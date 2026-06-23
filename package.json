@@ -1,0 +1,11 @@
+{
+  "name": "webai-deploy",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "deploy": "node scripts/deploy.js"
+  },
+  "dependencies": {
+    "adm-zip": "^0.5.16"
+  }
+}

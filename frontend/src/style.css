@@ -1,0 +1,80 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply antialiased text-gray-900 bg-[#FAF9F6] dark:bg-[#0C0E14] dark:text-gray-100 transition-colors duration-500;
+  }
+}
+
+@layer utilities {
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .hide-scrollbar {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+  }
+}
+
+/* Global CKEditor Table Styling (Compact) */
+.ck-content figure.table {
+  @apply overflow-x-auto w-full my-8 block rounded-2xl shadow-sm border border-gray-200 dark:border-gray-800 bg-white dark:bg-[#111827];
+}
+
+.ck-content figure.table table,
+.ck-content > table {
+  @apply w-full min-w-[500px] border-separate border-spacing-0 m-0 bg-transparent;
+}
+
+.ck-content > table {
+  @apply rounded-2xl overflow-x-auto block shadow-sm border border-gray-200 dark:border-gray-800 my-8 bg-white dark:bg-[#111827];
+}
+
+.ck-content thead {
+  @apply bg-emerald-50 dark:bg-emerald-900/20 text-emerald-800 dark:text-emerald-400;
+}
+
+.ck-content th {
+  @apply px-4 py-3 md:px-5 md:py-3.5 text-left text-xs md:text-sm font-bold tracking-wider border-b border-emerald-100 dark:border-emerald-900/40 !important;
+}
+
+.ck-content td {
+  @apply px-4 py-2.5 md:px-5 md:py-3 text-xs md:text-sm text-gray-700 dark:text-gray-300 align-middle border-b border-gray-100 dark:border-gray-800/80 break-words !important;
+}
+
+.ck-content tbody tr {
+  @apply transition-colors duration-200 hover:bg-emerald-50/50 dark:hover:bg-emerald-900/10;
+}
+
+/* For tables where the first column acts as a header */
+.ck-content tbody td:first-child,
+.ck-content tbody th:first-child {
+  @apply font-bold text-gray-900 dark:text-gray-100 w-1/3 md:w-[30%] bg-gray-50/50 dark:bg-gray-800/30 border-r border-gray-100 dark:border-gray-800/80;
+}
+
+/* Remove bottom border on last row */
+.ck-content tbody tr:last-child td,
+.ck-content tbody tr:last-child th {
+  @apply border-b-0;
+}
+
+/* Custom Scrollbar for tables */
+.ck-content figure.table::-webkit-scrollbar,
+.ck-content > table::-webkit-scrollbar {
+  height: 6px;
+}
+.ck-content figure.table::-webkit-scrollbar-track,
+.ck-content > table::-webkit-scrollbar-track {
+  background: transparent;
+}
+.ck-content figure.table::-webkit-scrollbar-thumb,
+.ck-content > table::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 10px;
+}
+.dark .ck-content figure.table::-webkit-scrollbar-thumb,
+.dark .ck-content > table::-webkit-scrollbar-thumb {
+  background: #4b5563;
+}

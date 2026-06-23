@@ -1,0 +1,298 @@
+const express = require('express');
+const router = express.Router();
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
+const sharp = require('sharp');
+const { verifyAdmin } = require('./auth');
+
+// Create uploads directory if it doesn't exist
+const uploadDir = (process.env.NODE_ENV !== 'production' && fs.existsSync(path.join(__dirname, '../../public/uploads')))
+    ? path.join(__dirname, '../../public/uploads')
+    : path.join(__dirname, '../public/uploads');
+if (!fs.existsSync(uploadDir)) {
+    fs.mkdirSync(uploadDir, { recursive: true });
+}
+
+// Config multer to use memory storage so we can process with sharp before saving
+const storage = multer.memoryStorage();
+const upload = multer({
+    storage: storage,
+    limits: { fileSize: 5 * 1024 * 1024 } // 5MB limit
+});
+
+// On-the-fly resizing endpoint for fallback requests
+router.get('/resize', async (req, res) => {
+    const { path: pathParam } = req.query;
+    if (!pathParam || typeof pathParam !== 'string') {
+        return res.status(400).json({ success: false, error: 'Path parameter is required' });
+    }
+
+    try {
+        const regex = /^uploads\/(?:(.+)\/)?cache\/([^/]+)-(\d+)\.([a-zA-Z0-9]+)$/;
+        const match = pathParam.match(regex);
+        
+        if (!match) {
+            return res.status(400).json({ success: false, error: 'Invalid path format' });
+        }
+
+        const subfolder = match[1] || ''; // e.g. 'categories' or ''
+        const baseName = match[2]; // e.g. 'image-xxx'
+        const targetWidth = parseInt(match[3]);
+        const ext = match[4]; // e.g. 'webp'
+
+        const originalFilename = `${baseName}.${ext}`;
+        const cachedFilename = `${baseName}-${targetWidth}.${ext}`;
+
+        const originalFilePath = path.join(uploadDir, subfolder, originalFilename);
+        const cachedFileDir = path.join(uploadDir, subfolder, 'cache');
+        const cachedFilePath = path.join(cachedFileDir, cachedFilename);
+
+        // If the original file does not exist, return 404
+        if (!fs.existsSync(originalFilePath)) {
+            return res.status(404).send('Original image not found');
+        }
+
+        // Set caching headers for the response
+        res.setHeader('Cache-Control', 'public, max-age=2592000'); // 30 days
+
+        // If cached version already exists, serve it
+        if (fs.existsSync(cachedFilePath)) {
+            return res.sendFile(cachedFilePath);
+        }
+
+        // Ensure cache directory exists
+        if (!fs.existsSync(cachedFileDir)) {
+            fs.mkdirSync(cachedFileDir, { recursive: true });
+        }
+
+        // Generate dynamically using sharp
+        await sharp(originalFilePath)
+            .resize({ width: targetWidth, withoutEnlargement: true })
+            .toFile(cachedFilePath);
+
+        return res.sendFile(cachedFilePath);
+    } catch (err) {
+        console.error('On-the-fly resizing error:', err);
+        return res.status(500).send('Resizing failed');
+    }
+});
+
+// Single image upload endpoint (auto convert to webp)
+router.post('/', verifyAdmin, (req, res, next) => {
+    upload.single('image')(req, res, function (err) {
+        if (err instanceof multer.MulterError) {
+            // A Multer error occurred when uploading (e.g. file too large)
+            return res.status(400).json({ success: false, error: err.message });
+        } else if (err) {
+            // An unknown error occurred when uploading
+            return res.status(500).json({ success: false, error: 'Unknown upload error' });
+        }
+        next();
+    });
+}, async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ success: false, error: 'No image provided' });
+        }
+
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        const filename = 'image-' + uniqueSuffix + '.webp';
+        const filepath = path.join(uploadDir, filename);
+
+        // Convert the image to webp and resize to max 2000px using sharp
+        await sharp(req.file.buffer)
+            .resize({ width: 2000, height: 2000, fit: 'inside', withoutEnlargement: true })
+            .webp({ quality: 80 })
+            .toFile(filepath);
+
+        // Pre-generate responsive thumbnails in cache
+        const { generateThumbnailsForFile } = require('../services/thumbnailService');
+        await generateThumbnailsForFile(filepath);
+
+        // Return relative URL
+        const fileUrl = `/uploads/${filename}`;
+        res.status(200).json({ success: true, url: fileUrl });
+    } catch (error) {
+        console.error('Upload error:', error);
+        res.status(500).json({ success: false, error: 'Failed to upload and convert image' });
+    }
+});
+
+// CKEditor specific upload endpoint (requires 'upload' field and specific JSON response)
+router.post('/ckeditor', verifyAdmin, (req, res, next) => {
+    upload.single('upload')(req, res, function (err) {
+        if (err instanceof multer.MulterError) {
+            return res.status(400).json({ error: { message: err.message } });
+        } else if (err) {
+            return res.status(500).json({ error: { message: 'Unknown upload error' } });
+        }
+        next();
+    });
+}, async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ error: { message: 'No image provided' } });
+        }
+
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        const filename = 'ck-image-' + uniqueSuffix + '.webp';
+        const filepath = path.join(uploadDir, filename);
+
+        // Convert the image to webp and resize to max 2000px
+        await sharp(req.file.buffer)
+            .resize({ width: 2000, height: 2000, fit: 'inside', withoutEnlargement: true })
+            .webp({ quality: 80 })
+            .toFile(filepath);
+
+        // Pre-generate responsive thumbnails in cache
+        const { generateThumbnailsForFile } = require('../services/thumbnailService');
+        await generateThumbnailsForFile(filepath);
+
+        // CKEditor expects { url: 'http://...' } or relative
+        const fileUrl = `/uploads/${filename}`;
+        res.status(200).json({ url: fileUrl });
+    } catch (error) {
+        console.error('CKEditor upload error:', error);
+        res.status(500).json({ error: { message: 'Failed to upload and convert image' } });
+    }
+});
+
+// POST /api/upload/convert-all-existing
+// Scan uploads folder for JPEG/PNG and convert to WebP, then replace all references in the database
+router.post('/convert-all-existing', verifyAdmin, async (req, res) => {
+    try {
+        const db = require('../config/database');
+        const results = [];
+        let convertedCount = 0;
+        let dbUpdatedCount = 0;
+        
+        // 1. Clear all cache folders recursively to free up disk space and avoid converting cached files
+        const clearCacheDirs = (dir) => {
+            const files = fs.readdirSync(dir);
+            for (const file of files) {
+                const filePath = path.join(dir, file);
+                if (fs.statSync(filePath).isDirectory()) {
+                    if (file === 'cache') {
+                        fs.rmSync(filePath, { recursive: true, force: true });
+                        console.log(`[Convert] Cleared cache folder: ${filePath}`);
+                    } else {
+                        clearCacheDirs(filePath);
+                    }
+                }
+            }
+        };
+        try {
+            clearCacheDirs(uploadDir);
+        } catch (e) {
+            console.error('[Convert] Error clearing cache folders:', e.message);
+        }
+
+        // Helper: Recursively scan directories for non-webp images
+        const scanAndConvert = async (dir) => {
+            const files = await fs.promises.readdir(dir);
+            for (const file of files) {
+                const filePath = path.join(dir, file);
+                const stat = await fs.promises.stat(filePath);
+                
+                if (stat.isDirectory()) {
+                    if (file !== 'cache') {
+                        await scanAndConvert(filePath);
+                    }
+                    continue;
+                }
+                
+                const ext = path.extname(file).toLowerCase();
+                if (['.png', '.jpeg', '.jpg'].includes(ext)) {
+                    const baseName = path.basename(file, ext);
+                    const relativeDir = path.relative(uploadDir, dir);
+                    
+                    const newFilename = `${baseName}.webp`;
+                    const newFilePath = path.join(dir, newFilename);
+                    
+                    try {
+                        // Convert to WebP and limit size to 2000px
+                        await sharp(filePath)
+                            .resize({ width: 2000, height: 2000, fit: 'inside', withoutEnlargement: true })
+                            .webp({ quality: 80 })
+                            .toFile(newFilePath);
+                        
+                        convertedCount++;
+                        
+                        // Delete original non-webp file
+                        await fs.promises.unlink(filePath);
+                        
+                        // Construct the relative URLs for database matching
+                        const oldUrlPart = relativeDir 
+                            ? `/uploads/${relativeDir.replace(/\\/g, '/')}/${file}` 
+                            : `/uploads/${file}`;
+                        const newUrlPart = relativeDir 
+                            ? `/uploads/${relativeDir.replace(/\\/g, '/')}/${newFilename}` 
+                            : `/uploads/${newFilename}`;
+                            
+                        results.push({ oldUrl: oldUrlPart, newUrl: newUrlPart });
+                    } catch (err) {
+                        console.error(`[Convert] Failed converting ${file}:`, err.message);
+                    }
+                }
+            }
+        };
+        
+        await scanAndConvert(uploadDir);
+        
+        // 2. Perform database updates for all converted images
+        if (results.length > 0) {
+            const connection = await db.getConnection();
+            await connection.beginTransaction();
+            try {
+                for (const item of results) {
+                    const { oldUrl, newUrl } = item;
+                    
+                    // Update products: image_url, images, description
+                    await connection.query('UPDATE products SET image_url = REPLACE(image_url, ?, ?) WHERE image_url LIKE ?', [oldUrl, newUrl, `%${oldUrl}%`]);
+                    await connection.query('UPDATE products SET images = REPLACE(images, ?, ?) WHERE images LIKE ?', [oldUrl, newUrl, `%${oldUrl}%`]);
+                    await connection.query('UPDATE products SET description = REPLACE(description, ?, ?) WHERE description LIKE ?', [oldUrl, newUrl, `%${oldUrl}%`]);
+                    
+                    // Update articles: cover_image, content
+                    await connection.query('UPDATE articles SET cover_image = REPLACE(cover_image, ?, ?) WHERE cover_image LIKE ?', [oldUrl, newUrl, `%${oldUrl}%`]);
+                    await connection.query('UPDATE articles SET content = REPLACE(content, ?, ?) WHERE content LIKE ?', [oldUrl, newUrl, `%${oldUrl}%`]);
+                    
+                    // Update projects: cover_image, gallery_images, description
+                    await connection.query('UPDATE projects SET cover_image = REPLACE(cover_image, ?, ?) WHERE cover_image LIKE ?', [oldUrl, newUrl, `%${oldUrl}%`]);
+                    await connection.query('UPDATE projects SET gallery_images = REPLACE(gallery_images, ?, ?) WHERE gallery_images LIKE ?', [oldUrl, newUrl, `%${oldUrl}%`]);
+                    await connection.query('UPDATE projects SET description = REPLACE(description, ?, ?) WHERE description LIKE ?', [oldUrl, newUrl, `%${oldUrl}%`]);
+                    
+                    // Update settings: setting_value
+                    await connection.query('UPDATE settings SET setting_value = REPLACE(setting_value, ?, ?) WHERE setting_value LIKE ?', [oldUrl, newUrl, `%${oldUrl}%`]);
+                    
+                    // Update categories: image_url
+                    await connection.query('UPDATE categories SET image_url = REPLACE(image_url, ?, ?) WHERE image_url LIKE ?', [oldUrl, newUrl, `%${oldUrl}%`]);
+                    
+                    // Update product_reviews: images
+                    await connection.query('UPDATE product_reviews SET images = REPLACE(images, ?, ?) WHERE images LIKE ?', [oldUrl, newUrl, `%${oldUrl}%`]);
+                    
+                    dbUpdatedCount++;
+                }
+                await connection.commit();
+            } catch (dbErr) {
+                await connection.rollback();
+                console.error('[Convert] DB transaction failed:', dbErr.message);
+                throw dbErr;
+            } finally {
+                connection.release();
+            }
+        }
+        
+        res.status(200).json({
+            success: true,
+            message: `Successfully converted ${convertedCount} images to WebP and updated ${dbUpdatedCount} database entries.`,
+            convertedCount,
+            dbUpdatedCount
+        });
+    } catch (error) {
+        console.error('[Convert] Global error:', error);
+        res.status(500).json({ success: false, error: 'Conversion failed: ' + error.message });
+    }
+});
+
+module.exports = router;
