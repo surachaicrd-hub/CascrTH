@@ -753,11 +753,11 @@ onUnmounted(() => {
               <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
             </router-link>
           </li>
-          <li><span class="text-gray-300 dark:text-gray-700">/</span></li>
+          <li><span class="text-gray-500 dark:text-gray-500" aria-hidden="true">/</span></li>
           <li>
             <router-link to="/products" class="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">แคตตาล็อกสินค้า</router-link>
           </li>
-          <li><span class="text-gray-300 dark:text-gray-700">/</span></li>
+          <li><span class="text-gray-500 dark:text-gray-500" aria-hidden="true">/</span></li>
           <li>
             <span class="text-gray-900 dark:text-white truncate max-w-[200px] md:max-w-xs block px-2 py-0.5 rounded-md bg-white dark:bg-gray-800 shadow-sm border border-gray-100 dark:border-gray-700">
               {{ product.title }}
@@ -1046,7 +1046,7 @@ onUnmounted(() => {
                 v-if="!product.is_out_of_stock && product.price !== 'à¸ªà¸­à¸šà¸–à¸²à¸¡à¸£à¸²à¸„à¸²'"
                 :href="`https://lin.ee/yourlinelink?text=${encodeURIComponent('à¸ªà¸­à¸šà¸–à¸²à¸¡à¸ªà¸´à¸™à¸„à¹‰à¸²: ' + product.title)}`"
                 target="_blank" rel="noopener"
-                class="flex items-center justify-center gap-2 text-sm font-bold text-[#06C755] hover:text-green-600 transition-colors py-2"
+                class="flex items-center justify-center gap-2 text-sm font-bold text-[#046c2e] dark:text-emerald-400 hover:text-green-600 dark:hover:text-emerald-300 transition-colors py-2"
               >
                 <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M24 10.314C24 4.943 18.615.572 12 .572S0 4.943 0 10.314c0 4.811 4.27 8.842 10.035 9.608.391.082.923.258 1.058.59.12.301.079.766.038 1.08l-.164 1.02c-.045.301-.24 1.186 1.049.645 1.291-.539 6.916-4.078 9.436-6.975C23.176 14.393 24 12.458 24 10.314"/></svg>
                 à¸«à¸£à¸·à¸­à¸ªà¸­à¸šà¸–à¸²à¸¡à¹€à¸žà¸´à¹ˆà¸¡à¹€à¸•à¸´à¸¡à¸œà¹ˆà¸²à¸™ LINE
@@ -1061,10 +1061,10 @@ onUnmounted(() => {
       <!-- Tabs -->
       <div class="mt-16 md:mt-24">
         <div class="flex gap-0 border-b border-gray-200 dark:border-gray-700/60 overflow-x-auto scrollbar-hide -mb-px">
-          <button v-if="product.description" @click="activeTab = 'description'" :class="activeTab === 'description' ? 'border-emerald-500 text-emerald-600 dark:text-emerald-400' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'" class="relative px-6 py-4 font-black text-sm tracking-wide uppercase whitespace-nowrap border-b-2 transition-all duration-200" id="tab-description">à¸£à¸²à¸¢à¸¥à¸°à¹€à¸­à¸µà¸¢à¸”</button>
-          <button v-if="product.attributes && product.attributes.length > 0" @click="activeTab = 'specs'" :class="activeTab === 'specs' ? 'border-emerald-500 text-emerald-600 dark:text-emerald-400' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'" class="relative px-6 py-4 font-black text-sm tracking-wide uppercase whitespace-nowrap border-b-2 transition-all duration-200" id="tab-specs">à¸‚à¹‰à¸­à¸¡à¸¹à¸¥à¸ˆà¸³à¹€à¸žà¸²à¸°</button>
-          <button v-if="product.faq && product.faq.length > 0" @click="activeTab = 'faq'" :class="activeTab === 'faq' ? 'border-emerald-500 text-emerald-600 dark:text-emerald-400' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'" class="relative px-6 py-4 font-black text-sm tracking-wide uppercase whitespace-nowrap border-b-2 transition-all duration-200" id="tab-faq">à¸„à¸³à¸–à¸²à¸¡à¸—à¸µà¹ˆà¸žà¸šà¸šà¹ˆà¸­à¸¢</button>
-          <button v-if="settingsStore.showProductReview" @click="activeTab = 'reviews'" :class="activeTab === 'reviews' ? 'border-emerald-500 text-emerald-600 dark:text-emerald-400' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'" class="relative px-6 py-4 font-black text-sm tracking-wide uppercase whitespace-nowrap border-b-2 transition-all duration-200" id="tab-reviews">à¸£à¸µà¸§à¸´à¸§ ({{ product.review_count || 0 }})</button>
+          <button v-if="product.description" @click="activeTab = 'description'" :class="activeTab === 'description' ? 'border-emerald-500 text-emerald-700 dark:text-emerald-400' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'" class="relative px-6 py-4 font-black text-sm tracking-wide uppercase whitespace-nowrap border-b-2 transition-all duration-200" id="tab-description">à¸£à¸²à¸¢à¸¥à¸°à¹€à¸­à¸µà¸¢à¸”</button>
+          <button v-if="product.attributes && product.attributes.length > 0" @click="activeTab = 'specs'" :class="activeTab === 'specs' ? 'border-emerald-500 text-emerald-700 dark:text-emerald-400' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'" class="relative px-6 py-4 font-black text-sm tracking-wide uppercase whitespace-nowrap border-b-2 transition-all duration-200" id="tab-specs">à¸‚à¹‰à¸­à¸¡à¸¹à¸¥à¸ˆà¸³à¹€à¸žà¸²à¸°</button>
+          <button v-if="product.faq && product.faq.length > 0" @click="activeTab = 'faq'" :class="activeTab === 'faq' ? 'border-emerald-500 text-emerald-700 dark:text-emerald-400' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'" class="relative px-6 py-4 font-black text-sm tracking-wide uppercase whitespace-nowrap border-b-2 transition-all duration-200" id="tab-faq">à¸„à¸³à¸–à¸²à¸¡à¸—à¸µà¹ˆà¸žà¸šà¸šà¹ˆà¸­à¸¢</button>
+          <button v-if="settingsStore.showProductReview" @click="activeTab = 'reviews'" :class="activeTab === 'reviews' ? 'border-emerald-500 text-emerald-700 dark:text-emerald-400' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'" class="relative px-6 py-4 font-black text-sm tracking-wide uppercase whitespace-nowrap border-b-2 transition-all duration-200" id="tab-reviews">à¸£à¸µà¸§à¸´à¸§ ({{ product.review_count || 0 }})</button>
         </div>
 
         <div class="mt-8 md:mt-12">
@@ -1183,7 +1183,7 @@ onUnmounted(() => {
       <FrequentlyBoughtTogether :product-id="product.id" class="mt-16 md:mt-24" />
 
       <!-- Product Accessories -->
-      <ProductAccessories :product-id="product.id" class="mt-10" />
+      <ProductAccessories :product="product" class="mt-10" />
 
       <!-- Related Products -->
       <div v-if="relatedProducts.length > 0" class="mt-16 md:mt-24">

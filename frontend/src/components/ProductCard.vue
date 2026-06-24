@@ -207,7 +207,7 @@ const getTimeRemaining = (endTime) => {
       </div>
       <h3 :class="[
         compact ? 'text-sm md:text-base mb-2' : 'text-base md:text-[17px] mb-4',
-        'font-black text-gray-900 dark:text-white leading-snug transition-colors line-clamp-2 flex-1 group-hover:text-emerald-500 dark:group-hover:text-emerald-400'
+        'font-black text-gray-900 dark:text-white leading-snug transition-colors line-clamp-2 flex-1 group-hover:text-emerald-700 dark:group-hover:text-emerald-400'
       ]">
         {{ product.title || product.name }}
       </h3>
@@ -222,7 +222,7 @@ const getTimeRemaining = (endTime) => {
           <div class="flex items-center gap-1.5 mb-0.5" v-else>
             <span class="text-xs text-gray-400 font-medium opacity-0">฿0</span>
           </div>
-          <span class="text-2xl font-black text-emerald-500 dark:text-emerald-400 leading-none">฿{{ Number(product.price || 0).toLocaleString() }}</span>
+          <span class="text-2xl font-black text-emerald-700 dark:text-emerald-400 leading-none">฿{{ Number(product.price || 0).toLocaleString() }}</span>
         </div>
         
         <div class="flex items-center gap-2">

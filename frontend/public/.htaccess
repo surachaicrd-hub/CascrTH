@@ -1,3 +1,7 @@
+# Force UTF-8 Encoding
+AddDefaultCharset UTF-8
+AddCharset UTF-8 .html .js .css .json
+
 RewriteEngine On
 RewriteBase /
 

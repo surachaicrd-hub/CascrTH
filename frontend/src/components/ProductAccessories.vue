@@ -29,7 +29,7 @@ const getDiscount = (original_price, price) => {
 onMounted(async () => {
   try {
     let relatedIds = []
-    if (props.product.related_products) {
+    if (props.product && props.product.related_products) {
       try {
         relatedIds = typeof props.product.related_products === 'string' 
           ? JSON.parse(props.product.related_products) 

@@ -1,4 +1,4 @@
-require('dotenv').config();
+require('dotenv').config();
 const { Agent, setGlobalDispatcher } = require('undici');
 setGlobalDispatcher(new Agent({
     headersTimeout: 120000, // 2 minutes to allow long Gemini AI responses
@@ -12,6 +12,7 @@ const compression = require('compression');
 const path = require('path');
 
 const app = express();
+app.set('trust proxy', 1);
 const PORT = process.env.PORT || 8080;
 
 // ========== Startup Validation ==========
@@ -45,14 +46,15 @@ const logger = require('./config/logger');
 app.use(morgan('combined', { stream: { write: message => logger.info(message.trim()) } }));
 
 
-// Apply Rate Limiter globally or specifically (here global basic limit)
+// Apply Rate Limiter to API routes specifically
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
     limit: 2000, // Increased limit to accommodate heartbeat and polling
     standardHeaders: 'draft-7',
     legacyHeaders: false,
+    skip: (req, res) => process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test',
 });
-app.use(limiter);
+app.use('/api', limiter);
 
 app.use(compression());
 // CORS — restrict allowed origins in production

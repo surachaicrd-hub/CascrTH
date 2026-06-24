@@ -83,7 +83,7 @@ function goTo(path) {
     <aside :class="['bg-gray-900 border-r border-gray-800 flex flex-col z-50 transition-transform duration-300 ease-in-out shrink-0', 'fixed inset-y-0 left-0 w-72 lg:w-64 lg:relative lg:translate-x-0', sidebarOpen ? 'translate-x-0' : '-translate-x-full']">
       <div class="h-16 flex items-center justify-between px-6 border-b border-gray-800">
         <div class="flex flex-col">
-          <span class="text-xl font-black text-white tracking-widest uppercase leading-none">ผู้ดูแลระบบ<span class="text-emerald-500">CMS</span></span>
+          <span class="text-xl font-black text-white tracking-widest uppercase leading-none">ผู้ดูแลระบบ</span>
           <span class="text-[10px] font-bold text-gray-500 mt-1 uppercase tracking-wider pl-0.5">System <span class="text-emerald-500 font-mono">{{ systemVersion }}</span></span>
         </div>
         <button @click="sidebarOpen = false" class="lg:hidden p-1 text-gray-400 hover:text-white transition-colors">

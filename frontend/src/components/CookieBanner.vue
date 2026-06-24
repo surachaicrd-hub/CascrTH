@@ -97,7 +97,7 @@ onMounted(async () => {
               <h4 class="text-base md:text-lg font-bold text-gray-900 dark:text-white mb-2">เราใช้คุกกี้เพื่อประสบการณ์ที่ดีขึ้น</h4>
               <p class="text-gray-500 dark:text-gray-400 text-sm font-light leading-relaxed">
                 เว็บไซต์นี้ใช้คุกกี้ (Cookies) เพื่อยกระดับประสบการณ์การใช้งานของท่าน รวมถึงเพื่อเก็บข้อมูลสถิติและการตลาด 
-                คลิกเพื่อดู <router-link to="/privacy-policy" class="text-emerald-600 dark:text-emerald-400 hover:underline font-medium">นโยบายความเป็นส่วนตัว (Privacy Policy)</router-link>
+                คลิกเพื่อดู <router-link to="/privacy-policy" class="text-emerald-700 dark:text-emerald-400 hover:underline font-medium">นโยบายความเป็นส่วนตัว (Privacy Policy)</router-link>
               </p>
             </div>
           </div>

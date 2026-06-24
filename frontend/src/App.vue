@@ -432,24 +432,24 @@ onUnmounted(() => {
       >
         
         <!-- Logo -->
-        <router-link to="/" class="group flex items-center gap-2.5 z-50 transition-all duration-300 active:scale-95">
+        <router-link to="/" class="group flex items-center gap-2 md:gap-2.5 z-50 transition-all duration-300 active:scale-95 shrink-0">
           <template v-if="settingsStore.storeLogo">
-            <img :src="getOptimizedImageUrl(settingsStore.storeLogo, 300)" alt="Store Logo" class="h-10 w-auto object-contain" @error="onImageError" />
+            <img :src="getOptimizedImageUrl(settingsStore.storeLogo, 300)" alt="Store Logo" class="h-8 md:h-10 w-auto max-w-[130px] sm:max-w-[160px] md:max-w-[200px] object-contain transition-all duration-300" @error="onImageError" />
           </template>
           <template v-else>
-            <div class="w-10 h-10 border border-[#f07100]/80 bg-white dark:bg-gray-900 text-[#f07100] rounded-xl flex items-center justify-center shadow-sm group-hover:shadow-lg group-hover:shadow-orange-500/10 group-hover:border-[#f07100] transition-all duration-300 transform group-hover:-translate-y-0.5 overflow-hidden">
+            <div class="w-8 h-8 md:w-10 md:h-10 border border-[#f07100]/80 bg-white dark:bg-gray-900 text-[#f07100] rounded-lg md:rounded-xl flex items-center justify-center shadow-sm group-hover:shadow-lg group-hover:shadow-orange-500/10 group-hover:border-[#f07100] transition-all duration-300 transform group-hover:-translate-y-0.5 overflow-hidden shrink-0">
               <!-- House Icon with Chimney -->
-              <svg class="w-5.5 h-5.5 transition-transform duration-300 group-hover:scale-110" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+              <svg class="w-4.5 h-4.5 md:w-5.5 md:h-5.5 transition-transform duration-300 group-hover:scale-110" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l9-9 9 9M5 10v10a1 1 0 001 1h12a1 1 0 001-1V10" />
                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 21v-6a1 1 0 011-1h4a1 1 0 011 1v6" />
                 <path stroke-linecap="round" stroke-linejoin="round" d="M17 5.5V8M16.5 5.5h2" />
               </svg>
             </div>
             <div class="flex flex-col leading-none">
-              <span :class="['text-xl font-black tracking-wider uppercase transition-colors duration-300 group-hover:text-[#f07100]', isDarkHeader ? 'text-white' : 'text-[#1b222d] dark:text-white']">
+              <span :class="['text-lg md:text-xl font-black tracking-wider uppercase transition-colors duration-300 group-hover:text-[#f07100]', isDarkHeader ? 'text-white' : 'text-[#1b222d] dark:text-white']">
                 {{ (settingsStore.storeName || 'STORAGE').split(' ')[0] }}
               </span>
-              <span v-if="(settingsStore.storeName || 'STORAGE HOUSE').split(' ').slice(1).join(' ')" :class="['text-xs font-black tracking-[0.2em] uppercase transition-colors duration-300', isDarkHeader ? 'text-orange-400' : 'text-[#f07100] dark:text-orange-400']">
+              <span v-if="(settingsStore.storeName || 'STORAGE HOUSE').split(' ').slice(1).join(' ')" :class="['text-[10px] md:text-xs font-black tracking-[0.2em] uppercase transition-colors duration-300', isDarkHeader ? 'text-orange-400' : 'text-[#f07100] dark:text-orange-400']">
                 {{ (settingsStore.storeName || 'STORAGE HOUSE').split(' ').slice(1).join(' ') }}
               </span>
             </div>
@@ -458,17 +458,17 @@ onUnmounted(() => {
         
         <!-- Desktop Nav -->
         <nav class="hidden lg:flex flex-1 justify-center items-center gap-4 xl:gap-6 mx-2 xl:mx-4">
-          <router-link to="/" :class="['text-sm font-semibold tracking-wide transition-colors duration-300 relative group', isActiveRoute('/') ? 'text-[#f07100] dark:text-[#f07100]' : isDarkHeader ? 'text-gray-300 hover:text-[#f07100]' : 'text-gray-700 dark:text-gray-300 hover:text-[#f07100] dark:hover:text-[#f07100]']">
+          <router-link to="/" :class="['text-sm font-semibold tracking-wide transition-colors duration-300 relative group', isActiveRoute('/') ? 'text-[#9a3412] dark:text-orange-400' : isDarkHeader ? 'text-gray-300 hover:text-orange-400' : 'text-gray-700 dark:text-gray-300 hover:text-[#9a3412] dark:hover:text-orange-400']">
             หน้าแรก
-            <span :class="['absolute bottom-[-8px] left-1/2 -translate-x-1/2 h-[2.5px] bg-[#f07100] rounded-full transition-all duration-300', isActiveRoute('/') ? 'w-5' : 'w-0 group-hover:w-5']"></span>
+            <span :class="['absolute bottom-[-8px] left-1/2 -translate-x-1/2 h-[2.5px] bg-[#9a3412] dark:bg-orange-400 rounded-full transition-all duration-300', isActiveRoute('/') ? 'w-5' : 'w-0 group-hover:w-5']"></span>
           </router-link>
 
           <!-- Products with Dropdown -->
           <div class="relative" @mouseenter="openProductsDropdown" @mouseleave="closeProductsDropdown">
-            <router-link to="/products" :class="['text-sm font-semibold tracking-wide transition-colors duration-300 relative group inline-flex items-center gap-1', isActiveRoute('/products') ? 'text-[#f07100] dark:text-[#f07100]' : isDarkHeader ? 'text-gray-300 hover:text-[#f07100]' : 'text-gray-700 dark:text-gray-300 hover:text-[#f07100] dark:hover:text-[#f07100]']">
+            <router-link to="/products" :class="['text-sm font-semibold tracking-wide transition-colors duration-300 relative group inline-flex items-center gap-1', isActiveRoute('/products') ? 'text-[#9a3412] dark:text-orange-400' : isDarkHeader ? 'text-gray-300 hover:text-orange-400' : 'text-gray-700 dark:text-gray-300 hover:text-[#9a3412] dark:hover:text-orange-400']">
               สินค้า
               <svg class="w-3 h-3 transition-transform duration-200" :class="isProductsDropdownOpen ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7"/></svg>
-              <span :class="['absolute bottom-[-8px] left-1/2 -translate-x-1/2 h-[2.5px] bg-[#f07100] rounded-full transition-all duration-300', isActiveRoute('/products') ? 'w-5' : 'w-0 group-hover:w-5']"></span>
+              <span :class="['absolute bottom-[-8px] left-1/2 -translate-x-1/2 h-[2.5px] bg-[#9a3412] dark:bg-orange-400 rounded-full transition-all duration-300', isActiveRoute('/products') ? 'w-5' : 'w-0 group-hover:w-5']"></span>
             </router-link>
             <!-- Dropdown (Premium Mega Menu) -->
             <transition name="dropdown">
@@ -621,46 +621,46 @@ onUnmounted(() => {
             </transition>
           </div>
 
-          <router-link to="/projects" :class="['text-sm font-semibold tracking-wide transition-colors duration-300 relative group', isActiveRoute('/projects') ? 'text-[#f07100] dark:text-[#f07100]' : isDarkHeader ? 'text-gray-300 hover:text-[#f07100]' : 'text-gray-700 dark:text-gray-300 hover:text-[#f07100] dark:hover:text-[#f07100]']">
+          <router-link to="/projects" :class="['text-sm font-semibold tracking-wide transition-colors duration-300 relative group', isActiveRoute('/projects') ? 'text-[#9a3412] dark:text-orange-400' : isDarkHeader ? 'text-gray-300 hover:text-orange-400' : 'text-gray-700 dark:text-gray-300 hover:text-[#9a3412] dark:hover:text-orange-400']">
             ผลงาน
-            <span :class="['absolute bottom-[-8px] left-1/2 -translate-x-1/2 h-[2.5px] bg-[#f07100] rounded-full transition-all duration-300', isActiveRoute('/projects') ? 'w-5' : 'w-0 group-hover:w-5']"></span>
+            <span :class="['absolute bottom-[-8px] left-1/2 -translate-x-1/2 h-[2.5px] bg-[#9a3412] dark:bg-orange-400 rounded-full transition-all duration-300', isActiveRoute('/projects') ? 'w-5' : 'w-0 group-hover:w-5']"></span>
           </router-link>
 
-          <router-link to="/blog" :class="['text-sm font-semibold tracking-wide transition-colors duration-300 relative group', isActiveRoute('/blog') ? 'text-[#f07100] dark:text-[#f07100]' : isDarkHeader ? 'text-gray-300 hover:text-[#f07100]' : 'text-gray-700 dark:text-gray-300 hover:text-[#f07100] dark:hover:text-[#f07100]']">
+          <router-link to="/blog" :class="['text-sm font-semibold tracking-wide transition-colors duration-300 relative group', isActiveRoute('/blog') ? 'text-[#9a3412] dark:text-orange-400' : isDarkHeader ? 'text-gray-300 hover:text-orange-400' : 'text-gray-700 dark:text-gray-300 hover:text-[#9a3412] dark:hover:text-orange-400']">
             บทความ
-            <span :class="['absolute bottom-[-8px] left-1/2 -translate-x-1/2 h-[2.5px] bg-[#f07100] rounded-full transition-all duration-300', isActiveRoute('/blog') ? 'w-5' : 'w-0 group-hover:w-5']"></span>
+            <span :class="['absolute bottom-[-8px] left-1/2 -translate-x-1/2 h-[2.5px] bg-[#9a3412] dark:bg-orange-400 rounded-full transition-all duration-300', isActiveRoute('/blog') ? 'w-5' : 'w-0 group-hover:w-5']"></span>
           </router-link>
 
-          <router-link to="/services" :class="['text-sm font-semibold tracking-wide transition-colors duration-300 relative group', isActiveRoute('/services') ? 'text-[#f07100] dark:text-[#f07100]' : isDarkHeader ? 'text-gray-300 hover:text-[#f07100]' : 'text-gray-700 dark:text-gray-300 hover:text-[#f07100] dark:hover:text-[#f07100]']">
+          <router-link to="/services" :class="['text-sm font-semibold tracking-wide transition-colors duration-300 relative group', isActiveRoute('/services') ? 'text-[#9a3412] dark:text-orange-400' : isDarkHeader ? 'text-gray-300 hover:text-orange-400' : 'text-gray-700 dark:text-gray-300 hover:text-[#9a3412] dark:hover:text-orange-400']">
             บริการ
-            <span :class="['absolute bottom-[-8px] left-1/2 -translate-x-1/2 h-[2.5px] bg-[#f07100] rounded-full transition-all duration-300', isActiveRoute('/services') ? 'w-5' : 'w-0 group-hover:w-5']"></span>
+            <span :class="['absolute bottom-[-8px] left-1/2 -translate-x-1/2 h-[2.5px] bg-[#9a3412] dark:bg-orange-400 rounded-full transition-all duration-300', isActiveRoute('/services') ? 'w-5' : 'w-0 group-hover:w-5']"></span>
           </router-link>
 
-          <router-link to="/about" :class="['text-sm font-semibold tracking-wide transition-colors duration-300 relative group', isActiveRoute('/about') ? 'text-[#f07100] dark:text-[#f07100]' : isDarkHeader ? 'text-gray-300 hover:text-[#f07100]' : 'text-gray-700 dark:text-gray-300 hover:text-[#f07100] dark:hover:text-[#f07100]']">
+          <router-link to="/about" :class="['text-sm font-semibold tracking-wide transition-colors duration-300 relative group', isActiveRoute('/about') ? 'text-[#9a3412] dark:text-orange-400' : isDarkHeader ? 'text-gray-300 hover:text-orange-400' : 'text-gray-700 dark:text-gray-300 hover:text-[#9a3412] dark:hover:text-orange-400']">
             เกี่ยวกับเรา
-            <span :class="['absolute bottom-[-8px] left-1/2 -translate-x-1/2 h-[2.5px] bg-[#f07100] rounded-full transition-all duration-300', isActiveRoute('/about') ? 'w-5' : 'w-0 group-hover:w-5']"></span>
+            <span :class="['absolute bottom-[-8px] left-1/2 -translate-x-1/2 h-[2.5px] bg-[#9a3412] dark:bg-orange-400 rounded-full transition-all duration-300', isActiveRoute('/about') ? 'w-5' : 'w-0 group-hover:w-5']"></span>
           </router-link>
 
-          <router-link to="/contact" :class="['text-sm font-semibold tracking-wide transition-colors duration-300 relative group', isActiveRoute('/contact') ? 'text-[#f07100] dark:text-[#f07100]' : isDarkHeader ? 'text-gray-300 hover:text-[#f07100]' : 'text-gray-700 dark:text-gray-300 hover:text-[#f07100] dark:hover:text-[#f07100]']">
+          <router-link to="/contact" :class="['text-sm font-semibold tracking-wide transition-colors duration-300 relative group', isActiveRoute('/contact') ? 'text-[#9a3412] dark:text-orange-400' : isDarkHeader ? 'text-gray-300 hover:text-orange-400' : 'text-gray-700 dark:text-gray-300 hover:text-[#9a3412] dark:hover:text-orange-400']">
             ติดต่อเรา
-            <span :class="['absolute bottom-[-8px] left-1/2 -translate-x-1/2 h-[2.5px] bg-[#f07100] rounded-full transition-all duration-300', isActiveRoute('/contact') ? 'w-5' : 'w-0 group-hover:w-5']"></span>
+            <span :class="['absolute bottom-[-8px] left-1/2 -translate-x-1/2 h-[2.5px] bg-[#9a3412] dark:bg-orange-400 rounded-full transition-all duration-300', isActiveRoute('/contact') ? 'w-5' : 'w-0 group-hover:w-5']"></span>
           </router-link>
         </nav>
         <!-- Desktop Actions -->
         <div class="hidden lg:flex items-center gap-1.5 xl:gap-2.5 z-10 shrink-0 relative">
-          <button @click="isSearchOpen = true" aria-label="ค้นหาสินค้า" :class="['transition-all p-2.5 rounded-full duration-300 hover:scale-105 hover:bg-[#f07100]/10 dark:hover:bg-white/5 hover:text-[#f07100] dark:hover:text-orange-400', isDarkHeader ? 'text-gray-300' : 'text-gray-600 dark:text-gray-300']">
+          <button @click="isSearchOpen = true" aria-label="ค้นหาสินค้า" :class="['transition-all w-12 h-12 flex items-center justify-center rounded-full duration-300 hover:scale-105 hover:bg-[#f07100]/10 dark:hover:bg-white/5 hover:text-[#f07100] dark:hover:text-orange-400 flex-shrink-0', isDarkHeader ? 'text-gray-300' : 'text-gray-600 dark:text-gray-300']">
             <svg class="w-[20px] h-[20px] xl:w-[22px] xl:h-[22px]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
           </button>
-          <router-link v-if="settingsStore.isOnlineShoppingEnabled" to="/cart" aria-label="ตะกร้าสินค้า" :class="['relative transition-all p-2.5 rounded-full duration-300 hover:scale-105 hover:bg-[#f07100]/10 dark:hover:bg-white/5 hover:text-[#f07100] dark:hover:text-orange-400', isDarkHeader ? 'text-gray-300' : 'text-gray-600 dark:text-gray-300']">
+          <router-link v-if="settingsStore.isOnlineShoppingEnabled" to="/cart" aria-label="ตะกร้าสินค้า" :class="['relative transition-all w-12 h-12 flex items-center justify-center rounded-full duration-300 hover:scale-105 hover:bg-[#f07100]/10 dark:hover:bg-white/5 hover:text-[#f07100] dark:hover:text-orange-400 flex-shrink-0', isDarkHeader ? 'text-gray-300' : 'text-gray-600 dark:text-gray-300']">
             <svg class="w-[20px] h-[20px] xl:w-[22px] xl:h-[22px]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
             </svg>
-            <span v-if="cartStore.cartTotal > 0" class="absolute top-1 right-1 bg-gradient-to-r from-[#f07100] to-[#ff8a24] text-white text-[9px] xl:text-[10px] font-black min-w-[18px] h-[18px] px-1 rounded-full flex items-center justify-center border-2 border-white dark:border-[#0C0E14] shadow-md animate-pulse leading-none">
+            <span v-if="cartStore.cartTotal > 0" class="absolute top-1.5 right-1.5 bg-gradient-to-r from-[#f07100] to-[#ff8a24] text-white text-[9px] xl:text-[10px] font-black min-w-[18px] h-[18px] px-1 rounded-full flex items-center justify-center border-2 border-white dark:border-[#0C0E14] shadow-md animate-pulse leading-none">
               {{ cartStore.cartTotal > 99 ? '99+' : cartStore.cartTotal }}
             </span>
           </router-link>
           
-          <button @click="toggleDarkMode" aria-label="สลับโหมดมืด" :class="['transition-all p-2.5 rounded-full duration-300 hover:scale-105 hover:bg-[#f07100]/10 dark:hover:bg-white/5 hover:text-[#f07100] dark:hover:text-orange-400', isDarkHeader ? 'text-gray-300' : 'text-gray-600 dark:text-gray-300']">
+          <button @click="toggleDarkMode" aria-label="สลับโหมดมืด" :class="['transition-all w-12 h-12 flex items-center justify-center rounded-full duration-300 hover:scale-105 hover:bg-[#f07100]/10 dark:hover:bg-white/5 hover:text-[#f07100] dark:hover:text-orange-400 flex-shrink-0', isDarkHeader ? 'text-gray-300' : 'text-gray-600 dark:text-gray-300']">
             <svg v-if="!isDark" class="w-[20px] h-[20px] xl:w-[22px] xl:h-[22px]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
             <svg v-else class="w-[20px] h-[20px] xl:w-[22px] xl:h-[22px]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
           </button>
@@ -706,22 +706,22 @@ onUnmounted(() => {
 
         <!-- Mobile Menu Toggles -->
         <div class="flex lg:hidden items-center gap-1 sm:gap-2.5 z-50">
-          <button @click="isSearchOpen = true" aria-label="ค้นหาสินค้า" :class="['transition-all p-2 rounded-full hover:bg-gray-100 dark:hover:bg-white/5', isDarkHeader ? 'text-gray-300' : 'text-gray-600 dark:text-gray-300']">
+          <button @click="isSearchOpen = true" aria-label="ค้นหาสินค้า" :class="['transition-all w-12 h-12 flex items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-white/5 flex-shrink-0', isDarkHeader ? 'text-gray-300' : 'text-gray-600 dark:text-gray-300']">
             <svg class="w-5.5 h-5.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
           </button>
-          <router-link v-if="settingsStore.isOnlineShoppingEnabled" to="/cart" aria-label="ตะกร้าสินค้า" :class="['relative transition-all p-2 rounded-full hover:bg-gray-100 dark:hover:bg-white/5', isDarkHeader ? 'text-gray-300' : 'text-gray-600 dark:text-gray-300']">
+          <router-link v-if="settingsStore.isOnlineShoppingEnabled" to="/cart" aria-label="ตะกร้าสินค้า" :class="['relative transition-all w-12 h-12 flex items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-white/5 flex-shrink-0', isDarkHeader ? 'text-gray-300' : 'text-gray-600 dark:text-gray-300']">
             <svg class="w-5.5 h-5.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
             </svg>
-            <span v-if="cartStore.cartTotal > 0" class="absolute top-0.5 right-0.5 bg-gradient-to-r from-[#f07100] to-[#ff8a24] text-white text-[9px] font-bold min-w-[16px] h-[16px] px-1 rounded-full flex items-center justify-center border-2 border-white dark:border-[#0C0E14] shadow-sm animate-pulse leading-none">
+            <span v-if="cartStore.cartTotal > 0" class="absolute top-1 right-1 bg-gradient-to-r from-[#f07100] to-[#ff8a24] text-white text-[9px] font-bold min-w-[16px] h-[16px] px-1 rounded-full flex items-center justify-center border-2 border-white dark:border-[#0C0E14] shadow-sm animate-pulse leading-none">
               {{ cartStore.cartTotal > 99 ? '99+' : cartStore.cartTotal }}
             </span>
           </router-link>
-          <button @click="toggleDarkMode" aria-label="สลับโหมดมืด" :class="['transition-all p-2 rounded-full hover:bg-gray-100 dark:hover:bg-white/5', isDarkHeader ? 'text-gray-300' : 'text-gray-600 dark:text-gray-300']">
+          <button @click="toggleDarkMode" aria-label="สลับโหมดมืด" :class="['transition-all w-12 h-12 flex items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-white/5 flex-shrink-0', isDarkHeader ? 'text-gray-300' : 'text-gray-600 dark:text-gray-300']">
             <svg v-if="!isDark" class="w-5.5 h-5.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
             <svg v-else class="w-5.5 h-5.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
           </button>
-          <button @click="toggleMobileMenu" aria-label="เมนูหลัก" :class="['focus:outline-none p-2 transition-all rounded-full hover:bg-gray-100 dark:hover:bg-white/5', isDarkHeader ? 'text-white' : 'text-gray-900 dark:text-white']">
+          <button @click="toggleMobileMenu" aria-label="เมนูหลัก" :class="['focus:outline-none w-12 h-12 flex items-center justify-center transition-all rounded-full hover:bg-gray-100 dark:hover:bg-white/5 flex-shrink-0', isDarkHeader ? 'text-white' : 'text-gray-900 dark:text-white']">
             <svg v-if="!isMobileMenuOpen" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
             <svg v-else class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
           </button>
@@ -732,23 +732,23 @@ onUnmounted(() => {
       <transition name="slide-down">
         <div v-if="isMobileMenuOpen" class="lg:hidden absolute top-full left-0 w-full bg-[#FAF9F6] dark:bg-[#0C0E14] border-b border-gray-100 dark:border-white/10 shadow-2xl py-6 flex flex-col px-6 space-y-4 z-40">
           <div>
-            <button @click="isMobileProductsOpen = !isMobileProductsOpen" :class="['py-2 text-lg font-bold tracking-wide transition-colors flex items-center justify-between w-full', isActiveRoute('/products') ? 'text-emerald-600 dark:text-emerald-400 border-l-4 border-emerald-500 pl-4' : 'text-gray-900 dark:text-white hover:text-emerald-600']">
+            <button @click="isMobileProductsOpen = !isMobileProductsOpen" :class="['py-2 text-lg font-bold tracking-wide transition-colors flex items-center justify-between w-full', isActiveRoute('/products') ? 'text-emerald-700 dark:text-emerald-400 border-l-4 border-emerald-500 pl-4' : 'text-gray-900 dark:text-white hover:text-emerald-700']">
               สินค้า
               <svg class="w-4 h-4 transition-transform duration-200" :class="isMobileProductsOpen ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
             </button>
             <div v-if="isMobileProductsOpen" class="pl-6 pb-2 space-y-1">
-              <router-link to="/products" class="block py-1.5 text-sm font-semibold text-emerald-600 dark:text-emerald-400">ดูทั้งหมด</router-link>
-              <router-link v-for="cat in navCategories" :key="cat.id || cat.name" :to="`/products/category/${encodeURIComponent(cat.name)}`" class="block py-1.5 text-sm text-gray-600 dark:text-gray-400 hover:text-emerald-600 dark:hover:text-emerald-400 font-medium">
+              <router-link to="/products" class="block py-1.5 text-sm font-semibold text-emerald-700 dark:text-emerald-400">ดูทั้งหมด</router-link>
+              <router-link v-for="cat in navCategories" :key="cat.id || cat.name" :to="`/products/category/${encodeURIComponent(cat.name)}`" class="block py-1.5 text-sm text-gray-600 dark:text-gray-400 hover:text-emerald-700 dark:hover:text-emerald-400 font-medium">
                 {{ cat.name }}
               </router-link>
             </div>
           </div>
-          <router-link to="/services" :class="['py-2 text-lg font-bold tracking-wide transition-colors', isActiveRoute('/services') ? 'text-emerald-600 dark:text-emerald-400 border-l-4 border-emerald-500 pl-4' : 'text-gray-900 dark:text-white hover:text-emerald-600']">บริการ</router-link>
-          <router-link to="/space-calculator" @click="isMobileMenuOpen = false" :class="['py-2 text-lg font-bold tracking-wide transition-colors', isActiveRoute('/space-calculator') ? 'text-emerald-600 dark:text-emerald-400 border-l-4 border-emerald-500 pl-4' : 'text-gray-900 dark:text-white hover:text-emerald-600']">คำนวณพื้นที่</router-link>
-          <router-link to="/projects" :class="['py-2 text-lg font-bold tracking-wide transition-colors', isActiveRoute('/projects') ? 'text-emerald-600 dark:text-emerald-400 border-l-4 border-emerald-500 pl-4' : 'text-gray-900 dark:text-white hover:text-emerald-600']">ผลงาน</router-link>
-          <router-link to="/blog" :class="['py-2 text-lg font-bold tracking-wide transition-colors', isActiveRoute('/blog') ? 'text-emerald-600 dark:text-emerald-400 border-l-4 border-emerald-500 pl-4' : 'text-gray-900 dark:text-white hover:text-emerald-600']">บทความ</router-link>
-          <router-link to="/about" :class="['py-2 text-lg font-bold tracking-wide transition-colors', isActiveRoute('/about') ? 'text-emerald-600 dark:text-emerald-400 border-l-4 border-emerald-500 pl-4' : 'text-gray-900 dark:text-white hover:text-emerald-600']">เกี่ยวกับเรา</router-link>
-          <router-link to="/contact" :class="['py-2 text-lg font-bold tracking-wide transition-colors', isActiveRoute('/contact') ? 'text-emerald-600 dark:text-emerald-400 border-l-4 border-emerald-500 pl-4' : 'text-gray-900 dark:text-white hover:text-emerald-600']">ติดต่อเรา</router-link>
+          <router-link to="/services" :class="['py-2 text-lg font-bold tracking-wide transition-colors', isActiveRoute('/services') ? 'text-emerald-700 dark:text-emerald-400 border-l-4 border-emerald-500 pl-4' : 'text-gray-900 dark:text-white hover:text-emerald-700']">บริการ</router-link>
+          <router-link to="/space-calculator" @click="isMobileMenuOpen = false" :class="['py-2 text-lg font-bold tracking-wide transition-colors', isActiveRoute('/space-calculator') ? 'text-emerald-700 dark:text-emerald-400 border-l-4 border-emerald-500 pl-4' : 'text-gray-900 dark:text-white hover:text-emerald-700']">คำนวณพื้นที่</router-link>
+          <router-link to="/projects" :class="['py-2 text-lg font-bold tracking-wide transition-colors', isActiveRoute('/projects') ? 'text-emerald-700 dark:text-emerald-400 border-l-4 border-emerald-500 pl-4' : 'text-gray-900 dark:text-white hover:text-emerald-700']">ผลงาน</router-link>
+          <router-link to="/blog" :class="['py-2 text-lg font-bold tracking-wide transition-colors', isActiveRoute('/blog') ? 'text-emerald-700 dark:text-emerald-400 border-l-4 border-emerald-500 pl-4' : 'text-gray-900 dark:text-white hover:text-emerald-700']">บทความ</router-link>
+          <router-link to="/about" :class="['py-2 text-lg font-bold tracking-wide transition-colors', isActiveRoute('/about') ? 'text-emerald-700 dark:text-emerald-400 border-l-4 border-emerald-500 pl-4' : 'text-gray-900 dark:text-white hover:text-emerald-700']">เกี่ยวกับเรา</router-link>
+          <router-link to="/contact" :class="['py-2 text-lg font-bold tracking-wide transition-colors', isActiveRoute('/contact') ? 'text-emerald-700 dark:text-emerald-400 border-l-4 border-emerald-500 pl-4' : 'text-gray-900 dark:text-white hover:text-emerald-700']">ติดต่อเรา</router-link>
           <div class="pt-6 mt-4 border-t border-gray-100 dark:border-white/10 flex flex-col gap-4">
              <template v-if="settingsStore.isOnlineShoppingEnabled">
                <template v-if="authStore.isAuthenticated">
@@ -993,9 +993,9 @@ onUnmounted(() => {
           
           <!-- Column 1: Brand & Address -->
           <div class="lg:col-span-3 flex flex-col items-start">
-            <router-link to="/" class="group inline-flex items-center gap-4 mb-6">
+            <router-link to="/" class="group inline-flex items-center gap-4 mb-6 shrink-0">
               <template v-if="settingsStore.storeLogo">
-                 <img :src="getOptimizedImageUrl(settingsStore.storeLogo, 300)" alt="Store Logo" class="h-10 w-auto object-contain grayscale opacity-80 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-300" @error="onImageError" />
+                 <img :src="getOptimizedImageUrl(settingsStore.storeLogo, 300)" alt="Store Logo" class="h-8 md:h-10 w-auto max-w-[130px] sm:max-w-[160px] md:max-w-[200px] object-contain grayscale opacity-80 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-300" @error="onImageError" />
               </template>
               <template v-else>
                 <span class="text-2xl font-black tracking-tighter text-gray-900 dark:text-white">{{ settingsStore.storeName || 'STORAGE HOUSE' }}</span>
@@ -1167,7 +1167,7 @@ onUnmounted(() => {
       </div>
 
       <!-- Bottom Copyright Bar -->
-      <div class="w-full bg-[#b85200] py-5 mt-4 relative z-10">
+      <div class="w-full bg-[#964000] py-5 mt-4 relative z-10">
         <div class="max-w-[90rem] mx-auto px-6 lg:px-12 flex flex-col sm:flex-row justify-between items-center gap-4 text-white">
           <p class="text-xs md:text-sm font-medium">
             &copy; {{ new Date().getFullYear() }} <span class="font-black">{{ settingsStore.storeName || 'STORAGE HOUSE' }}</span>. สงวนลิขสิทธิ์

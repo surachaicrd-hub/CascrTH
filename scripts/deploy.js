@@ -71,10 +71,17 @@ try {
 
     // 4. Pre-install Linux modules for cPanel
     console.log('\n[4/5] Pre-installing Linux dependencies for cPanel (Bypassing NPM limits)...');
+    
+    const nodeModulesDir = path.join(apiDir, 'node_modules');
+    if (fs.existsSync(nodeModulesDir)) {
+        console.log('Clearing old node_modules to guarantee clean Linux binary builds...');
+        fs.rmSync(nodeModulesDir, { recursive: true, force: true });
+    }
+    
     console.log('Running npm install --cpu=x64 --os=linux --omit=dev in api folder...');
     execSync('npm install --cpu=x64 --os=linux --omit=dev', { cwd: apiDir, stdio: 'inherit' });
     
-    const binPath = path.join(apiDir, 'node_modules', '.bin');
+    const binPath = path.join(nodeModulesDir, '.bin');
     if (fs.existsSync(binPath)) {
         fs.rmSync(binPath, { recursive: true, force: true });
         console.log('Removed .bin to prevent symlink corruption on Windows -> Linux transfer.');
@@ -130,6 +137,9 @@ try {
 
     // Restore Windows dev dependencies automatically
     console.log('Restoring local Windows dependencies for development...');
+    if (fs.existsSync(nodeModulesDir)) {
+        fs.rmSync(nodeModulesDir, { recursive: true, force: true });
+    }
     execSync('npm install', { cwd: apiDir, stdio: 'ignore' });
 
 } catch (error) {

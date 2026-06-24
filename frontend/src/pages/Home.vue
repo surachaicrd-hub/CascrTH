@@ -1855,7 +1855,7 @@ onUnmounted(() => {
               <div class="hero-stagger-4 flex flex-row flex-wrap items-center gap-4 mb-6">
                 <!-- Solid Orange CTA Button -->
                 <router-link :to="slides[currentSlide]?.ctaLink || '/products'" @click="trackCTA(slides[currentSlide]?.ctaAction || 'view_products')" 
-                  class="group relative inline-flex items-center justify-center px-7 py-3.5 text-sm font-bold tracking-wide text-white transition-all bg-[#c64c00] hover:bg-[#ad3f00] rounded-full overflow-hidden shadow-lg shadow-[#c64c00]/30 hover:shadow-xl hover:shadow-[#c64c00]/50 hover:scale-[1.03] active:scale-95 whitespace-nowrap duration-300"
+                  class="group relative inline-flex items-center justify-center px-7 py-3.5 text-sm font-bold tracking-wide text-white transition-all bg-[#ad3f00] hover:bg-[#923400] rounded-full overflow-hidden shadow-lg shadow-[#ad3f00]/30 hover:shadow-xl hover:shadow-[#ad3f00]/50 hover:scale-[1.03] active:scale-95 whitespace-nowrap duration-300"
                 >
                   <span class="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out"></span>
                   <span class="relative z-10">{{ slides[currentSlide]?.ctaText || 'เลือกชมรุ่นยอดนิยม' }}</span>
@@ -1936,7 +1936,7 @@ onUnmounted(() => {
                     </svg>
                   </div>
                   <div class="text-left flex-1 min-w-0">
-                    <h3 class="text-[13px] font-bold text-white leading-tight font-['IBM_Plex_Sans_Thai'] truncate">{{ badge.title }}</h3>
+                    <div class="text-[13px] font-bold text-white leading-tight font-['IBM_Plex_Sans_Thai'] truncate">{{ badge.title }}</div>
                     <p class="text-[10px] text-gray-400 font-normal leading-tight mt-1 font-['IBM_Plex_Sans_Thai'] truncate">{{ badge.desc }}</p>
                   </div>
                 </div>
@@ -1947,7 +1947,7 @@ onUnmounted(() => {
             <div class="flex items-center gap-3 select-none mb-1">
               <!-- Prev Button -->
               <button @click="prevSlide" aria-label="สไลด์ก่อนหน้า"
-                class="w-9 h-9 rounded-full flex items-center justify-center bg-white/5 backdrop-blur-md border border-white/10 text-gray-300 hover:bg-[#ff7a00] hover:text-white hover:border-[#ff7a00]/50 hover:scale-105 active:scale-95 transition-all duration-300 cursor-pointer"
+                class="w-12 h-12 rounded-full flex items-center justify-center bg-white/5 backdrop-blur-md border border-white/10 text-gray-300 hover:bg-[#ff7a00] hover:text-white hover:border-[#ff7a00]/50 hover:scale-105 active:scale-95 transition-all duration-300 cursor-pointer flex-shrink-0"
               >
                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
@@ -1959,8 +1959,7 @@ onUnmounted(() => {
                 <button v-for="(slide, idx) in slides" :key="idx" 
                   @click="goToSlide(idx)"
                   :aria-label="`ดูสไลด์ที่ ${idx + 1}`"
-                  class="flex items-center justify-center h-10 transition-all duration-500 ease-out cursor-pointer focus:outline-none"
-                  :class="currentSlide === idx ? 'w-10' : 'w-6'"
+                  class="flex items-center justify-center w-12 h-12 transition-all duration-500 ease-out cursor-pointer focus:outline-none flex-shrink-0"
                 >
                   <div 
                     class="relative overflow-hidden rounded-full h-2 transition-all duration-500 ease-out"
@@ -1976,7 +1975,7 @@ onUnmounted(() => {
 
               <!-- Next Button -->
               <button @click="nextSlide" aria-label="สไลด์ถัดไป"
-                class="w-9 h-9 rounded-full flex items-center justify-center bg-white/5 backdrop-blur-md border border-white/10 text-gray-300 hover:bg-[#ff7a00] hover:text-white hover:border-[#ff7a00]/50 hover:scale-105 active:scale-95 transition-all duration-300 cursor-pointer"
+                class="w-12 h-12 rounded-full flex items-center justify-center bg-white/5 backdrop-blur-md border border-white/10 text-gray-300 hover:bg-[#ff7a00] hover:text-white hover:border-[#ff7a00]/50 hover:scale-105 active:scale-95 transition-all duration-300 cursor-pointer flex-shrink-0"
               >
                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
@@ -1990,7 +1989,7 @@ onUnmounted(() => {
       <!-- Mobile fallback for pagination controls -->
       <div class="absolute bottom-5 left-1/2 -translate-x-1/2 z-20 flex items-center gap-3 select-none md:hidden">
         <button @click="prevSlide" aria-label="สไลด์ก่อนหน้า"
-          class="w-8 h-8 rounded-full flex items-center justify-center bg-white/10 backdrop-blur-md border border-white/15 text-gray-300 hover:bg-[#ff7a00] hover:text-white hover:scale-110 active:scale-95 transition-all duration-300 cursor-pointer"
+          class="w-12 h-12 rounded-full flex items-center justify-center bg-white/10 backdrop-blur-md border border-white/15 text-gray-300 hover:bg-[#ff7a00] hover:text-white hover:scale-110 active:scale-95 transition-all duration-300 cursor-pointer flex-shrink-0"
         >
           <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
             <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
@@ -2000,8 +1999,7 @@ onUnmounted(() => {
           <button v-for="(slide, idx) in slides" :key="idx" 
             @click="goToSlide(idx)"
             :aria-label="`ดูสไลด์ที่ ${idx + 1}`"
-            class="flex items-center justify-center h-8 transition-all duration-500 ease-out cursor-pointer focus:outline-none"
-            :class="currentSlide === idx ? 'w-8' : 'w-5'"
+            class="flex items-center justify-center w-12 h-12 transition-all duration-500 ease-out cursor-pointer focus:outline-none flex-shrink-0"
           >
             <div 
               class="relative overflow-hidden rounded-full h-1.5 transition-all duration-500 ease-out"
@@ -2015,7 +2013,7 @@ onUnmounted(() => {
           </button>
         </div>
         <button @click="nextSlide" aria-label="สไลด์ถัดไป"
-          class="w-8 h-8 rounded-full flex items-center justify-center bg-white/10 backdrop-blur-md border border-white/15 text-gray-300 hover:bg-[#ff7a00] hover:text-white hover:scale-110 active:scale-95 transition-all duration-300 cursor-pointer"
+          class="w-12 h-12 rounded-full flex items-center justify-center bg-white/10 backdrop-blur-md border border-white/15 text-gray-300 hover:bg-[#ff7a00] hover:text-white hover:scale-110 active:scale-95 transition-all duration-300 cursor-pointer flex-shrink-0"
         >
           <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
             <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
@@ -2167,8 +2165,8 @@ onUnmounted(() => {
                     {{ promoTag }}
                   </span>
                   
-                  <h3 v-html="promoTitle" class="text-gray-900 dark:text-white font-black text-xl leading-tight mb-2 font-['IBM_Plex_Sans_Thai'] tracking-tight group-hover/promo:text-[#c2410c] transition-colors duration-300">
-                  </h3>
+                  <h2 v-html="promoTitle" class="text-gray-900 dark:text-white font-black text-xl leading-tight mb-2 font-['IBM_Plex_Sans_Thai'] tracking-tight group-hover/promo:text-[#c2410c] transition-colors duration-300">
+                  </h2>
                   
                   <p class="text-gray-500 dark:text-gray-400 text-xs mb-6 font-medium leading-relaxed font-['IBM_Plex_Sans_Thai']">
                     {{ promoDesc }}
@@ -2796,12 +2794,12 @@ onUnmounted(() => {
                 class="group/cta flex flex-col items-center justify-center p-3 px-6 bg-white hover:bg-orange-50 active:scale-95 transition-all rounded-2xl shadow-lg hover:shadow-xl w-full xl:w-auto select-none border border-orange-100/50"
               >
                 <div class="flex items-center gap-1.5 font-['IBM_Plex_Sans_Thai'] leading-none">
-                  <span class="text-[14px] font-black text-[#c2410c] tracking-wide">ขอรับคำปรึกษาฟรี</span>
-                  <svg class="w-4 h-4 text-[#c2410c] stroke-[3.5] transform group-hover/cta:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <span class="text-[14px] font-black text-[#9a3412] tracking-wide">ขอรับคำปรึกษาฟรี</span>
+                  <svg class="w-4 h-4 text-[#9a3412] stroke-[3.5] transform group-hover/cta:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
                   </svg>
                 </div>
-                <span class="text-[9px] font-bold text-gray-600 mt-1.5 leading-none font-['IBM_Plex_Sans_Thai']">คลิกเลย! ทีมงานพร้อมดูแลคุณ</span>
+                <span class="text-[9px] font-bold text-gray-700 mt-1.5 leading-none font-['IBM_Plex_Sans_Thai']">คลิกเลย! ทีมงานพร้อมดูแลคุณ</span>
               </router-link>
             </div>
             
@@ -3091,7 +3089,7 @@ onUnmounted(() => {
             <!-- Action Button -->
             <router-link 
               to="/quotation" 
-              class="flex items-center justify-center w-full bg-white hover:bg-orange-50 active:scale-95 transition-all py-3 rounded-2xl shadow-md text-[#c2410c] font-black text-sm gap-2 mt-auto"
+              class="flex items-center justify-center w-full bg-white hover:bg-orange-50 active:scale-95 transition-all py-3 rounded-2xl shadow-md text-[#9a3412] font-black text-sm gap-2 mt-auto"
             >
               <span>ขอใบเสนอราคา</span>
               <svg class="w-4 h-4 stroke-[3.5]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -3846,13 +3844,13 @@ onUnmounted(() => {
                 </h4>
                 
                 <!-- Line-clamped Description to keep heights uniform -->
-                <p v-if="company.description" class="text-gray-500 dark:text-gray-400 text-sm font-light leading-relaxed mt-2.5 line-clamp-3 sm:line-clamp-4 h-[72px] sm:h-[80px] overflow-hidden">
+                <p v-if="company.description" class="text-gray-600 dark:text-gray-400 text-sm font-light leading-relaxed mt-2.5 line-clamp-3 sm:line-clamp-4 h-[72px] sm:h-[80px] overflow-hidden">
                   {{ company.description }}
                 </p>
               </div>
 
               <!-- Action Link Footer -->
-              <div class="pt-4 mt-4 border-t border-gray-100 dark:border-white/[0.04] flex items-center justify-between text-emerald-700 dark:text-emerald-400 text-sm font-bold">
+              <div class="pt-4 mt-4 border-t border-gray-100 dark:border-white/[0.04] flex items-center justify-between text-emerald-800 dark:text-emerald-400 text-sm font-bold">
                 <span class="font-['IBM_Plex_Sans_Thai']">เข้าชมเว็บไซต์</span>
                 <div class="w-7 h-7 rounded-full bg-emerald-50 dark:bg-emerald-950/20 group-hover:bg-emerald-700 group-hover:text-white flex items-center justify-center transition-all duration-300">
                   <svg class="w-4 h-4 transform group-hover:translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">

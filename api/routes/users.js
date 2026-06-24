@@ -55,8 +55,9 @@ const router = express.Router();
 // ==========================================
 const authLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 10, // Limit each IP to 10 requests per windowMs
-    message: { success: false, error: 'พยายามเข้าสู่ระบบ/สมัครสมาชิกมากเกินไป กรุณารอ 15 นาที' }
+    limit: 10, // Limit each IP to 10 requests per windowMs
+    message: { success: false, error: 'พยายามเข้าสู่ระบบ/สมัครสมาชิกมากเกินไป กรุณารอ 15 นาที' },
+    skip: (req, res) => process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test',
 });
 
 // ==========================================
