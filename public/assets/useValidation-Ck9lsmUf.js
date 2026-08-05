@@ -1,0 +1,1 @@
+const t=s=>{if(!s)return!1;const e=s.replace(/[\s\-().]/g,"");return/^0\d{8,9}$/.test(e)},r=s=>s?/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s.trim()):!1,a=s=>{if(!s)return!1;const e=s.replace(/[\s\-]/g,"");return/^\d{13}$/.test(e)};export{t as a,r as b,a as i};

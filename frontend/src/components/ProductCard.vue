@@ -200,14 +200,14 @@ const getTimeRemaining = (endTime) => {
 
     <!-- Content Section -->
     <div :class="compact ? 'p-4' : 'p-5'" class="flex flex-col flex-1 bg-white dark:bg-[#121826]">
-      <div class="mb-2" v-if="!compact && product.sku">
+      <div class="mb-2" v-if="product.sku">
         <span class="inline-block text-emerald-700 dark:text-emerald-300 font-black text-[11px] uppercase tracking-wider bg-emerald-50 dark:bg-emerald-500/10 px-2 py-0.5 rounded">
           SKU: {{ product.sku }}
         </span>
       </div>
       <h3 :class="[
         compact ? 'text-sm md:text-base mb-2' : 'text-base md:text-[17px] mb-4',
-        'font-black text-gray-900 dark:text-white leading-snug transition-colors line-clamp-2 flex-1 group-hover:text-emerald-700 dark:group-hover:text-emerald-400'
+        'font-black text-gray-900 dark:text-white leading-snug transition-colors flex-1 group-hover:text-emerald-700 dark:group-hover:text-emerald-400'
       ]">
         {{ product.title || product.name }}
       </h3>
@@ -232,8 +232,8 @@ const getTimeRemaining = (endTime) => {
           <button v-if="settingsStore.isOnlineShoppingEnabled && !product.is_out_of_stock" @click.prevent="addToCart(product)" class="w-10 h-10 rounded-full bg-emerald-500 dark:bg-emerald-500 hover:bg-emerald-600 dark:hover:bg-emerald-600 flex items-center justify-center transition-colors shadow-sm group/cart border border-transparent" title="เพิ่มลงตะกร้า" aria-label="เพิ่มลงตะกร้า">
              <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
           </button>
-          <div v-else-if="!product.is_out_of_stock" class="w-10 h-10 rounded-full bg-gray-50 dark:bg-gray-800 hover:bg-emerald-600 dark:hover:bg-emerald-500 flex items-center justify-center transition-colors border border-gray-100 dark:border-gray-700">
-             <svg class="w-5 h-5 text-gray-600 group-hover:text-white transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+          <div v-else-if="!product.is_out_of_stock" class="w-10 h-10 rounded-full bg-gray-50 dark:bg-gray-800 group-hover:bg-emerald-600 dark:group-hover:bg-emerald-500 group-hover:border-emerald-600 flex items-center justify-center transition-all duration-300 border border-gray-100 dark:border-gray-700 shadow-sm">
+             <svg class="w-5 h-5 text-gray-600 dark:text-gray-300 group-hover:text-white transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
           </div>
         </div>
       </div>

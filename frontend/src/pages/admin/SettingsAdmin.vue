@@ -1572,6 +1572,23 @@ onMounted(() => {
               
             </div>
 
+            <!-- AI Product Recommendation Toggle -->
+            <div class="flex items-center justify-between p-4 border border-gray-200 rounded-xl bg-gray-50/50 mt-4">
+              <div>
+                <h3 class="font-bold text-gray-900 flex items-center gap-2">
+                  <svg class="w-5 h-5 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.813 15.904L9 21L8.188 15.904L3 15L8.188 14.096L9 9L9.813 14.096L15 15L9.813 15.904ZM19.007 10.08L18.5 13L17.993 10.08L15 9.57L17.993 9.06L18.5 6L19.007 10.08Z" />
+                  </svg>
+                  ป๊อปอัพ "AI แนะนำสำหรับคุณ" (AI Product Recommendation)
+                </h3>
+                <p class="text-sm text-gray-500 mt-1">แสดงกล่องป๊อปอัพแนะนำสินค้าอัจฉริยะตามความสนใจของผู้เข้าชมที่มุมซ้ายล่าง</p>
+              </div>
+              <label class="relative inline-flex items-center cursor-pointer flex-shrink-0 mt-2 sm:mt-0">
+                <input type="checkbox" v-model="aiRecommendationEnabled" class="sr-only peer">
+                <div class="w-14 h-7 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-orange-500"></div>
+              </label>
+            </div>
+
             <!-- Online Shopping Toggle -->
             <div class="flex items-center justify-between p-4 border border-gray-200 rounded-xl bg-gray-50/50 mt-4">
               <div>
@@ -2289,6 +2306,62 @@ onMounted(() => {
               <input type="checkbox" v-model="aiConsultantEnabled" class="sr-only peer">
               <div class="w-11 h-7 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-indigo-600"></div>
             </label>
+          </div>
+
+          <!-- AI Product Recommendation Widget Control Card -->
+          <div class="p-5 border border-gray-200 rounded-2xl bg-gray-50/40 mb-6 space-y-4">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div class="flex-1">
+                <div class="flex items-center gap-2">
+                  <h4 class="font-bold text-gray-900 text-sm md:text-base flex items-center gap-2">
+                    <svg class="w-5 h-5 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.813 15.904L9 21L8.188 15.904L3 15L8.188 14.096L9 9L9.813 14.096L15 15L9.813 15.904ZM19.007 10.08L18.5 13L17.993 10.08L15 9.57L17.993 9.06L18.5 6L19.007 10.08Z" />
+                    </svg>
+                    ป๊อปอัพ "AI แนะนำสำหรับคุณ" (AI Product Recommendation Widget)
+                  </h4>
+                  <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold" :class="aiRecommendationEnabled ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-gray-100 text-gray-500 border border-gray-200'">
+                    {{ aiRecommendationEnabled ? 'เปิดใช้งาน' : 'ปิดใช้งาน' }}
+                  </span>
+                </div>
+                <p class="text-xs text-gray-500 mt-1">แสดงกล่องวิดเจ็ตแนะนำสินค้าตามพฤติกรรมและความสนใจของผู้เข้าชมที่มุมซ้ายล่างของเว็บไซต์</p>
+              </div>
+              <label class="relative inline-flex items-center cursor-pointer flex-shrink-0">
+                <input type="checkbox" v-model="aiRecommendationEnabled" class="sr-only peer">
+                <div class="w-14 h-7 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-orange-500"></div>
+              </label>
+            </div>
+
+            <!-- Detailed settings when enabled -->
+            <div v-if="aiRecommendationEnabled" class="pt-4 border-t border-gray-200/80 space-y-4">
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div>
+                  <label class="block text-xs font-bold text-gray-700 mb-1.5">ระยะเวลาหน่วงก่อนแสดง (Delay)</label>
+                  <div class="relative">
+                    <input v-model.number="aiWidgetDelay" type="number" min="0" class="w-full border border-gray-300 rounded-xl pl-3 pr-16 py-2 text-sm focus:ring-2 focus:ring-orange-400 focus:border-orange-400 bg-white">
+                    <span class="absolute right-3 top-2 text-gray-400 text-xs font-medium">วินาที</span>
+                  </div>
+                  <p class="text-[11px] text-gray-400 mt-1">รอกี่วินาทีหลังเข้าหน้าเว็บก่อนแสดงป๊อปอัพ</p>
+                </div>
+
+                <div>
+                  <label class="block text-xs font-bold text-gray-700 mb-1.5">ระยะเวลาพักหลังกดปิด (Cooldown)</label>
+                  <div class="relative">
+                    <input v-model.number="aiWidgetCooldown" type="number" min="0" class="w-full border border-gray-300 rounded-xl pl-3 pr-16 py-2 text-sm focus:ring-2 focus:ring-orange-400 focus:border-orange-400 bg-white">
+                    <span class="absolute right-3 top-2 text-gray-400 text-xs font-medium">นาที</span>
+                  </div>
+                  <p class="text-[11px] text-gray-400 mt-1">เมื่อผู้ใช้กดปิด จะซ่อนป๊อปอัพไว้นานกี่นาที</p>
+                </div>
+
+                <div>
+                  <label class="block text-xs font-bold text-gray-700 mb-1.5">จำนวนสินค้าที่แนะนำ (Limit)</label>
+                  <div class="relative">
+                    <input v-model.number="aiWidgetProductCount" type="number" min="1" max="10" class="w-full border border-gray-300 rounded-xl pl-3 pr-16 py-2 text-sm focus:ring-2 focus:ring-orange-400 focus:border-orange-400 bg-white">
+                    <span class="absolute right-3 top-2 text-gray-400 text-xs font-medium">รายการ</span>
+                  </div>
+                  <p class="text-[11px] text-gray-400 mt-1">จำนวนสินค้าสูงสุดที่จะวนสไลด์แสดง</p>
+                </div>
+              </div>
+            </div>
           </div>
 
           <div class="mb-6">

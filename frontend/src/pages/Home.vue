@@ -1805,7 +1805,7 @@ onUnmounted(() => {
       <div class="absolute inset-0 z-0 overflow-hidden select-none pointer-events-none">
         <div v-for="(slide, idx) in slides" :key="idx"
           class="absolute inset-0 transition-all duration-[1500ms] ease-in-out"
-          :class="currentSlide === idx ? 'opacity-90 scale-100' : 'opacity-0 scale-105 pointer-events-none'"
+          :class="currentSlide === idx ? 'opacity-100 scale-100' : 'opacity-0 scale-105 pointer-events-none'"
         >
           <img 
             :src="getOptimizedImageUrl(slide.image, 1200)" 
@@ -1821,10 +1821,10 @@ onUnmounted(() => {
         </div>
       </div>
 
-      <!-- Overlay Gradient — strong left for text readability -->
-      <div class="absolute inset-0 z-10 pointer-events-none" style="background: linear-gradient(105deg, rgba(8,10,15,0.93) 0%, rgba(12,14,20,0.82) 38%, rgba(18,22,34,0.4) 62%, rgba(8,10,15,0.25) 100%);"></div>
+      <!-- Overlay Gradient — strong left for text readability, fully bright and clear on the right -->
+      <div class="absolute inset-0 z-10 pointer-events-none" style="background: linear-gradient(90deg, rgba(8,10,15,0.96) 0%, rgba(8,10,15,0.85) 35%, rgba(8,10,15,0.2) 55%, rgba(0,0,0,0) 75%);"></div>
       <!-- Bottom fade -->
-      <div class="absolute bottom-0 left-0 right-0 h-28 z-10 pointer-events-none" style="background: linear-gradient(to top, #0C0E14 0%, transparent 100%);"></div>
+      <div class="absolute bottom-0 left-0 right-0 h-20 z-10 pointer-events-none" style="background: linear-gradient(to top, rgba(12,14,20,0.8) 0%, transparent 100%);"></div>
 
       <!-- Main Content Container -->
       <div class="relative z-20 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 md:pt-32 pb-24 md:pb-40">
@@ -2055,53 +2055,7 @@ onUnmounted(() => {
       </div>
     </section>
 
-    <!-- Stats Counter Section -->
-    <section v-if="homeShowStats && stats.length > 0" class="py-14 md:py-20 bg-white dark:bg-[#0a0f16] border-b border-gray-100 dark:border-white/5 relative overflow-hidden">
-      <!-- Decorative gradient bleed from hero -->
-      <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[200px] bg-gradient-to-b from-emerald-500/5 to-transparent pointer-events-none"></div>
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
-          <div v-for="(stat, index) in stats" :key="index" class="text-center group relative h-full flex" data-aos="fade-up" :data-aos-delay="index * 100">
-            <!-- Premium Card -->
-            <div class="relative w-full bg-white dark:bg-[#121826] rounded-3xl p-8 md:p-10 border border-gray-100/80 dark:border-white/5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] hover:shadow-[0_20px_40px_rgba(240,113,0,0.12)] hover:border-emerald-200/50 dark:hover:border-emerald-500/20 hover:-translate-y-2 transition-all duration-500 overflow-hidden flex flex-col justify-center items-center">
-              
-              <!-- Ambient Glow Effects -->
-              <div class="absolute -right-10 -top-10 w-40 h-40 bg-emerald-400/10 dark:bg-emerald-500/10 rounded-full blur-3xl group-hover:bg-emerald-400/20 dark:group-hover:bg-emerald-500/20 transition-colors duration-700 pointer-events-none"></div>
-              <div class="absolute -left-10 -bottom-10 w-32 h-32 bg-emerald-400/5 dark:bg-emerald-500/5 rounded-full blur-2xl group-hover:bg-emerald-400/15 dark:group-hover:bg-emerald-500/15 transition-colors duration-700 pointer-events-none delay-100"></div>
-              
-              <!-- Stat Icon -->
-              <div class="mb-4 text-emerald-500 relative z-10 transition-transform duration-500 group-hover:scale-110">
-                <svg v-if="index === 0" class="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                </svg>
-                <svg v-else-if="index === 1" class="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <svg v-else-if="index === 2" class="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                </svg>
-                <svg v-else class="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                </svg>
-              </div>
-              
-              <!-- Number -->
-              <div class="text-4xl md:text-5xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-br from-gray-900 to-gray-600 dark:from-white dark:to-gray-400 group-hover:from-emerald-500 group-hover:to-teal-400 transition-all duration-500 mb-2 relative z-10 drop-shadow-sm">
-                {{ stat.value }}
-              </div>
-              
-              <!-- Separator -->
-              <div class="w-8 h-0.5 bg-gradient-to-r from-emerald-400/40 to-teal-400/40 mx-auto mb-3 group-hover:w-14 group-hover:from-emerald-400 group-hover:to-teal-400 transition-all duration-500 delay-100"></div>
-              
-              <!-- Label -->
-              <p class="text-xs md:text-sm font-bold text-gray-500 dark:text-gray-400 leading-relaxed relative z-10 transition-colors duration-500 group-hover:text-gray-700 dark:group-hover:text-gray-300">
-                {{ stat.label }}
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
+
 
     <!-- Best Sellers & Why Choose Us Section (Redesigned Bento Grid Layout) -->
     <section class="py-16 md:py-20 bg-white dark:bg-[#0a0f16] relative overflow-hidden border-t border-gray-50 dark:border-white/5">
@@ -2244,20 +2198,13 @@ onUnmounted(() => {
                 </div>
               </div>
               
-              <!-- Orange Badge Overlay on the Right photo -->
-              <div v-if="bannerBadgeText" class="absolute top-4 right-4 sm:top-6 sm:right-6 w-20 h-20 sm:w-24 sm:h-24 bg-gradient-to-br from-[#ff7a00] to-orange-500 rounded-full flex flex-col items-center justify-center text-white text-center shadow-lg border-2 border-white/20 transform rotate-12 z-20 select-none animate-float-slow">
-                <span class="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider">{{ bannerBadgeText }}</span>
-                <span class="text-sm sm:text-lg font-black leading-none mt-0.5">{{ bannerBadgeSub }}</span>
-                <!-- Orange Badge Outer Sunburst Glow Rays -->
-                <div class="absolute inset-0 rounded-full border border-dashed border-orange-300/30 scale-110 pointer-events-none animate-spin-slow"></div>
-              </div>
             </div>
 
-            <!-- Bento Grid Row: Cards Slider & Why Choose Us Checklist -->
-            <div v-if="showcaseProducts.length > 0" class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
+            <!-- Bento Grid Row: Cards Slider -->
+            <div v-if="showcaseProducts.length > 0" class="w-full">
               
-              <!-- LEFT SIDE: Best Sellers Carousel (lg:col-span-9) -->
-              <div class="lg:col-span-9 relative flex flex-col justify-between group/slider" data-aos="fade-right">
+              <!-- Best Sellers Carousel -->
+              <div class="w-full relative flex flex-col justify-between group/slider" data-aos="fade-up">
                 <!-- Header -->
                 <div class="flex items-center justify-between mb-8 text-left">
                   <div>
@@ -2298,41 +2245,14 @@ onUnmounted(() => {
                 </div>
               </div>
 
-              <!-- RIGHT SIDE: Why Choose Us (lg:col-span-3) -->
-              <div class="lg:col-span-3 flex flex-col justify-between gap-5 text-left" data-aos="fade-left">
-                <!-- Checklist wrapper -->
-                <div class="bg-gray-50/50 dark:bg-[#121826]/40 rounded-[2rem] border border-gray-150 dark:border-white/5 p-6 flex-1 flex flex-col justify-between shadow-xl">
-                  <div>
-                    <h4 class="text-sm font-black text-gray-900 dark:text-white mb-5 flex items-center gap-1 font-['IBM_Plex_Sans_Thai']">
-                      {{ whyChooseUsTitle }}
-                      <svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
-                    </h4>
-                    
-                    <ul class="space-y-4">
-                      <!-- Dynamic Checklist Items -->
-                      <li v-for="(bullet, index) in whyChooseUsBullets" :key="index" class="flex items-center gap-3">
-                        <span class="w-5 h-5 rounded-full bg-orange-100 dark:bg-orange-950/30 text-[#ff7a00] flex items-center justify-center shrink-0">
-                          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-                          </svg>
-                        </span>
-                        <span class="text-xs font-bold text-gray-700 dark:text-gray-300 font-['IBM_Plex_Sans_Thai']">{{ bullet }}</span>
-                      </li>
-                    </ul>
-                  </div>
-                </div>
-
-
-              </div>
-
             </div>
           </div>
         </div>
       </div>
-
     </section>
     
     <!-- Highlight Categories Auto-Rotating Showcase -->
+    <template v-if="false">
     <section v-if="homeShowHighlightCategories" class="py-24 md:py-32 bg-gray-50 dark:bg-[#0f172a] overflow-hidden relative border-t border-gray-100 dark:border-gray-800">
       <!-- Decorative Backdrop -->
       <div class="absolute top-1/2 left-0 -translate-y-1/2 -translate-x-1/3 w-[800px] h-[800px] bg-emerald-500/5 rounded-full blur-[100px] pointer-events-none"></div>
@@ -2393,7 +2313,7 @@ onUnmounted(() => {
 
                             <!-- Product Info -->
                             <div class="flex flex-col flex-grow">
-                                <h4 class="font-black text-gray-900 dark:text-white text-[13px] md:text-sm leading-snug line-clamp-2 mb-2 group-hover:text-[#c2410c] transition-colors font-['IBM_Plex_Sans_Thai'] min-h-[38px] lg:min-h-[40px]">
+                                <h4 class="font-black text-gray-900 dark:text-white text-[13px] md:text-sm leading-snug mb-2 group-hover:text-[#c2410c] transition-colors font-['IBM_Plex_Sans_Thai']">
                                     {{ product.name }}
                                 </h4>
 
@@ -2548,9 +2468,10 @@ onUnmounted(() => {
         </div>
       </div>
     </section>
+    </template>
 
-    <!-- Luxury Features Section (Marketing Focused) -->
-    <section v-if="homeShowFeatures" class="py-16 md:py-24 bg-gradient-to-br from-[#fdfcf9] via-[#f7f3eb] to-[#efeae0] dark:from-[#0b0f19] dark:via-[#0f172a] dark:to-[#1e293b] overflow-hidden relative">
+    <!-- Luxury Features Section (Removed) -->
+    <template v-if="false">
       <!-- Soft ambient backdrop glow blobs for depth -->
       <div class="absolute top-1/4 left-0 w-[350px] h-[350px] bg-orange-500/5 dark:bg-orange-500/10 rounded-full blur-[100px] pointer-events-none z-0"></div>
       <div class="absolute bottom-1/4 right-0 w-[400px] h-[400px] bg-amber-500/5 dark:bg-amber-500/8 rounded-full blur-[120px] pointer-events-none z-0"></div>
@@ -2807,7 +2728,7 @@ onUnmounted(() => {
         </div>
 
       </div>
-    </section>
+    </template>
 
 <!-- Category Showcase Blocks -->
     <template v-if="showcaseCategoriesData.length > 0">
@@ -2849,6 +2770,7 @@ onUnmounted(() => {
     </template>
 
     <!-- How It Works Section -->
+    <template v-if="false">
     <section v-if="homeShowHowItWorks" class="py-20 md:py-28 bg-[#fffcf9] dark:bg-[#070b11] relative overflow-hidden">
       <!-- Decorative background -->
       <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[1000px] rounded-full bg-gradient-to-br from-orange-500/5 via-transparent to-amber-500/5 blur-3xl pointer-events-none"></div>
@@ -2957,6 +2879,7 @@ onUnmounted(() => {
         </div>
       </div>
     </section>
+    </template>
 
 
 
@@ -3164,6 +3087,7 @@ onUnmounted(() => {
     </section>
 
     <!-- Social Proof / Testimonials Section -->
+    <template v-if="false">
     <section v-if="homeShowTestimonials" class="py-20 md:py-28 bg-gradient-to-b from-[#fff8f2] via-white to-white dark:from-[#1a1208] dark:via-[#0a0f16] dark:to-[#0a0f16] relative overflow-hidden">
       <!-- Subtle background decorations -->
       <div class="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
@@ -3258,8 +3182,10 @@ onUnmounted(() => {
 
       </div>
     </section>
+    </template>
 
     <!-- Partners / Trusted By Section -->
+    <template v-if="false">
     <section v-if="homeShowPartners" class="py-20 md:py-28 bg-[#f9fafb] dark:bg-[#0a0f16] relative overflow-hidden border-t border-gray-100 dark:border-white/5">
       <!-- Background decoration -->
       <div class="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
@@ -3453,6 +3379,7 @@ onUnmounted(() => {
 
       </div>
     </section>
+    </template>
 
     <!-- Latest Articles -->
     <section 
@@ -3610,6 +3537,7 @@ onUnmounted(() => {
     </section>
 
     <!-- FAQ Section -->
+    <template v-if="false">
     <section v-if="homeShowFaq" class="faq-section-redesign py-20 md:py-28 relative overflow-hidden">
       <!-- Soft blue/grey gradient background -->
       <div class="absolute inset-0 bg-gradient-to-b from-[#e8f1f9]/40 via-[#f7fafc] to-[#f4f7fa] dark:from-[#0d131f] dark:via-[#111827] dark:to-[#0f172a]"></div>
@@ -3781,6 +3709,7 @@ onUnmounted(() => {
 
       </div>
     </section>
+    </template>
 
 
     <!-- Affiliated Companies Section -->

@@ -479,7 +479,7 @@ const addStructuredData = () => {
   document.head.appendChild(bcScript)
 
   // Update page title and meta for this product
-  document.title = `${product.value.title} â€” Morespace บ้านเก็บของสำเร็จรูป`
+  document.title = `${product.value.title} — Morespace บ้านเก็บของสำเร็จรูป`
   const metaDesc = document.querySelector('meta[name="description"]')
   if (metaDesc) {
     metaDesc.setAttribute('content', product.value.seo_description || product.value.short_description || product.value.description?.substring(0, 160) || '')
@@ -521,6 +521,35 @@ const toggleGalleryZoom = () => {
   } else {
     document.body.style.overflow = ''
   }
+}
+
+// Dynamic LINE Inquiry URL from Admin Settings
+const getLineInquiryUrl = (productTitle) => {
+  let baseUrl = ''
+  if (settingsStore.contactLines && settingsStore.contactLines.length > 0) {
+    const firstLine = settingsStore.contactLines[0]
+    if (typeof firstLine === 'string' && firstLine.trim()) {
+      const val = firstLine.trim()
+      baseUrl = val.startsWith('http') ? val : `https://line.me/ti/p/~${val.replace(/^@/, '')}`
+    } else if (firstLine && typeof firstLine === 'object') {
+      if (firstLine.url && firstLine.url.trim()) {
+        baseUrl = firstLine.url.trim()
+      } else if (firstLine.value && firstLine.value.trim()) {
+        const val = firstLine.value.trim()
+        baseUrl = val.startsWith('http') ? val : `https://line.me/ti/p/~${val.replace(/^@/, '')}`
+      } else if (firstLine.id && firstLine.id.trim()) {
+        const val = firstLine.id.trim()
+        baseUrl = val.startsWith('http') ? val : `https://line.me/ti/p/~${val.replace(/^@/, '')}`
+      }
+    }
+  }
+
+  if (!baseUrl) {
+    baseUrl = 'https://line.me/R/ti/p/@morespace'
+  }
+
+  const connector = baseUrl.includes('?') ? '&' : '?'
+  return `${baseUrl}${connector}text=${encodeURIComponent('สอบถามสินค้า: ' + (productTitle || ''))}`
 }
 
 // Interactive State
@@ -839,191 +868,178 @@ onUnmounted(() => {
         <div class="lg:col-span-5 xl:col-span-5 flex flex-col pt-2 lg:pt-0">
           
             <!-- Dynamic Tags Above Title (Only Marketing & Installation Badges) -->
-            <div class="flex flex-wrap gap-2.5 mb-5" v-if="productBadges.filter(b => ['badge-new', 'badge-bestseller', 'badge-recommended', 'badge-installation'].includes(b.id)).length > 0">
+            <div class="flex flex-wrap gap-2 mb-3" v-if="productBadges.filter(b => ['badge-new', 'badge-bestseller', 'badge-recommended', 'badge-installation'].includes(b.id)).length > 0">
               <div v-for="badge in productBadges.filter(b => ['badge-new', 'badge-bestseller', 'badge-recommended', 'badge-installation'].includes(b.id))" :key="badge.id" 
-                   :class="`group relative flex items-center gap-1.5 text-xs font-black tracking-widest uppercase px-3.5 py-1.5 rounded-full overflow-hidden text-${badge.color}-700 dark:text-${badge.color}-300 bg-white/60 dark:bg-${badge.color}-900/20 border border-${badge.color}-200/50 dark:border-${badge.color}-800/50 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 backdrop-blur-sm`">
-                <!-- Hover Gradient Background -->
-                <div :class="`absolute inset-0 bg-gradient-to-r from-${badge.color}-100 to-${badge.color}-50/0 dark:from-${badge.color}-800/40 dark:to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300`"></div>
-                
-                <!-- Ping effect for installation/cog icon -->
-                <span v-if="badge.icon === 'cog' || badge.id === 'badge-installation'" class="relative flex h-2 w-2 mr-0.5 z-10">
+                   :class="`group relative inline-flex items-center gap-1.5 text-[11px] font-bold px-3 py-1 rounded-full text-${badge.color}-700 dark:text-${badge.color}-300 bg-white/70 dark:bg-${badge.color}-950/40 border border-${badge.color}-200/70 dark:border-${badge.color}-800/70 shadow-2xs backdrop-blur-md hover:shadow-xs transition-all`">
+                <span v-if="badge.icon === 'cog' || badge.id === 'badge-installation'" class="relative flex h-2 w-2">
                   <span :class="`animate-ping absolute inline-flex h-full w-full rounded-full bg-${badge.color}-400 opacity-75`"></span>
                   <span :class="`relative inline-flex rounded-full h-2 w-2 bg-${badge.color}-500`"></span>
                 </span>
                 
-                <svg class="w-3.5 h-3.5 relative z-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" :d="getBadgeIconPath(badge.icon)"></path></svg>
-                <span class="relative z-10">{{ badge.name }}</span>
+                <svg class="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" :d="getBadgeIconPath(badge.icon)"></path></svg>
+                <span>{{ badge.name }}</span>
               </div>
             </div>
             
-            <h1 class="text-3xl sm:text-4xl lg:text-3xl xl:text-[2.5rem] font-black text-slate-900 dark:text-white tracking-tight mb-5 leading-[1.2] drop-shadow-sm">
+            <h1 class="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight mb-3 leading-tight">
               {{ product.title }}
-              <span v-if="product.sku" class="group inline-flex items-center gap-1.5 px-3 py-1 ml-2 lg:ml-3 rounded-xl bg-slate-100 dark:bg-slate-800/80 text-slate-600 dark:text-slate-400 text-xs font-black tracking-wide uppercase border border-slate-200/80 dark:border-slate-700/60 transition-all cursor-default relative align-middle -translate-y-0.5 shadow-sm hover:bg-slate-200 dark:hover:bg-slate-700/80 duration-300">
-                <svg class="w-3.5 h-3.5 text-slate-500 dark:text-slate-400 relative z-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A2 2 0 013 12V7a4 4 0 014-4z"></path></svg>
-                <span class="relative z-10 pt-[1px]">SKU: <span class="text-slate-800 dark:text-slate-200 ml-1 font-black">{{ product.sku }}</span></span>
+              <span v-if="product.sku" class="inline-flex items-center gap-1 px-2.5 py-0.5 ml-2 rounded-lg bg-slate-100 dark:bg-slate-800/90 text-slate-600 dark:text-slate-400 text-[11px] font-bold border border-slate-200/80 dark:border-slate-700/80 align-middle shadow-2xs">
+                <svg class="w-3 h-3 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A2 2 0 013 12V7a4 4 0 014-4z"></path></svg>
+                <span>SKU: <span class="text-slate-800 dark:text-slate-200 font-extrabold">{{ product.sku }}</span></span>
               </span>
             </h1>
             
-            <div class="flex items-center gap-3 mb-8" v-if="product.review_count > 0 && (settingsStore.showProductRating || settingsStore.showProductReview)">
-               <div class="flex items-center bg-amber-50 dark:bg-amber-900/20 px-2 py-1 rounded-lg border border-amber-100 dark:border-amber-800/30" :title="`${product.rating || 5} ดาว`" v-if="settingsStore.showProductRating">
-                  <span class="text-amber-600 dark:text-amber-400 font-black text-sm mr-1.5">{{ product.rating || 5.0 }}</span>
-                  <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20" v-for="i in 5" :key="i" :class="i <= Math.round(product.rating || 5) ? 'text-amber-400' : 'text-gray-200 dark:text-gray-700'"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+            <div class="flex items-center gap-2.5 mb-4" v-if="product.review_count > 0 && (settingsStore.showProductRating || settingsStore.showProductReview)">
+               <div class="flex items-center bg-amber-50 dark:bg-amber-900/20 px-2 py-0.5 rounded-md border border-amber-100 dark:border-amber-800/30 text-xs font-bold" :title="`${product.rating || 5} ดาว`" v-if="settingsStore.showProductRating">
+                  <span class="text-amber-600 dark:text-amber-400 font-black mr-1">{{ product.rating || 5.0 }}</span>
+                  <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20" v-for="i in 5" :key="i" :class="i <= Math.round(product.rating || 5) ? 'text-amber-400' : 'text-gray-200 dark:text-gray-700'"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
                </div>
-               <span class="text-sm font-medium text-gray-500 hover:text-emerald-600 dark:hover:text-emerald-400 cursor-pointer transition-colors border-dashed border-gray-300 dark:border-gray-600 hover:border-emerald-400" :class="{ 'border-b': settingsStore.showProductReview }" @click="settingsStore.showProductReview ? activeTab = 'reviews' : null" v-if="settingsStore.showProductReview">อ่านรีวิวผู้ใช้งาน ({{ product.review_count || 0 }})</span>
+               <span class="text-xs font-medium text-gray-500 hover:text-emerald-600 dark:hover:text-emerald-400 cursor-pointer transition-colors border-dashed border-gray-300 dark:border-gray-600 hover:border-emerald-400" :class="{ 'border-b': settingsStore.showProductReview }" @click="settingsStore.showProductReview ? activeTab = 'reviews' : null" v-if="settingsStore.showProductReview">อ่านรีวิวผู้ใช้งาน ({{ product.review_count || 0 }})</span>
             </div>
 
-            <!-- Price Block -->
-            <div class="bg-gradient-to-b from-white to-gray-50/50 dark:from-[#1A1A1A] dark:to-[#2D2D2D] rounded-3xl p-7 md:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-none border border-gray-100 dark:border-gray-800 relative overflow-hidden mb-8 group/pricebox transition-all duration-500 hover:shadow-[0_8px_30px_rgb(16,185,129,0.08)]">
-               <!-- Decorative Elements -->
-               <div class="absolute -right-20 -top-20 w-64 h-64 bg-gradient-to-br from-emerald-100/40 to-emerald-50/10 dark:from-emerald-900/20 dark:to-emerald-950/5 rounded-full blur-3xl group-hover/pricebox:scale-110 transition-transform duration-700"></div>
-               <div class="absolute -left-10 -bottom-10 w-40 h-40 bg-gradient-to-tr from-blue-50/40 to-transparent dark:from-blue-900/10 rounded-full blur-2xl"></div>
+            <!-- Compact & Modern Price Block -->
+            <div class="bg-gradient-to-b from-white to-gray-50/60 dark:from-[#1A1A1A] dark:to-[#252525] rounded-2xl p-4 sm:p-5 shadow-xs border border-gray-100 dark:border-gray-800 relative overflow-hidden mb-5 group/pricebox">
+               <!-- Decorative Subtle Glow -->
+               <div class="absolute -right-16 -top-16 w-48 h-48 bg-gradient-to-br from-amber-100/30 to-amber-50/5 dark:from-amber-900/10 dark:to-transparent rounded-full blur-2xl pointer-events-none"></div>
                
                <div class="relative z-10">
                  <!-- Flash Sale Banner -->
-                 <div v-if="timeRemainingObj" class="mb-5 bg-gradient-to-r from-orange-500 to-amber-500 rounded-2xl p-3.5 flex flex-col sm:flex-row items-center justify-between shadow-lg shadow-orange-500/20 text-white relative overflow-hidden">
-                   <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 mix-blend-overlay"></div>
-                   <div class="flex items-center gap-2 relative z-10 mb-3 sm:mb-0">
-                      <svg class="w-5 h-5 animate-pulse" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.381z" clip-rule="evenodd"/></svg>
-                      <span class="font-black tracking-widest uppercase text-sm">Flash Sale</span>
+                 <div v-if="timeRemainingObj" class="mb-3.5 bg-gradient-to-r from-orange-500 to-amber-500 rounded-xl p-2.5 flex flex-col sm:flex-row items-center justify-between shadow-xs text-white relative overflow-hidden">
+                   <div class="flex items-center gap-1.5 relative z-10 mb-2 sm:mb-0">
+                      <svg class="w-4 h-4 animate-pulse shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.381z" clip-rule="evenodd"/></svg>
+                      <span class="font-extrabold uppercase text-xs">Flash Sale</span>
                    </div>
-                    <div class="flex items-center gap-2.5 relative z-10">
-                      <span class="text-[11px] font-bold opacity-90 uppercase tracking-widest hidden sm:inline-block">Ends in</span>
+                    <div class="flex items-center gap-2 relative z-10">
+                      <span class="text-[10px] font-bold opacity-90 uppercase hidden sm:inline-block">Ends in</span>
                       <div class="flex gap-1 text-center font-mono">
-                         <div v-if="timeRemainingObj.days > 0" class="bg-black/20 backdrop-blur-md rounded-lg min-w-[36px] py-1 px-1.5 shadow-inner border border-white/10">
-                            <span class="block text-sm font-black">{{ timeRemainingObj.days }}</span>
-                            <span class="block text-[8px] uppercase tracking-wider opacity-80">วัน</span>
+                         <div v-if="timeRemainingObj.days > 0" class="bg-black/20 rounded-md min-w-[30px] py-0.5 px-1 border border-white/10">
+                            <span class="block text-xs font-black">{{ timeRemainingObj.days }}</span>
+                            <span class="block text-[7px] uppercase opacity-80">วัน</span>
                          </div>
-                         <div class="bg-black/20 backdrop-blur-md rounded-lg min-w-[36px] py-1 px-1.5 shadow-inner border border-white/10">
-                            <span class="block text-sm font-black">{{ String(timeRemainingObj.hours).padStart(2, '0') }}</span>
-                            <span class="block text-[8px] uppercase tracking-wider opacity-80">ชม.</span>
+                         <div class="bg-black/20 rounded-md min-w-[30px] py-0.5 px-1 border border-white/10">
+                            <span class="block text-xs font-black">{{ String(timeRemainingObj.hours).padStart(2, '0') }}</span>
+                            <span class="block text-[7px] uppercase opacity-80">ชม.</span>
                          </div>
-                         <div class="text-white/50 font-black self-start pt-1 animate-pulse">:</div>
-                         <div class="bg-black/20 backdrop-blur-md rounded-lg min-w-[36px] py-1 px-1.5 shadow-inner border border-white/10">
-                             <span class="block text-sm font-black">{{ String(timeRemainingObj.minutes).padStart(2, '0') }}</span>
-                             <span class="block text-[8px] uppercase tracking-wider opacity-80">นาที</span>
+                         <div class="text-white/50 font-black self-start pt-0.5 text-xs animate-pulse">:</div>
+                         <div class="bg-black/20 rounded-md min-w-[30px] py-0.5 px-1 border border-white/10">
+                             <span class="block text-xs font-black">{{ String(timeRemainingObj.minutes).padStart(2, '0') }}</span>
+                             <span class="block text-[7px] uppercase opacity-80">นาที</span>
                           </div>
-                          <div class="text-white/50 font-black self-start pt-1 animate-pulse">:</div>
-                          <div class="bg-black/20 backdrop-blur-md rounded-lg min-w-[36px] py-1 px-1.5 shadow-inner border border-white/10">
-                             <span class="block text-sm font-black">{{ String(timeRemainingObj.seconds).padStart(2, '0') }}</span>
-                             <span class="block text-[8px] uppercase tracking-wider opacity-80">วิ</span>
+                          <div class="text-white/50 font-black self-start pt-0.5 text-xs animate-pulse">:</div>
+                          <div class="bg-black/20 rounded-md min-w-[30px] py-0.5 px-1 border border-white/10">
+                             <span class="block text-xs font-black">{{ String(timeRemainingObj.seconds).padStart(2, '0') }}</span>
+                             <span class="block text-[7px] uppercase opacity-80">วิ</span>
                           </div>
-                       </div>
+                      </div>
                     </div>
-                  </div>
+                 </div>
 
-                 <div v-if="product.original_price && Number(product.original_price) > Number(product.price.replace(/[^0-9.-]+/g,'')) && product.price !== 'สอบถามราคา'" class="flex items-center gap-3 mb-2">
-                   <span class="text-lg md:text-xl text-gray-500 dark:text-gray-400 line-through font-bold decoration-gray-300 dark:decoration-gray-600 decoration-2">฿{{ Number(product.original_price).toLocaleString() }}</span>
-                   <span class="bg-gradient-to-r from-rose-500 to-red-500 text-white text-[11px] md:text-xs font-black px-2.5 py-1 rounded-md tracking-wider shadow-sm shadow-rose-500/20 flex items-center gap-1">
-                      <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M12.395 2.553a1 1 0 00-1.45-.385c-.345.23-.614.558-.822.88-.214.33-.403.713-.57 1.116-.334.804-.614 1.768-.84 2.734a31.365 31.365 0 00-.613 3.58 2.64 2.64 0 01-.945-1.067c-.328-.68-.398-1.534-.398-2.654A1 1 0 005.05 6.05 6.981 6.981 0 003 11a7 7 0 1011.95-4.95c-.592-.591-.98-.985-1.348-1.467-.363-.476-.724-1.063-1.207-2.03zM12.12 15.12A3 3 0 017 13s.879.5 2.5.5c0-1 .5-4 1.25-4.5.5 1 .786 1.293 1.371 1.879A2.99 2.99 0 0113 13a2.99 2.99 0 01-.879 2.121z" clip-rule="evenodd"/></svg>
-                      ลด {{ Math.round(((product.original_price - product.price.replace(/[^0-9.-]+/g,'')) / product.original_price) * 100) }}%
+                 <!-- Original Price & Discount Tag (No Emoji) -->
+                 <div v-if="product.original_price && Number(product.original_price) > Number(product.price.replace(/[^0-9.-]+/g,'')) && product.price !== 'สอบถามราคา'" class="flex items-center gap-2.5 mb-1">
+                   <span class="text-base text-gray-400 dark:text-gray-500 line-through font-bold">฿{{ Number(product.original_price).toLocaleString() }}</span>
+                   <span class="inline-flex items-center gap-1 bg-gradient-to-r from-rose-500 to-red-500 text-white text-[11px] font-extrabold px-2 py-0.5 rounded-full shadow-2xs">
+                      <svg class="w-3 h-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"/></svg>
+                      <span>ลด {{ Math.round(((product.original_price - product.price.replace(/[^0-9.-]+/g,'')) / product.original_price) * 100) }}%</span>
                    </span>
                  </div>
                  
-                 <div class="flex items-end gap-2.5 mb-1">
-                   <strong class="text-5xl xl:text-[3.5rem] font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 to-emerald-600 dark:from-emerald-400 dark:to-emerald-500 tracking-tight leading-none">{{ product.price }}</strong>
-                   <span v-if="product.price !== 'สอบถามราคา'" class="text-gray-500 dark:text-gray-400 font-bold text-lg pb-1.5">/ ชุด</span>
+                 <!-- Main Price Display -->
+                 <div class="flex items-baseline gap-2 mb-1">
+                   <strong class="text-3xl sm:text-4xl md:text-[2.75rem] font-black text-amber-600 dark:text-amber-400 tracking-tight leading-none">{{ product.price }}</strong>
+                   <span v-if="product.price !== 'สอบถามราคา'" class="text-gray-500 dark:text-gray-400 font-bold text-sm">/ ชุด</span>
                  </div>
 
-                 
                  <!-- Stock Urgency -->
-                 <div v-if="product.stock_quantity !== null && product.stock_quantity > 0 && product.stock_quantity <= 10" class="mt-4 text-rose-600 dark:text-rose-400 text-sm font-bold flex items-center gap-2 bg-gradient-to-r from-rose-50 to-white dark:from-rose-900/20 dark:to-transparent p-3 rounded-xl border border-rose-100 dark:border-rose-900/30">
-                   <div class="relative flex h-3 w-3">
+                 <div v-if="product.stock_quantity !== null && product.stock_quantity > 0 && product.stock_quantity <= 10" class="mt-3 text-rose-600 dark:text-rose-400 text-xs font-bold flex items-center gap-2 bg-rose-50/80 dark:bg-rose-950/30 p-2.5 rounded-xl border border-rose-100 dark:border-rose-900/40">
+                   <div class="relative flex h-2.5 w-2.5 shrink-0">
                      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
-                     <span class="relative inline-flex rounded-full h-3 w-3 bg-rose-500"></span>
+                     <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-rose-500"></span>
                    </div>
-                    ด่วน! สินค้าเหลือเพียง {{ product.stock_quantity }} ชิ้นสุดท้าย
+                    <span>ด่วน! สินค้าเหลือเพียง <strong class="font-black">{{ product.stock_quantity }}</strong> ชิ้นสุดท้าย</span>
                  </div>
 
-                  <!-- Important Services Bar (e.g. Free install, Free shipping, Warranty, and Custom Badges) -->
-                  <div class="mt-6 pt-5 border-t border-gray-200/60 dark:border-gray-700/60 flex items-center gap-3 text-sm flex-wrap" v-if="product.free_install_bkk || product.badge_free_shipping || product.free_shipping_bkk || productBadges.filter(b => !['badge-new', 'badge-bestseller', 'badge-recommended', 'badge-installation'].includes(b.id)).length > 0">
+                  <!-- Service & Warranty Badges Bar (Clean SVG Icons, Compact Pills) -->
+                  <div class="mt-4 pt-3.5 border-t border-gray-200/60 dark:border-gray-700/60 flex items-center gap-2 text-xs flex-wrap" v-if="product.free_install_bkk || product.badge_free_shipping || product.free_shipping_bkk || productBadges.filter(b => !['badge-new', 'badge-bestseller', 'badge-recommended', 'badge-installation'].includes(b.id)).length > 0">
                      
                      <!-- Free Installation Badge -->
-                     <div v-if="product.free_install_bkk" class="group/service flex items-center gap-2 bg-white/60 hover:bg-teal-50 dark:bg-teal-900/10 dark:hover:bg-teal-900/20 px-3.5 py-2 rounded-xl border border-gray-200 dark:border-teal-800/30 hover:border-teal-200 dark:hover:border-teal-700/50 transition-all duration-300 backdrop-blur-sm cursor-default">
-                        <div class="w-6 h-6 rounded-full bg-teal-100 dark:bg-teal-800/50 flex items-center justify-center text-teal-600 dark:text-teal-400 group-hover/service:scale-110 transition-transform shrink-0">
-                           <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
-                        </div>
-                        <span class="text-teal-700 dark:text-teal-400 font-bold text-[13px]">ฟรีติดตั้ง {{ settingsStore.freeInstallProvinces.length <= 4 ? settingsStore.freeInstallProvinces.join(', ') : settingsStore.freeInstallProvinces.slice(0, 3).join(', ') + ' +' + (settingsStore.freeInstallProvinces.length - 3) + ' จังหวัด' }}</span>
+                     <div v-if="product.free_install_bkk" class="inline-flex items-center gap-1.5 bg-teal-50/90 dark:bg-teal-950/40 px-2.5 py-1 rounded-lg border border-teal-200/80 dark:border-teal-800/60 text-teal-700 dark:text-teal-300 font-bold shadow-2xs cursor-default">
+                        <svg class="w-3.5 h-3.5 text-teal-600 dark:text-teal-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        <span>ฟรีติดตั้ง {{ settingsStore.freeInstallProvinces.length <= 4 ? settingsStore.freeInstallProvinces.join(', ') : settingsStore.freeInstallProvinces.slice(0, 3).join(', ') + ' +' + (settingsStore.freeInstallProvinces.length - 3) + ' จังหวัด' }}</span>
                      </div>
 
                      <!-- Free Shipping Nationwide Badge -->
-                     <div v-if="product.badge_free_shipping" class="group/service flex items-center gap-2 bg-white/60 hover:bg-emerald-50 dark:bg-emerald-900/10 dark:hover:bg-emerald-900/20 px-3.5 py-2 rounded-xl border border-gray-200 dark:border-emerald-800/30 hover:border-emerald-200 dark:hover:border-emerald-700/50 transition-all duration-300 backdrop-blur-sm cursor-default">
-                        <div class="w-6 h-6 rounded-full bg-emerald-100 dark:bg-emerald-800/50 flex items-center justify-center text-emerald-600 dark:emerald-400 group-hover/service:scale-110 transition-transform">
-                           <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"></path></svg>
-                        </div>
-                        <span class="text-emerald-700 dark:text-emerald-400 font-bold text-[13px]">จัดส่งฟรีทั่วประเทศ</span>
+                     <div v-if="product.badge_free_shipping" class="inline-flex items-center gap-1.5 bg-emerald-50/90 dark:bg-emerald-950/40 px-2.5 py-1 rounded-lg border border-emerald-200/80 dark:border-emerald-800/60 text-emerald-700 dark:text-emerald-300 font-bold shadow-2xs cursor-default">
+                        <svg class="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/></svg>
+                        <span>จัดส่งฟรีทั่วประเทศ</span>
                      </div>
 
                      <!-- Free Shipping BKK Badge -->
-                     <div v-if="product.free_shipping_bkk" class="group/service flex items-center gap-2 bg-white/60 hover:bg-blue-50 dark:bg-blue-900/10 dark:hover:bg-blue-900/20 px-3.5 py-2 rounded-xl border border-gray-200 dark:border-blue-800/30 hover:border-blue-200 dark:hover:border-blue-700/50 transition-all duration-300 backdrop-blur-sm cursor-default">
-                        <div class="w-6 h-6 rounded-full bg-blue-100 dark:bg-blue-800/50 flex items-center justify-center text-blue-600 dark:text-blue-400 group-hover/service:scale-110 transition-transform">
-                           <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"></path></svg>
-                        </div>
-                        <span class="text-blue-700 dark:text-blue-400 font-bold text-[13px]">ส่งฟรีกทม.และปริมณฑล</span>
+                     <div v-if="product.free_shipping_bkk" class="inline-flex items-center gap-1.5 bg-blue-50/90 dark:bg-blue-950/40 px-2.5 py-1 rounded-lg border border-blue-200/80 dark:border-blue-800/60 text-blue-700 dark:text-blue-300 font-bold shadow-2xs cursor-default">
+                        <svg class="w-3.5 h-3.5 text-blue-600 dark:text-blue-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/></svg>
+                        <span>ส่งฟรีกทม.และปริมณฑล</span>
                      </div>
 
                      <!-- Dynamic Badges -->
                      <div v-for="badge in productBadges.filter(b => !['badge-new', 'badge-bestseller', 'badge-recommended', 'badge-installation'].includes(b.id))" :key="badge.id" 
-                          :class="`group/service flex items-center gap-2 bg-white/60 hover:bg-${badge.color}-50 dark:bg-${badge.color}-900/10 dark:hover:bg-${badge.color}-900/20 px-3.5 py-2 rounded-xl border border-gray-200 dark:border-${badge.color}-800/30 hover:border-${badge.color}-200 dark:hover:border-${badge.color}-700/50 transition-all duration-300 backdrop-blur-sm cursor-default`">
-                        <div :class="`w-6 h-6 rounded-full bg-${badge.color}-100 dark:bg-${badge.color}-800/50 flex items-center justify-center text-${badge.color}-600 dark:text-${badge.color}-400 group-hover/service:scale-110 transition-transform`">
-                           <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" :d="getBadgeIconPath(badge.icon)"></path></svg>
-                        </div>
-                        <span :class="`text-${badge.color}-700 dark:text-${badge.color}-400 font-bold text-[13px]`">{{ badge.name }}</span>
+                          :class="`inline-flex items-center gap-1.5 bg-${badge.color}-50/90 dark:bg-${badge.color}-950/40 px-2.5 py-1 rounded-lg border border-${badge.color}-200/80 dark:border-${badge.color}-800/60 text-${badge.color}-700 dark:text-${badge.color}-300 font-bold shadow-2xs cursor-default`">
+                        <svg class="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" :d="getBadgeIconPath(badge.icon)"></path></svg>
+                        <span>{{ badge.name }}</span>
                      </div>
                   </div>
 
                </div>
             </div>
 
-            <!-- Add to Cart Section -->
-            <div class="flex flex-col gap-3 mb-6">
+            <!-- Add to Cart & Action Section (Compact & Sleek) -->
+            <div class="flex flex-col gap-3 mb-5">
               <!-- Quantity Selector -->
-              <div v-if="product.price !== 'à¸ªà¸­à¸šà¸–à¸²à¸¡à¸£à¸²à¸„à¸²' && !product.is_out_of_stock" class="flex items-center gap-4">
-                <span class="text-sm font-bold text-gray-600 dark:text-gray-400 shrink-0">à¸ˆà¸³à¸™à¸§à¸™</span>
-                <div class="flex items-center bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl overflow-hidden shadow-sm">
-                  <button @click="quantity > 1 ? quantity-- : null" class="px-4 py-3 text-gray-500 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-colors font-bold text-lg" aria-label="à¸¥à¸”à¸ˆà¸³à¸™à¸§à¸™">âˆ’</button>
-                  <span class="px-5 py-3 font-black text-gray-900 dark:text-white text-base min-w-[3rem] text-center border-x border-gray-200 dark:border-gray-700">{{ quantity }}</span>
-                  <button @click="product.stock_quantity === null || quantity < product.stock_quantity ? quantity++ : null" class="px-4 py-3 text-gray-500 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-colors font-bold text-lg" aria-label="à¹€à¸žà¸´à¹ˆà¸¡à¸ˆà¸³à¸™à¸§à¸™">+</button>
+              <div v-if="product.price !== 'สอบถามราคา' && !product.is_out_of_stock" class="flex items-center gap-3">
+                <span class="text-xs font-bold text-gray-500 dark:text-gray-400 shrink-0">จำนวน</span>
+                <div class="inline-flex items-center bg-gray-50 dark:bg-gray-800/90 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden shadow-2xs">
+                  <button @click="quantity > 1 ? quantity-- : null" class="w-9 h-9 flex items-center justify-center text-gray-500 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 transition-colors font-black text-base" aria-label="ลดจำนวน">−</button>
+                  <span class="w-10 text-center font-black text-gray-900 dark:text-white text-sm border-x border-gray-200 dark:border-gray-700 py-1.5">{{ quantity }}</span>
+                  <button @click="product.stock_quantity === null || quantity < product.stock_quantity ? quantity++ : null" class="w-9 h-9 flex items-center justify-center text-gray-500 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 transition-colors font-black text-base" aria-label="เพิ่มจำนวน">+</button>
                 </div>
-                <span v-if="product.stock_quantity !== null" class="text-xs text-gray-400 dark:text-gray-500">à¸¡à¸µà¸ªà¸´à¸™à¸„à¹‰à¸² {{ product.stock_quantity }} à¸Šà¸´à¹‰à¸™</span>
+                <span v-if="product.stock_quantity !== null" class="text-xs text-gray-400 dark:text-gray-500">มีสินค้า {{ product.stock_quantity }} ชิ้น</span>
               </div>
 
               <!-- Out of Stock -->
-              <div v-if="product.is_out_of_stock" class="flex items-center gap-2 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 px-4 py-3 rounded-2xl border border-red-100 dark:border-red-800/30">
+              <div v-if="product.is_out_of_stock" class="flex items-center gap-2 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 px-4 py-3 rounded-xl border border-red-100 dark:border-red-800/30">
                 <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-                <span class="font-bold text-sm">à¸ªà¸´à¸™à¸„à¹‰à¸²à¸«à¸¡à¸” â€” à¸à¸£à¸¸à¸“à¸²à¸•à¸´à¸”à¸•à¹ˆà¸­à¸ªà¸­à¸šà¸–à¸²à¸¡</span>
+                <span class="font-bold text-sm">สินค้าหมด — กรุณาติดต่อสอบถาม</span>
               </div>
 
               <!-- Action Buttons -->
-              <div class="flex gap-3">
+              <div class="flex gap-2.5">
                 <!-- Add to Cart -->
                 <button
-                  v-if="!product.is_out_of_stock && product.price !== 'à¸ªà¸­à¸šà¸–à¸²à¸¡à¸£à¸²à¸„à¸²'"
+                  v-if="!product.is_out_of_stock && product.price !== 'สอบถามราคา'"
                   @click="addToCart"
                   id="add-to-cart-btn"
-                  class="flex-1 group relative flex items-center justify-center gap-2.5 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-black text-base py-4 px-6 rounded-2xl shadow-lg shadow-emerald-500/25 hover:shadow-emerald-500/40 transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0 overflow-hidden"
+                  class="flex-1 group relative flex items-center justify-center gap-2 bg-amber-600 hover:bg-amber-700 active:bg-amber-800 text-white font-extrabold text-sm sm:text-base py-3 px-5 rounded-xl shadow-md shadow-amber-600/20 transition-all duration-200 overflow-hidden"
                 >
-                  <div class="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                  <svg class="w-5 h-5 relative z-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
-                  <span class="relative z-10">à¹€à¸žà¸´à¹ˆà¸¡à¸¥à¸‡à¸•à¸°à¸à¸£à¹‰à¸²</span>
+                  <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                  <span>เพิ่มลงตะกร้า</span>
                 </button>
 
                 <!-- Inquiry via LINE -->
                 <a
-                  v-if="product.is_out_of_stock || product.price === 'à¸ªà¸­à¸šà¸–à¸²à¸¡à¸£à¸²à¸„à¸²'"
-                  :href="`https://lin.ee/yourlinelink?text=${encodeURIComponent('à¸ªà¸­à¸šà¸–à¸²à¸¡à¸ªà¸´à¸™à¸„à¹‰à¸²: ' + product.title)}`"
+                  v-if="product.is_out_of_stock || product.price === 'สอบถามราคา'"
+                  :href="getLineInquiryUrl(product.title)"
                   target="_blank" rel="noopener"
-                  class="flex-1 flex items-center justify-center gap-2.5 bg-gradient-to-r from-[#06C755] to-green-500 hover:from-green-600 hover:to-green-600 text-white font-black text-base py-4 px-6 rounded-2xl shadow-lg shadow-green-500/25 hover:shadow-green-500/40 transition-all duration-300 hover:-translate-y-0.5"
+                  class="flex-1 flex items-center justify-center gap-2 bg-[#06C755] hover:bg-[#05b34c] text-white font-extrabold text-sm sm:text-base py-3 px-5 rounded-xl shadow-md shadow-green-500/20 transition-all duration-200"
                 >
-                  <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M24 10.314C24 4.943 18.615.572 12 .572S0 4.943 0 10.314c0 4.811 4.27 8.842 10.035 9.608.391.082.923.258 1.058.59.12.301.079.766.038 1.08l-.164 1.02c-.045.301-.24 1.186 1.049.645 1.291-.539 6.916-4.078 9.436-6.975C23.176 14.393 24 12.458 24 10.314"/></svg>
-                  à¸ªà¸­à¸šà¸–à¸²à¸¡à¸œà¹ˆà¸²à¸™ LINE
+                  <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="currentColor"><path d="M24 10.314C24 4.943 18.615.572 12 .572S0 4.943 0 10.314c0 4.811 4.27 8.842 10.035 9.608.391.082.923.258 1.058.59.12.301.079.766.038 1.08l-.164 1.02c-.045.301-.24 1.186 1.049.645 1.291-.539 6.916-4.078 9.436-6.975C23.176 14.393 24 12.458 24 10.314"/></svg>
+                  <span>สอบถามผ่าน LINE</span>
                 </a>
 
                 <!-- Wishlist Button -->
                 <button
+                  v-if="settingsStore.isWishlistEnabled !== false"
                   @click="handleToggleWishlist"
                   :class="wishlistStore.isInWishlist(product.id) ? 'bg-rose-50 dark:bg-rose-900/20 border-rose-200 dark:border-rose-700/50 text-rose-500' : 'bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 text-gray-500 hover:border-rose-200 hover:text-rose-500 dark:hover:border-rose-700'"
-                  class="w-14 h-14 flex items-center justify-center border rounded-2xl transition-all duration-300 hover:shadow-sm shrink-0"
-                  :aria-label="wishlistStore.isInWishlist(product.id) ? 'à¸¥à¸šà¸ˆà¸²à¸à¸£à¸²à¸¢à¸à¸²à¸£à¹‚à¸›à¸£à¸”' : 'à¹€à¸žà¸´à¹ˆà¸¡à¹ƒà¸™à¸£à¸²à¸¢à¸à¸²à¸£à¹‚à¸›à¸£à¸”'"
+                  class="w-11 h-11 flex items-center justify-center border rounded-xl transition-all duration-200 hover:shadow-2xs shrink-0"
+                  :aria-label="wishlistStore.isInWishlist(product.id) ? 'ลบจากรายการโปรด' : 'เพิ่มในรายการโปรด'"
                   id="wishlist-btn"
                 >
                   <svg class="w-5 h-5" :fill="wishlistStore.isInWishlist(product.id) ? 'currentColor' : 'none'" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
@@ -1031,10 +1047,11 @@ onUnmounted(() => {
 
                 <!-- Compare Button -->
                 <button
+                  v-if="settingsStore.isCompareEnabled !== false"
                   @click="compareStore.toggleCompare(product)"
                   :class="compareStore.isInCompare(product.id) ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-700/50 text-blue-500' : 'bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 text-gray-500 hover:border-blue-200 hover:text-blue-500 dark:hover:border-blue-700'"
-                  class="w-14 h-14 flex items-center justify-center border rounded-2xl transition-all duration-300 hover:shadow-sm shrink-0"
-                  aria-label="à¹€à¸›à¸£à¸µà¸¢à¸šà¹€à¸—à¸µà¸¢à¸šà¸ªà¸´à¸™à¸„à¹‰à¸²"
+                  class="w-11 h-11 flex items-center justify-center border rounded-xl transition-all duration-200 hover:shadow-2xs shrink-0"
+                  aria-label="เปรียบเทียบสินค้า"
                   id="compare-btn"
                 >
                   <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
@@ -1043,28 +1060,95 @@ onUnmounted(() => {
 
               <!-- LINE secondary CTA -->
               <a
-                v-if="!product.is_out_of_stock && product.price !== 'à¸ªà¸­à¸šà¸–à¸²à¸¡à¸£à¸²à¸„à¸²'"
-                :href="`https://lin.ee/yourlinelink?text=${encodeURIComponent('à¸ªà¸­à¸šà¸–à¸²à¸¡à¸ªà¸´à¸™à¸„à¹‰à¸²: ' + product.title)}`"
+                v-if="!product.is_out_of_stock && product.price !== 'สอบถามราคา'"
+                :href="getLineInquiryUrl(product.title)"
                 target="_blank" rel="noopener"
-                class="flex items-center justify-center gap-2 text-sm font-bold text-[#046c2e] dark:text-emerald-400 hover:text-green-600 dark:hover:text-emerald-300 transition-colors py-2"
+                class="inline-flex items-center justify-center gap-1.5 text-xs font-bold text-[#06C755] dark:text-emerald-400 hover:underline py-1"
               >
-                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M24 10.314C24 4.943 18.615.572 12 .572S0 4.943 0 10.314c0 4.811 4.27 8.842 10.035 9.608.391.082.923.258 1.058.59.12.301.079.766.038 1.08l-.164 1.02c-.045.301-.24 1.186 1.049.645 1.291-.539 6.916-4.078 9.436-6.975C23.176 14.393 24 12.458 24 10.314"/></svg>
-                à¸«à¸£à¸·à¸­à¸ªà¸­à¸šà¸–à¸²à¸¡à¹€à¸žà¸´à¹ˆà¸¡à¹€à¸•à¸´à¸¡à¸œà¹ˆà¸²à¸™ LINE
+                <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="currentColor"><path d="M24 10.314C24 4.943 18.615.572 12 .572S0 4.943 0 10.314c0 4.811 4.27 8.842 10.035 9.608.391.082.923.258 1.058.59.12.301.079.766.038 1.08l-.164 1.02c-.045.301-.24 1.186 1.049.645 1.291-.539 6.916-4.078 9.436-6.975C23.176 14.393 24 12.458 24 10.314"/></svg>
+                <span>หรือสอบถามเพิ่มเติมผ่าน LINE</span>
               </a>
             </div>
 
             <!-- Social Share -->
-            <SocialShare :title="product.title" :url="$route.fullPath" class="mt-2" />
+            <SocialShare :title="product.title" :url="$route.fullPath" class="mt-1" />
         </div>
       </div>
 
-      <!-- Tabs -->
-      <div class="mt-16 md:mt-24">
-        <div class="flex gap-0 border-b border-gray-200 dark:border-gray-700/60 overflow-x-auto scrollbar-hide -mb-px">
-          <button v-if="product.description" @click="activeTab = 'description'" :class="activeTab === 'description' ? 'border-emerald-500 text-emerald-700 dark:text-emerald-400' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'" class="relative px-6 py-4 font-black text-sm tracking-wide uppercase whitespace-nowrap border-b-2 transition-all duration-200" id="tab-description">à¸£à¸²à¸¢à¸¥à¸°à¹€à¸­à¸µà¸¢à¸”</button>
-          <button v-if="product.attributes && product.attributes.length > 0" @click="activeTab = 'specs'" :class="activeTab === 'specs' ? 'border-emerald-500 text-emerald-700 dark:text-emerald-400' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'" class="relative px-6 py-4 font-black text-sm tracking-wide uppercase whitespace-nowrap border-b-2 transition-all duration-200" id="tab-specs">à¸‚à¹‰à¸­à¸¡à¸¹à¸¥à¸ˆà¸³à¹€à¸žà¸²à¸°</button>
-          <button v-if="product.faq && product.faq.length > 0" @click="activeTab = 'faq'" :class="activeTab === 'faq' ? 'border-emerald-500 text-emerald-700 dark:text-emerald-400' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'" class="relative px-6 py-4 font-black text-sm tracking-wide uppercase whitespace-nowrap border-b-2 transition-all duration-200" id="tab-faq">à¸„à¸³à¸–à¸²à¸¡à¸—à¸µà¹ˆà¸žà¸šà¸šà¹ˆà¸­à¸¢</button>
-          <button v-if="settingsStore.showProductReview" @click="activeTab = 'reviews'" :class="activeTab === 'reviews' ? 'border-emerald-500 text-emerald-700 dark:text-emerald-400' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'" class="relative px-6 py-4 font-black text-sm tracking-wide uppercase whitespace-nowrap border-b-2 transition-all duration-200" id="tab-reviews">à¸£à¸µà¸§à¸´à¸§ ({{ product.review_count || 0 }})</button>
+      <div class="mt-12 md:mt-16">
+        <div class="flex items-center justify-start border-b border-gray-200/80 dark:border-gray-800 pb-4 overflow-x-auto scrollbar-hide">
+          <div class="inline-flex items-center gap-1.5 p-1.5 bg-gray-100/90 dark:bg-gray-800/90 backdrop-blur-md rounded-2xl border border-gray-200/70 dark:border-gray-700/70 shadow-inner max-w-full">
+            
+            <!-- Description Tab -->
+            <button
+              v-if="product.description"
+              @click="activeTab = 'description'"
+              :class="activeTab === 'description' 
+                ? 'bg-white dark:bg-gray-900 text-emerald-600 dark:text-emerald-400 shadow-md shadow-emerald-950/5 border border-gray-200/60 dark:border-gray-700/60 font-bold scale-[1.02]' 
+                : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white font-medium hover:bg-white/50 dark:hover:bg-gray-700/50'"
+              class="flex items-center gap-2 px-4 sm:px-5 py-2.5 text-xs sm:text-sm rounded-xl transition-all duration-200 whitespace-nowrap shrink-0"
+              id="tab-description"
+            >
+              <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+              </svg>
+              <span>รายละเอียด</span>
+            </button>
+
+            <!-- Specs Tab -->
+            <button
+              v-if="product.attributes && product.attributes.length > 0"
+              @click="activeTab = 'specs'"
+              :class="activeTab === 'specs' 
+                ? 'bg-white dark:bg-gray-900 text-emerald-600 dark:text-emerald-400 shadow-md shadow-emerald-950/5 border border-gray-200/60 dark:border-gray-700/60 font-bold scale-[1.02]' 
+                : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white font-medium hover:bg-white/50 dark:hover:bg-gray-700/50'"
+              class="flex items-center gap-2 px-4 sm:px-5 py-2.5 text-xs sm:text-sm rounded-xl transition-all duration-200 whitespace-nowrap shrink-0"
+              id="tab-specs"
+            >
+              <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
+              </svg>
+              <span>ข้อมูลจำเพาะ</span>
+            </button>
+
+            <!-- FAQ Tab -->
+            <button
+              v-if="product.faq && product.faq.length > 0"
+              @click="activeTab = 'faq'"
+              :class="activeTab === 'faq' 
+                ? 'bg-white dark:bg-gray-900 text-emerald-600 dark:text-emerald-400 shadow-md shadow-emerald-950/5 border border-gray-200/60 dark:border-gray-700/60 font-bold scale-[1.02]' 
+                : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white font-medium hover:bg-white/50 dark:hover:bg-gray-700/50'"
+              class="flex items-center gap-2 px-4 sm:px-5 py-2.5 text-xs sm:text-sm rounded-xl transition-all duration-200 whitespace-nowrap shrink-0"
+              id="tab-faq"
+            >
+              <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+              <span>คำถามที่พบบ่อย</span>
+            </button>
+
+            <!-- Reviews Tab -->
+            <button
+              v-if="settingsStore.showProductReview"
+              @click="activeTab = 'reviews'"
+              :class="activeTab === 'reviews' 
+                ? 'bg-white dark:bg-gray-900 text-emerald-600 dark:text-emerald-400 shadow-md shadow-emerald-950/5 border border-gray-200/60 dark:border-gray-700/60 font-bold scale-[1.02]' 
+                : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white font-medium hover:bg-white/50 dark:hover:bg-gray-700/50'"
+              class="flex items-center gap-2 px-4 sm:px-5 py-2.5 text-xs sm:text-sm rounded-xl transition-all duration-200 whitespace-nowrap shrink-0"
+              id="tab-reviews"
+            >
+              <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>
+              </svg>
+              <span>รีวิว</span>
+              <span 
+                :class="activeTab === 'reviews' ? 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300' : 'bg-gray-200/70 dark:bg-gray-700/70 text-gray-600 dark:text-gray-400'"
+                class="px-2 py-0.5 text-xs rounded-full font-bold transition-colors ml-0.5"
+              >
+                {{ product.review_count || 0 }}
+              </span>
+            </button>
+          </div>
         </div>
 
         <div class="mt-8 md:mt-12">
@@ -1103,7 +1187,7 @@ onUnmounted(() => {
                 <div class="flex justify-center gap-0.5 mt-1">
                   <svg v-for="i in 5" :key="i" class="w-4 h-4" :class="i <= Math.round(reviewsSummary.average) ? 'text-amber-400' : 'text-gray-200 dark:text-gray-700'" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
                 </div>
-                <p class="text-xs text-gray-400 mt-1">{{ reviewsSummary.total }} à¸£à¸µà¸§à¸´à¸§</p>
+                <p class="text-xs text-gray-400 mt-1">{{ reviewsSummary.total }} รีวิว</p>
               </div>
               <div class="flex-1 w-full space-y-2">
                 <div v-for="star in [5,4,3,2,1]" :key="star" class="flex items-center gap-2">
@@ -1132,7 +1216,7 @@ onUnmounted(() => {
                     <p class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">{{ review.comment }}</p>
                     <div v-if="review.images && review.images.length > 0" class="flex flex-wrap gap-2 mt-3">
                       <button v-for="(img, idx) in review.images" :key="idx" @click="openGalleryFromReview(review.images, idx)" class="relative w-16 h-16 rounded-xl overflow-hidden border border-gray-100 dark:border-gray-800 hover:opacity-90 transition-opacity">
-                        <img :src="getOptimizedImageUrl(img, 150)" :alt="`à¸£à¸µà¸§à¸´à¸§à¸£à¸¹à¸›à¸ à¸²à¸ž ${idx+1}`" class="absolute inset-0 w-full h-full object-cover" @error="onImageError">
+                        <img :src="getOptimizedImageUrl(img, 150)" :alt="`รีวิวรูปภาพ ${idx+1}`" class="absolute inset-0 w-full h-full object-cover" @error="onImageError">
                       </button>
                     </div>
                   </div>
@@ -1140,16 +1224,16 @@ onUnmounted(() => {
               </div>
 
               <div v-if="hasMoreReviews" class="text-center mt-4">
-                <button @click="loadMoreReviews" :disabled="fetchingReviews" class="px-6 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 text-sm font-bold text-gray-600 dark:text-gray-400 hover:border-emerald-300 hover:text-emerald-600 transition-colors disabled:opacity-50">{{ fetchingReviews ? 'à¸à¸³à¸¥à¸±à¸‡à¹‚à¸«à¸¥à¸”...' : 'à¹‚à¸«à¸¥à¸”à¸£à¸µà¸§à¸´à¸§à¹€à¸žà¸´à¹ˆà¸¡à¹€à¸•à¸´à¸¡' }}</button>
+                <button @click="loadMoreReviews" :disabled="fetchingReviews" class="px-6 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 text-sm font-bold text-gray-600 dark:text-gray-400 hover:border-emerald-300 hover:text-emerald-600 transition-colors disabled:opacity-50">{{ fetchingReviews ? 'กำลังโหลด...' : 'โหลดรีวิวเพิ่มเติม' }}</button>
               </div>
-              <p v-if="reviews.length === 0 && !fetchingReviews" class="text-center text-gray-400 dark:text-gray-600 text-sm py-8">à¸¢à¸±à¸‡à¹„à¸¡à¹ˆà¸¡à¸µà¸£à¸µà¸§à¸´à¸§à¸ªà¸³à¸«à¸£à¸±à¸šà¸ªà¸´à¸™à¸„à¹‰à¸²à¸™à¸µà¹‰</p>
+              <p v-if="reviews.length === 0 && !fetchingReviews" class="text-center text-gray-400 dark:text-gray-600 text-sm py-8">ยังไม่มีรีวิวสำหรับสินค้านี้</p>
             </div>
 
             <div v-if="settingsStore.showProductReview" class="bg-white dark:bg-gray-900/60 rounded-2xl border border-gray-100 dark:border-gray-800 p-6 shadow-sm">
-              <h3 class="font-black text-gray-900 dark:text-white mb-5">à¹€à¸‚à¸µà¸¢à¸™à¸£à¸µà¸§à¸´à¸§</h3>
+              <h3 class="font-black text-gray-900 dark:text-white mb-5">เขียนรีวิว</h3>
               <div v-if="!authStore.isAuthenticated" class="text-center py-4">
-                <p class="text-sm text-gray-500 dark:text-gray-400 mb-3">à¸à¸£à¸¸à¸“à¸²à¹€à¸‚à¹‰à¸²à¸ªà¸¹à¹ˆà¸£à¸°à¸šà¸šà¸à¹ˆà¸­à¸™à¹€à¸‚à¸µà¸¢à¸™à¸£à¸µà¸§à¸´à¸§</p>
-                <router-link to="/login" class="inline-flex items-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-white font-bold px-5 py-2.5 rounded-xl transition-colors">à¹€à¸‚à¹‰à¸²à¸ªà¸¹à¹ˆà¸£à¸°à¸šà¸š</router-link>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mb-3">กรุณาเข้าสู่ระบบก่อนเขียนรีวิว</p>
+                <router-link to="/login" class="inline-flex items-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-white font-bold px-5 py-2.5 rounded-xl transition-colors">เข้าสู่ระบบ</router-link>
               </div>
               <form v-else @submit.prevent="submitReview" class="space-y-4">
                 <div class="flex items-center gap-1">
@@ -1157,7 +1241,7 @@ onUnmounted(() => {
                     <svg class="w-8 h-8 transition-colors" :class="star <= (reviewHoverRating || reviewForm.rating) ? 'text-amber-400' : 'text-gray-200 dark:text-gray-700'" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
                   </button>
                 </div>
-                <textarea v-model="reviewForm.comment" rows="4" placeholder="à¹à¸Šà¸£à¹Œà¸›à¸£à¸°à¸ªà¸šà¸à¸²à¸£à¸“à¹Œà¸‚à¸­à¸‡à¸„à¸¸à¸“..." class="w-full px-4 py-3 text-sm bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-emerald-400 focus:border-transparent transition-all resize-none text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-600" required></textarea>
+                <textarea v-model="reviewForm.comment" rows="4" placeholder="แชร์ประสบการณ์ของคุณ..." class="w-full px-4 py-3 text-sm bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-emerald-400 focus:border-transparent transition-all resize-none text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-600" required></textarea>
                 <div class="flex flex-wrap gap-2 items-center">
                   <div v-for="(img, idx) in reviewForm.images" :key="idx" class="relative w-16 h-16 rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700">
                     <img :src="getOptimizedImageUrl(img, 150)" :alt="`review-upload-${idx}`" class="absolute inset-0 w-full h-full object-cover" @error="onImageError">
@@ -1165,13 +1249,13 @@ onUnmounted(() => {
                   </div>
                   <label v-if="reviewForm.images.length < 3" class="w-16 h-16 border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-xl flex flex-col items-center justify-center cursor-pointer hover:border-emerald-400 transition-colors">
                     <svg class="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                    <span class="text-[10px] text-gray-400 mt-1">à¸£à¸¹à¸›à¸ à¸²à¸ž</span>
+                    <span class="text-[10px] text-gray-400 mt-1">รูปภาพ</span>
                     <input ref="reviewImageInput" type="file" accept="image/*" multiple class="hidden" @change="handleReviewImageUpload" :disabled="uploadingReviewImage">
                   </label>
                 </div>
                 <button type="submit" :disabled="reviewSubmitting || !reviewForm.comment" class="bg-emerald-500 hover:bg-emerald-600 text-white font-black px-6 py-3 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
-                  <span v-if="reviewSubmitting">à¸à¸³à¸¥à¸±à¸‡à¸ªà¹ˆà¸‡...</span>
-                  <span v-else>à¸ªà¹ˆà¸‡à¸£à¸µà¸§à¸´à¸§</span>
+                  <span v-if="reviewSubmitting">กำลังส่ง...</span>
+                  <span v-else>ส่งรีวิว</span>
                 </button>
               </form>
             </div>
@@ -1187,7 +1271,7 @@ onUnmounted(() => {
 
       <!-- Related Products -->
       <div v-if="relatedProducts.length > 0" class="mt-16 md:mt-24">
-        <h2 class="text-2xl font-black text-gray-900 dark:text-white mb-8">à¸ªà¸´à¸™à¸„à¹‰à¸²à¸—à¸µà¹ˆà¹€à¸à¸µà¹ˆà¸¢à¸§à¸‚à¹‰à¸­à¸‡</h2>
+        <h2 class="text-2xl font-black text-gray-900 dark:text-white mb-8">สินค้าที่เกี่ยวข้อง</h2>
         <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
           <ProductCard v-for="rp in relatedProducts" :key="rp.id" :product="rp" />
         </div>
@@ -1202,9 +1286,9 @@ onUnmounted(() => {
       <div class="w-24 h-24 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mb-6">
         <svg class="w-12 h-12 text-gray-400 dark:text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
       </div>
-      <h1 class="text-2xl font-black text-gray-900 dark:text-white mb-3">à¹„à¸¡à¹ˆà¸žà¸šà¸ªà¸´à¸™à¸„à¹‰à¸²</h1>
-      <p class="text-gray-500 dark:text-gray-400 mb-8 max-w-sm">à¸‚à¸­à¸­à¸ à¸±à¸¢ à¹„à¸¡à¹ˆà¸žà¸šà¸ªà¸´à¸™à¸„à¹‰à¸²à¸—à¸µà¹ˆà¸„à¸¸à¸“à¸„à¹‰à¸™à¸«à¸² à¸­à¸²à¸ˆà¸–à¸¹à¸à¸¥à¸šà¸­à¸­à¸à¸«à¸£à¸·à¸­ URL à¹„à¸¡à¹ˆà¸–à¸¹à¸à¸•à¹‰à¸­à¸‡</p>
-      <router-link to="/products" class="bg-emerald-500 hover:bg-emerald-600 text-white font-black px-8 py-3 rounded-2xl transition-colors shadow-lg shadow-emerald-500/25">à¸”à¸¹à¸ªà¸´à¸™à¸„à¹‰à¸²à¸—à¸±à¹‰à¸‡à¸«à¸¡à¸”</router-link>
+      <h1 class="text-2xl font-black text-gray-900 dark:text-white mb-3">ไม่พบสินค้า</h1>
+      <p class="text-gray-500 dark:text-gray-400 mb-8 max-w-sm">ขออภัย ไม่พบสินค้าที่คุณค้นหา อาจถูกลบออกหรือ URL ไม่ถูกต้อง</p>
+      <router-link to="/products" class="bg-emerald-500 hover:bg-emerald-600 text-white font-black px-8 py-3 rounded-2xl transition-colors shadow-lg shadow-emerald-500/25">ดูสินค้าทั้งหมด</router-link>
     </div>
   </div>
 
@@ -1212,7 +1296,7 @@ onUnmounted(() => {
   <teleport to="body">
     <transition name="fade">
       <div v-if="isGalleryZoomed && product" class="fixed inset-0 z-[9999] bg-black/95 backdrop-blur-sm flex items-center justify-center" @click.self="toggleGalleryZoom">
-        <button @click="toggleGalleryZoom" class="absolute top-4 right-4 z-10 w-11 h-11 bg-white/10 hover:bg-white/20 text-white rounded-full flex items-center justify-center backdrop-blur-sm transition-all border border-white/10" aria-label="à¸›à¸´à¸”">
+        <button @click="toggleGalleryZoom" class="absolute top-4 right-4 z-10 w-11 h-11 bg-white/10 hover:bg-white/20 text-white rounded-full flex items-center justify-center backdrop-blur-sm transition-all border border-white/10" aria-label="ปิด">
           <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
         </button>
         <div class="absolute top-4 left-1/2 -translate-x-1/2 bg-white/10 backdrop-blur-sm text-white text-sm font-bold px-4 py-2 rounded-full border border-white/10">{{ activeImageIndex + 1 }} / {{ product.images.length }}</div>
@@ -1220,15 +1304,15 @@ onUnmounted(() => {
           <transition name="fade" mode="out-in">
             <img :key="activeImageIndex" :src="getOptimizedImageUrl(product.images[activeImageIndex], 1200)" :alt="product.image_alt || product.title" class="max-w-full max-h-[85vh] object-contain rounded-lg shadow-2xl" @error="onImageError">
           </transition>
-          <button v-if="product.images.length > 1" @click="setActiveImage((activeImageIndex - 1 + product.images.length) % product.images.length)" class="absolute left-0 -translate-x-14 w-11 h-11 bg-white/10 hover:bg-white/20 text-white rounded-full flex items-center justify-center backdrop-blur-sm transition-all border border-white/10" aria-label="à¸£à¸¹à¸›à¸à¹ˆà¸­à¸™à¸«à¸™à¹‰à¸²">
+          <button v-if="product.images.length > 1" @click="setActiveImage((activeImageIndex - 1 + product.images.length) % product.images.length)" class="absolute left-0 -translate-x-14 w-11 h-11 bg-white/10 hover:bg-white/20 text-white rounded-full flex items-center justify-center backdrop-blur-sm transition-all border border-white/10" aria-label="รูปก่อนหน้า">
             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/></svg>
           </button>
-          <button v-if="product.images.length > 1" @click="setActiveImage((activeImageIndex + 1) % product.images.length)" class="absolute right-0 translate-x-14 w-11 h-11 bg-white/10 hover:bg-white/20 text-white rounded-full flex items-center justify-center backdrop-blur-sm transition-all border border-white/10" aria-label="à¸£à¸¹à¸›à¸–à¸±à¸”à¹„à¸›">
+          <button v-if="product.images.length > 1" @click="setActiveImage((activeImageIndex + 1) % product.images.length)" class="absolute right-0 translate-x-14 w-11 h-11 bg-white/10 hover:bg-white/20 text-white rounded-full flex items-center justify-center backdrop-blur-sm transition-all border border-white/10" aria-label="รูปถัดไป">
             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
           </button>
         </div>
         <div v-if="product.images.length > 1" class="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 max-w-[90vw] overflow-x-auto scrollbar-hide px-4">
-          <button v-for="(img, idx) in product.images" :key="idx" @click="setActiveImage(idx)" :class="idx === activeImageIndex ? 'border-emerald-400 opacity-100 scale-110' : 'border-white/20 opacity-50 hover:opacity-80'" class="w-12 h-12 rounded-lg overflow-hidden border-2 shrink-0 transition-all duration-300 bg-black/40" :aria-label="`à¸”à¸¹à¸£à¸¹à¸›à¸ à¸²à¸žà¸—à¸µà¹ˆ ${idx + 1}`">
+          <button v-for="(img, idx) in product.images" :key="idx" @click="setActiveImage(idx)" :class="idx === activeImageIndex ? 'border-emerald-400 opacity-100 scale-110' : 'border-white/20 opacity-50 hover:opacity-80'" class="w-12 h-12 rounded-lg overflow-hidden border-2 shrink-0 transition-all duration-300 bg-black/40" :aria-label="`ดูรูปภาพที่ ${idx + 1}`">
             <img :src="getOptimizedImageUrl(img, 100)" :alt="`thumbnail-${idx}`" class="w-full h-full object-cover" @error="onImageError">
           </button>
         </div>

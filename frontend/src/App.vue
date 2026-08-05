@@ -287,8 +287,16 @@ onMounted(() => {
     if (!img || img.tagName !== 'IMG') return
 
     const src = img.getAttribute('src') || ''
+    const SVG_PLACEHOLDER = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='400' viewBox='0 0 600 400'%3E%3Crect width='100%25' height='100%25' fill='%23f1f5f9'/%3E%3Cg transform='translate(276,176)' fill='none' stroke='%2394a3b8' stroke-width='2'%3E%3Crect x='3' y='3' width='42' height='42' rx='8'/%3E%3Ccircle cx='17' cy='17' r='5'/%3E%3Cpath d='M41 33l-10-10-18 18'/%3E%3C/g%3E%3Ctext x='50%25' y='240' font-family='sans-serif' font-size='14' font-weight='600' fill='%2364748b' text-anchor='middle'%3EImage Not Found%3E%2Ftext%3E%3C%2Fsvg%3E"
+    
     // Prevent infinite loops
-    if (img.dataset.fallbackAttempted === 'original') return
+    if (img.dataset.fallbackAttempted === 'done') return
+
+    if (img.dataset.fallbackAttempted === 'original') {
+      img.dataset.fallbackAttempted = 'done'
+      img.src = SVG_PLACEHOLDER
+      return
+    }
 
     // Extract relative cache path from src (handles standard cache URLs and resize-api paths)
     let cachePath = ''
@@ -297,16 +305,26 @@ onMounted(() => {
         const urlParams = new URLSearchParams(src.split('?')[1])
         cachePath = urlParams.get('path') || ''
       } catch (e) {
+        img.dataset.fallbackAttempted = 'done'
+        img.src = SVG_PLACEHOLDER
         return
       }
     } else {
-      if (!src.includes('/uploads/') || !src.includes('/cache/')) return
+      if (!src.includes('/uploads/') || !src.includes('/cache/')) {
+        img.dataset.fallbackAttempted = 'done'
+        img.src = SVG_PLACEHOLDER
+        return
+      }
       cachePath = src.startsWith('/') ? src.substring(1) : src
     }
 
     // Parse cache path: uploads[/subfolder]/cache/basename-WIDTH.ext
     const match = cachePath.match(/^uploads\/(?:(.+)\/)?cache\/([^/]+)-(\d+)\.([a-zA-Z0-9]+)$/)
-    if (!match) return
+    if (!match) {
+      img.dataset.fallbackAttempted = 'done'
+      img.src = SVG_PLACEHOLDER
+      return
+    }
 
     if (img.dataset.fallbackAttempted !== 'resize-api') {
       // First fallback: try the on-the-fly resize API
@@ -426,7 +444,7 @@ onUnmounted(() => {
     >
       <div 
         :class="[
-          'max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-10 flex justify-between items-center transition-all duration-300',
+          'max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center transition-all duration-300',
           isScrolled ? 'py-3 lg:py-4' : 'py-5 lg:py-6'
         ]"
       >
@@ -901,7 +919,7 @@ onUnmounted(() => {
         </svg>
       </div>
 
-      <div class="max-w-[90rem] mx-auto px-6 lg:px-12">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <!-- Newsletter Banner: Compact horizontal strip -->
         <div class="relative rounded-3xl overflow-hidden mb-12 border border-orange-100/60 dark:border-white/5 bg-gradient-to-r from-[#FFF8F2] via-white to-[#F0FBF9] dark:from-[#1a0f06] dark:via-[#0f0f0f] dark:to-[#051a16]">
           <!-- Subtle glow blobs -->
@@ -1168,7 +1186,7 @@ onUnmounted(() => {
 
       <!-- Bottom Copyright Bar -->
       <div class="w-full bg-[#964000] py-5 mt-4 relative z-10">
-        <div class="max-w-[90rem] mx-auto px-6 lg:px-12 flex flex-col sm:flex-row justify-between items-center gap-4 text-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row justify-between items-center gap-4 text-white">
           <p class="text-xs md:text-sm font-medium">
             &copy; {{ new Date().getFullYear() }} <span class="font-black">{{ settingsStore.storeName || 'STORAGE HOUSE' }}</span>. สงวนลิขสิทธิ์
           </p>

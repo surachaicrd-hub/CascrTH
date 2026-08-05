@@ -15,6 +15,7 @@ const loading = ref(false)
 const displayDelay = ref(15) // seconds - default
 const cooldownMinutes = ref(60) // minutes - default
 const isAiEnabled = ref(true) // default
+const productCount = ref(4) // default
 const STORAGE_KEY = 'ai_rec_closed_at'
 
 const currentProduct = computed(() => recommendations.value[activeIndex.value] || null)
@@ -43,7 +44,7 @@ const fetchRecommendation = async () => {
 
     loading.value = true
     try {
-        const res = await fetch(`/api/track-interest/smart-recommendation?sessionId=${trackingStore.sessionId}&limit=4`)
+        const res = await fetch(`/api/track-interest/smart-recommendation?sessionId=${trackingStore.sessionId}&limit=${productCount.value}`)
         if (!res.ok) throw new Error('Failed to fetch')
         const data = await res.json()
         
@@ -145,6 +146,9 @@ onMounted(async () => {
                 }
                 if (settingsData.data.ai_widget_cooldown !== undefined) {
                     cooldownMinutes.value = parseInt(settingsData.data.ai_widget_cooldown) || 60
+                }
+                if (settingsData.data.ai_widget_product_count !== undefined) {
+                    productCount.value = parseInt(settingsData.data.ai_widget_product_count) || 4
                 }
             }
         }

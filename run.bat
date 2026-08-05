@@ -1,11 +1,11 @@
 @echo off
-setlocal EnableExtensions
-title StorageShed System
+setlocal EnableExtensions EnableDelayedExpansion
+title StorageShed System Launcher
 
 cd /d "%~dp0"
 
 echo ==================================================
-echo   StorageShed - Starting System
+echo         StorageShed System Launcher
 echo ==================================================
 echo.
 
@@ -30,86 +30,145 @@ if errorlevel 1 (
 REM ========== Auto Install Dependencies ==========
 if not exist "%~dp0frontend\node_modules\" (
     echo [INFO] frontend/node_modules not found. Installing frontend dependencies...
-    cd /d "%~dp0frontend"
+    pushd "%~dp0frontend"
     call npm.cmd install
+    popd
     if errorlevel 1 (
         echo [ERROR] Frontend npm install failed.
         pause
         exit /b 1
     )
-    cd /d "%~dp0"
 )
 
 if not exist "%~dp0api\node_modules\" (
     echo [INFO] api/node_modules not found. Installing API dependencies...
-    cd /d "%~dp0api"
+    pushd "%~dp0api"
     call npm.cmd install
+    popd
     if errorlevel 1 (
         echo [ERROR] API npm install failed.
         pause
         exit /b 1
     )
-    cd /d "%~dp0"
 )
 
-echo [0/3] Cleaning up ports 8080 and 8000...
-FOR /F "tokens=5" %%T IN ('netstat -a -n -o 2^>nul ^| findstr ":8080 "') DO (
-    IF NOT "%%T"=="0" IF NOT "%%T"=="" taskkill /PID %%T /F >nul 2>&1
-)
-FOR /F "tokens=5" %%T IN ('netstat -a -n -o 2^>nul ^| findstr ":8000 "') DO (
-    IF NOT "%%T"=="0" IF NOT "%%T"=="" taskkill /PID %%T /F >nul 2>&1
+REM ========== Select Mode ==========
+echo Please select run mode:
+echo   [1] Development Mode (Fast / Hot-Reloading) - Recommended
+echo   [2] Production Mode  (Build Frontend + Run API)
+echo   [3] Quick Start      (Skip Build, Run API only)
+echo.
+choice /C 123 /N /T 10 /D 1 /M "Select option [1-3] (Default = 1 in 10s): "
+set RUN_MODE=%ERRORLEVEL%
+echo.
+
+REM ========== Clean Ports 8080 & 8000 ==========
+echo [1/3] Cleaning up ports 8080 and 8000...
+for /f "tokens=5" %%T in ('netstat -a -n -o 2^>nul ^| findstr /C:":8080 " /C:":8000 "') do (
+    if not "%%T"=="0" if not "%%T"=="" taskkill /PID %%T /F >nul 2>&1
 )
 echo Done.
 echo.
 
-echo [1/3] Checking MySQL...
+REM ========== Database Check ==========
+echo [2/3] Checking MySQL Database...
 tasklist /FI "IMAGENAME eq mysqld.exe" 2>NUL | find /I "mysqld.exe" >NUL
 if errorlevel 1 (
-    if exist "C:\laragon\bin\mysql\mysql-8.0.30-winx64\bin\mysqld.exe" (
-        echo Starting MySQL...
-        start "MySQL" cmd /k "C:\laragon\bin\mysql\mysql-8.0.30-winx64\bin\mysqld.exe --console"
-        timeout /t 3 >nul
+    net start MySQL >nul 2>&1
+    net start MySQL80 >nul 2>&1
+    net start LaragonMySQL >nul 2>&1
+    tasklist /FI "IMAGENAME eq mysqld.exe" 2>NUL | find /I "mysqld.exe" >NUL
+    if errorlevel 1 (
+        set "MYSQL_EXE="
+        if exist "C:\laragon\bin\mysql\" (
+            for /d %%D in ("C:\laragon\bin\mysql\*") do (
+                if exist "%%D\bin\mysqld.exe" set "MYSQL_EXE=%%D\bin\mysqld.exe"
+            )
+        )
+        if not defined MYSQL_EXE if exist "C:\xampp\mysql\bin\mysqld.exe" set "MYSQL_EXE=C:\xampp\mysql\bin\mysqld.exe"
+        
+        if defined MYSQL_EXE (
+            echo Starting MySQL console from: !MYSQL_EXE!
+            start "StorageShed MySQL Server" cmd /k ""!MYSQL_EXE!" --console"
+            timeout /t 3 >nul
+        ) else (
+            echo [WARNING] MySQL is not running and MySQL path was not auto-detected.
+            echo Please make sure your MySQL database server is running on port 3306.
+            echo.
+        )
     ) else (
-        echo [WARNING] MySQL is not running and Laragon MySQL was not found.
-        echo Please make sure your MySQL database server is running on port 3306!
-        echo.
+        echo MySQL service started successfully.
     )
 ) else (
-    echo MySQL already running.
+    echo MySQL is already running.
 )
 echo.
 
-echo [2/3] Building Frontend - please wait 1-3 minutes...
-echo.
-cd /d "%~dp0frontend"
-call npm.cmd run build
-set BUILD_CODE=%ERRORLEVEL%
-cd /d "%~dp0"
+REM ========== Execute Selected Mode ==========
+if "%RUN_MODE%"=="1" (
+    echo [3/3] Starting System in Development Mode...
+    echo - Backend API:  http://localhost:8080
+    echo - Frontend Dev: http://localhost:8000
+    echo.
+    pushd "%~dp0api"
+    start "StorageShed Backend API (Port 8080)" cmd /k "node index.js"
+    popd
+    timeout /t 2 >nul
 
-if %BUILD_CODE% NEQ 0 (
-    echo.
-    echo *** BUILD FAILED - see errors above ***
-    echo.
-    pause
-    exit /b 1
+    pushd "%~dp0frontend"
+    start "StorageShed Frontend Dev (Port 8000)" cmd /k "npm.cmd run dev"
+    popd
+    timeout /t 2 >nul
+
+    start http://localhost:8000
+    goto RUNNING_COMPLETE
 )
-echo.
-echo Build OK! Deploying...
 
-if exist "%~dp0api\public\assets" rmdir /s /q "%~dp0api\public\assets" >nul 2>&1
-robocopy "%~dp0frontend\dist" "%~dp0api\public" /E /XD uploads /NP /NFL /NDL /NJH /NJS >nul 2>&1
-echo Deploy OK!
-echo.
+if "%RUN_MODE%"=="2" (
+    echo [3/3] Building Frontend for Production...
+    pushd "%~dp0frontend"
+    call npm.cmd run build
+    set BUILD_CODE=!ERRORLEVEL!
+    popd
 
-echo [3/3] Starting Backend API...
-start "StorageShed API" cmd /k "cd /d "%~dp0api" && node index.js"
-timeout /t 2 >nul
+    if !BUILD_CODE! NEQ 0 (
+        echo.
+        echo [ERROR] Frontend build failed. See error messages above.
+        echo.
+        pause
+        exit /b 1
+    )
 
+    echo.
+    echo Syncing build to API public directory...
+    if not exist "%~dp0api\public\" mkdir "%~dp0api\public\"
+    robocopy "%~dp0frontend\dist" "%~dp0api\public" /MIR /XD uploads /NP /NFL /NDL /NJH /NJS >nul 2>&1
+
+    echo Starting Backend API...
+    pushd "%~dp0api"
+    start "StorageShed Backend API (Port 8080)" cmd /k "node index.js"
+    popd
+    timeout /t 2 >nul
+
+    start http://localhost:8080
+    goto RUNNING_COMPLETE
+)
+
+if "%RUN_MODE%"=="3" (
+    echo [3/3] Quick Starting System (Using Existing Build)...
+    pushd "%~dp0api"
+    start "StorageShed Backend API (Port 8080)" cmd /k "node index.js"
+    popd
+    timeout /t 2 >nul
+
+    start http://localhost:8080
+    goto RUNNING_COMPLETE
+)
+
+:RUNNING_COMPLETE
 echo.
 echo ==================================================
-echo   RUNNING
-echo.
-echo   Open browser: http://localhost:8080
+echo   System launched successfully!
 echo ==================================================
 echo.
 pause

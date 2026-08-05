@@ -21,11 +21,27 @@ const upload = multer({
     limits: { fileSize: 5 * 1024 * 1024 } // 5MB limit
 });
 
+// Helper: SVG placeholder generator for missing images
+function getMissingImageSvg(width = 600, height = 400, text = 'Image Not Found') {
+    const w = width || 600;
+    const h = height || 400;
+    return `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">
+      <rect width="100%" height="100%" fill="#f1f5f9"/>
+      <g transform="translate(${Math.max(10, w/2 - 24)}, ${Math.max(10, h/2 - 24)})" fill="none" stroke="#94a3b8" stroke-width="2">
+        <rect x="3" y="3" width="42" height="42" rx="8"/>
+        <circle cx="17" cy="17" r="5"/>
+        <path d="M41 33l-10-10-18 18"/>
+      </g>
+      <text x="50%" y="${Math.max(30, h/2 + 28)}" font-family="system-ui, sans-serif" font-size="14" font-weight="600" fill="#64748b" text-anchor="middle">${text}</text>
+    </svg>`;
+}
+
 // On-the-fly resizing endpoint for fallback requests
 router.get('/resize', async (req, res) => {
     const { path: pathParam } = req.query;
     if (!pathParam || typeof pathParam !== 'string') {
-        return res.status(400).json({ success: false, error: 'Path parameter is required' });
+        res.setHeader('Content-Type', 'image/svg+xml');
+        return res.status(200).send(getMissingImageSvg(600, 400));
     }
 
     try {
@@ -33,12 +49,13 @@ router.get('/resize', async (req, res) => {
         const match = pathParam.match(regex);
         
         if (!match) {
-            return res.status(400).json({ success: false, error: 'Invalid path format' });
+            res.setHeader('Content-Type', 'image/svg+xml');
+            return res.status(200).send(getMissingImageSvg(600, 400));
         }
 
         const subfolder = match[1] || ''; // e.g. 'categories' or ''
         const baseName = match[2]; // e.g. 'image-xxx'
-        const targetWidth = parseInt(match[3]);
+        const targetWidth = parseInt(match[3]) || 600;
         const ext = match[4]; // e.g. 'webp'
 
         const originalFilename = `${baseName}.${ext}`;
@@ -48,9 +65,11 @@ router.get('/resize', async (req, res) => {
         const cachedFileDir = path.join(uploadDir, subfolder, 'cache');
         const cachedFilePath = path.join(cachedFileDir, cachedFilename);
 
-        // If the original file does not exist, return 404
+        // If the original file does not exist, serve SVG placeholder instead of 404
         if (!fs.existsSync(originalFilePath)) {
-            return res.status(404).send('Original image not found');
+            res.setHeader('Content-Type', 'image/svg+xml');
+            res.setHeader('Cache-Control', 'public, max-age=86400');
+            return res.status(200).send(getMissingImageSvg(targetWidth, Math.round(targetWidth * 0.66)));
         }
 
         // Set caching headers for the response
@@ -74,7 +93,9 @@ router.get('/resize', async (req, res) => {
         return res.sendFile(cachedFilePath);
     } catch (err) {
         console.error('On-the-fly resizing error:', err);
-        return res.status(500).send('Resizing failed');
+        res.setHeader('Content-Type', 'image/svg+xml');
+        res.setHeader('Cache-Control', 'public, max-age=86400');
+        return res.status(200).send(getMissingImageSvg(600, 400));
     }
 });
 

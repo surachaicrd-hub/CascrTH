@@ -21,28 +21,28 @@ const getIcon = (type) => {
 const getBgColor = (type) => {
   switch (type) {
     case 'success':
-      return 'bg-emerald-50 text-emerald-800 border-emerald-200'
+      return 'bg-emerald-50 text-emerald-950 border-emerald-500 border-2'
     case 'error':
-      return 'bg-red-50 text-red-800 border-red-200'
+      return 'bg-red-50 text-red-950 border-red-500 border-2'
     case 'warning':
-      return 'bg-amber-50 text-amber-800 border-amber-200'
+      return 'bg-amber-50 text-amber-950 border-amber-500 border-2'
     case 'info':
     default:
-      return 'bg-blue-50 text-blue-800 border-blue-200'
+      return 'bg-blue-50 text-blue-950 border-blue-500 border-2'
   }
 }
 
 const getIconColor = (type) => {
   switch (type) {
     case 'success':
-      return 'text-emerald-500'
+      return 'text-emerald-600'
     case 'error':
-      return 'text-red-500'
+      return 'text-red-600'
     case 'warning':
-      return 'text-amber-500'
+      return 'text-amber-600'
     case 'info':
     default:
-      return 'text-blue-500'
+      return 'text-blue-600'
   }
 }
 </script>
@@ -60,13 +60,13 @@ const getIconColor = (type) => {
       <div 
         v-for="toast in toasts" 
         :key="toast.id" 
-        :class="['pointer-events-auto w-full rounded-2xl shadow-lg border p-4 flex items-start gap-3 backdrop-blur-xl', getBgColor(toast.type)]"
+        :class="['pointer-events-auto w-full rounded-2xl shadow-xl border p-4 flex items-start gap-3 backdrop-blur-xl transition-all duration-200', getBgColor(toast.type)]"
       >
         <svg :class="['w-6 h-6 shrink-0', getIconColor(toast.type)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="getIcon(toast.type)" />
         </svg>
         <div class="flex-1 mt-0.5">
-          <p class="text-sm font-medium">{{ toast.message }}</p>
+          <p class="text-sm font-bold leading-snug">{{ toast.message }}</p>
         </div>
         <button @click="removeToast(toast.id)" class="shrink-0 p-1 rounded-lg hover:bg-black/5 transition-colors focus:outline-none">
           <svg class="w-4 h-4 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor">

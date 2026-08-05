@@ -177,9 +177,11 @@ if (!fs.existsSync(cacheDir)) {
 }
 
 // On-demand cache route: generate cached thumbnails if they don't exist yet
-app.get('/uploads/cache/:filename', async (req, res, next) => {
-    const { filename } = req.params;
-    const cachedFilePath = path.join(cacheDir, filename);
+app.get(['/uploads/cache/:filename', '/uploads/:subfolder/cache/:filename'], async (req, res, next) => {
+    const { filename, subfolder } = req.params;
+    const currentUploadsDir = subfolder ? path.join(uploadsDir, subfolder) : uploadsDir;
+    const currentCacheDir = path.join(currentUploadsDir, 'cache');
+    const cachedFilePath = path.join(currentCacheDir, filename);
 
     // If cached file already exists, let static middleware serve it
     if (fs.existsSync(cachedFilePath)) {
@@ -198,16 +200,20 @@ app.get('/uploads/cache/:filename', async (req, res, next) => {
     const originalBase = match[1];
     const targetWidth = parseInt(match[2]);
     const originalFilename = `${originalBase}${ext}`;
-    const originalFilePath = path.join(uploadsDir, originalFilename);
+    const originalFilePath = path.join(currentUploadsDir, originalFilename);
 
     if (!fs.existsSync(originalFilePath) || isNaN(targetWidth) || targetWidth <= 0) {
-        return next();
+        res.setHeader('Content-Type', 'image/svg+xml');
+        res.setHeader('Cache-Control', 'public, max-age=86400');
+        const w = targetWidth || 600;
+        const h = Math.round(w * 0.66);
+        return res.status(200).send(`<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}"><rect width="100%" height="100%" fill="#f1f5f9"/><g transform="translate(${Math.max(10, w/2 - 24)}, ${Math.max(10, h/2 - 24)})" fill="none" stroke="#94a3b8" stroke-width="2"><rect x="3" y="3" width="42" height="42" rx="8"/><circle cx="17" cy="17" r="5"/><path d="M41 33l-10-10-18 18"/></g><text x="50%" y="${Math.max(30, h/2 + 28)}" font-family="system-ui, sans-serif" font-size="14" font-weight="600" fill="#64748b" text-anchor="middle">Image Not Found</text></svg>`);
     }
 
     try {
         // Ensure cache directory exists
-        if (!fs.existsSync(cacheDir)) {
-            fs.mkdirSync(cacheDir, { recursive: true });
+        if (!fs.existsSync(currentCacheDir)) {
+            fs.mkdirSync(currentCacheDir, { recursive: true });
         }
 
         await sharp(originalFilePath)
@@ -218,8 +224,11 @@ app.get('/uploads/cache/:filename', async (req, res, next) => {
         return res.sendFile(cachedFilePath);
     } catch (err) {
         console.error('On-demand cache generation error:', err);
-        // Fallback: redirect to original file
-        return res.redirect(`/uploads/${originalFilename}`);
+        if (fs.existsSync(originalFilePath)) {
+            return res.redirect(`/uploads/${subfolder ? subfolder + '/' : ''}${originalFilename}`);
+        }
+        res.setHeader('Content-Type', 'image/svg+xml');
+        return res.status(200).send(`<svg xmlns="http://www.w3.org/2000/svg" width="600" height="400" viewBox="0 0 600 400"><rect width="100%" height="100%" fill="#f1f5f9"/><text x="50%" y="50%" font-family="sans-serif" font-size="14" fill="#64748b" text-anchor="middle">Image Not Found</text></svg>`);
     }
 });
 
