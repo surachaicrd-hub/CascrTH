@@ -231,7 +231,7 @@ onMounted(() => {
                   </tr>
                   <tr v-for="(prod, i) in stats.topProducts || []" :key="i" class="border-b border-gray-50 last:border-0 hover:bg-gray-50 transition-colors">
                     <td class="px-6 py-4">
-                      <div class="font-bold text-indigo-900 mb-0.5 truncate max-w-sm" :title="prod.page_title">{{ prod.page_title ? prod.page_title.replace(' - Morespace','') : 'สินค้าที่ไม่ทราบชื่อ' }}</div>
+                      <div class="font-bold text-indigo-900 mb-0.5 truncate max-w-sm" :title="prod.page_title">{{ prod.page_title ? prod.page_title.replace(/\s*-\s*[^-]+$/, '') : 'สินค้าที่ไม่ทราบชื่อ' }}</div>
                       <div class="text-[11px] text-gray-500 truncate max-w-sm font-mono bg-gray-100 inline-block px-1.5 py-0.5 rounded">{{ prod.page_path }}</div>
                     </td>
                     <td class="px-6 py-4 text-right font-medium text-gray-900">{{ parseInt(prod.views).toLocaleString() }}</td>

@@ -98,8 +98,14 @@ export const useTrackingStore = defineStore('tracking', {
                 timestamp: new Date().toISOString()
             }
             
-            this.events.push(event) // Keep local history if needed
+            this.events.push(event) // Keep local history up to 50 items
+            if (this.events.length > 50) {
+                this.events = this.events.slice(-50)
+            }
             this.queue.push(event) // Push to send queue
+            if (this.queue.length > 50) {
+                this.queue = this.queue.slice(-50)
+            }
             
             // Flush immediately if tracking critical events like purchase
             if (event.type === 'purchase' || event.type === 'begin_checkout') {
@@ -123,9 +129,9 @@ export const useTrackingStore = defineStore('tracking', {
                     keepalive: isUnload
                 }).catch(err => {
                     console.error('Failed to flush tracking queue', err)
-                    // If not unloading, put events back in queue to try again
+                    // If not unloading, put events back in queue to try again (max 50)
                     if (!isUnload) {
-                        this.queue = [...currentQueue, ...this.queue]
+                        this.queue = [...currentQueue, ...this.queue].slice(0, 50)
                     }
                 })
             }

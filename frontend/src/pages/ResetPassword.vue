@@ -260,7 +260,7 @@
                 <!-- Label text -->
                 <div class="leading-tight">
                   <p class="text-sm font-bold text-gray-700 dark:text-gray-300">ฉันไม่ใช่โปรแกรมอัตโนมัติ</p>
-                  <p class="text-[10px] text-gray-455 dark:text-gray-500 mt-0.5">การยืนยันความปลอดภัยโดย Morespace</p>
+                  <p class="text-[10px] text-gray-455 dark:text-gray-500 mt-0.5">การยืนยันความปลอดภัยโดยระบบ</p>
                 </div>
               </div>
               
@@ -314,7 +314,7 @@
           
           <div class="space-y-2">
             <h2 class="text-2xl font-black text-gray-900 dark:text-white">ตั้งรหัสผ่านสำเร็จ!</h2>
-            <p class="text-gray-550 dark:text-gray-400 text-sm leading-relaxed max-w-xs mx-auto">คุณสามารถใช้รหัสผ่านใหม่นี้ในการเข้าสู่ระบบ และรับบริการต่างๆ บนระบบ Morespace ได้ทันที</p>
+            <p class="text-gray-550 dark:text-gray-400 text-sm leading-relaxed max-w-xs mx-auto">คุณสามารถใช้รหัสผ่านใหม่นี้ในการเข้าสู่ระบบ และรับบริการต่างๆ บนระบบได้ทันที</p>
           </div>
 
           <router-link 

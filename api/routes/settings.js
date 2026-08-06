@@ -30,6 +30,8 @@ router.get('/public', async (req, res) => {
             'home_category_showcase', 'show_product_rating', 'show_product_review',
             'home_highlight_categories', 'home_show_highlight_categories',
             'home_section_titles', 'home_how_it_works', 'home_faq', 'home_projects_cta',
+            'home_slides', 'home_hero_feature_badges', 'home_stats', 'home_features_items',
+            'home_testimonials', 'home_partners', 'home_corporate_reviews', 'home_affiliates',
             'maintenance_mode_enabled', 'maintenance_message',
             'holiday_mode_enabled', 'holiday_message', 'holiday_name',
             'holiday_start_date', 'holiday_end_date', 'holiday_image',
@@ -43,6 +45,21 @@ router.get('/public', async (req, res) => {
             'home_why_choose_us_title', 'home_why_choose_us_bullets',
             'home_promo_tag', 'home_promo_title', 'home_promo_desc', 
             'home_promo_btn_text', 'home_promo_btn_link', 'home_promo_image',
+            'about_hero_title', 'about_hero_subtitle', 'about_hero_desc', 'about_hero_bg',
+            'about_main_img', 'about_quote_title', 'about_quote_text',
+            'about_core_1_title', 'about_core_1_desc', 'about_core_1_img',
+            'about_core_2_title', 'about_core_2_desc', 'about_core_2_img',
+            'about_core_3_title', 'about_core_3_desc', 'about_core_3_img',
+            'about_core_4_title', 'about_core_4_desc', 'about_core_4_img',
+            'about_vision_title', 'about_vision_desc', 'about_vision_img',
+            'about_mission_title', 'about_mission_desc',
+            'about_stat_1_val', 'about_stat_1_label',
+            'about_stat_2_val', 'about_stat_2_label',
+            'about_stat_3_val', 'about_stat_3_label',
+            'about_stat_4_val', 'about_stat_4_label',
+            'about_cta_title', 'about_cta_desc', 'about_content_rich',
+            'services_hero_title', 'services_hero_subtitle', 'services_hero_desc', 'services_hero_bg',
+            'services_items', 'services_stats', 'services_cta_title', 'services_cta_desc', 'services_content_rich',
             'footer_newsletter_title', 'footer_newsletter_subtitle', 'footer_newsletter_privacy',
             'footer_trust_badges', 'footer_distributor_label', 'footer_distributor_url',
             'footer_sitemap_label', 'footer_sitemap_url',
@@ -186,12 +203,18 @@ router.post('/test-notification', verifyAdmin, async (req, res) => {
     try {
         const { type, token, chatId, emails } = req.body;
 
-        let title = '🧪 ข้อความทดสอบจากระบบ Morespace';
+        let storeName = 'STORAGE HOUSE';
+        try {
+            const [sRows] = await db.query("SELECT setting_value FROM settings WHERE setting_key = 'store_name'");
+            if (sRows.length > 0 && sRows[0].setting_value) storeName = sRows[0].setting_value;
+        } catch (e) {}
+
+        let title = `🧪 ข้อความทดสอบจากระบบ ${storeName}`;
         let text = 'นี่คือข้อความทดสอบเพื่อยืนยันว่าการตั้งค่าการแจ้งเตือนของคุณทำงานได้อย่างถูกต้องแล้ว 🎉';
         let htmlText = `
             <h2>${title}</h2>
             <p>${text}</p>
-            <p style="color: #666; font-size: 12px; margin-top: 20px;">ส่งจากระบบจัดการหลังบ้าน Morespace</p>
+            <p style="color: #666; font-size: 12px; margin-top: 20px;">ส่งจากระบบจัดการหลังบ้าน ${storeName}</p>
         `;
 
         if (type === 'telegram') {
@@ -296,15 +319,21 @@ router.post('/test-smtp', verifyAdmin, async (req, res) => {
             secure: secure === true || secure === 'true',
             auth: { user, pass }
         });
-        const fromName = from || 'Morespace'
+        let storeName = 'STORAGE HOUSE';
+        try {
+            const [sRows] = await db.query("SELECT setting_value FROM settings WHERE setting_key = 'store_name'");
+            if (sRows.length > 0 && sRows[0].setting_value) storeName = sRows[0].setting_value;
+        } catch (e) {}
+
+        const fromName = from || storeName;
         await transporter.sendMail({
             from: `"${fromName}" <${user}>`,
             to: to || user,
-            subject: '✅ ทดสอบ SMTP จากระบบ Morespace Admin',
+            subject: `✅ ทดสอบ SMTP จากระบบ ${storeName} Admin`,
             html: `
                 <div style="font-family:sans-serif;max-width:500px;margin:0 auto;padding:20px">
                     <h2 style="color:#059669">✅ การตั้งค่า SMTP ทำงานได้ปกติ!</h2>
-                    <p>Email นี้ถูกส่งจากระบบจัดการหลังบ้าน Morespace เพื่อยืนยันว่าการตั้งค่า SMTP ของคุณถูกต้อง</p>
+                    <p>Email นี้ถูกส่งจากระบบจัดการหลังบ้าน ${storeName} เพื่อยืนยันว่าการตั้งค่า SMTP ของคุณถูกต้อง</p>
                     <hr style="border:none;border-top:1px solid #e5e7eb;margin:20px 0">
                     <p style="color:#6b7280;font-size:12px">SMTP Host: <code>${host}:${port}</code> | Secure: ${secure}</p>
                 </div>

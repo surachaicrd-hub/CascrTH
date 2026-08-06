@@ -113,7 +113,7 @@ export function useAnalytics() {
     }
 
     const sendHeartbeat = (isUnload = false) => {
-        if (!hasConsent()) return
+        if (!hasConsent() || (typeof navigator !== 'undefined' && !navigator.onLine)) return
         
         const payload = JSON.stringify({
             sessionId,

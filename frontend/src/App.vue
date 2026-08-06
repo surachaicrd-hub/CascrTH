@@ -801,11 +801,9 @@ onUnmounted(() => {
     <!-- Page Content -->
     <main class="flex-grow min-h-screen relative z-10 flex flex-col">
       <router-view v-slot="{ Component, route }">
-        <transition name="fade" mode="out-in">
-          <div :key="route.path" class="flex-grow flex flex-col w-full">
-            <component :is="Component" />
-          </div>
-        </transition>
+        <div :key="route.path" class="flex-grow flex flex-col w-full">
+          <component :is="Component" />
+        </div>
       </router-view>
     </main>
 
@@ -1139,13 +1137,14 @@ onUnmounted(() => {
               </div>
 
               <!-- LINE ID Label -->
-              <h4 class="text-[17px] font-black text-gray-900 dark:text-white mb-5 select-all">
-                {{ contactLines.length > 0 ? '@' + contactLines[0].value.replace(/^@/, '') : '@morespace_official' }}
+              <h4 v-if="contactLines.length > 0" class="text-[17px] font-black text-gray-900 dark:text-white mb-5 select-all">
+                {{ '@' + contactLines[0].value.replace(/^@/, '') }}
               </h4>
 
               <!-- Add Friend Button -->
               <a 
-                :href="contactLines.length > 0 ? (contactLines[0].url || 'https://line.me/ti/p/~' + contactLines[0].value.replace(/^@/, '')) : 'https://line.me/ti/p/~morespace_official'" 
+                v-if="contactLines.length > 0"
+                :href="contactLines[0].url || 'https://line.me/ti/p/~' + contactLines[0].value.replace(/^@/, '')" 
                 target="_blank" 
                 class="w-full py-2.5 px-4 border-2 border-[#f07100] text-[#f07100] hover:bg-[#f07100] hover:text-white text-sm font-black rounded-full transition-all duration-300 flex items-center justify-center gap-2 group-hover:scale-105"
               >

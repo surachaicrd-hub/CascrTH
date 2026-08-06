@@ -100,7 +100,7 @@ onMounted(() => {
     <div class="mb-8">
       <h1 class="text-2xl font-black text-gray-900 tracking-tight">จัดการข้อมูลติดต่อ</h1>
       <p class="text-sm text-gray-500 mt-1 flex items-center gap-1">แก้ไขข้อมูลที่แสดงในหน้า "ติดต่อเรา" ของเว็บไซต์
-        <InfoTooltip title="การจัดการข้อมูลติดต่อ" description="ข้อมูลนี้ถูกนำไปแสดงผลที่หน้าจอติดต่อเราของลูกค้า<ul><li><strong>เบอร์โทร/อีเมล/LINE:</strong> สามารถกด 'เพิ่ม' เพื่อใส่ข้อมูลหลายรายการได้</li><li><strong>Google Maps URL:</strong> ต้องนำ URL จากช่อง 'ฝังแผนที่ (Embed map)' มาใส่เท่านั้น</li></ul>" />
+        <InfoTooltip title="การจัดการข้อมูลติดต่อ" description="ข้อมูลนี้ถูกนำไปแสดงผลที่หน้าจอติดต่อเราของลูกค้า" />
       </p>
     </div>
 
@@ -179,7 +179,7 @@ onMounted(() => {
                 </div>
                 <div>
                   <label class="block text-xs font-semibold text-gray-500 mb-1">อีเมล</label>
-                  <input v-model="email.value" type="text" placeholder="เช่น surachai@more.co.th" class="w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors text-sm">
+                  <input v-model="email.value" type="text" placeholder="เช่น sale@domain.com" class="w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors text-sm">
                 </div>
               </div>
               <button type="button" @click="removeEmail(i)" :disabled="emails.length <= 1" class="mt-6 p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed" title="ลบรายการ">
@@ -206,11 +206,11 @@ onMounted(() => {
               <div class="flex-1 grid grid-cols-1 md:grid-cols-3 gap-3">
                 <div>
                   <label class="block text-xs font-semibold text-gray-500 mb-1">ชื่อ</label>
-                  <input v-model="line.name" type="text" placeholder="เช่น บริษัท / คุณตั้ม" class="w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors text-sm">
+                  <input v-model="line.name" type="text" placeholder="เช่น บริษัท / แอดมิน" class="w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors text-sm">
                 </div>
                 <div>
                   <label class="block text-xs font-semibold text-gray-500 mb-1">LINE ID</label>
-                  <input v-model="line.value" type="text" placeholder="เช่น @morespace" class="w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors text-sm">
+                  <input v-model="line.value" type="text" placeholder="เช่น @yourlineid" class="w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors text-sm">
                 </div>
                 <div>
                   <label class="block text-xs font-semibold text-gray-500 mb-1">URL เพิ่มเพื่อน</label>
@@ -239,15 +239,15 @@ onMounted(() => {
           <div class="p-6 space-y-5">
             <div>
               <label class="block text-xs font-semibold text-gray-500 mb-1">Facebook Page URL</label>
-              <input v-model="form.contact_facebook_url" type="text" placeholder="เช่น https://www.facebook.com/morespacethailand" class="w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors text-sm">
+              <input v-model="form.contact_facebook_url" type="text" placeholder="เช่น https://www.facebook.com/yourpage" class="w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors text-sm">
             </div>
             <div>
               <label class="block text-xs font-semibold text-gray-500 mb-1">TikTok URL</label>
-              <input v-model="form.contact_tiktok_url" type="text" placeholder="เช่น https://www.tiktok.com/@morespace" class="w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors text-sm">
+              <input v-model="form.contact_tiktok_url" type="text" placeholder="เช่น https://www.tiktok.com/@youraccount" class="w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors text-sm">
             </div>
             <div>
               <label class="block text-xs font-semibold text-gray-500 mb-1">YouTube URL</label>
-              <input v-model="form.contact_youtube_url" type="text" placeholder="เช่น https://www.youtube.com/@morespace" class="w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors text-sm">
+              <input v-model="form.contact_youtube_url" type="text" placeholder="เช่น https://www.youtube.com/@yourchannel" class="w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors text-sm">
             </div>
           </div>
         </div>

@@ -14,8 +14,9 @@ const FAILED_KEY_COOLDOWN = 60000; // 1 minute cooldown for failed keys
 // Hardcoded fallback models if database settings are empty or fail to load
 const BACKUP_MODELS = [
     { id: 'gemini-2.5-flash', name: 'Gemini 2.5 Flash', description: 'เสถียร คุ้มค่า แนะนำ', tier: 'recommended' },
-    { id: 'gemini-2.5-pro', name: 'Gemini 2.5 Pro', description: 'ขั้นสูง เหมาะงานซับซ้อน', tier: 'premium' },
-    { id: 'gemini-3-flash-preview', name: 'Gemini 3 Flash (Preview)', description: 'พรีวิวรุ่นที่ 3', tier: 'stable' },
+    { id: 'gemini-2.0-flash', name: 'Gemini 2.0 Flash', description: 'ความเร็วสูง', tier: 'recommended' },
+    { id: 'gemini-1.5-flash', name: 'Gemini 1.5 Flash', description: 'โมเดลหลัก', tier: 'stable' },
+    { id: 'gemini-1.5-pro', name: 'Gemini 1.5 Pro', description: 'ขั้นสูง เหมาะงานซับซ้อน', tier: 'premium' },
 ];
 
 /**
@@ -41,12 +42,8 @@ async function getAvailableModels() {
  */
 async function getDefaultModels() {
     const models = await getAvailableModels();
-    if (models.length >= 2) {
-        return [models[0].id, models[1].id];
-    } else if (models.length === 1) {
-        return [models[0].id];
-    }
-    return ['gemini-2.5-flash', 'gemini-2.5-pro'];
+    const ids = models.map(m => m.id);
+    return ids.length > 0 ? ids : ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash'];
 }
 
 /**

@@ -11,10 +11,10 @@
     <div class="container mx-auto px-4 sm:px-6 lg:px-8 max-w-6xl relative z-10">
       
       <!-- Premium Text Header -->
-      <div class="text-center max-w-4xl mx-auto mb-16 md:mb-24 mt-8 md:mt-12" data-aos="zoom-y-out">
+      <div class="text-center max-w-4xl mx-auto mb-16 md:mb-24 mt-8 md:mt-12">
         <div class="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-white/60 dark:bg-white/5 border border-gray-200/80 dark:border-white/10 backdrop-blur-md mb-8 shadow-sm hover:-translate-y-0.5 transition-transform">
           <span class="w-2 h-2 rounded-full bg-emerald-500 animate-[pulse_2s_ease-in-out_infinite]"></span>
-          <span class="text-xs font-bold text-gray-600 dark:text-gray-300 tracking-widest uppercase">Morespace AI Consultant</span>
+          <span class="text-xs font-bold text-gray-600 dark:text-gray-300 tracking-widest uppercase">AI Space Consultant</span>
         </div>
         <h1 class="text-5xl md:text-7xl lg:text-[5.5rem] font-black text-gray-900 dark:text-white tracking-tight leading-[1.1] mb-8">
           เช็คความพอดี<br class="md:hidden" />
@@ -29,7 +29,7 @@
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
         
         <!-- Left Column: The Form -->
-        <div class="lg:col-span-4 space-y-6" data-aos="fade-right" data-aos-delay="100">
+        <div class="lg:col-span-4 space-y-6">
           
           <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] border border-gray-100 dark:border-gray-700/50 p-6 sm:p-8 flex flex-col relative transition-all duration-300 hover:shadow-[0_8px_30px_rgb(16,185,129,0.1)]">
             
@@ -282,7 +282,7 @@
         </div>
 
         <!-- Right Column: Results Area -->
-        <div class="lg:col-span-8 h-full" data-aos="fade-left" data-aos-delay="200">
+        <div class="lg:col-span-8 h-full">
           
           <!-- Empty State -->
           <div v-if="!hasCalculated" class="bg-transparent border-dashed border-2 border-gray-200 dark:border-gray-800 rounded-3xl h-full min-h-[400px] flex flex-col items-center justify-center text-center p-12 transition-colors hover:border-emerald-300 dark:hover:border-emerald-700/50 group">

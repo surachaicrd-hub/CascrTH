@@ -9,7 +9,7 @@ const verifyCustomer = (req, res, next) => {
     if (!token) return res.status(401).json({ success: false, error: 'ไม่พบ Token กรุณาเข้าสู่ระบบ' });
 
     try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'morespace-secret-key-2024');
+        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'storage-shed-secret-key-2024');
         if (decoded.role !== 'customer') {
             return res.status(403).json({ success: false, error: 'สิทธิ์ไม่เพียงพอ (ไม่ใช่ Customer)' });
         }

@@ -266,7 +266,6 @@ const formatDate = (dateStr) => {
               <img
                 :src="getImageUrl(project.cover_image)"
                 :alt="project.title"
-                loading="lazy"
                 class="card-img"
                 @error="onImageError"
               />

@@ -164,7 +164,7 @@ const filteredProducts = computed(() => {
 })
 
 const displayedProducts = computed(() => {
-  return filteredProducts.value.slice(0, visibleCount.value)
+  return filteredProducts.value
 })
 
 const groupedDisplayedProducts = computed(() => {
@@ -330,11 +330,11 @@ const applyCategoryFromRoute = () => {
     : (route.query.category ? decodeURIComponent(route.query.category) : null)
   if (cat && categories.value.includes(cat)) {
     activeCategory.value = cat
-    document.title = `สินค้าหมวดหมู่ ${cat} - Morespace`
+    document.title = settingsStore.storeName ? `สินค้าหมวดหมู่ ${cat} - ${settingsStore.storeName}` : `สินค้าหมวดหมู่ ${cat}`
   } else if (cat) {
     // Category from URL not found yet, try matching
     activeCategory.value = cat
-    document.title = `สินค้าหมวดหมู่ ${cat} - Morespace`
+    document.title = settingsStore.storeName ? `สินค้าหมวดหมู่ ${cat} - ${settingsStore.storeName}` : `สินค้าหมวดหมู่ ${cat}`
   } else {
     activeCategory.value = 'ทุกหมวดหมู่'
   }

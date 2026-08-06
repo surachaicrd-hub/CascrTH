@@ -14,21 +14,21 @@ const getCompanySettings = async () => {
         const s = {};
         for (const r of rows) s[r.setting_key] = r.setting_value;
         return {
-            companyName: s.contact_company_name || s.store_name || 'บริษัท มอร์สเปซ จำกัด',
-            address: s.contact_address || '123 ถนนตัวอย่าง แขวงตัวอย่าง เขตตัวอย่าง กรุงเทพฯ 10000',
-            taxId: s.contact_tax_id || '0105550000000',
-            phone: s.contact_phone || '02-000-0000',
-            email: s.contact_email || 'contact@morespace.com',
+            companyName: s.contact_company_name || s.store_name || 'บริษัทจำหน่ายสินค้า',
+            address: s.contact_address || '',
+            taxId: s.contact_tax_id || '-',
+            phone: s.contact_phone || '-',
+            email: s.contact_email || '',
             logo: s.store_logo || null
         };
     } catch (e) {
         console.error('Failed to get company settings for PDF:', e);
         return {
-            companyName: 'บริษัท มอร์สเปซ จำกัด',
+            companyName: 'บริษัทจำหน่ายสินค้า',
             address: '-',
             taxId: '-',
             phone: '-',
-            email: '-',
+            email: '',
             logo: null
         };
     }

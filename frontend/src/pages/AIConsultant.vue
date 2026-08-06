@@ -7,7 +7,7 @@ const message = ref('')
 const conversation = ref([
   { 
     sender: 'ai', 
-    text: 'สวัสดีค่ะ! Morespace AI ยินดีให้บริการค่ะ ต้องการให้เราช่วยแนะนำบ้านเก็บของ ตู้เก็บของ หรือประเมินราคาพื้นที่แบบไหน แจ้งได้เลยนะคะ', 
+    text: 'สวัสดีค่ะ! AI Assistant ยินดีให้บริการค่ะ ต้องการให้เราช่วยแนะนำบ้านเก็บของ ตู้เก็บของ หรือประเมินราคาพื้นที่แบบไหน แจ้งได้เลยนะคะ', 
     products: [], 
     time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) 
   }
@@ -87,11 +87,14 @@ const parseMarkdown = (text) => {
   // Handle bold **text**
   html = html.replace(/\*\*([^*]+)\*\*/g, '<strong class="font-bold text-gray-900 dark:text-white">$1</strong>');
   
-  // Handle italic *text* (single asterisk, but not inside bold)
-  html = html.replace(/(?<!\*)\*([^*]+)\*(?!\*)/g, '<em>$1</em>');
+  // Handle italic *text* (single asterisk)
+  html = html.replace(/(^|[^*])\*([^*]+)\*([^*]|$)/g, '$1<em>$2</em>$3');
   
   // Auto-link plain URLs that aren't already inside <a> tags
-  html = html.replace(/(?<!href="|">)(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" rel="noopener noreferrer" class="ai-link">$1</a>');
+  html = html.replace(/(href="|">)?(https?:\/\/[^\s<]+)/g, (match, prefix, url) => {
+    if (prefix) return match
+    return `<a href="${url}" target="_blank" rel="noopener noreferrer" class="ai-link">${url}</a>`
+  });
   
   // Auto-link phone numbers (Thai format)
   html = html.replace(/(\d{2,3}-\d{3,4}-?\d{3,4})/g, '<a href="tel:$1" class="ai-link ai-link-phone"><svg class="w-3.5 h-3.5 inline-block mr-1 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.94.725l.548 2.2a1 1 0 01-.321.988l-1.305.98a10.582 10.582 0 004.872 4.872l.98-1.305a1 1 0 01.988-.321l2.2.548a1 1 0 01.725.94V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>$1</a>');
@@ -160,7 +163,7 @@ const clearChat = () => {
     conversation.value = [
         { 
             sender: 'ai', 
-            text: 'สวัสดีค่ะ! Morespace AI ยินดีให้บริการค่ะ ต้องการให้เราช่วยแนะนำบ้านเก็บของ ตู้เก็บของ หรือประเมินราคาพื้นที่แบบไหน แจ้งได้เลยนะคะ', 
+            text: 'สวัสดีค่ะ! AI Assistant ยินดีให้บริการค่ะ ต้องการให้เราช่วยแนะนำบ้านเก็บของ ตู้เก็บของ หรือประเมินราคาพื้นที่แบบไหน แจ้งได้เลยนะคะ', 
             products: [], 
             time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) 
         }
@@ -218,7 +221,7 @@ const insertQuickPrompt = (prompt) => {
                         <div class="flex-1 min-w-0 flex flex-col justify-between py-0.5">
                             <div>
                                 <h4 class="text-xs font-bold text-gray-900 dark:text-white truncate">{{ item.name }}</h4>
-                                <p class="text-[10px] text-gray-500 truncate">{{ item.category || 'Morespace' }}</p>
+                                <p class="text-[10px] text-gray-500 truncate">{{ item.category || '' }}</p>
                             </div>
                             <div class="flex items-center justify-between mt-1">
                                 <span class="text-xs font-black text-emerald-600 dark:text-emerald-400">{{ formatPrice(item.price) }}</span>
@@ -347,7 +350,7 @@ const insertQuickPrompt = (prompt) => {
                                         <p class="text-sm font-bold text-gray-900 dark:text-gray-100 truncate">{{ product.name }}</p>
                                         <p class="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5 truncate">
                                             <span v-if="product.sku" class="font-semibold text-gray-600 dark:text-gray-300 mr-1">รหัส: {{ product.sku }}</span>
-                                            {{ product.category || 'Morespace' }}
+                                            {{ product.category || '' }}
                                         </p>
                                         
                                         <div class="mt-auto pt-3 mb-3 flex items-center gap-2">

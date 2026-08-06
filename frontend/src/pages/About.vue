@@ -55,16 +55,6 @@ const isEmptyHtml = (html) => {
   return clean === ''
 }
 
-const defaultRichContent = `
-<h2>เส้นทางแห่งคุณภาพและความน่าเชื่อถือ</h2>
-<p>นับตั้งแต่ก่อตั้ง จากจุดเริ่มต้นเมื่อกว่าทศวรรษที่แล้ว ด้วยวิสัยทัศน์ที่จะปฏิวัติแนวคิดของโรงเก็บของทั่วไป เราได้ทุ่มเทพัฒนาผลิตภัณฑ์และบริการอย่างต่อเนื่อง จากโรงเก็บของที่เน้นฟังก์ชันการใช้งานพื้นฐาน สู่การเป็นผู้เชี่ยวชาญด้านโรงเก็บของพรีเมียมที่ผสมผสานทั้งความแข็งแรงทนทาน ดีไซน์ที่สวยงามทันสมัย และนวัตกรรมที่ตอบโจทย์การใช้งานที่หลากหลาย</p>
-<p>ตลอดระยะเวลาที่ผ่านมา เราภาคภูมิใจในผลงานที่ได้ส่งมอบให้กับลูกค้าทั่วประเทศไทย ไม่ว่าจะเป็นโรงเก็บของสำหรับบ้านพักอาศัย, รีสอร์ท, หรือแม้แต่โครงการเชิงพาณิชย์ขนาดใหญ่ ทุกชิ้นงานของเราคือการสะท้อนถึงความมุ่งมั่นในคุณภาพและความใส่ใจในรายละเอียด</p>
-<h2>ทีมงานผู้เชี่ยวชาญ: พลังขับเคลื่อนสู่ความสำเร็จ</h2>
-<p>เบื้องหลังความสำเร็จของเราคือทีมงานที่เปี่ยมด้วยความรู้ ความสามารถ และความมุ่งมั่น ตั้งแต่ทีมวิศวกรและนักออกแบบผู้สร้างสรรค์ ไปจนถึงช่างเทคนิคผู้เชี่ยวชาญและทีมบริการลูกค้าที่พร้อมให้คำปรึกษา ทุกคนล้วนทำงานด้วยความหลงใหลในการส่งมอบสิ่งที่ดีที่สุดให้กับลูกค้า</p>
-<p>เราเชื่อมั่นว่า ความเข้าใจในความต้องการของลูกค้า คือกุญแจสำคัญ เราจึงใส่ใจรับฟังทุกข้อเสนอแนะ และพร้อมให้คำแนะนำอย่างมืออาชีพ เพื่อให้มั่นใจว่าโรงเก็บของพรีเมียมที่คุณได้รับนั้น ตรงตามความคาดหวังและใช้งานได้อย่างยาวนาน</p>
-<p><strong>ขอขอบคุณที่ไว้วางใจให้เราเป็นส่วนหนึ่งในการสร้างสรรค์พื้นที่จัดเก็บที่สมบูรณ์แบบให้กับคุณ</strong></p>
-`
-
 const coreIcons = [
   'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z',
   'M13 10V3L4 14h7v7l9-11h-7z',
@@ -73,66 +63,34 @@ const coreIcons = [
 ]
 
 const buildComputed = () => {
-  const defaultTitles = [
-    'วัสดุชั้นเลิศและฝีมืออันประณีต',
-    'การออกแบบที่ลงตัว',
-    'กระบวนการผลิตที่ได้มาตรฐาน',
-    'การติดตั้งที่ปลอดภัยและรวดเร็ว'
-  ]
-  const defaultDescs = [
-    'เราเลือกใช้เฉพาะวัสดุคุณภาพสูงสุด ไม่ว่าจะเป็นเหล็กกล้าเคลือบพิเศษกันสนิม ไม้เนื้อแข็งคุณภาพเยี่ยม หรือวัสดุคอมโพสิตที่ทันสมัย ซึ่งล้วนผ่านการทดสอบเพื่อให้มั่นใจในความทนทานต่อทุกสภาพอากาศของประเทศไทย',
-    'ทีมออกแบบของเราทำงานอย่างใกล้ชิดกับลูกค้า เพื่อสร้างสรรค์โรงเก็บของที่เข้ากับสไตล์สถาปัตยกรรมของอาคารและภูมิทัศน์โดยรอบได้อย่างกลมกลืน',
-    'เราใช้เทคโนโลยีการผลิตที่ทันสมัย ผสานกับฝีมือช่างผู้เชี่ยวชาญ เพื่อให้ได้โครงสร้างที่แข็งแรง การประกอบที่แม่นยำ และงานเก็บรายละเอียดที่ประณีต',
-    'ทีมติดตั้งของเรามีความเชี่ยวชาญและประสบการณ์สูง มั่นใจได้ในความรวดเร็ว ปลอดภัย และได้มาตรฐาน'
-  ]
-  const defaultImages = [
-    'https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?auto=format&fit=crop&w=800&q=80',
-    'https://images.unsplash.com/photo-1582268611958-ebfd161ef9cf?auto=format&fit=crop&w=800&q=80',
-    'https://images.unsplash.com/photo-1504917595217-d4dc5ebe6122?auto=format&fit=crop&w=800&q=80',
-    'https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=800&q=80'
-  ]
-
   coreValues.value = [1, 2, 3, 4]
     .map(i => {
-      let imgUrl = s.value[`about_core_${i}_img`]
-      if (!imgUrl) imgUrl = defaultImages[i - 1]
+      const title = s.value[`about_core_${i}_title`] || ''
+      const desc = s.value[`about_core_${i}_desc`] || ''
+      const imgUrl = s.value[`about_core_${i}_img`] || ''
       
       return {
-        title: s.value[`about_core_${i}_title`] || defaultTitles[i - 1],
-        desc: s.value[`about_core_${i}_desc`] || defaultDescs[i - 1],
+        title,
+        desc,
         img: imgUrl,
-        fallbackImg: defaultImages[i - 1],
         icon: coreIcons[i - 1]
       }
     })
     .filter(v => v.title)
 
-  const defaultStatVals = ['20+', '100%', '7 วัน', '100%']
-  const defaultStatLabels = [
-    'ปีแห่งประสบการณ์',
-    'คัดสรรคุณภาพและบริการ',
-    'ระยะเวลาเริ่มต้นในการติดตั้ง พร้อมเนรมิตพื้นที่ในฝันของคุณให้เป็นจริง',
-    'วัสดุคุณภาพสูง นำเข้าจากสหรัฐอเมริกา เพื่อความทนทานและมาตรฐานระดับโลก'
-  ]
-
   stats.value = [1, 2, 3, 4]
     .map(i => ({
-      val: s.value[`about_stat_${i}_val`] || defaultStatVals[i-1],
-      label: s.value[`about_stat_${i}_label`] || defaultStatLabels[i-1]
+      val: s.value[`about_stat_${i}_val`] || '',
+      label: s.value[`about_stat_${i}_label`] || ''
     }))
+    .filter(st => st.val || st.label)
 
-  // Handle rich content display and visibility
-  if (isRichContentSet.value) {
-    if (isEmptyHtml(s.value.about_content_rich)) {
-      showRichContent.value = false
-      displayRichContent.value = ''
-    } else {
-      showRichContent.value = true
-      displayRichContent.value = s.value.about_content_rich
-    }
-  } else {
+  if (s.value.about_content_rich && !isEmptyHtml(s.value.about_content_rich)) {
     showRichContent.value = true
-    displayRichContent.value = defaultRichContent
+    displayRichContent.value = s.value.about_content_rich
+  } else {
+    showRichContent.value = false
+    displayRichContent.value = ''
   }
 }
 
@@ -435,7 +393,7 @@ onUnmounted(() => {
         <div v-if="isModalOpen && selectedCoreValue" class="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
           <div class="absolute inset-0 bg-slate-950/80 backdrop-blur-sm cursor-pointer" @click="closeModal"></div>
           
-          <div class="relative bg-white dark:bg-[#111622] rounded-[2rem] shadow-2xl w-full max-w-xl overflow-hidden border border-slate-200/50 dark:border-white/5 animate-fade-in-up" @click.stop>
+          <div class="relative bg-white dark:bg-[#111622] rounded-[2rem] shadow-2xl w-full max-w-xl overflow-hidden border border-slate-200/50 dark:border-white/5" @click.stop>
             <button @click="closeModal" class="absolute top-4 right-4 w-8 h-8 bg-black/20 hover:bg-black/40 backdrop-blur-md rounded-full flex items-center justify-center text-white z-20 transition-colors">
               <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
             </button>

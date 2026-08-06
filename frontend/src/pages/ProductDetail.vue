@@ -129,7 +129,7 @@ const transformOembed = (html) => {
   
   const buildYouTubeEmbed = (videoId) => {
     const embedUrl = `https://www.youtube.com/embed/${videoId}`;
-    return `<div class="yt-embed-wrapper"><div class="yt-embed-inner"><iframe src="${embedUrl}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen loading="lazy"></iframe></div></div>`;
+    return `<div class="yt-embed-wrapper"><div class="yt-embed-inner"><iframe src="${embedUrl}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div></div>`;
   };
 
   const extractYouTubeId = (url) => {
@@ -401,11 +401,11 @@ const addStructuredData = () => {
     "name": product.value.title,
     "image": product.value.images,
     "description": aiDescription,
-    "sku": product.value.sku || `MORESPACE-${product.value.id}`,
-    "brand": {
+    "sku": product.value.sku || `${product.value.id}`,
+    "brand": settingsStore.storeName ? {
       "@type": "Brand",
-      "name": "Morespace"
-    },
+      "name": settingsStore.storeName
+    } : undefined,
     "offers": {
       "@type": "AggregateOffer",
       "url": window.location.href,
@@ -456,13 +456,13 @@ const addStructuredData = () => {
         "@type": "ListItem",
         "position": 1,
         "name": "หน้าแรก",
-        "item": "https://morespace.co.th/"
+        "item": `${window.location.origin}/`
       },
       {
         "@type": "ListItem",
         "position": 2,
         "name": "สินค้า",
-        "item": "https://morespace.co.th/products"
+        "item": `${window.location.origin}/products`
       },
       {
         "@type": "ListItem",
@@ -479,7 +479,7 @@ const addStructuredData = () => {
   document.head.appendChild(bcScript)
 
   // Update page title and meta for this product
-  document.title = `${product.value.title} — Morespace บ้านเก็บของสำเร็จรูป`
+  document.title = settingsStore.storeName ? `${product.value.title} — ${settingsStore.storeName}` : product.value.title
   const metaDesc = document.querySelector('meta[name="description"]')
   if (metaDesc) {
     metaDesc.setAttribute('content', product.value.seo_description || product.value.short_description || product.value.description?.substring(0, 160) || '')
@@ -492,7 +492,7 @@ const addStructuredData = () => {
     canonicalLink.setAttribute('rel', 'canonical')
     document.head.appendChild(canonicalLink)
   }
-  canonicalLink.setAttribute('href', `https://morespace.co.th/products/${route.params.id}`)
+  canonicalLink.setAttribute('href', `${window.location.origin}/products/${route.params.id}`)
   
   // Update OG Tags
   const ogTitle = document.querySelector('meta[property="og:title"]')
@@ -545,7 +545,7 @@ const getLineInquiryUrl = (productTitle) => {
   }
 
   if (!baseUrl) {
-    baseUrl = 'https://line.me/R/ti/p/@morespace'
+    baseUrl = settingsStore.contactLines?.[0]?.url || ''
   }
 
   const connector = baseUrl.includes('?') ? '&' : '?'
@@ -757,7 +757,7 @@ onUnmounted(() => {
   // Reset canonical to homepage
   const canonicalLink = document.querySelector('link[rel="canonical"]')
   if (canonicalLink) {
-    canonicalLink.setAttribute('href', 'https://morespace.co.th/')
+    canonicalLink.setAttribute('href', `${window.location.origin}/`)
   }
 })
 </script>
@@ -816,9 +816,7 @@ onUnmounted(() => {
 
           <!-- Main Stage -->
           <div class="order-1 md:order-2 relative w-full aspect-square bg-white dark:bg-[#111827] rounded-3xl overflow-hidden shadow-2xl shadow-gray-200/50 dark:shadow-emerald-900/10 border border-gray-100 dark:border-gray-800 group cursor-zoom-in flex-1" @click="toggleGalleryZoom">
-             <transition name="fade" mode="out-in">
-                <img :key="activeImageIndex" :src="getOptimizedImageUrl(product.images[activeImageIndex], 700)" :alt="product.image_alt || product.title" :fetchpriority="activeImageIndex === 0 ? 'high' : 'auto'" :loading="activeImageIndex === 0 ? 'eager' : 'lazy'" class="absolute inset-0 w-full h-full object-contain transform scale-100 group-hover:scale-105 transition-all duration-700 ease-out" @error="onImageError">
-             </transition>
+             <img :key="activeImageIndex" :src="getOptimizedImageUrl(product.images[activeImageIndex], 700)" :alt="product.image_alt || product.title" fetchpriority="high" loading="eager" class="absolute inset-0 w-full h-full object-contain transform scale-100 group-hover:scale-105 transition-all duration-700 ease-out" @error="onImageError">
              
              <!-- Category Badge -->
              <div class="absolute top-6 left-6 z-10 flex flex-wrap gap-2">

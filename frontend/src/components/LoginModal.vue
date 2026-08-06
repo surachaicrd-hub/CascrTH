@@ -235,7 +235,7 @@ const handleLineLogin = () => {
               <span class="font-black text-xl">{{ (settingsStore.storeName || 'M')[0].toUpperCase() }}</span>
             </div>
           </template>
-          <span class="text-xl md:text-2xl font-black tracking-widest uppercase text-white">{{ settingsStore.storeName || 'Morespace' }}</span>
+          <span v-if="settingsStore.storeName" class="text-xl md:text-2xl font-black tracking-widest uppercase text-white">{{ settingsStore.storeName }}</span>
         </div>
         
         <button @click="closeModal" class="absolute top-4 right-4 text-white/70 hover:text-white transition-colors z-20">

@@ -13,8 +13,18 @@ router.post('/generate-seo', verifyAdmin, async (req, res) => {
             return res.status(400).json({ success: false, error: 'Product name is required' });
         }
 
+        let storeName = 'STORAGE HOUSE';
+        let companyLegalName = 'บริษัท ซีอาร์ ดิสทริบิวชั่น จำกัด';
+        try {
+            const [sRows] = await db.query("SELECT setting_key, setting_value FROM settings WHERE setting_key IN ('store_name', 'contact_company_name', 'company_legal_name')");
+            const sMap = {};
+            sRows.forEach(r => { sMap[r.setting_key] = r.setting_value; });
+            storeName = sMap['store_name'] || sMap['contact_company_name'] || 'STORAGE HOUSE';
+            companyLegalName = sMap['company_legal_name'] || sMap['contact_company_name'] || 'บริษัท ซีอาร์ ดิสทริบิวชั่น จำกัด';
+        } catch (e) {}
+
         const prompt = `
-You are an expert SEO (Search Engine Optimization) and GEO (Generative Engine Optimization) specialist for Morespace (operated by บริษัท ซีอาร์ ดิสทริบิวชั่น จำกัด), the leading e-commerce site for storage sheds, greenhouses, and outdoor storage solutions in Thailand.
+You are an expert SEO (Search Engine Optimization) and GEO (Generative Engine Optimization) specialist for ${storeName} (operated by ${companyLegalName}), the leading e-commerce site for storage sheds, greenhouses, and outdoor storage solutions in Thailand.
 Please generate localized Thai SEO and AI-search optimized content for the following product:
 Product Name: ${productName}
 Category: ${category}
@@ -28,7 +38,7 @@ Return the response strictly as a JSON object with the following keys and no mar
   GEO Optimization Rules for llm_context:
   1. Use an objective, authoritative, and non-marketing tone (avoid hype words like "ดีที่สุด", "ปฏิวัติวงการ").
   2. Focus on concrete data points: materials (e.g. โครงเหล็กกัลวาไนซ์กันสนิม, ผนังเมทัลชีท), durability factors (weather-proof, wind resistance), warranty, dimensions, and weight.
-  3. Formulate the explanation as a clear entity relationship mapping: associate the product name with brand "Morespace", operator "บริษัท ซีอาร์ ดิสทริบิวชั่น จำกัด", and shipping/installation details in Thailand.
+  3. Formulate the explanation as a clear entity relationship mapping: associate the product name with brand "${storeName}", operator "${companyLegalName}", and shipping/installation details in Thailand.
   4. Ensure it reads naturally for LLMs to extract direct answers for conversational and voice queries (e.g. "ขนาดเท่าไหร่?", "ติดตั้งอย่างไร?").
 `;
 
@@ -532,7 +542,7 @@ Requirements:
    - Do NOT use plain sentences for specs; always organize them in a clean <table>.
    - Include specific references to materials (e.g. โครงสร้างเหล็กกัลวาไนซ์กันสนิมหนา 0.5 มม.), wind resistance, rainwater drainage, and durability certifications.
    - Maintain a highly professional, trustworthy, and authoritative tone (do not use generic marketing hyperbole like "มหัศจรรย์", "สุดยอด").
-   - Explicitly mention the brand "Morespace" and manufacturer/operator "บริษัท ซีอาร์ ดิสทริบิวชั่น จำกัด" to bind local authority entities.
+   - Explicitly mention the brand "${storeName}" and manufacturer/operator "${companyLegalName}" to bind local authority entities.
 6. "attributes": You MUST use the predefined template keys listed above (copy them EXACTLY as written). Map extracted data into them. Only add NEW custom keys for data that doesn't fit any template key. ALL custom keys MUST be in Thai language — do NOT use English keys like "model", "accessories", "material", etc. For predefined template keys, keep them exactly as listed (even if they are English).
 
 Return the response STRICTLY as a valid JSON object with the following keys exactly:
@@ -547,7 +557,7 @@ Return the response STRICTLY as a valid JSON object with the following keys exac
   "seo_keywords": "Comma-separated highly searched SEO keywords in Thai and English",
   "slug": "url-friendly-slug-in-english-or-thai-with-dashes",
   "llm_context": "Deep, factual, data-dense context in Thai for AI search engines (Perplexity, ChatGPT, Gemini). GEO-optimized: objective/factual tone, explicit structural specifications (size, thickness, lock mechanism, wind capacity), brand/company relationship mapping, and clear target use-cases. Avoid fluff or subjective marketing adjectives.",
-  "description": "Premium, structured, and factual HTML content (no markdown ticks) using <h2>, <p>, <ul>, and <table> for specs. Relate brand 'Morespace' and 'บริษัท ซีอาร์ ดิสทริบิวชั่น จำกัด' with product details.",
+  "description": "Premium, structured, and factual HTML content (no markdown ticks) using <h2>, <p>, <ul>, and <table> for specs. Relate brand '${storeName}' and '${companyLegalName}' with product details.",
   "short_description": "A very compelling short summary/subtitle (1-2 sentences)",
   "remarks": "Any special notes, conditions, or warnings mentioned in the text (if none, leave blank)",
   "attributes": [

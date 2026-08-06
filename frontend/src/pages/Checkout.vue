@@ -525,7 +525,7 @@ const handleCheckout = async () => {
                 </label>
             </div>
 
-            <div v-if="requireTaxInvoice" class="mt-6 pt-6 border-t border-gray-100 dark:border-gray-800 animate-[fadeIn_0.3s_ease-out]">
+            <div v-if="requireTaxInvoice" class="mt-6 pt-6 border-t border-gray-100 dark:border-gray-800">
                 
                  <!-- Saved Tax Addresses Selection -->
                 <div v-if="authStore.isAuthenticated && savedAddresses.filter(a => a.type === 'tax').length > 0" class="mb-6">

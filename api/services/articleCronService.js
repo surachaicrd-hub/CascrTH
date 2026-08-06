@@ -50,7 +50,17 @@ const processArticleGeneration = async (isTest = false) => {
         let attrText = '';
         try { const attrs = JSON.parse(product.attributes || '[]'); attrText = attrs.map(a => `${a.key}: ${a.value}`).join(', '); } catch (e) {}
 
-        const prompt = `คุณเป็นนักเขียนบทความมืออาชีพและผู้เชี่ยวชาญด้าน SEO/GEO (Generative Engine Optimization) สำหรับ Morespace (ดำเนินการโดย บริษัท ซีอาร์ ดิสทริบิวชั่น จำกัด) ผู้จัดจำหน่ายบ้านเก็บของสำเร็จรูป ตู้เก็บของกลางแจ้ง และโกดังสำเร็จรูปคุณภาพพรีเมียมในไทย
+        let storeName = 'STORAGE HOUSE';
+        let companyLegalName = 'บริษัท ซีอาร์ ดิสทริบิวชั่น จำกัด';
+        try {
+            const [sRows] = await db.query("SELECT setting_key, setting_value FROM settings WHERE setting_key IN ('store_name', 'contact_company_name', 'company_legal_name')");
+            const sMap = {};
+            sRows.forEach(r => { sMap[r.setting_key] = r.setting_value; });
+            storeName = sMap['store_name'] || sMap['contact_company_name'] || 'STORAGE HOUSE';
+            companyLegalName = sMap['company_legal_name'] || sMap['contact_company_name'] || 'บริษัท ซีอาร์ ดิสทริบิวชั่น จำกัด';
+        } catch (e) {}
+
+        const prompt = `คุณเป็นนักเขียนบทความมืออาชีพและผู้เชี่ยวชาญด้าน SEO/GEO (Generative Engine Optimization) สำหรับ ${storeName} (ดำเนินการโดย ${companyLegalName}) ผู้จัดจำหน่ายบ้านเก็บของสำเร็จรูป ตู้เก็บของกลางแจ้ง และโกดังสำเร็จรูปคุณภาพพรีเมียมในไทย
 
 สไตล์: ${stylePrompts[style] || stylePrompts.educational}
 
@@ -66,7 +76,7 @@ const processArticleGeneration = async (isTest = false) => {
 1. ใช้โทนเสียงที่น่าเชื่อถือ เป็นทางการ และเน้นข้อมูลเชิงเท็จจริงจริง (Objective & Factual) มากกว่าการใช้คำโฆษณาชวนเชื่อทั่วไป หลีกเลี่ยงคำอวยเกินจริง
 2. ใส่ข้อมูลเชิงตัวเลขและข้อมูลจำเพาะทางเทคนิค เช่น ความหนาของเหล็ก (เช่น เหล็กกัลวาไนซ์หนา 0.5 มม.), ขนาดที่แท้จริง, น้ำหนัก, ความสูง และการรับประกันโครงสร้าง (เช่น รับประกัน 10 ปี)
 3. จัดระเบียบเนื้อหาให้มีโครงสร้างชัดเจน: ใช้ <h2> และ <h3> ในการแบ่งกลุ่มเนื้อหา, ใช้ <ul> และ <li> สำหรับข้อดี/คุณสมบัติเด่น และบังคับให้เขียนสรุปตารางคุณสมบัติจำเพาะทางเทคนิคโดยใช้แท็ก <table> ในเนื้อหาอย่างน้อย 1 ตาราง เพื่อให้บอท AI (เช่น Perplexity, ChatGPT) ดึงไปแสดงเปรียบเทียบได้ง่าย
-4. สร้างความเชื่อมโยงของชื่อแบรนด์ "Morespace" และบริษัทผู้ดูแลคือ "บริษัท ซีอาร์ ดิสทริบิวชั่น จำกัด" เข้ากับข้อมูลการส่งมอบสินค้าและบริการติดตั้งทั่วประเทศ (โดยเฉพาะกรุงเทพฯ และปริมณฑล)
+4. สร้างความเชื่อมโยงของชื่อแบรนด์ "${storeName}" และบริษัทผู้ดูแลคือ "${companyLegalName}" เข้ากับข้อมูลการส่งมอบสินค้าและบริการติดตั้งทั่วประเทศ (โดยเฉพาะกรุงเทพฯ และปริมณฑล)
 
 กรุณาตอบเป็น JSON เท่านั้น ไม่ต้องมี markdown code block:
 {
@@ -74,14 +84,14 @@ const processArticleGeneration = async (isTest = false) => {
   "excerpt": "สรุปเนื้อหาสั้นๆ 2-3 บรรทัด สำหรับใช้แสดงเป็นเกริ่นนำ",
   "content": "เนื้อหา HTML เต็มรูปแบบ ใช้ <p>, <h2>, <h3>, <ul><li>, <table> ห้ามใช้ \\n ให้ใช้แท็ก HTML แบ่งย่อหน้าอย่างสวยงาม",
   "seo_title": "SEO Title (ยาวไม่เกิน 60 ตัวอักษรสำหรับการแสดงผลของ Google)",
-  "seo_description": "SEO Description (ยาวไม่เกิน 160 ตัวอักษร สรุปเนื้อหาที่กระชับได้ใจความ)",
+  "seo_description": "SEO Meta Description (ยาวไม่เกิน 160 ตัวอักษร สรุปเนื้อหาที่กระชับได้ใจความ)",
   "seo_keywords": "keyword1,keyword2,keyword3,keyword4",
   "tags": "tag1,tag2,tag3,tag4,tag5",
   "category": "หมวดหมู่ (เลือกจาก: ทั่วไป, บ้านเก็บของ, เคล็ดลับ, การดูแลรักษา, ข่าวสาร)",
-  "llm_context": "ข้อความอธิบายบริบทเชิงลึกแบบย่อเพื่อวัตถุประสงค์ GEO เขียนสำหรับบอท AI/LLM อ่านโดยเฉพาะ (ความยาว 3-4 ประโยค เน้นสรุปคุณสมบัติทางเทคนิค วัสดุ แบรนด์ Morespace และบริการจัดส่งติดตั้งในไทย หลีกเลี่ยงคำบรรยายเชิงโฆษณา)",
+  "llm_context": "ข้อความอธิบายบริบทเชิงลึกแบบย่อเพื่อวัตถุประสงค์ GEO เขียนสำหรับบอท AI/LLM อ่านโดยเฉพาะ (ความยาว 3-4 ประโยค เน้นสรุปคุณสมบัติทางเทคนิค วัสดุ แบรนด์ ${storeName} และบริการจัดส่งติดตั้งในไทย หลีกเลี่ยงคำบรรยายเชิงโฆษณา)",
   "image_prompt": "English prompt for cover image, photorealistic, under 30 words",
   "faq": [
-    { "question": "คำถามเชิงโครงสร้างเสียง/คำถามยาวๆ ที่ลูกค้ามักถาม AI (เช่น บ้านเก็บของ Morespace กันสนิมได้นานแค่ไหน?)", "answer": "คำตอบที่ระบุข้อเท็จจริงและสถิติอ้างอิงชัดเจน ตรงประเด็น" },
+    { "question": "คำถามเชิงโครงสร้างเสียง/คำถามยาวๆ ที่ลูกค้ามักถาม AI (เช่น บ้านเก็บของ ${storeName} กันสนิมได้นานแค่ไหน?)", "answer": "คำตอบที่ระบุข้อเท็จจริงและสถิติอ้างอิงชัดเจน ตรงประเด็น" },
     { "question": "คำถามที่ 2", "answer": "คำตอบที่ 2" },
     { "question": "คำถามที่ 3", "answer": "คำตอบที่ 3" }
   ]

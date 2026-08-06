@@ -12,39 +12,20 @@ const activeStep = ref(0)
 const activeStepMobile = ref(0)
 const slider = ref(null)
 
-const serviceImages = [
-  '/images/services/inspection.webp',
-  '/images/services/3d-design.webp',
-  '/images/services/prefab.webp',
-  '/images/services/installation.webp',
-  '/images/services/warranty.webp',
-  '/images/services/support.webp'
-]
+const serviceImages = []
 
 const settings = ref({
-   services_hero_title: 'บริการออกแบบและติดตั้ง <br/> แบบครบวงจร',
-   services_hero_subtitle: 'บริการระดับมาตรฐานสากลจาก CR Distribution',
-   services_hero_desc: 'เราพร้อมส่งมอบประสบการณ์ที่ดีเยี่ยม ตั้งแต่การให้คำปรึกษา การสั่งซื้อ การจัดส่ง จนถึงการติดตั้งด้วยทีมงานมืออาชีพ',
-   services_items: [
-      { title: "ประเมินพื้นที่ด้วยวิศวกร", desc: "ทีมงานผู้เชี่ยวชาญลงตรวจสอบหน้างานจริงเพื่อวิเคราะห์ทิศทางลม ฐานราก และสภาพแวดล้อมโดยละเอียด ถอดแบบแม่นยำ 100%", icon: "M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" },
-      { title: "ออกแบบโครงสร้าง 3D", desc: "คุณจะเห็นภาพเสมือนจริงของบ้านก่อนสร้างจริง สามารถปรับเปลี่ยนสีและวัสดุได้ตามความต้องการ", icon: "M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" },
-      { title: "ผลิตแบบสำเร็จรูปพรีแฟบ", desc: "ชิ้นส่วนถูกตัดแต่งและทำสีฝุ่นบริเวณโรงงานควบคุมคุณภาพ ก่อนส่งประกอบหน้างาน", icon: "M13 10V3L4 14h7v7l9-11h-7z" },
-      { title: "ติดตั้งเสร็จสิ้นภายใน 48 ชม.", desc: "ประกอบขึ้นรูปด้วยระบบน็อคดาวน์ นวัตกรรมจากยุโรป ไร้เสียงรบกวน จบงานไวทันใจ", icon: "M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" },
-      { title: "รับประกันโครงสร้างสูง 10 ปี", desc: "คุณภาพแห่งความเชื่อมั่น เรารับประกันความแข็งแรงของเหล็กกัลวาไนซ์ โครงสร้าง และสีไม่ลอกไม่เป็นสนิม", icon: "M20.618 5.984A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016zM12 9v2m0 4h.01" },
-      { title: "ศูนย์ดูแลหลังการขาย 24 ชั่วโมง", desc: "พร้อมดูแลเมื่อคุณต้องการต่อเติม ขยับขยายพื้นที่ หรือให้เราช่วยส่งทีมงานเข้าบำรุงรักษา", icon: "M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" }
-   ],
-   services_cta_title: 'เริ่มต้นเนรมิตพื้นที่ของคุณวันนี้',
-   services_cta_desc: 'ติดต่อทีมงานเพื่อรับคำปรึกษาฟรี เรายินดีให้บริการและมอบสิ่งที่ดีที่สุดให้แก่คุณเสมอ',
+   services_hero_title: '',
+   services_hero_subtitle: '',
+   services_hero_desc: '',
+   services_items: [],
+   services_cta_title: '',
+   services_cta_desc: '',
    services_content_rich: '',
    services_hero_bg: ''
  })
 
-const stats = [
-  { number: '2,500+', label: 'โปรเจคที่ติดตั้งสำเร็จ' },
-  { number: '10 ปี', label: 'รับประกันโครงสร้าง' },
-  { number: '48 ชม.', label: 'ติดตั้งเสร็จสิ้น' },
-  { number: '98%', label: 'ลูกค้าพึงพอใจ' }
-]
+const stats = ref([])
 
 let observer = null
 
@@ -77,16 +58,25 @@ const loadSettings = async () => {
     const res = await apiFetch('/api/settings')
     const data = await res.json()
     if (data.success && data.data) {
-      if (data.data.services_hero_title) settings.value.services_hero_title = data.data.services_hero_title
-      if (data.data.services_hero_subtitle) settings.value.services_hero_subtitle = data.data.services_hero_subtitle
-      if (data.data.services_hero_desc) settings.value.services_hero_desc = data.data.services_hero_desc
+      if (data.data.services_hero_title !== undefined) settings.value.services_hero_title = data.data.services_hero_title
+      if (data.data.services_hero_subtitle !== undefined) settings.value.services_hero_subtitle = data.data.services_hero_subtitle
+      if (data.data.services_hero_desc !== undefined) settings.value.services_hero_desc = data.data.services_hero_desc
       if (data.data.services_items) {
-         try { settings.value.services_items = JSON.parse(data.data.services_items) } catch(e) {}
+         try {
+            const parsed = typeof data.data.services_items === 'string' ? JSON.parse(data.data.services_items) : data.data.services_items
+            if (Array.isArray(parsed)) settings.value.services_items = parsed
+         } catch(e) {}
       }
-      if (data.data.services_cta_title) settings.value.services_cta_title = data.data.services_cta_title
-      if (data.data.services_cta_desc) settings.value.services_cta_desc = data.data.services_cta_desc
-      if (data.data.services_content_rich) settings.value.services_content_rich = data.data.services_content_rich
-      if (data.data.services_hero_bg) settings.value.services_hero_bg = data.data.services_hero_bg
+      if (data.data.services_stats) {
+         try {
+            const parsed = typeof data.data.services_stats === 'string' ? JSON.parse(data.data.services_stats) : data.data.services_stats
+            if (Array.isArray(parsed)) stats.value = parsed
+         } catch(e) {}
+      }
+      if (data.data.services_cta_title !== undefined) settings.value.services_cta_title = data.data.services_cta_title
+      if (data.data.services_cta_desc !== undefined) settings.value.services_cta_desc = data.data.services_cta_desc
+      if (data.data.services_content_rich !== undefined) settings.value.services_content_rich = data.data.services_content_rich
+      if (data.data.services_hero_bg !== undefined) settings.value.services_hero_bg = data.data.services_hero_bg
     }
   } catch (error) {
     console.error('Failed to load settings:', error)
@@ -165,7 +155,7 @@ onUnmounted(() => {
       <!-- ══════════════════════════════════════════════
            STATS BAR
       ══════════════════════════════════════════════ -->
-      <section data-section="stats" class="relative -mt-6 z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section v-if="stats.length > 0" data-section="stats" class="relative -mt-6 z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="bg-white dark:bg-[#111622] rounded-2xl shadow-xl border border-slate-200/50 dark:border-white/[0.04] p-5 md:p-6 grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
           <div v-for="(stat, i) in stats" :key="i" class="text-center border-r border-slate-100 dark:border-white/[0.03] last:border-r-0">
             <p class="text-2xl md:text-3xl font-black text-emerald-500 dark:text-emerald-400 mb-0.5 tabular-nums">{{ stat.number }}</p>

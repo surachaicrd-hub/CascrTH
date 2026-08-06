@@ -2,9 +2,6 @@ const fs = require('fs');
 const path = require('path');
 const db = require('../config/database');
 
-const SITE_URL = process.env.SITE_URL || 'https://morespace.co.th';
-const DEFAULT_IMAGE = `${SITE_URL}/og-image.jpg`;
-
 /**
  * Helper to generate SEO/GEO tags and inject JSON-LD
  */
@@ -67,11 +64,32 @@ const seoProxyMiddleware = async (req, res, next) => {
     let html = fs.readFileSync(indexPath, 'utf-8');
 
     try {
-        const url = `${SITE_URL}${req.path}`;
-        let title = 'Morespace — บ้านเก็บของสำเร็จรูป ตู้เก็บของกลางแจ้ง โกดังเก็บของ คุณภาพพรีเมียม';
-        let description = 'ผู้นำด้านบ้านเก็บของสำเร็จรูป ตู้เก็บของกลางแจ้ง โกดังเก็บของ รับประกัน 10 ปี ติดตั้งฉับไว ปรึกษาฟรี';
-        let image = DEFAULT_IMAGE;
-        let keywords = 'บ้านเก็บของสำเร็จรูป, ตู้เก็บของสำเร็จรูป, โกดังสำเร็จรูป, ตู้เก็บของนอกบ้าน, morespace';
+        // Dynamically compute siteUrl from request headers or env
+        const protocol = req.headers['x-forwarded-proto'] || req.protocol || 'https';
+        const host = req.headers['x-forwarded-host'] || req.headers.host || 'localhost';
+        const siteUrl = process.env.SITE_URL || `${protocol}://${host}`;
+        const defaultImage = `${siteUrl}/og-image.jpg`;
+        const url = `${siteUrl}${req.path}`;
+
+        // Fetch dynamic site settings from DB
+        let storeName = 'STORAGE HOUSE';
+        let companyLegalName = 'บริษัท ซีอาร์ ดิสทริบิวชั่น จำกัด';
+        try {
+            const [settingsRows] = await db.query(
+                "SELECT setting_key, setting_value FROM settings WHERE setting_key IN ('store_name', 'contact_company_name', 'company_legal_name')"
+            );
+            const sMap = {};
+            settingsRows.forEach(r => { sMap[r.setting_key] = r.setting_value; });
+            storeName = sMap['store_name'] || sMap['contact_company_name'] || 'STORAGE HOUSE';
+            companyLegalName = sMap['company_legal_name'] || sMap['contact_company_name'] || 'บริษัท ซีอาร์ ดิสทริบิวชั่น จำกัด';
+        } catch (e) {
+            // Use defaults if table doesn't exist
+        }
+
+        let title = `${storeName} — บ้านเก็บของสำเร็จรูป ตู้เก็บของกลางแจ้ง โกดังเก็บของ คุณภาพพรีเมียม`;
+        let description = `ผู้นำด้านบ้านเก็บของสำเร็จรูป ตู้เก็บของกลางแจ้ง โกดังเก็บของ รับประกัน 10 ปี ติดตั้งฉับไว ปรึกษาฟรี`;
+        let image = defaultImage;
+        let keywords = `บ้านเก็บของสำเร็จรูป, ตู้เก็บของสำเร็จรูป, โกดังสำเร็จรูป, ตู้เก็บของนอกบ้าน, ${storeName}`;
         let llmContext = '';
         let jsonLdList = [];
         let matched = false;
@@ -85,7 +103,7 @@ const seoProxyMiddleware = async (req, res, next) => {
                 );
                 if (rows.length > 0) {
                     const product = rows[0];
-                    title = product.seo_title || `${product.name} | Morespace`;
+                    title = product.seo_title || `${product.name} | ${storeName}`;
                     
                     const plainDescription = product.seo_description || product.short_description || product.description?.replace(/<[^>]*>?/gm, '').substring(0, 160) || '';
                     description = plainDescription;
@@ -93,7 +111,7 @@ const seoProxyMiddleware = async (req, res, next) => {
                     llmContext = product.llm_context || '';
 
                     if (product.image_url) {
-                        image = product.image_url.startsWith('http') ? product.image_url : `${SITE_URL}${product.image_url}`;
+                        image = product.image_url.startsWith('http') ? product.image_url : `${siteUrl}${product.image_url}`;
                     }
 
                     // GEO-optimized description: merge plain text and AI-specific details for indexers
@@ -112,18 +130,19 @@ const seoProxyMiddleware = async (req, res, next) => {
                     if (parsedImages.length === 0 && product.image_url) {
                         parsedImages = [product.image_url];
                     }
-                    parsedImages = parsedImages.map(img => img.startsWith('http') ? img : `${SITE_URL}${img}`);
+                    parsedImages = parsedImages.map(img => img.startsWith('http') ? img : `${siteUrl}${img}`);
 
+                    const skuPrefix = storeName.toUpperCase().replace(/[^A-Z0-9]/g, '') || 'STORE';
                     const productSchema = {
                         "@context": "https://schema.org",
                         "@type": "Product",
                         "name": product.name,
                         "image": parsedImages,
                         "description": aiDescription,
-                        "sku": product.sku || `MORESPACE-${product.id}`,
+                        "sku": product.sku || `${skuPrefix}-${product.id}`,
                         "brand": {
                             "@type": "Brand",
-                            "name": "Morespace"
+                            "name": storeName
                         },
                         "offers": {
                             "@type": "AggregateOffer",
@@ -134,7 +153,7 @@ const seoProxyMiddleware = async (req, res, next) => {
                             "availability": product.is_active && !product.is_out_of_stock ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
                             "seller": {
                                 "@type": "Organization",
-                                "name": "บริษัท ซีอาร์ ดิสทริบิวชั่น จำกัด"
+                                "name": companyLegalName
                             }
                         }
                     };
@@ -168,8 +187,8 @@ const seoProxyMiddleware = async (req, res, next) => {
                         "@context": "https://schema.org",
                         "@type": "BreadcrumbList",
                         "itemListElement": [
-                            { "@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": `${SITE_URL}/` },
-                            { "@type": "ListItem", "position": 2, "name": "สินค้า", "item": `${SITE_URL}/products` },
+                            { "@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": `${siteUrl}/` },
+                            { "@type": "ListItem", "position": 2, "name": "สินค้า", "item": `${siteUrl}/products` },
                             { "@type": "ListItem", "position": 3, "name": product.name, "item": url }
                         ]
                     };
@@ -188,7 +207,7 @@ const seoProxyMiddleware = async (req, res, next) => {
                     );
                     if (rows.length > 0) {
                         const article = rows[0];
-                        title = article.seo_title || `${article.title} | Morespace Blog`;
+                        title = article.seo_title || `${article.title} | ${storeName} Blog`;
                         
                         const plainDescription = article.seo_description || article.excerpt || article.content?.replace(/<[^>]*>?/gm, '').substring(0, 160) || '';
                         description = plainDescription;
@@ -196,7 +215,7 @@ const seoProxyMiddleware = async (req, res, next) => {
                         llmContext = article.llm_context || '';
 
                         if (article.cover_image) {
-                            image = article.cover_image.startsWith('http') ? article.cover_image : `${SITE_URL}${article.cover_image}`;
+                            image = article.cover_image.startsWith('http') ? article.cover_image : `${siteUrl}${article.cover_image}`;
                         }
 
                         const aiDescription = article.llm_context
@@ -213,8 +232,8 @@ const seoProxyMiddleware = async (req, res, next) => {
                             "author": { "@type": "Person", "name": article.author || "Admin" },
                             "publisher": {
                                 "@type": "Organization",
-                                "name": "Morespace",
-                                "url": SITE_URL
+                                "name": storeName,
+                                "url": siteUrl
                             },
                             "datePublished": article.created_at,
                             "dateModified": article.updated_at,
@@ -253,8 +272,8 @@ const seoProxyMiddleware = async (req, res, next) => {
                             "@context": "https://schema.org",
                             "@type": "BreadcrumbList",
                             "itemListElement": [
-                                { "@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": `${SITE_URL}/` },
-                                { "@type": "ListItem", "position": 2, "name": "บทความ", "item": `${SITE_URL}/blog` },
+                                { "@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": `${siteUrl}/` },
+                                { "@type": "ListItem", "position": 2, "name": "บทความ", "item": `${siteUrl}/blog` },
                                 { "@type": "ListItem", "position": 3, "name": article.title, "item": url }
                             ]
                         };
@@ -272,10 +291,10 @@ const seoProxyMiddleware = async (req, res, next) => {
                  const [rows] = await db.query('SELECT title, description, cover_image, location, service_date FROM projects WHERE id = ? OR slug = ?', [slug, slug]);
                  if (rows.length > 0) {
                         const project = rows[0];
-                        title = `${project.title} | ผลงานของเรา Morespace`;
+                        title = `${project.title} | ผลงานของเรา ${storeName}`;
                         description = project.description?.replace(/<[^>]*>?/gm, '').substring(0, 160) || '';
                         if (project.cover_image) {
-                            image = project.cover_image.startsWith('http') ? project.cover_image : `${SITE_URL}${project.cover_image}`;
+                            image = project.cover_image.startsWith('http') ? project.cover_image : `${siteUrl}${project.cover_image}`;
                         }
 
                         // Build CreativeWork Project schema
@@ -287,8 +306,8 @@ const seoProxyMiddleware = async (req, res, next) => {
                             "image": image,
                             "provider": {
                                 "@type": "LocalBusiness",
-                                "name": "Morespace",
-                                "image": DEFAULT_IMAGE,
+                                "name": storeName,
+                                "image": defaultImage,
                                 "address": {
                                     "@type": "PostalAddress",
                                     "addressLocality": project.location || "Bangkok",
@@ -306,8 +325,8 @@ const seoProxyMiddleware = async (req, res, next) => {
                             "@context": "https://schema.org",
                             "@type": "BreadcrumbList",
                             "itemListElement": [
-                                { "@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": `${SITE_URL}/` },
-                                { "@type": "ListItem", "position": 2, "name": "ผลงานติดตั้ง", "item": `${SITE_URL}/projects` },
+                                { "@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": `${siteUrl}/` },
+                                { "@type": "ListItem", "position": 2, "name": "ผลงานติดตั้ง", "item": `${siteUrl}/projects` },
                                 { "@type": "ListItem", "position": 3, "name": project.title, "item": url }
                             ]
                         };
@@ -322,7 +341,7 @@ const seoProxyMiddleware = async (req, res, next) => {
                 if (rows.length > 0 && rows[0].setting_value) {
                     const slides = JSON.parse(rows[0].setting_value);
                     if (Array.isArray(slides) && slides.length > 0 && slides[0].image) {
-                        const heroImage = slides[0].image.startsWith('http') ? slides[0].image : `${SITE_URL}${slides[0].image}`;
+                        const heroImage = slides[0].image.startsWith('http') ? slides[0].image : `${siteUrl}${slides[0].image}`;
                         
                         // Inject preload link before </head>
                         const preloadTag = `\n  <link rel="preload" as="image" href="${heroImage}" fetchpriority="high">\n</head>`;

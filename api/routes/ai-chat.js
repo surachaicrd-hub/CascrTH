@@ -48,8 +48,10 @@ async function buildSystemContext() {
 
     // Build contact info text
     let contactInfo = '';
+    let storeName = 'STORAGE HOUSE';
     try {
-        const companyName = settings.contact_company_name || 'Morespace';
+        storeName = settings.store_name || settings.contact_company_name || 'STORAGE HOUSE';
+        const companyName = settings.contact_company_name || settings.company_legal_name || storeName;
         const address = settings.contact_address || '';
         const workingHours = settings.contact_working_hours || 'จันทร์-ศุกร์ 08:00-17:00';
 
@@ -76,7 +78,7 @@ async function buildSystemContext() {
         const youtube = settings.contact_youtube_url || '';
 
         contactInfo = `
-ชื่อบริษัท: ${companyName}
+ชื่อบริษัท/ร้านค้า: ${companyName}
 ที่อยู่: ${address}
 เวลาทำการ: ${workingHours}
 ${phoneList ? 'โทรศัพท์: ' + phoneList : ''}
@@ -87,20 +89,20 @@ ${tiktok ? 'TikTok: ' + tiktok : ''}
 ${youtube ? 'YouTube: ' + youtube : ''}
 `.trim();
     } catch (e) {
-        contactInfo = 'ติดต่อ Morespace ผ่านหน้าเว็บไซต์';
+        contactInfo = 'ติดต่อเราผ่านหน้าเว็บไซต์';
     }
 
-    return { productCatalog, contactInfo, settings, productMap };
+    return { productCatalog, contactInfo, settings, productMap, storeName };
 }
 
-function buildSystemPrompt(productCatalog, contactInfo) {
-    return `คุณคือ "Morespace AI Consultant" ผู้ช่วย AI สถาปนิกและผู้เชี่ยวชาญด้านการจัดการพื้นที่ของ Morespace ผู้เชี่ยวชาญด้านบ้านเก็บของ และโซลูชันจัดเก็บสินค้า
+function buildSystemPrompt(productCatalog, contactInfo, storeName = 'STORAGE HOUSE') {
+    return `คุณคือ "${storeName} AI Consultant" ผู้ช่วย AI สถาปนิกและผู้เชี่ยวชาญด้านการจัดการพื้นที่ของ ${storeName} ผู้เชี่ยวชาญด้านบ้านเก็บของ และโซลูชันจัดเก็บสินค้า
 
 บทบาทและความเชี่ยวชาญของคุณ:
 - วิเคราะห์ความต้องการของลูกค้า: หากลูกค้าให้ข้อมูลมาไม่ครบถ้วน (เช่น บอกแค่ว่า "อยากได้ตู้เก็บของ") ให้ตั้งคำถามกลับเพื่อเจาะลึกความต้องการ เช่น พื้นที่กว้างยาวเท่าไหร่? นำไปใช้งานอะไร? ติดตั้งภายนอกหรือภายใน?
 - ให้คำปรึกษาเชิงลึก: แนะนำสินค้าที่ตอบโจทย์จริงๆ พร้อมอธิบายเหตุผลว่าทำไมถึงเหมาะสม ประเมินงบประมาณเบื้องต้น
 - สไตล์การตอบ: มืออาชีพ (Professional), ล้ำสมัย (Modern), สุภาพและใส่ใจ (Empathetic) เหมือนได้คุยกับสถาปนิกผู้เชี่ยวชาญ
-- ขอบเขต: หากคำถามอยู่นอกเหนือสินค้า/บริการของ Morespace ให้ตอบอย่างสุภาพว่าไม่เชี่ยวชาญ และโยงกลับมาที่โซลูชันของเรา
+- ขอบเขต: หากคำถามอยู่นอกเหนือสินค้า/บริการของ ${storeName} ให้ตอบอย่างสุภาพว่าไม่เชี่ยวชาญ และโยงกลับมาที่โซลูชันของเรา
 - การโอนสาย: หากลูกค้ายืนยันต้องการคุยกับพนักงาน (มนุษย์) ให้แจ้งข้อมูลติดต่อจากส่วน "ข้อมูลติดต่อ" ด้านล่าง
 
 == รูปแบบการตอบ (Formatting Rules) ==
@@ -144,8 +146,8 @@ router.post('/', async (req, res) => {
         }
 
         // Build context from DB
-        const { productCatalog, contactInfo, productMap } = await buildSystemContext();
-        const systemPrompt = buildSystemPrompt(productCatalog, contactInfo);
+        const { productCatalog, contactInfo, productMap, storeName } = await buildSystemContext();
+        const systemPrompt = buildSystemPrompt(productCatalog, contactInfo, storeName);
 
         // Get/create conversation history
         const sid = sessionId || 'anonymous';
@@ -166,7 +168,7 @@ router.post('/', async (req, res) => {
         // Build contents for Gemini
         const contents = [
             { role: 'user', parts: [{ text: systemPrompt + '\n\nนี่คือข้อความแรกของลูกค้า ให้ทักทายด้วย' }] },
-            { role: 'model', parts: [{ text: 'สวัสดีครับ ผมคือ **Morespace AI Consultant** ผู้เชี่ยวชาญด้านการจัดการพื้นที่และการเลือกโซลูชันจัดเก็บสินค้า วันนี้มีโปรเจกต์แบบไหน หรือต้องการให้ผมช่วยวิเคราะห์พื้นที่สำหรับการติดตั้งบ้านเก็บของ แจ้งได้เลยครับ' }] },
+            { role: 'model', parts: [{ text: `สวัสดีครับ ผมคือ **${storeName} AI Consultant** ผู้เชี่ยวชาญด้านการจัดการพื้นที่และการเลือกโซลูชันจัดเก็บสินค้า วันนี้มีโปรเจกต์แบบไหน หรือต้องการให้ผมช่วยวิเคราะห์พื้นที่สำหรับการติดตั้งบ้านเก็บของ แจ้งได้เลยครับ` }] },
             ...session.messages
         ];
 

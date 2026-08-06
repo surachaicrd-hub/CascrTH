@@ -27,7 +27,7 @@ const getTransporter = async () => {
                 auth: { user, pass },
                 tls: { rejectUnauthorized: false } // Bypass untrusted certificate issues
             }),
-            fromName: s.smtp_from_name || process.env.SMTP_FROM_NAME || 'Morespace',
+            fromName: s.smtp_from_name || process.env.SMTP_FROM_NAME || s.store_name || 'STORAGE HOUSE',
             fromEmail: user
         };
     } catch (e) {
@@ -47,7 +47,7 @@ const getTransporter = async () => {
                 auth: { user, pass },
                 tls: { rejectUnauthorized: false } // Bypass untrusted certificate issues
             }),
-            fromName: process.env.SMTP_FROM_NAME || 'Morespace',
+            fromName: process.env.SMTP_FROM_NAME || 'STORAGE HOUSE',
             fromEmail: user
         };
     }
@@ -61,7 +61,7 @@ const getStoreSettings = async () => {
         const s = {};
         for (const r of rows) s[r.setting_key] = r.setting_value;
         return { 
-            storeName: s.store_name || 'Morespace', 
+            storeName: s.store_name || 'STORAGE HOUSE', 
             storeLogo: s.store_logo || '', 
             contactEmail: s.contact_email || '',
             contactEmails: s.contact_emails || '',
@@ -71,7 +71,7 @@ const getStoreSettings = async () => {
         };
     } catch (e) {
         return { 
-            storeName: 'Morespace', 
+            storeName: 'STORAGE HOUSE', 
             storeLogo: '', 
             contactEmail: '', 
             contactEmails: '',
@@ -482,7 +482,7 @@ const sendVerificationEmail = async (email, token, frontendUrl) => {
     const store = await getStoreSettings();
 
     const content = `
-        <h2 style="margin:0 0 8px;color:#111827;font-size:20px;">ยินดีต้อนรับสู่ครอบครัว Morespace! 🎉</h2>
+        <h2 style="margin:0 0 8px;color:#111827;font-size:20px;">ยินดีต้อนรับสู่ ${store.storeName}! 🎉</h2>
         <p style="margin:0 0 16px;color:#374151;font-size:15px;">กรุณาคลิกลิงก์ด้านล่างเพื่อยืนยันบัญชีอีเมลของคุณ และเปิดใช้งานการเข้าถึงสิทธิพิเศษต่างๆ:</p>
         <div style="text-align:center;margin-top:24px;margin-bottom:24px;">
             <a href="${verifyUrl}" style="display:inline-block;padding:12px 32px;background:#10b981;color:#ffffff;text-decoration:none;font-weight:700;border-radius:8px;font-size:16px;">ยืนยันอีเมลของฉัน</a>
@@ -493,7 +493,7 @@ const sendVerificationEmail = async (email, token, frontendUrl) => {
 
     await sendMailLogged({
         recipient: email,
-        subject: `ยินดีต้อนรับสู่ Morespace - กรุณายืนยันอีเมลของคุณ`,
+        subject: `ยินดีต้อนรับสู่ ${store.storeName} - กรุณายืนยันอีเมลของคุณ`,
         emailType: 'Verification',
         html: emailTemplate(content, store)
     });
@@ -638,7 +638,7 @@ const sendAdminLoginNotification = async (adminUsername, adminName, notifyEmails
 
     const content = `
         <h2 style="margin:0 0 8px;color:#ef4444;font-size:20px;">🚨 แจ้งเตือนความปลอดภัย: มีการล็อกอินเข้าระบบหลังบ้าน (Admin)</h2>
-        <p style="margin:0 0 16px;color:#374151;font-size:15px;">ระบบตรวจพบการเข้าสู่ระบบส่วนการจัดการหลังบ้าน (Morespace Admin Panel) สำเร็จด้วยข้อมูลดังต่อไปนี้:</p>
+        <p style="margin:0 0 16px;color:#374151;font-size:15px;">ระบบตรวจพบการเข้าสู่ระบบส่วนการจัดการหลังบ้าน (${store.storeName} Admin Panel) สำเร็จด้วยข้อมูลดังต่อไปนี้:</p>
         <div style="background:#f9fafb;border-radius:12px;padding:20px;border-left:4px solid #ef4444;margin-bottom:24px;">
             <p style="margin:0 0 8px;font-size:14px;color:#374151;">👤 <strong>ชื่อผู้ใช้งาน:</strong> ${adminUsername}</p>
             <p style="margin:0 0 8px;font-size:14px;color:#374151;">📛 <strong>ชื่อแอดมิน:</strong> ${adminName}</p>

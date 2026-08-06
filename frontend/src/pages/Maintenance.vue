@@ -141,8 +141,8 @@ const settingsStore = useSettingsStore()
 
     <!-- Minimum Footer -->
     <div class="w-full text-center px-4 py-8 opacity-0 animate-fade-in-up delay-500 fill-mode-forwards z-10">
-      <p class="text-[12px] text-gray-400 font-medium tracking-[0.2em] uppercase">
-        &copy; {{ new Date().getFullYear() }} {{ settingsStore.storeName || 'MORESPACE' }}. All rights reserved.
+      <p v-if="settingsStore.storeName" class="text-[12px] text-gray-400 font-medium tracking-[0.2em] uppercase">
+        &copy; {{ new Date().getFullYear() }} {{ settingsStore.storeName }}. All rights reserved.
       </p>
     </div>
   </div>

@@ -1,11 +1,13 @@
 <script setup>
 import { ref, onMounted, onUnmounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useSettingsStore } from '../stores/settingsStore'
 import SocialShare from '../components/SocialShare.vue'
 import { getOptimizedImageUrl, onImageError } from '../utils/image'
 
 const route = useRoute()
 const router = useRouter()
+const settingsStore = useSettingsStore()
 const article = ref(null)
 const loading = ref(true)
 const relatedArticles = ref([])
@@ -19,7 +21,7 @@ const transformOembed = (html) => {
   
   const buildYouTubeEmbed = (videoId) => {
     const embedUrl = `https://www.youtube.com/embed/${videoId}`;
-    return `<div class="yt-embed-wrapper"><div class="yt-embed-inner"><iframe src="${embedUrl}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen loading="lazy"></iframe></div></div>`;
+    return `<div class="yt-embed-wrapper"><div class="yt-embed-inner"><iframe src="${embedUrl}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div></div>`;
   };
 
   const extractYouTubeId = (url) => {
@@ -82,7 +84,7 @@ const loadArticle = async () => {
 }
 
 const updateMetaTags = () => {
-    const titleText = article.value.seo_title || article.value.title || 'Morespace บทความ'
+    const titleText = article.value.seo_title || article.value.title || (settingsStore.storeName ? `${settingsStore.storeName} บทความ` : 'บทความ')
     document.title = titleText
 
     const setMeta = (name, content, isProp = false) => {
@@ -200,8 +202,8 @@ const addSchema = () => {
     "author": { "@type": "Person", "name": article.value.author || "Admin" },
     "publisher": {
       "@type": "Organization",
-      "name": "Morespace",
-      "url": "https://morespace.co.th"
+      "name": settingsStore.storeName || "",
+      "url": window.location.origin
     },
     "datePublished": article.value.created_at,
     "dateModified": article.value.updated_at,
@@ -221,8 +223,8 @@ const addSchema = () => {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     "itemListElement": [
-      { "@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": "https://morespace.co.th/" },
-      { "@type": "ListItem", "position": 2, "name": "บทความ", "item": "https://morespace.co.th/blog" },
+      { "@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": `${window.location.origin}/` },
+      { "@type": "ListItem", "position": 2, "name": "บทความ", "item": `${window.location.origin}/blog` },
       { "@type": "ListItem", "position": 3, "name": article.value.title, "item": window.location.href }
     ]
   }
@@ -367,7 +369,7 @@ onUnmounted(() => {
           <div class="w-10 h-10 rounded-full bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center text-indigo-600 dark:text-indigo-400 font-bold">{{ (article.author || 'A')[0] }}</div>
           <div>
             <p class="text-sm font-bold text-gray-900 dark:text-white">{{ article.author || 'Admin' }}</p>
-            <p class="text-xs text-gray-400">Morespace Team</p>
+            <p v-if="settingsStore.storeName" class="text-xs text-gray-400">{{ settingsStore.storeName }} Team</p>
           </div>
           <div class="ml-auto">
             <SocialShare />

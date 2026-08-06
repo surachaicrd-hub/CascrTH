@@ -2,7 +2,9 @@
 import { ref, onMounted, onUnmounted, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { getOptimizedImageUrl, onImageError } from '../utils/image'
+import { useSettingsStore } from '../stores/settingsStore'
 
+const settingsStore = useSettingsStore()
 const route = useRoute()
 const articles = ref([])
 const categories = ref([])
@@ -128,16 +130,18 @@ const gridArticles = computed(() => {
 
 // Schema
 const addSchema = () => {
+  const storeName = settingsStore.storeName || ''
+  const baseUrl = window.location.origin
   const schema = {
     "@context": "https://schema.org",
     "@type": "Blog",
-    "name": "บทความ Morespace",
+    "name": `บทความ ${storeName}`.trim(),
     "description": "บทความให้ความรู้เกี่ยวกับบ้านเก็บของ โรงเรือน การดูแลรักษา และเคล็ดลับจัดพื้นที่",
-    "url": "https://morespace.co.th/blog",
+    "url": `${baseUrl}/blog`,
     "publisher": {
       "@type": "Organization",
-      "name": "Morespace",
-      "url": "https://morespace.co.th"
+      "name": storeName,
+      "url": baseUrl
     }
   }
   const s = document.createElement('script')
@@ -225,7 +229,6 @@ onUnmounted(() => {
               <img
                 :src="getOptimizedBlogImageUrl(featuredArticle.cover_image, 1200)"
                 :alt="featuredArticle.title"
-                loading="lazy"
                 class="w-full h-full object-cover transform group-hover:scale-102 transition-transform duration-[1.2s] ease-out"
                 @error="onImageError"
               />
@@ -271,7 +274,7 @@ onUnmounted(() => {
                     {{ featuredArticle.view_count || 0 }} ยอดเข้าชม
                   </span>
                   <span>•</span>
-                  <span>โดย {{ featuredArticle.author || 'Morespace' }}</span>
+                  <span v-if="featuredArticle.author || settingsStore.storeName">โดย {{ featuredArticle.author || settingsStore.storeName }}</span>
                 </div>
                 
                 <span class="featured-hero-action">
@@ -415,7 +418,6 @@ onUnmounted(() => {
               <img
                 :src="getOptimizedBlogImageUrl(article.cover_image, 600)"
                 :alt="article.title"
-                loading="lazy"
                 class="card-img"
                 @error="onImageError"
               />

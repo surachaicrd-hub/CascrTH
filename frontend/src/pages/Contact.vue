@@ -62,13 +62,13 @@ const contact = ref({
   contact_company_name: 'บริษัท ซีอาร์ ดิสทริบิวชั่น จำกัด',
   contact_address: '75/110 หมู่ 11 ตำบลคลองหนึ่ง อำเภอคลองหลวง จังหวัดปทุมธานี 12120',
   contact_map_embed: '',
-  contact_working_hours: 'จันทร์ - ศุกร์ 08:00 - 17:00 น.'
+  contact_working_hours: ''
 })
 
 // Multi-entry contact lists
-const phones = ref([{ name: 'ฝ่ายขาย', value: '02-908-1348 ต่อ 9' }])
-const emails = ref([{ name: 'ฝ่ายขาย', value: 'panuwat@morespace.co.th' }])
-const lines = ref([{ name: 'บริษัท', value: '@morespace', url: 'https://line.me/R/ti/p/@morespace' }])
+const phones = ref([])
+const emails = ref([])
+const lines = ref([])
 const socialFacebook = ref('')
 const socialTiktok = ref('')
 const socialYoutube = ref('')
@@ -179,8 +179,8 @@ const addStructuredData = () => {
   const schema = {
     "@context": "https://schema.org",
     "@type": "ContactPage",
-    "name": "ติดต่อเรา - Morespace",
-    "description": "ติดต่อและสอบถามข้อมูลเพิ่มเติมเกี่ยวกับสินค้าและบริการติดตั้งบ้านเก็บของจาก Morespace",
+    "name": settingsStore.storeName ? `ติดต่อเรา - ${settingsStore.storeName}` : 'ติดต่อเรา',
+    "description": "ติดต่อและสอบถามข้อมูลเพิ่มเติมเกี่ยวกับสินค้าและบริการติดตั้งบ้านเก็บของ",
     "mainEntity": {
       "@type": "LocalBusiness",
       "name": contact.value.contact_company_name,
@@ -615,7 +615,6 @@ onUnmounted(() => {
             height="100%" 
             style="border:0;" 
             allowfullscreen="" 
-            loading="lazy" 
             referrerpolicy="no-referrer-when-downgrade" 
             class="absolute inset-0 w-full h-full filter dark:invert-[90%] dark:hue-rotate-180 opacity-90 hover:opacity-100 hover:filter-none transition-all duration-700"
           ></iframe>

@@ -2,11 +2,13 @@
 import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useToast } from '../../composables/useToast'
+import { useConfirm } from '../../composables/useConfirm'
 import { getTrackingUrl, getProviderIcon } from '../../utils/trackingUrls'
 
 const route = useRoute()
 const router = useRouter()
 const { showToast } = useToast()
+const { showConfirm } = useConfirm()
 const toast = {
   success: (msg) => showToast(msg, 'success'),
   error: (msg) => showToast(msg, 'error'),
@@ -145,6 +147,36 @@ const printDocument = (type) => {
   window.open(`/admin/orders/${order.value.id}/print/${type}`, '_blank')
 }
 
+const deleteOrder = async () => {
+  if (!order.value) return
+  const isConfirmed = await showConfirm({
+    title: 'ยืนยันการลบคำสั่งซื้อ',
+    message: `คุณแน่ใจหรือไม่ว่าต้องการลบคำสั่งซื้อ #${shortId(order.value.id)}? การดำเนินการนี้ไม่สามารถย้อนกลับได้`,
+    confirmText: 'ลบคำสั่งซื้อ',
+    cancelText: 'ยกเลิก',
+    type: 'danger'
+  })
+  if (!isConfirmed) return
+
+  try {
+    const res = await fetch(`/api/orders/admin/${order.value.id}`, {
+      method: 'DELETE',
+      headers: authHeaders()
+    })
+    const data = await res.json()
+    if (data.success) {
+      toast.success(data.message || 'ลบคำสั่งซื้อเรียบร้อยแล้ว')
+      router.push('/admin/orders')
+    } else {
+      toast.error(data.error || 'ไม่สามารถลบคำสั่งซื้อได้')
+    }
+  } catch (e) {
+    console.error('Delete order error:', e)
+    toast.error('เกิดข้อผิดพลาดในการลบคำสั่งซื้อ')
+  }
+}
+
+
 const formatPrice = (v) => Number(v || 0).toLocaleString('th-TH', { minimumFractionDigits: 2 })
 const formatDate = (d) => d ? new Date(d).toLocaleString('th-TH', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '-'
 const formatDateShort = (d) => d ? new Date(d).toLocaleString('th-TH', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '-'
@@ -205,6 +237,10 @@ onMounted(() => { fetchOrder(); fetchActivity(); fetchCompany() })
             <span :class="[getStatusOpt(order.order_status).dot, 'w-1.5 h-1.5 rounded-full']"></span>
             สถานะ: {{ getStatusOpt(order.order_status).label }}
           </span>
+          <button @click="deleteOrder" class="h-8 px-3 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm ml-1" title="ลบคำสั่งซื้อนี้">
+            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+            ลบคำสั่งซื้อ
+          </button>
         </div>
       </div>
 

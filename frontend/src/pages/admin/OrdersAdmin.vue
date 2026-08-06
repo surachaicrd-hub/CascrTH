@@ -2,11 +2,13 @@
 import { ref, onMounted, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useToast } from '../../composables/useToast'
+import { useConfirm } from '../../composables/useConfirm'
 import InfoTooltip from '../../components/admin/InfoTooltip.vue'
 
 const router = useRouter()
 
 const toast = useToast()
+const { showConfirm } = useConfirm()
 
 const orders = ref([])
 const stats = ref({})
@@ -218,6 +220,75 @@ const bulkUpdate = async () => {
   selectedRows.value = []
   selectAll.value = false
 }
+
+// Single delete order
+const deleteOrder = async (orderId) => {
+  const isConfirmed = await showConfirm({
+    title: 'ยืนยันการลบคำสั่งซื้อ',
+    message: `คุณแน่ใจหรือไม่ว่าต้องการลบคำสั่งซื้อ #${shortId(orderId)}? การดำเนินการนี้ไม่สามารถย้อนกลับได้`,
+    confirmText: 'ลบคำสั่งซื้อ',
+    cancelText: 'ยกเลิก',
+    type: 'danger'
+  })
+  if (!isConfirmed) return
+
+  try {
+    const token = localStorage.getItem('adminToken')
+    const res = await fetch(`/api/orders/admin/${orderId}`, {
+      method: 'DELETE',
+      headers: { 'Authorization': `Bearer ${token}` }
+    })
+    const data = await res.json()
+    if (data.success) {
+      toast.success(data.message || 'ลบคำสั่งซื้อเรียบร้อยแล้ว')
+      fetchOrders()
+    } else {
+      toast.error(data.error || 'ไม่สามารถลบคำสั่งซื้อได้')
+    }
+  } catch (e) {
+    console.error('Delete order error:', e)
+    toast.error('เกิดข้อผิดพลาดในการลบคำสั่งซื้อ')
+  }
+}
+
+// Bulk delete orders
+const bulkDeleteOrders = async () => {
+  if (selectedRows.value.length === 0) return
+  const count = selectedRows.value.length
+  const isConfirmed = await showConfirm({
+    title: 'ยืนยันการลบคำสั่งซื้อหลายรายการ',
+    message: `คุณแน่ใจหรือไม่ว่าต้องการลบคำสั่งซื้อที่เลือกจำนวน ${count} รายการ? การดำเนินการนี้ไม่สามารถย้อนกลับได้`,
+    confirmText: `ลบ ${count} รายการ`,
+    cancelText: 'ยกเลิก',
+    type: 'danger'
+  })
+  if (!isConfirmed) return
+
+  try {
+    const token = localStorage.getItem('adminToken')
+    const res = await fetch('/api/orders/admin/bulk-delete', {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({ ids: selectedRows.value })
+    })
+    const data = await res.json()
+    if (data.success) {
+      toast.success(data.message || 'ลบคำสั่งซื้อที่เลือกเรียบร้อยแล้ว')
+      selectedRows.value = []
+      selectAll.value = false
+      fetchOrders()
+    } else {
+      toast.error(data.error || 'ไม่สามารถลบคำสั่งซื้อได้')
+    }
+  } catch (e) {
+    console.error('Bulk delete orders error:', e)
+    toast.error('เกิดข้อผิดพลาดในการลบคำสั่งซื้อ')
+  }
+}
+
 
 
 
@@ -479,13 +550,19 @@ onMounted(fetchOrders)
 
       <!-- Bulk action bar -->
       <transition name="slide">
-        <div v-if="selectedRows.length > 0" class="px-4 py-3 bg-gray-900 flex items-center gap-4">
+        <div v-if="selectedRows.length > 0" class="px-4 py-3 bg-gray-900 flex items-center gap-3 flex-wrap">
           <span class="text-sm font-bold text-white">เลือก {{ selectedRows.length }} รายการ</span>
-          <select v-model="bulkStatus" class="h-8 px-3 rounded-lg border-0 text-sm font-bold bg-gray-700 text-white outline-none">
-            <option value="">— เปลี่ยนสถานะ —</option>
-            <option v-for="opt in orderStatusOptions" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
-          </select>
-          <button v-if="bulkStatus" @click="bulkUpdate" class="h-8 px-4 bg-emerald-500 text-white rounded-lg text-sm font-bold hover:bg-emerald-600 transition-colors">ยืนยัน</button>
+          <div class="flex items-center gap-2">
+            <select v-model="bulkStatus" class="h-8 px-3 rounded-lg border-0 text-sm font-bold bg-gray-700 text-white outline-none">
+              <option value="">— เปลี่ยนสถานะ —</option>
+              <option v-for="opt in orderStatusOptions" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
+            </select>
+            <button v-if="bulkStatus" @click="bulkUpdate" class="h-8 px-4 bg-emerald-500 text-white rounded-lg text-sm font-bold hover:bg-emerald-600 transition-colors">ยืนยัน</button>
+          </div>
+          <button @click="bulkDeleteOrders" class="h-8 px-3 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-bold transition-colors flex items-center gap-1.5 shadow-sm">
+            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+            ลบที่เลือก
+          </button>
           <button @click="selectedRows = []; selectAll = false" class="ml-auto text-sm text-gray-400 hover:text-white transition-colors font-medium">ยกเลิกการเลือก</button>
         </div>
       </transition>
@@ -519,7 +596,8 @@ onMounted(fetchOrders)
               <th class="text-center px-3 py-3 font-bold text-gray-400 uppercase text-[10px] tracking-wider">การชำระ</th>
               <th class="text-center px-3 py-3 font-bold text-gray-400 uppercase text-[10px] tracking-wider">สถานะ</th>
               <th class="text-center px-3 py-3 font-bold text-gray-400 uppercase text-[10px] tracking-wider">สลิป</th>
-              <th class="text-right px-3 py-3 font-bold text-gray-400 uppercase text-[10px] tracking-wider pr-5">วันที่สั่งซื้อ</th>
+              <th class="text-right px-3 py-3 font-bold text-gray-400 uppercase text-[10px] tracking-wider">วันที่สั่งซื้อ</th>
+              <th class="text-center px-3 py-3 font-bold text-gray-400 uppercase text-[10px] tracking-wider pr-4">จัดการ</th>
             </tr>
           </thead>
           <tbody>
@@ -573,10 +651,16 @@ onMounted(fetchOrders)
                 </div>
                 <span v-else class="text-gray-300 text-xs">—</span>
               </td>
-              <td class="px-3 py-3 text-right pr-5">
+              <td class="px-3 py-3 text-right">
                 <span class="text-xs text-gray-500 font-medium">{{ formatDateShort(order.created_at) }}</span>
               </td>
+              <td class="px-3 py-3 text-center pr-4" @click.stop>
+                <button @click.stop="deleteOrder(order.id)" class="w-8 h-8 rounded-lg bg-red-50 hover:bg-red-100 text-red-600 transition-colors inline-flex items-center justify-center group-hover:scale-105" title="ลบคำสั่งซื้อ">
+                  <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                </button>
+              </td>
             </tr>
+
           </tbody>
         </table>
       </div>

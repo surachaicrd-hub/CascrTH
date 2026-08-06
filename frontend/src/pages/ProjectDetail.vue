@@ -40,7 +40,7 @@ const transformOembed = (html) => {
   
   const buildYouTubeEmbed = (videoId) => {
     const embedUrl = `https://www.youtube.com/embed/${videoId}`;
-    return `<div class="yt-embed-wrapper"><div class="yt-embed-inner"><iframe src="${embedUrl}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen loading="lazy"></iframe></div></div>`;
+    return `<div class="yt-embed-wrapper"><div class="yt-embed-inner"><iframe src="${embedUrl}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div></div>`;
   };
 
   const extractYouTubeId = (url) => {
@@ -381,7 +381,6 @@ const formatDate = (dateString) => {
                     :src="getImageUrl(img, 600)" 
                     :alt="`รูปที่ ${idx + 1}`" 
                     class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" 
-                    loading="lazy" 
                     @error="onImageError"
                   />
                   <!-- Hover overlay -->
@@ -518,7 +517,6 @@ const formatDate = (dateString) => {
                   :src="getProductImage(prod)" 
                   :alt="prod.name" 
                   class="max-h-full max-w-full object-contain transition-transform duration-500 group-hover:scale-105" 
-                  loading="lazy"
                 />
                 <div v-if="prod.discount_percent > 0" class="absolute top-2 left-2 bg-emerald-500 text-white text-[9px] font-black px-2 py-0.5 rounded-full uppercase leading-none shadow">
                   -{{ prod.discount_percent }}%
@@ -578,7 +576,6 @@ const formatDate = (dateString) => {
                   :src="getImageUrl(article.cover_image, 600)" 
                   :alt="article.title" 
                   class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-103" 
-                  loading="lazy"
                   @error="onImageError"
                 />
                 <div v-else class="w-full h-full flex items-center justify-center text-slate-600 bg-slate-900">
@@ -808,14 +805,13 @@ const formatDate = (dateString) => {
 
 /* ─── Scroll entrance reveal animation ─── */
 .reveal {
-  opacity: 0;
-  transform: translateY(24px);
-  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  opacity: 1;
+  transform: none;
 }
 
 .reveal.is-visible {
   opacity: 1;
-  transform: translateY(0);
+  transform: none;
 }
 
 /* ─── Sidebar Cards ─── */

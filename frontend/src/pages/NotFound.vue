@@ -158,7 +158,7 @@ onMounted(() => {
             :to="'/products/category/' + encodeURIComponent(cat.name)"
             class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold bg-white dark:bg-[#111827] text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-gray-800 hover:border-emerald-400 dark:hover:border-emerald-600 hover:text-emerald-700 dark:hover:text-emerald-400 hover:shadow-md transition-all"
           >
-            <img v-if="cat.icon_url" :src="cat.icon_url" :alt="cat.name" class="w-5 h-5 object-contain opacity-50 dark:invert dark:opacity-70">
+            <img v-if="cat.icon_url" :src="cat.icon_url" :alt="cat.name" class="w-5 h-5 object-contain filter invert dark:invert-0 opacity-70 group-hover:opacity-100 transition-opacity">
             {{ cat.name }}
           </router-link>
         </div>

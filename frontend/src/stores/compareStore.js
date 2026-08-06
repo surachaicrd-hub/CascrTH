@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 
-const STORAGE_KEY = 'morespace_compare'
+const STORAGE_KEY = 'product_compare'
 const MAX_ITEMS = 4
 
 export const useCompareStore = defineStore('compare', () => {

@@ -15,7 +15,7 @@ router.get('/info', (req, res) => {
       res.json({
         success: true,
         version: packageData.version || '1.0.0',
-        name: packageData.name || 'Morespace API'
+        name: packageData.name || 'StorageShed API'
       });
     } else {
       res.json({ success: true, version: '1.0.0' });

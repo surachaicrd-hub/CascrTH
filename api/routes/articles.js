@@ -4,6 +4,42 @@ const db = require('../config/database');
 const gemini = require('../services/geminiService');
 const { verifyAdmin } = require('./auth');
 
+// Helper function to safely parse AI JSON responses
+function parseAiJson(rawText) {
+    if (!rawText) return null;
+    let cleaned = rawText.trim();
+    cleaned = cleaned.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
+    try {
+        return JSON.parse(cleaned);
+    } catch (e1) {
+        const jsonMatch = cleaned.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+            try {
+                return JSON.parse(jsonMatch[0]);
+            } catch (e2) {
+                const sanitized = jsonMatch[0].replace(/"([^"\\]*(\\.[^"\\]*)*)"/g, (match) => {
+                    return match.replace(/[\r\n]+/g, '\\n').replace(/\t/g, '\\t');
+                });
+                try {
+                    return JSON.parse(sanitized);
+                } catch (e3) { }
+            }
+        }
+        return null;
+    }
+}
+
+function handleGeminiError(error, defaultMsg) {
+    const msg = (error.message || error.toString() || '');
+    if (error.status === 401 || msg.includes('UNAUTHENTICATED') || msg.includes('authentication credentials') || msg.includes('API Key')) {
+        return 'Gemini API Key ไม่ถูกต้อง หรือยังไม่ได้ตั้งค่า กรุณาตรวจสอบหรืออัปเดต API Key ในหน้าตั้งค่าระบบ (/admin/settings)';
+    }
+    if (error.status === 429 || msg.includes('QUOTA') || msg.includes('quota') || msg.includes('rate limit')) {
+        return 'Gemini API Key ถูกใช้งานเกินโควต้าชั่วคราว กรุณารอสักครู่แล้วลองใหม่อีกครั้ง';
+    }
+    return defaultMsg + ': ' + msg;
+}
+
 // Auto-create articles table
 const initTable = async () => {
     try {
@@ -49,6 +85,10 @@ const initTable = async () => {
     try {
         await db.query(`ALTER TABLE articles ADD COLUMN llm_context TEXT`);
     } catch (e) { /* Column likely exists */ }
+
+    try {
+        await db.query(`ALTER TABLE articles ADD COLUMN published_at DATETIME NULL AFTER is_published`);
+    } catch (e) { /* Column likely exists */ }
 };
 initTable();
 
@@ -62,14 +102,14 @@ const generateSlug = (title) => {
         .substring(0, 200);
 };
 
-// GET all articles (Admin - includes drafts, with pagination)
+// GET all articles (Admin - includes drafts, scheduled, with pagination)
 router.get('/', async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 20;
         const offset = (page - 1) * limit;
         const search = req.query.search || '';
-        const status = req.query.status || ''; // 'published', 'draft', or ''
+        const status = req.query.status || ''; // 'published', 'scheduled', 'draft', or ''
 
         let whereClause = '1=1';
         const params = [];
@@ -79,9 +119,11 @@ router.get('/', async (req, res) => {
             params.push(`%${search}%`, `%${search}%`);
         }
         if (status === 'published') {
-            whereClause += ' AND is_published = 1';
+            whereClause += ' AND is_published = 1 AND (published_at IS NULL OR published_at <= NOW())';
+        } else if (status === 'scheduled') {
+            whereClause += ' AND (published_at IS NOT NULL AND published_at > NOW())';
         } else if (status === 'draft') {
-            whereClause += ' AND is_published = 0';
+            whereClause += ' AND is_published = 0 AND (published_at IS NULL OR published_at <= NOW())';
         }
 
         const [[{ total }]] = await db.query(`SELECT COUNT(*) as total FROM articles WHERE ${whereClause}`, params);
@@ -121,7 +163,7 @@ router.get('/published', async (req, res) => {
         const category = req.query.category;
         const search = req.query.search || '';
 
-        let whereClause = 'WHERE is_published = 1';
+        let whereClause = 'WHERE is_published = 1 AND (published_at IS NULL OR published_at <= NOW())';
         const params = [];
 
         if (category && category !== 'all') {
@@ -138,8 +180,8 @@ router.get('/published', async (req, res) => {
         const total = countResult[0].total;
 
         const [rows] = await db.query(
-            `SELECT id, title, slug, excerpt, cover_image, category, tags, author, view_count, is_featured, product_id, gallery_images, created_at 
-             FROM articles ${whereClause} ORDER BY is_featured DESC, created_at DESC LIMIT ? OFFSET ?`,
+            `SELECT id, title, slug, excerpt, cover_image, category, tags, author, view_count, is_featured, product_id, gallery_images, published_at, created_at 
+             FROM articles ${whereClause} ORDER BY is_featured DESC, COALESCE(published_at, created_at) DESC LIMIT ? OFFSET ?`,
             [...params, limit, offset]
         );
 
@@ -168,7 +210,7 @@ router.get('/published', async (req, res) => {
 router.get('/categories', async (req, res) => {
     try {
         const [rows] = await db.query(
-            `SELECT category, COUNT(*) as count FROM articles WHERE is_published = 1 GROUP BY category ORDER BY count DESC`
+            `SELECT category, COUNT(*) as count FROM articles WHERE is_published = 1 AND (published_at IS NULL OR published_at <= NOW()) GROUP BY category ORDER BY count DESC`
         );
         res.json({ success: true, data: rows });
     } catch (error) {
@@ -228,7 +270,7 @@ router.post('/', verifyAdmin, async (req, res) => {
     try {
         const {
             title, excerpt, content, cover_image, category, tags,
-            seo_title, seo_description, seo_keywords, faq, llm_context, is_published, is_featured, author, product_id,
+            seo_title, seo_description, seo_keywords, faq, llm_context, is_published, published_at, is_featured, author, product_id,
             gallery_images, image_prompt
         } = req.body;
 
@@ -249,8 +291,8 @@ router.post('/', verifyAdmin, async (req, res) => {
 
         const insertQuery = `
             INSERT INTO articles
-            (title, slug, excerpt, content, cover_image, category, tags, seo_title, seo_description, seo_keywords, faq, llm_context, is_published, is_featured, author, product_id, gallery_images, image_prompt)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            (title, slug, excerpt, content, cover_image, category, tags, seo_title, seo_description, seo_keywords, faq, llm_context, is_published, published_at, is_featured, author, product_id, gallery_images, image_prompt)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `;
 
         const galleryJson = Array.isArray(gallery_images) ? JSON.stringify(gallery_images) : '[]';
@@ -263,6 +305,8 @@ router.post('/', verifyAdmin, async (req, res) => {
         } else {
             tagsJson = '[]'; // Default to empty array JSON
         }
+
+        const publishedAtVal = published_at ? new Date(published_at) : null;
 
         const [result] = await db.query(insertQuery, [
             title, finalSlug,
@@ -277,6 +321,7 @@ router.post('/', verifyAdmin, async (req, res) => {
             faqJson,
             llm_context || '',
             is_published ? 1 : 0,
+            publishedAtVal,
             is_featured ? 1 : 0,
             author || 'Admin',
             product_id || null,
@@ -296,7 +341,7 @@ router.put('/:id', verifyAdmin, async (req, res) => {
     try {
         const {
             title, slug: customSlug, excerpt, content, cover_image, category, tags,
-            seo_title, seo_description, seo_keywords, faq, llm_context, is_published, is_featured, author, product_id,
+            seo_title, seo_description, seo_keywords, faq, llm_context, is_published, published_at, is_featured, author, product_id,
             gallery_images, image_prompt
         } = req.body;
 
@@ -308,9 +353,10 @@ router.put('/:id', verifyAdmin, async (req, res) => {
         const tagsJson = typeof tags === 'string' ? tags : JSON.stringify(tags || []);
         const galleryJson = typeof gallery_images === 'string' ? gallery_images : JSON.stringify(gallery_images || []);
         const faqJson = typeof faq === 'string' ? faq : JSON.stringify(faq || []);
+        const publishedAtVal = published_at ? new Date(published_at) : null;
 
         const [result] = await db.query(
-            `UPDATE articles SET title=?, slug=?, excerpt=?, content=?, cover_image=?, category=?, tags=?, seo_title=?, seo_description=?, seo_keywords=?, faq=?, llm_context=?, is_published=?, is_featured=?, author=?, product_id=?, gallery_images=?, image_prompt=?
+            `UPDATE articles SET title=?, slug=?, excerpt=?, content=?, cover_image=?, category=?, tags=?, seo_title=?, seo_description=?, seo_keywords=?, faq=?, llm_context=?, is_published=?, published_at=?, is_featured=?, author=?, product_id=?, gallery_images=?, image_prompt=?
              WHERE id=?`,
             [
                 title, slug,
@@ -325,6 +371,7 @@ router.put('/:id', verifyAdmin, async (req, res) => {
                 faqJson,
                 llm_context || '',
                 is_published ? 1 : 0,
+                publishedAtVal,
                 is_featured ? 1 : 0,
                 author || 'Admin',
                 product_id || null,
@@ -395,54 +442,73 @@ router.post('/generate', verifyAdmin, async (req, res) => {
         // Style-specific prompts
         const stylePrompts = {
             educational: {
-                name: 'ให้ความรู้',
-                prompt: `เขียนบทความให้ความรู้แบบเชิงลึก อธิบายข้อมูลอย่างละเอียด ใช้ภาษาเข้าใจง่าย เป็นกันเอง มีหัวข้อย่อยชัดเจน ให้ข้อมูลที่ผู้อ่านนำไปใช้ได้จริง ความยาว 800-1200 คำ`
+                name: 'ให้ความรู้เชิงลึก (Deep Dive)',
+                prompt: `เขียนบทความให้ความรู้แบบเป็นทางการ น่าเชื่อถือ อธิบายหลักการ เหตุผล และวิธีพิจารณาเลือกซื้ออย่างเป็นกลาง ให้ข้อมูลจริง ไม่โอ้อวด ใช้ภาษาสุภาพ ความยาว 800-1200 คำ`
             },
             sales: {
-                name: 'ขายของ',
-                prompt: `เขียนบทความโปรโมตสินค้า เน้นจุดเด่น คุณสมบัติพิเศษ ความคุ้มค่า มี Call-to-Action ชัดเจน กระตุ้นการตัดสินใจซื้อ ใช้ภาษาน่าสนใจ ดึงดูด สร้างความน่าเชื่อถือ ความยาว 600-800 คำ`
+                name: 'แนะนำและเจาะลึกความคุ้มค่า (Value Proposition)',
+                prompt: `เขียนบทความแนะนำความคุ้มค่าและจุดเด่นของสินค้า วิเคราะห์ฟังก์ชันการใช้งานและการแก้ไขปัญหาให้ลูกค้า มี Call-to-Action ชัดเจน หลีกเลี่ยงคำอวยเกินจริง ความยาว 600-800 คำ`
             },
             howto: {
-                name: 'วิธีใช้/ดูแลรักษา',
-                prompt: `เขียนบทความแนว How-to / Tips เป็นขั้นตอนชัดเจน มีรายการ checklist มีเคล็ดลับที่เป็นประโยชน์ อ่านง่าย ใช้ numbered list และ bullet points ความยาว 800-1000 คำ`
+                name: 'คู่มือและวิธีการ (How-To & Tips)',
+                prompt: `เขียนบทความแนวแนะนำขั้นตอนการใช้งาน การประกอบ หรือการดูแลรักษาอย่างถูกวิธี มี Checklist และข้อควรระวัง ใช้โครงสร้างอ่านง่าย ความยาว 800-1000 คำ`
             },
             comparison: {
-                name: 'เปรียบเทียบ',
-                prompt: `เขียนบทความเปรียบเทียบสินค้า/ตัวเลือกต่างๆ อย่างเป็นกลาง ใส่ตาราง pros/cons วิเคราะห์จุดแข็ง-จุดอ่อน ช่วยผู้อ่านตัดสินใจ ความยาว 800-1000 คำ`
+                name: 'วิเคราะห์เปรียบเทียบอย่างเป็นกลาง (Comparison)',
+                prompt: `เขียนบทความเปรียบเทียบตัวเลือก/วัสดุ/ขนาด อย่างเป็นกลาง มีตารางเปรียบเทียบ ข้อดี-ข้อพิจารณา ช่วยให้ผู้อ่านตัดสินใจได้ถูกต้อง ความยาว 800-1000 คำ`
             },
             review: {
-                name: 'รีวิว',
-                prompt: `เขียนในสไตล์รีวิวประสบการณ์ใช้งานจริง เล่าเรื่องเหมือนลูกค้าจริงรีวิว บอกข้อดี-ข้อจำกัด ให้คะแนน มีรูปแบบที่น่าเชื่อถือ ความยาว 600-800 คำ`
+                name: 'การใช้งานจริงและกรณีศึกษา (Practical Review)',
+                prompt: `เขียนในรูปแบบกรณีศึกษาหรือประสบการณ์ใช้งานจริง นำเสนอภาพรวมการใช้งานในสภาพแวดล้อมจริง ข้อดีและข้อจำกัด ความยาว 600-800 คำ`
             }
         };
 
         const selectedStyle = stylePrompts[style] || stylePrompts.educational;
 
-        const systemPrompt = `คุณเป็นนักเขียนบทความมืออาชีพสำหรับ Morespace บริษัทจำหน่ายบ้านเก็บของสำเร็จรูป ตู้เก็บของ และโกดังเก็บของ
+        let storeName = 'STORAGE HOUSE';
+        let companyLegalName = 'บริษัท ซีอาร์ ดิสทริบิวชั่น จำกัด';
+        try {
+            const [sRows] = await db.query("SELECT setting_key, setting_value FROM settings WHERE setting_key IN ('store_name', 'contact_company_name', 'company_legal_name')");
+            const sMap = {};
+            sRows.forEach(r => { sMap[r.setting_key] = r.setting_value; });
+            storeName = sMap['store_name'] || sMap['contact_company_name'] || 'STORAGE HOUSE';
+            companyLegalName = sMap['company_legal_name'] || sMap['contact_company_name'] || 'บริษัท ซีอาร์ ดิสทริบิวชั่น จำกัด';
+        } catch (e) {}
+
+        const systemPrompt = `คุณเป็นนักเขียนบทความมืออาชีพและผู้เชี่ยวชาญด้าน SEO / GEO (Generative Engine Optimization) สำหรับ "${storeName}" (ดำเนินการโดย ${companyLegalName}) ผู้จัดจำหน่ายบ้านเก็บของสำเร็จรูป ตู้เก็บของกลางแจ้ง และโกดังสำเร็จรูปชั้นนำในไทย
 
 สไตล์การเขียน: ${selectedStyle.name}
-${selectedStyle.prompt}
+แนวทางการเขียน: ${selectedStyle.prompt}
 
-${productInfo ? productInfo : 'ไม่มีสินค้าอ้างอิง ให้เขียนบทความทั่วไปเกี่ยวกับบ้านเก็บของ/ตู้เก็บของกลางแจ้ง'}
-${additionalPrompt ? '\nคำแนะนำเพิ่มเติม: ' + additionalPrompt : ''}
+${productInfo ? productInfo : 'ไม่มีสินค้าเฉพาะเจาะจง ให้เขียนบทความให้ความรู้เกี่ยวกับบ้านเก็บของสำเร็จรูป/ตู้เก็บของกลางแจ้ง/การจัดเก็บพื้นที่'}
+${additionalPrompt ? '\nเนื้อหา/ตัวอย่าง/คำแนะนำเพิ่มเติมจากผู้ใช้ (ให้นำข้อมูลและตัวอย่างนี้ไปวิเคราะห์ เรียบเรียง และสังเคราะห์เข้าในบทความอย่างเป็นธรรมชาติ):\n' + additionalPrompt : ''}
 
-กรุณาตอบเป็น JSON format เท่านั้น ไม่ต้องมี markdown code block ห่อ:
+กฎเหล็กในการเขียน (Professional & SEO/GEO Rules):
+1. [โทนเสียงระดับมืออาชีพ]: ให้ข้อมูลที่เป็นจริง น่าเชื่อถือ อ้างอิงตัวเลขหรือสเปกวัสดุ (เช่น เหล็กกัลวาไนซ์, เมทัลชีท, การทนแดดทนฝน, การรับประกัน) ห้ามใช้คำโฆษณาเกินจริง (เช่น "ดีที่สุดในจักรวาล", "ปฏิวัติวงการอย่างที่ไม่เคยมีมาก่อน")
+2. [โครงสร้างบทความสวยงาม]:
+   - ใช้แท็ก <h2> สำหรับหัวข้อหลัก และ <h3> สำหรับหัวข้อย่อย
+   - ใช้แท็ก <p> หุ้มย่อหน้าอย่างสวยงาม หลีกเลี่ยงข้อความยาวเป็นตับ
+   - ใช้แท็ก <ul> และ <li> สำหรับรายการคุณสมบัติหรือข้อดี
+   - บังคับใส่แท็ก <table><tr><th>...</th></tr><tr><td>...</td></tr></table> อย่างน้อย 1 ตาราง สำหรับสรุปตารางสเปก ตัวเลข หรือข้อเปรียบเทียบ ให้สวยงามอ่านง่าย
+3. [SEO & GEO Optimization]:
+   - ใส่ Keyword สำคัญ (เช่น บ้านเก็บของสำเร็จรูป, ตู้เก็บของกลางแจ้ง, ${storeName}) อย่างเป็นธรรมชาติ
+   - เชื่อมโยงแบรนด์ ${storeName} และ ${companyLegalName} กับบริการจัดส่งและติดตั้งทั่วประเทศ
+
+กรุณาตอบเป็น JSON format เท่านั้น ห้ามมี markdown code block ห่อหุ้ม:
 {
-  "title": "หัวข้อบทความ (SEO friendly ให้น่าสนใจ)",
-  "excerpt": "สรุปเนื้อหาสั้นๆ 2-3 บรรทัด",
-  "content": "เนื้อหาบทความเต็มเป็น HTML string. กฎเหล็ก: [1] ห้ามใช้ \\n ธรรมดา ให้ใช้แท็ก <p>...</p> หุ้มทุกย่อหน้าเพื่อแบ่งบรรทัดเสมอ [2] ใช้แท็ก <h2>, <h3> สำหรับหัวข้อ [3] ใช้ <ul><li> สำหรับหัวข้อย่อย [4] สำคัญมาก: ข้อมูลจำเพาะ วัสดุ หรือข้อเปรียบเทียบ ต้องถูกจัดรูปแบบด้วยแท็ก <table><tr><th><td> เสมอ เพื่อให้อ่านง่ายและสวยงาม",
-  "seo_title": "SEO Title (60 ตัวอักษร)",
-  "seo_description": "SEO Meta Description (160 ตัวอักษร)",
-  "seo_keywords": "keyword1,keyword2,keyword3 (คั่นด้วย comma)",
+  "title": "หัวข้อบทความ (SEO friendly น่าสนใจ และตรงประเด็น)",
+  "excerpt": "สรุปเนื้อหาสั้นๆ 2-3 บรรทัด สำหรับเกริ่นนำ",
+  "content": "เนื้อหาบทความเต็มรูปแบบ HTML string ห้ามใช้ \\n ให้ใช้แท็ก <p>, <h2>, <h3>, <ul><li>, <table> เท่านั้น",
+  "seo_title": "SEO Title (ยาวไม่เกิน 60 ตัวอักษร)",
+  "seo_description": "SEO Meta Description (ยาวไม่เกิน 160 ตัวอักษร)",
+  "seo_keywords": "keyword1,keyword2,keyword3,keyword4",
   "tags": "tag1,tag2,tag3,tag4,tag5",
-  "category": "หมวดหมู่ที่เหมาะ (เลือกจาก: ทั่วไป, บ้านเก็บของ, เคล็ดลับ, การดูแลรักษา, ข่าวสาร, โปรโมชั่น)",
-  "llm_context": "ข้อความอธิบายบริบทสั้นๆ (2-3 ประโยค) เพื่อบอกให้ AI อื่นรู้ว่าหน้านี้เกี่ยวข้องกับอะไร",
-  "image_prompt": "A descriptive, high-quality, photorealistic English prompt for an image generator (like Midjourney or DALL-E) representing the cover of this article. Keep it under 30 words. Format: 'A photorealistic image of [subject], 8k resolution, highly detailed'",
+  "category": "หมวดหมู่ที่เหมาะสม (เลือกจาก: ทั่วไป, บ้านเก็บของ, เคล็ดลับ, การดูแลรักษา, ข่าวสาร, โปรโมชั่น)",
+  "llm_context": "บริบทเชิงลึก 2-3 ประโยค สรุปคุณสมบัติ สเปกวัสดุ แบรนด์ ${storeName} และบริการ สำหรับ AI Scraper (ChatGPT/Perplexity) อ่านโดยเฉพาะ",
+  "image_prompt": "An exquisite Midjourney v6 / DALL-E 3 English prompt for editorial magazine cover photo matching the article topic, specifying lighting, composition, Architectural Digest photography style, 8k, photorealistic, no text --ar 16:9",
   "faq": [
-    {
-      "question": "คำถามที่ 1",
-      "answer": "คำตอบที่ 1"
-    }
+    { "question": "คำถามที่พบบ่อย 1", "answer": "คำตอบที่ระบุข้อเท็จจริงชัดเจน 1" },
+    { "question": "คำถามที่พบบ่อย 2", "answer": "คำตอบที่ระบุข้อเท็จจริงชัดเจน 2" }
   ]
 }`;
 
@@ -451,39 +517,31 @@ ${additionalPrompt ? '\nคำแนะนำเพิ่มเติม: ' + ad
             label: 'Article Generate'
         });
 
-        let aiText = response.text || '';
-
-        // Clean up markdown code blocks if present
-        aiText = aiText.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim();
-
-        // Strip raw newlines or tabs that could break JSON.parse in string literals
-        aiText = aiText.replace(/[\n\r\t]+/g, ' ');
-
-        try {
-            const articleData = JSON.parse(aiText);
-            res.json({
-                success: true,
-                data: {
-                    title: articleData.title || '',
-                    excerpt: articleData.excerpt || '',
-                    content: articleData.content || '',
-                    seo_title: articleData.seo_title || '',
-                    seo_description: articleData.seo_description || '',
-                    seo_keywords: articleData.seo_keywords || '',
-                    tags: articleData.tags || '',
-                    category: articleData.category || productCategory,
-                    llm_context: articleData.llm_context || '',
-                    image_prompt: articleData.image_prompt || '',
-                    faq: Array.isArray(articleData.faq) ? articleData.faq : []
-                }
-            });
-        } catch (parseError) {
-            console.error('AI JSON parse error:', parseError, 'Raw:', aiText.substring(0, 200));
-            res.status(500).json({ success: false, error: 'AI สร้างข้อมูลไม่สมบูรณ์ กรุณาลองใหม่' });
+        const articleData = parseAiJson(response.text);
+        if (!articleData) {
+            console.error('AI JSON parse error. Raw:', (response.text || '').substring(0, 300));
+            return res.status(500).json({ success: false, error: 'AI สร้างข้อมูลไม่สมบูรณ์ กรุณาลองใหม่อีกครั้ง' });
         }
+
+        res.json({
+            success: true,
+            data: {
+                title: articleData.title || '',
+                excerpt: articleData.excerpt || '',
+                content: articleData.content || '',
+                seo_title: articleData.seo_title || '',
+                seo_description: articleData.seo_description || '',
+                seo_keywords: articleData.seo_keywords || '',
+                tags: articleData.tags || '',
+                category: articleData.category || productCategory,
+                llm_context: articleData.llm_context || '',
+                image_prompt: articleData.image_prompt || '',
+                faq: Array.isArray(articleData.faq) ? articleData.faq : []
+            }
+        });
     } catch (error) {
         console.error('Generate article error:', error);
-        res.status(500).json({ success: false, error: 'เกิดข้อผิดพลาดในการสร้างบทความ: ' + error.message });
+        res.status(500).json({ success: false, error: handleGeminiError(error, 'เกิดข้อผิดพลาดในการสร้างบทความ') });
     }
 });
 
@@ -530,29 +588,25 @@ Tags ปัจจุบัน: ${tags || '-'}
             label: 'Article All-SEO Generate'
         });
 
-        let aiText = response.text || '';
-        aiText = aiText.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim();
-        aiText = aiText.replace(/[\n\r\t]+/g, ' '); // simple sanitization
-
-        try {
-            const generatedData = JSON.parse(aiText);
-            res.json({
-                success: true,
-                data: {
-                    seo_title: generatedData.seo_title || title || '',
-                    seo_description: generatedData.seo_description || excerpt || '',
-                    seo_keywords: generatedData.seo_keywords || tags || '',
-                    llm_context: generatedData.llm_context || '',
-                    faq: Array.isArray(generatedData.faq) ? generatedData.faq : []
-                }
-            });
-        } catch (parseError) {
-            console.error('AI JSON parse error:', parseError, 'Raw:', aiText.substring(0, 200));
-            res.status(500).json({ success: false, error: 'AI สร้างข้อมูลไม่สมบูรณ์ กรุณาลองใหม่' });
+        const generatedData = parseAiJson(response.text);
+        if (!generatedData) {
+            console.error('AI JSON parse error. Raw:', (response.text || '').substring(0, 300));
+            return res.status(500).json({ success: false, error: 'AI สร้างข้อมูลไม่สมบูรณ์ กรุณาลองใหม่อีกครั้ง' });
         }
+
+        res.json({
+            success: true,
+            data: {
+                seo_title: generatedData.seo_title || title || '',
+                seo_description: generatedData.seo_description || excerpt || '',
+                seo_keywords: generatedData.seo_keywords || tags || '',
+                llm_context: generatedData.llm_context || '',
+                faq: Array.isArray(generatedData.faq) ? generatedData.faq : []
+            }
+        });
     } catch (error) {
         console.error('Generate All SEO error:', error);
-        res.status(500).json({ success: false, error: 'เกิดข้อผิดพลาดในการสร้างข้อมูล: ' + error.message });
+        res.status(500).json({ success: false, error: handleGeminiError(error, 'เกิดข้อผิดพลาดในการสร้างข้อมูล') });
     }
 });
 
@@ -565,14 +619,19 @@ router.post('/generate-prompt', verifyAdmin, async (req, res) => {
             return res.status(400).json({ success: false, error: 'ต้องมีหัวข้อหรือข้อมูลสำหรับสร้าง Prompt' });
         }
 
-        // Translate the Thai title to an English image prompt
-        const systemPrompt = `You are an expert AI prompt engineer.
-Convert the following article topic/title into a descriptive, high-quality, photorealistic English prompt for an image generator like Midjourney or DALL-E.
-Keep it under 30 words. No text, no words in the image. Just pure visual description.
-Format: "A photorealistic image of [subject], [environment/lighting], 8k resolution, highly detailed, professional photography"
+        const systemPrompt = `คุณเป็นพรอทพ์เอ็นจิเนียร์ (AI Prompt Engineer) ระดับมืออาชีพสำหรับการวาดรูปปกบทความนิตยสาร/เว็บไซต์ไฮเอนด์ (Editorial Magazine Cover Photography)
+หน้าที่ของคุณคือแปลงหัวข้อบทความต่อไปนี้ ให้เป็นคำสั่งภาษาอังกฤษ (Midjourney v6 / DALL-E 3 Prompt) สำหรับสร้างรูปภาพหน้าปกบทความที่สวยงาม สมจริง ตรงกับเนื้อหา และน่าดึงดูด
 
-Topic: "${title || userPrompt}"
-`;
+หัวข้อบทความ / บริบท: "${title || userPrompt}"
+
+กฎในการเขียน Image Prompt:
+1. [สไตล์และแนวภาพ]: เป็นภาพถ่ายสถาปัตยกรรม/อินทีเรียร์/ไลฟ์สไตล์ระดับมืออาชีพ (Professional Architectural & Editorial Photography) 
+2. [องค์ประกอบแสงและมุมมอง]: ระบุแสงธรรมชาติที่สวยงาม (เช่น Golden hour, warm diffused daylight, cinematic lighting), มุมกล้องระดับสายตา หรือ 45-degree angle shot ที่ดูสะอาดตา หรูหรา
+3. [รายละเอียดฉาก]: อธิบายสภาพแวดล้อมที่สอดคล้องกับเนื้อหา เช่น บ้านเก็บของสำเร็จรูปในสวนสีเขียวชอุ่ม, การจัดระเบียบตู้เก็บของกลางแจ้งอย่างเป็นระเบียบ, หรือเครื่องมือช่างที่จัดวางอย่างพิถีพิถัน
+4. [ข้อห้าม]: ห้ามมีตัวหนังสือ ห้ามมีข้อความ ห้ามมีโลโก้ ห้ามมีตัวละครการ์ตูน
+5. [พารามิเตอร์]: ลงท้ายด้วยคำว่า "shot on 35mm lens, 8k resolution, photorealistic, architectural digest style, highly detailed, no text, no letters --ar 16:9"
+
+ตอบเฉพาะคำสั่งภาษาอังกฤษบรรทัดเดียว ห้ามใส่เครื่องหมายอัญประกาศ ห้ามมีข้อความเกริ่นนำใดๆ`;
         
         const aiResponse = await gemini.generateContent({
             prompt: systemPrompt,
@@ -581,7 +640,7 @@ Topic: "${title || userPrompt}"
         });
 
         let englishPrompt = aiResponse.text || '';
-        englishPrompt = englishPrompt.trim().replace(/^"|"$/g, ''); // Remove quotes
+        englishPrompt = englishPrompt.trim().replace(/^"|"$/g, '').replace(/```\s*/g, '');
 
         res.json({
             success: true,
@@ -589,7 +648,7 @@ Topic: "${title || userPrompt}"
         });
     } catch (error) {
         console.error('Generate AI Image Prompt error:', error);
-        res.status(500).json({ success: false, error: 'Failed to generate prompt: ' + error.message });
+        res.status(500).json({ success: false, error: handleGeminiError(error, 'เกิดข้อผิดพลาดในการสร้าง Image Prompt') });
     }
 });
 

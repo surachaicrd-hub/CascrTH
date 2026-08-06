@@ -1,8 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../config/database');
+const fs = require('fs');
+const path = require('path');
 
-const SITE_URL = process.env.SITE_URL || 'https://morespace.co.th';
+const SITE_URL = process.env.SITE_URL || 'https://บ้านเก็บของ.com';
 
 // Static pages with their priorities and change frequencies
 const STATIC_PAGES = [
@@ -29,6 +31,11 @@ const formatDate = (date) => {
 // GET /api/sitemap.xml — Dynamic sitemap
 router.get('/', async (req, res) => {
     try {
+        // Dynamically determine domain from request to match GSC property host
+        const protocol = req.headers['x-forwarded-proto'] || req.protocol || 'https';
+        const host = req.headers['x-forwarded-host'] || req.headers.host || 'บ้านเก็บของ.com';
+        const siteUrl = process.env.SITE_URL || `${protocol}://${host}`;
+
         // 1. Fetch all active products
         const [products] = await db.query(
             `SELECT slug, id FROM products WHERE is_active = 1 
@@ -78,7 +85,7 @@ router.get('/', async (req, res) => {
                 continue;
             }
             xml += `  <url>\n`;
-            xml += `    <loc>${SITE_URL}${page.path}</loc>\n`;
+            xml += `    <loc>${siteUrl}${page.path}</loc>\n`;
             xml += `    <changefreq>${page.changefreq}</changefreq>\n`;
             xml += `    <priority>${page.priority}</priority>\n`;
             xml += `  </url>\n`;
@@ -88,7 +95,7 @@ router.get('/', async (req, res) => {
         for (const product of products) {
             const productPath = product.slug || product.id;
             xml += `  <url>\n`;
-            xml += `    <loc>${SITE_URL}/products/${encodeURI(productPath)}</loc>\n`;
+            xml += `    <loc>${siteUrl}/products/${encodeURI(productPath)}</loc>\n`;
             xml += `    <changefreq>weekly</changefreq>\n`;
             xml += `    <priority>0.8</priority>\n`;
             xml += `  </url>\n`;
@@ -97,7 +104,7 @@ router.get('/', async (req, res) => {
         // Project pages
         for (const project of projects) {
             xml += `  <url>\n`;
-            xml += `    <loc>${SITE_URL}/projects/${project.id}</loc>\n`;
+            xml += `    <loc>${siteUrl}/projects/${project.id}</loc>\n`;
             xml += `    <lastmod>${formatDate(project.updated_at)}</lastmod>\n`;
             xml += `    <changefreq>monthly</changefreq>\n`;
             xml += `    <priority>0.7</priority>\n`;
@@ -108,7 +115,7 @@ router.get('/', async (req, res) => {
         for (const article of articles) {
             const articlePath = article.slug || article.id;
             xml += `  <url>\n`;
-            xml += `    <loc>${SITE_URL}/blog/${articlePath}</loc>\n`;
+            xml += `    <loc>${siteUrl}/blog/${articlePath}</loc>\n`;
             xml += `    <lastmod>${formatDate(article.updated_at)}</lastmod>\n`;
             xml += `    <changefreq>monthly</changefreq>\n`;
             xml += `    <priority>0.7</priority>\n`;
@@ -116,6 +123,20 @@ router.get('/', async (req, res) => {
         }
 
         xml += `</urlset>`;
+
+        // Save physical sitemap.xml to public folder as a static fallback for Nginx / cPanel static file serving
+        try {
+            const publicPath = path.join(__dirname, '../public/sitemap.xml');
+            fs.writeFileSync(publicPath, xml, 'utf8');
+        } catch (fsErr) {
+            // Ignore write errors if directory is read-only
+        }
+
+        // Ensure IndexNow key file exists for Bing Webmaster Tools
+        try {
+            const { ensureKeyFile } = require('../services/indexNowService');
+            ensureKeyFile();
+        } catch (e) {}
 
         // Set headers
         res.set('Content-Type', 'application/xml');
@@ -126,6 +147,33 @@ router.get('/', async (req, res) => {
     } catch (error) {
         console.error('Sitemap generation error:', error);
         res.status(500).send('<?xml version="1.0" encoding="UTF-8"?><urlset></urlset>');
+    }
+});
+
+// GET /api/sitemap/ping-bing — Ping Bing via IndexNow API
+router.get(['/ping-bing', '/api/sitemap/ping-bing'], async (req, res) => {
+    try {
+        const protocol = req.headers['x-forwarded-proto'] || req.protocol || 'https';
+        const host = req.headers['x-forwarded-host'] || req.headers.host || 'บ้านเก็บของ.com';
+        const siteUrl = process.env.SITE_URL || `${protocol}://${host}`;
+
+        const { notifyIndexNow } = require('../services/indexNowService');
+        const result = await notifyIndexNow([
+            `${siteUrl}/sitemap.xml`,
+            `${siteUrl}/`,
+            `${siteUrl}/products`,
+            `${siteUrl}/projects`,
+            `${siteUrl}/blog`
+        ]);
+
+        return res.json({
+            success: true,
+            message: 'ส่งสัญญาณ Bing IndexNow เรียบร้อยแล้ว (Bing & Yandex Instant Indexing Triggered)',
+            result
+        });
+    } catch (error) {
+        console.error('Bing IndexNow error:', error);
+        return res.status(500).json({ success: false, error: error.message });
     }
 });
 

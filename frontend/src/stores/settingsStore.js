@@ -3,7 +3,7 @@ import { ref, computed } from 'vue'
 
 export const useSettingsStore = defineStore('settings', () => {
     // Store Profile Settings
-    const storeName = ref('STORAGE HOUSE')
+    const storeName = ref('')
     const storeDescription = ref('')
     const storeLogo = ref('')
     const storeFavicon = ref('')
@@ -24,9 +24,9 @@ export const useSettingsStore = defineStore('settings', () => {
     
     // Maintenance & Holiday Modes
     const maintenanceModeEnabled = ref(false)
-    const maintenanceMessage = ref('ขออภัยค่ะ ขณะนี้เว็บไซต์อยู่ระหว่างการปรับปรุงระบบชั่วคราว กรุณาติดต่อทางไลน์หรือโทรศัพท์')
+    const maintenanceMessage = ref('')
     const holidayModeEnabled = ref(false)
-    const holidayMessage = ref('ร้านค้าอยู่ในช่วงวันหยุดยาว การจัดส่งอาจมีระยะเวลานานกว่าปกติ ขออภัยในความไม่สะดวกค่ะ')
+    const holidayMessage = ref('')
     const holidayName = ref('')
     const holidayStartDate = ref('')  // ISO date string YYYY-MM-DD
     const holidayEndDate = ref('')    // ISO date string YYYY-MM-DD
@@ -60,7 +60,7 @@ export const useSettingsStore = defineStore('settings', () => {
     const shippingRestrictedProvinces = ref([])
 
     // Free Installation Provinces (Array of province names)
-    const freeInstallProvinces = ref(['กรุงเทพมหานคร', 'นนทบุรี', 'ปทุมธานี', 'สมุทรปราการ', 'สมุทรสาคร', 'นครปฐม'])
+    const freeInstallProvinces = ref([])
 
     // Contact Channels
     const contactPhones = ref([])
@@ -74,19 +74,14 @@ export const useSettingsStore = defineStore('settings', () => {
     const contactWorkingHours = ref('')
 
     // Footer Settings
-    const footerNewsletterTitle = ref('ไม่พลาดโปรโมชั่นและไอเดียแต่งบ้าน')
-    const footerNewsletterSubtitle = ref('สมัครฟรี รับสิทธิ์ก่อนใคร')
-    const footerNewsletterPrivacy = ref('ข้อมูลปลอดภัย ยกเลิกได้ทุกเมื่อ')
-    const footerTrustBadges = ref([
-        { title: 'เชื่อถือได้', desc: 'บริการด้วยความโปร่งใส ตรวจสอบได้', icon: 'shield' },
-        { title: 'คัดสรรคุณภาพ', desc: 'คัดเลือกบ้านและบริการที่ได้มาตรฐาน', icon: 'crown' },
-        { title: 'ดูแลครบวงจร', desc: 'ทีมงานมืออาชีพพร้อมดูแลคุณทุกขั้นตอน', icon: 'support' },
-        { title: 'ใส่ใจลูกค้า', desc: 'เราดูแลลูกค้าทุกท่านเหมือนคนในครอบครัว', icon: 'heart' }
-    ])
-    const footerDistributorLabel = ref('ตัวแทนจำหน่าย')
-    const footerDistributorUrl = ref('/ai-consultant')
-    const footerSitemapLabel = ref('แผนผังเว็บไซต์')
-    const footerSitemapUrl = ref('/contact')
+    const footerNewsletterTitle = ref('')
+    const footerNewsletterSubtitle = ref('')
+    const footerNewsletterPrivacy = ref('')
+    const footerTrustBadges = ref([])
+    const footerDistributorLabel = ref('')
+    const footerDistributorUrl = ref('')
+    const footerSitemapLabel = ref('')
+    const footerSitemapUrl = ref('')
 
     const initializeSettings = (pubSettings) => {
         if (!pubSettings) return
@@ -137,7 +132,7 @@ export const useSettingsStore = defineStore('settings', () => {
         }
 
         // Store Settings
-        if (pubSettings.store_name !== undefined) storeName.value = pubSettings.store_name || 'STORAGE HOUSE';
+        if (pubSettings.store_name !== undefined) storeName.value = pubSettings.store_name || '';
         if (pubSettings.store_description !== undefined) storeDescription.value = pubSettings.store_description;
         if (pubSettings.store_logo !== undefined) storeLogo.value = pubSettings.store_logo;
         if (pubSettings.store_favicon !== undefined) storeFavicon.value = pubSettings.store_favicon;
@@ -150,13 +145,13 @@ export const useSettingsStore = defineStore('settings', () => {
 
         // Contact Channels
         if (pubSettings.contact_phones) {
-            try { const p = typeof pubSettings.contact_phones === 'string' ? JSON.parse(pubSettings.contact_phones) : pubSettings.contact_phones; if (p.length) contactPhones.value = p } catch (e) {}
+            try { const p = typeof pubSettings.contact_phones === 'string' ? JSON.parse(pubSettings.contact_phones) : pubSettings.contact_phones; if (Array.isArray(p)) contactPhones.value = p } catch (e) {}
         }
         if (pubSettings.contact_emails) {
-            try { const e = typeof pubSettings.contact_emails === 'string' ? JSON.parse(pubSettings.contact_emails) : pubSettings.contact_emails; if (e.length) contactEmails.value = e } catch (e) {}
+            try { const e = typeof pubSettings.contact_emails === 'string' ? JSON.parse(pubSettings.contact_emails) : pubSettings.contact_emails; if (Array.isArray(e)) contactEmails.value = e } catch (e) {}
         }
         if (pubSettings.contact_lines) {
-            try { const l = typeof pubSettings.contact_lines === 'string' ? JSON.parse(pubSettings.contact_lines) : pubSettings.contact_lines; if (l.length) contactLines.value = l } catch (e) {}
+            try { const l = typeof pubSettings.contact_lines === 'string' ? JSON.parse(pubSettings.contact_lines) : pubSettings.contact_lines; if (Array.isArray(l)) contactLines.value = l } catch (e) {}
         }
         if (pubSettings.contact_facebook_url !== undefined) contactFacebookUrl.value = pubSettings.contact_facebook_url;
         if (pubSettings.contact_tiktok_url !== undefined) contactTiktokUrl.value = pubSettings.contact_tiktok_url;
@@ -166,36 +161,40 @@ export const useSettingsStore = defineStore('settings', () => {
         if (pubSettings.contact_working_hours !== undefined) contactWorkingHours.value = pubSettings.contact_working_hours;
 
         // Footer Settings
-        if (pubSettings.footer_newsletter_title !== undefined) footerNewsletterTitle.value = pubSettings.footer_newsletter_title || 'ไม่พลาดโปรโมชั่นและไอเดียแต่งบ้าน';
-        if (pubSettings.footer_newsletter_subtitle !== undefined) footerNewsletterSubtitle.value = pubSettings.footer_newsletter_subtitle || 'สมัครฟรี รับสิทธิ์ก่อนใคร';
-        if (pubSettings.footer_newsletter_privacy !== undefined) footerNewsletterPrivacy.value = pubSettings.footer_newsletter_privacy || 'ข้อมูลปลอดภัย ยกเลิกได้ทุกเมื่อ';
+        if (pubSettings.footer_newsletter_title !== undefined) footerNewsletterTitle.value = pubSettings.footer_newsletter_title || '';
+        if (pubSettings.footer_newsletter_subtitle !== undefined) footerNewsletterSubtitle.value = pubSettings.footer_newsletter_subtitle || '';
+        if (pubSettings.footer_newsletter_privacy !== undefined) footerNewsletterPrivacy.value = pubSettings.footer_newsletter_privacy || '';
         if (pubSettings.footer_trust_badges) {
             try {
                 const parsed = typeof pubSettings.footer_trust_badges === 'string' ? JSON.parse(pubSettings.footer_trust_badges) : pubSettings.footer_trust_badges;
-                if (Array.isArray(parsed) && parsed.length > 0) {
+                if (Array.isArray(parsed)) {
                     footerTrustBadges.value = parsed;
                 }
             } catch (e) {
                 console.error('Failed to parse footer_trust_badges:', e);
             }
         }
-        if (pubSettings.footer_distributor_label !== undefined) footerDistributorLabel.value = pubSettings.footer_distributor_label || 'ตัวแทนจำหน่าย';
-        if (pubSettings.footer_distributor_url !== undefined) footerDistributorUrl.value = pubSettings.footer_distributor_url || '/ai-consultant';
-        if (pubSettings.footer_sitemap_label !== undefined) footerSitemapLabel.value = pubSettings.footer_sitemap_label || 'แผนผังเว็บไซต์';
-        if (pubSettings.footer_sitemap_url !== undefined) footerSitemapUrl.value = pubSettings.footer_sitemap_url || '/contact';
+        if (pubSettings.footer_distributor_label !== undefined) footerDistributorLabel.value = pubSettings.footer_distributor_label || '';
+        if (pubSettings.footer_distributor_url !== undefined) footerDistributorUrl.value = pubSettings.footer_distributor_url || '';
+        if (pubSettings.footer_sitemap_label !== undefined) footerSitemapLabel.value = pubSettings.footer_sitemap_label || '';
+        if (pubSettings.footer_sitemap_url !== undefined) footerSitemapUrl.value = pubSettings.footer_sitemap_url || '';
 
         // Apply dynamically to DOM
         if (storeName.value) {
             document.title = storeName.value;
         }
-        if (storeFavicon.value) {
-            let link = document.querySelector("link[rel~='icon']");
-            if (!link) {
-                link = document.createElement('link');
+        const iconUrl = storeFavicon.value || storeLogo.value;
+        if (iconUrl) {
+            let links = document.querySelectorAll("link[rel*='icon']");
+            if (links.length === 0) {
+                const link = document.createElement('link');
                 link.rel = 'icon';
                 document.getElementsByTagName('head')[0].appendChild(link);
+                links = [link];
             }
-            link.href = storeFavicon.value;
+            links.forEach(link => {
+                link.href = iconUrl;
+            });
         }
 
         if (pubSettings.payment_promptpay_enabled !== undefined) {

@@ -155,7 +155,7 @@ onUnmounted(() => { window.removeEventListener('keydown', handleKeydown); docume
                   <button v-for="(item, i) in groupedResults.products" :key="item.link" @click="goTo(item.link)"
                     :class="['w-full flex items-center gap-4 px-5 py-3 transition-all duration-150 text-left group', activeIndex === i ? 'bg-emerald-50 dark:bg-emerald-900/20' : 'hover:bg-gray-50 dark:hover:bg-gray-800/50']">
                     <div class="w-14 h-14 rounded-xl overflow-hidden bg-gray-100 dark:bg-gray-800 flex-shrink-0 border border-gray-200/50 dark:border-gray-700/50 group-hover:border-emerald-300 dark:group-hover:border-emerald-700 transition-colors">
-                      <img v-if="item.image" :src="item.image" class="w-full h-full object-cover" loading="lazy" />
+                      <img v-if="item.image" :src="item.image" class="w-full h-full object-cover" />
                       <div v-else class="w-full h-full flex items-center justify-center">
                         <svg class="w-6 h-6 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
                       </div>
@@ -181,7 +181,7 @@ onUnmounted(() => { window.removeEventListener('keydown', handleKeydown); docume
                   <button v-for="(item, idx) in groupedResults.articles" :key="item.link" @click="goTo(item.link)"
                     :class="['w-full flex items-center gap-4 px-5 py-3 transition-all duration-150 text-left group', activeIndex === (groupedResults.products.length + idx) ? 'bg-indigo-50 dark:bg-indigo-900/20' : 'hover:bg-gray-50 dark:hover:bg-gray-800/50']">
                     <div class="w-14 h-14 rounded-xl overflow-hidden bg-gray-100 dark:bg-gray-800 flex-shrink-0">
-                      <img v-if="item.image" :src="item.image" class="w-full h-full object-cover" loading="lazy" />
+                      <img v-if="item.image" :src="item.image" class="w-full h-full object-cover" />
                       <div v-else class="w-full h-full flex items-center justify-center">
                         <svg class="w-6 h-6 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"/></svg>
                       </div>
@@ -270,7 +270,7 @@ onUnmounted(() => { window.removeEventListener('keydown', handleKeydown); docume
                 <span class="flex items-center gap-1"><kbd class="px-1.5 py-0.5 bg-white dark:bg-gray-700 rounded border border-gray-200 dark:border-gray-600 font-mono text-[10px]">esc</kbd> ปิด</span>
               </div>
               <span class="sm:hidden">กดค้นหาเพื่อเริ่มต้น</span>
-              <span class="font-medium">Powered by <span class="text-emerald-500 font-bold">Morespace</span></span>
+              <span v-if="settingsStore.storeName" class="font-medium">Powered by <span class="text-emerald-500 font-bold">{{ settingsStore.storeName }}</span></span>
             </div>
           </div>
         </div>

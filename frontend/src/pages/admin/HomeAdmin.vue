@@ -119,7 +119,6 @@ const homeShowAffiliates = ref(true)
 const homeShowFaq = ref(true)
 
 const homeShowFeatures = ref(true)
-const homeShowHowItWorks = ref(true)
 
 // Icon Options
 const iconOptions = [
@@ -328,7 +327,6 @@ const fetchData = async () => {
       homeShowFaq.value = s.home_show_faq !== 'false'
 
       homeShowFeatures.value = s.home_show_features !== 'false'
-      homeShowHowItWorks.value = s.home_show_how_it_works !== 'false'
     }
   } catch (error) {
     console.error('Error loading homepage settings:', error)
@@ -367,8 +365,7 @@ const saveSettings = async () => {
         { key: 'home_show_affiliates', value: String(homeShowAffiliates.value) },
         { key: 'home_show_faq', value: String(homeShowFaq.value) },
 
-        { key: 'home_show_features', value: String(homeShowFeatures.value) },
-        { key: 'home_show_how_it_works', value: String(homeShowHowItWorks.value) }
+        { key: 'home_show_features', value: String(homeShowFeatures.value) }
       ]
     }
 
@@ -881,7 +878,7 @@ onMounted(() => {
 
                 <div class="py-4 flex items-center justify-between">
                   <div>
-                    <h3 class="text-sm font-bold text-gray-800">Section จุดเด่นแบรนด์ Morespace (Brand Features)</h3>
+                    <h3 class="text-sm font-bold text-gray-800">Section จุดเด่นแบรนด์ (Brand Features)</h3>
                     <p class="text-xs text-gray-500">แสดงการเปรียบเทียบจุดเด่น 10-Year Warranty และวัสดุคุณภาพสูง</p>
                   </div>
                   <label class="relative inline-flex items-center cursor-pointer">

@@ -214,11 +214,14 @@ router.get('/stats', verifyAdmin, async (req, res) => {
 // POST - Generate AI Insights from stats
 router.post('/ai-insights', verifyAdmin, async (req, res) => {
     try {
-        const { stats, period } = req.body || {};
-        if (!stats) return res.status(400).json({ success: false, error: 'Stats data is required' });
+        let storeName = 'STORAGE HOUSE';
+        try {
+            const [sRows] = await db.query("SELECT setting_value FROM settings WHERE setting_key = 'store_name'");
+            if (sRows.length > 0 && sRows[0].setting_value) storeName = sRows[0].setting_value;
+        } catch (e) {}
 
         const prompt = `
-        You are an expert AI Marketing Consultant for an e-commerce platform called "Morespace".
+        You are an expert AI Marketing Consultant for an e-commerce platform called "${storeName}".
         Analyze the following analytics data for the period "${period}" and provide insightful, actionable marketing advice in Thai.
         
         Data:

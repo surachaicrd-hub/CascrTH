@@ -856,7 +856,7 @@ onMounted(() => {
               <div class="bg-red-50 dark:bg-red-900/10 rounded-3xl p-8 border border-red-100 dark:border-red-900/30">
                 <h2 class="text-xl font-bold text-red-700 dark:text-red-400 mb-2">ลบบัญชีผู้ใช้งาน</h2>
                 <p class="text-red-600/80 dark:text-red-400/80 text-sm mb-6 max-w-2xl leading-relaxed">
-                  เมื่อคุณลบบัญชี ข้อมูลส่วนตัว ที่อยู่ และการตั้งค่าทั้งหมดของคุณจะถูกลบออกจากระบบของ Morespace อย่างถาวร ไม่สามารถกู้คืนได้ (ตามมาตรฐานการคุ้มครองข้อมูลส่วนบุคคล PDPA)
+                  เมื่อคุณลบบัญชี ข้อมูลส่วนตัว ที่อยู่ และการตั้งค่าทั้งหมดของคุณจะถูกลบออกจากระบบอย่างถาวร ไม่สามารถกู้คืนได้ (ตามมาตรฐานการคุ้มครองข้อมูลส่วนบุคคล PDPA)
                 </p>
                 <button @click="showDeleteConfirmModal = true; confirmDeleteText = ''" class="px-6 py-2.5 bg-red-600 text-white font-bold text-sm rounded-xl hover:bg-red-700 transition-colors shadow-lg shadow-red-500/30">
                   ลบบัญชีอย่างถาวร
@@ -999,7 +999,7 @@ onMounted(() => {
           <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
         </div>
         <h3 class="text-xl font-black text-gray-900 dark:text-white mb-2">เตือนความจำ!</h3>
-        <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">คุณกำลังดำเนินการลบบัญชีข้อมูลทาง Morespace อย่างถาวร<br>การกระทำนี้ <strong class="text-red-500">ไม่สามารถกู้คืนได้</strong></p>
+        <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">คุณกำลังดำเนินการลบบัญชีข้อมูลอย่างถาวร<br>การกระทำนี้ <strong class="text-red-500">ไม่สามารถกู้คืนได้</strong></p>
         
         <div class="mb-6 text-left">
           <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">พิมพ์คำว่า <span class="text-red-600">DELETE</span> เพื่อยืนยัน</label>

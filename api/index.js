@@ -59,10 +59,6 @@ app.use('/api', limiter);
 app.use(compression());
 // CORS — restrict allowed origins in production
 const allowedOrigins = [
-    'https://morespace.co.th',
-    'https://www.morespace.co.th',
-    'https://new.morespace.co.th',
-    'http://new.morespace.co.th',
     'http://localhost:8000',
     'http://127.0.0.1:8000',
     'http://localhost:8080'
@@ -98,8 +94,8 @@ app.use(cors((req, corsCallback) => {
             return originCallback(null, true);
         }
 
-        // Allow explicitly listed origins OR any subdomain of morespace.co.th
-        if (allowedOrigins.includes(origin) || origin.endsWith('morespace.co.th')) {
+        // Allow explicitly listed origins
+        if (allowedOrigins.includes(origin)) {
             originCallback(null, true);
         } else {
             console.warn(`⚠️ CORS Blocked: Origin ${origin} not in allowed list`);
@@ -147,7 +143,33 @@ app.use('/api/newsletter', require('./routes/newsletter'));
 app.use('/api/badges', require('./routes/badges'));
 app.use('/api/projects', require('./routes/projects'));
 app.use('/api/analytics', require('./routes/analytics'));
-app.use('/sitemap.xml', require('./routes/sitemap'));
+app.get(['/api/sitemap/ping-bing', '/ping-bing'], async (req, res) => {
+    try {
+        const protocol = req.headers['x-forwarded-proto'] || req.protocol || 'https';
+        const host = req.headers['x-forwarded-host'] || req.headers.host || 'บ้านเก็บของ.com';
+        const siteUrl = process.env.SITE_URL || `${protocol}://${host}`;
+
+        const { notifyIndexNow } = require('./services/indexNowService');
+        const result = await notifyIndexNow([
+            `${siteUrl}/sitemap.xml`,
+            `${siteUrl}/`,
+            `${siteUrl}/products`,
+            `${siteUrl}/projects`,
+            `${siteUrl}/blog`
+        ]);
+
+        return res.json({
+            success: true,
+            message: 'ส่งสัญญาณ Bing IndexNow เรียบร้อยแล้ว (Bing & Yandex Instant Indexing Triggered)',
+            result
+        });
+    } catch (error) {
+        console.error('Bing IndexNow error:', error);
+        return res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+app.use(['/sitemap.xml', '/api/sitemap.xml', '/api/sitemap'], require('./routes/sitemap'));
 app.use('/api/articles', require('./routes/articles'));
 app.use('/api/users', require('./routes/users'));
 app.use('/api/orders', require('./routes/orders'));
@@ -285,9 +307,11 @@ app.use('/uploads', express.static(uploadsDir, {
 // Serve Frontend Static Files
 app.use(express.static(path.join(__dirname, 'public'), {
     maxAge: '1y', // Cache assets for 1 year
-    setHeaders: (res, path) => {
-        if (path.endsWith('index.html')) {
+    setHeaders: (res, filePath) => {
+        if (filePath.endsWith('index.html')) {
             res.setHeader('Cache-Control', 'public, max-age=0'); // Do not cache index.html
+        } else if (filePath.endsWith('favicon.ico') || filePath.includes('favicon-') || filePath.endsWith('apple-touch-icon.png') || filePath.endsWith('favicon.svg')) {
+            res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
         }
     }
 }));

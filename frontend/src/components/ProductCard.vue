@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { getOptimizedImageUrl, onImageError } from '../utils/image'
 import { useCartStore } from '../stores/cartStore'
@@ -85,12 +85,35 @@ const formatPrice = (price) => {
 
 
 
-const now = ref(Date.now())
-setInterval(() => { now.value = Date.now() }, 60000)
+
+const sharedNow = ref(Date.now())
+let sharedTimer = null
+let activeCardCount = 0
+
+function startSharedTimer() {
+  if (!sharedTimer) {
+    sharedTimer = setInterval(() => {
+      sharedNow.value = Date.now()
+    }, 60000)
+  }
+  activeCardCount++
+}
+
+function stopSharedTimer() {
+  activeCardCount--
+  if (activeCardCount <= 0 && sharedTimer) {
+    clearInterval(sharedTimer)
+    sharedTimer = null
+    activeCardCount = 0
+  }
+}
+
+onMounted(startSharedTimer)
+onUnmounted(stopSharedTimer)
 
 const getTimeRemaining = (endTime) => {
   if (!endTime) return null
-  const total = Date.parse(endTime) - now.value
+  const total = Date.parse(endTime) - sharedNow.value
   if (total <= 0) return null
   const days = Math.floor(total / (1000 * 60 * 60 * 24))
   const hours = Math.floor((total / (1000 * 60 * 60)) % 24)
@@ -113,7 +136,7 @@ const getTimeRemaining = (endTime) => {
       class="relative bg-gray-50 dark:bg-gray-800/50 flex items-center justify-center overflow-hidden transition-all duration-300"
       :class="compact ? 'h-[180px] sm:h-[200px] lg:h-[220px]' : 'h-[280px] md:h-[320px]'"
     >
-      <img :src="getOptimizedImageUrl(product.image || product.image_url, 400)" :alt="product.title || product.name" loading="lazy" width="600" height="600" class="w-full h-full object-cover object-center transform group-hover:scale-105 transition-transform duration-[1s] relative z-[1]" @error="onImageError">
+      <img :src="getOptimizedImageUrl(product.image || product.image_url, 400)" :alt="product.title || product.name" width="600" height="600" class="w-full h-full object-cover object-center transform group-hover:scale-105 transition-transform duration-[1s] relative z-[1]" @error="onImageError">
       
       <!-- Background decoration for image -->
       <div class="absolute inset-0 bg-gradient-to-b from-black/5 to-transparent z-[2] opacity-0 group-hover:opacity-100 transition-opacity"></div>

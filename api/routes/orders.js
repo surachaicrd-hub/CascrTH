@@ -933,4 +933,80 @@ router.get('/export/:id', verifyApiToken, async (req, res) => {
 
 
 
+// DELETE /api/orders/admin/bulk-delete
+// Bulk delete orders
+router.delete('/admin/bulk-delete', verifyAdmin, async (req, res) => {
+    const connection = await db.getConnection();
+    try {
+        const { ids } = req.body;
+        if (!ids || !Array.isArray(ids) || ids.length === 0) {
+            connection.release();
+            return res.status(400).json({ success: false, error: 'กรุณาระบุคำสั่งซื้อที่ต้องการลบ' });
+        }
+
+        await connection.beginTransaction();
+
+        // Delete related logs, items, and unlink reviews
+        await connection.query('DELETE FROM order_activity_log WHERE order_id IN (?)', [ids]);
+        await connection.query('UPDATE product_reviews SET order_id = NULL WHERE order_id IN (?)', [ids]);
+        await connection.query('DELETE FROM order_items WHERE order_id IN (?)', [ids]);
+
+        // Delete orders
+        const [result] = await connection.query('DELETE FROM orders WHERE id IN (?)', [ids]);
+
+        await connection.commit();
+        connection.release();
+
+        res.json({
+            success: true,
+            message: `ลบคำสั่งซื้อเรียบร้อยแล้ว (${result.affectedRows} รายการ)`,
+            deletedCount: result.affectedRows
+        });
+    } catch (err) {
+        await connection.rollback();
+        connection.release();
+        console.error('Bulk Delete Orders Error:', err);
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+// DELETE /api/orders/admin/:id
+// Delete single order by ID
+router.delete('/admin/:id', verifyAdmin, async (req, res) => {
+    const connection = await db.getConnection();
+    try {
+        const { id } = req.params;
+
+        const [orders] = await connection.query('SELECT id FROM orders WHERE id = ?', [id]);
+        if (orders.length === 0) {
+            connection.release();
+            return res.status(404).json({ success: false, error: 'ไม่พบคำสั่งซื้อนี้' });
+        }
+
+        await connection.beginTransaction();
+
+        // Delete related logs, items, and unlink reviews
+        await connection.query('DELETE FROM order_activity_log WHERE order_id = ?', [id]);
+        await connection.query('UPDATE product_reviews SET order_id = NULL WHERE order_id = ?', [id]);
+        await connection.query('DELETE FROM order_items WHERE order_id = ?', [id]);
+
+        // Delete order
+        await connection.query('DELETE FROM orders WHERE id = ?', [id]);
+
+        await connection.commit();
+        connection.release();
+
+        res.json({
+            success: true,
+            message: 'ลบคำสั่งซื้อเรียบร้อยแล้ว'
+        });
+    } catch (err) {
+        await connection.rollback();
+        connection.release();
+        console.error('Delete Order Error:', err);
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
 module.exports = router;
+

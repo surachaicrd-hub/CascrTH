@@ -51,7 +51,7 @@ const handleLogin = async () => {
       </div>
       <h2 class="mt-6 text-center text-3xl font-black text-gray-900 tracking-tight">Admin System</h2>
       <p class="mt-2 text-center text-sm text-gray-600">
-        เข้าสู่ระบบจัดการข้อมูลเว็บไซต์ <span class="font-bold text-emerald-600">Morespace</span>
+        เข้าสู่ระบบจัดการข้อมูลเว็บไซต์
       </p>
     </div>
 

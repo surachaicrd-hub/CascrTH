@@ -105,7 +105,7 @@ const holidayStartDate = ref('')
 const holidayEndDate = ref('')
 const holidayImage = ref('')
 const uploadingHolidayImage = ref(false)
-const storeName = ref('Morespace')
+const storeName = ref('')
 const storeUrl = ref('')
 const storeLogo = ref('')
 const storeFavicon = ref('')
@@ -178,7 +178,7 @@ const smtpPass = ref('')
 const smtpFrom = ref('')
 const smtpSecure = ref(false)
 const smtpTestEmail = ref('')
-const exportApiKeyInput = ref('morespace-sync-2024')
+const exportApiKeyInput = ref('')
 const apiTokenName = ref('')
 const apiTokenType = ref('temporary')
 const generatingToken = ref(false)
@@ -1175,7 +1175,7 @@ onMounted(() => {
               </div>
               <div>
                 <label class="block text-sm font-bold text-gray-700 mb-1">ลิงก์เว็บไซต์หลัก (Store URL)</label>
-                <input v-model="storeUrl" type="url" placeholder="https://www.morespace.co.th" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm font-mono focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500">
+                <input v-model="storeUrl" type="url" placeholder="https://www.yourdomain.com" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm font-mono focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500">
                 <p class="text-xs text-gray-500 mt-1">ใช้เป็นลิงก์อ้างอิงในระบบอีเมลอัตโนมัติ (Newsletter)</p>
               </div>
               <div>
@@ -2763,7 +2763,7 @@ onMounted(() => {
                     class="px-4 py-2 text-sm font-bold rounded-xl border border-gray-200 hover:bg-blue-50 hover:border-blue-300 hover:text-blue-700 transition-all">
                     Office 365
                   </button>
-                  <button type="button" @click="smtpHost = 'mail.morespace.co.th'; smtpPort = '587'; smtpSecure = false"
+                  <button type="button" @click="smtpHost = 'mail.yourdomain.com'; smtpPort = '587'; smtpSecure = false"
                     class="px-4 py-2 text-sm font-bold rounded-xl border border-gray-200 hover:bg-emerald-50 hover:border-emerald-300 hover:text-emerald-700 transition-all flex items-center gap-1.5">
                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
                     cPanel Hosting
@@ -2810,7 +2810,7 @@ onMounted(() => {
                 <!-- From Name -->
                 <div>
                   <label class="block text-sm font-bold text-gray-700 mb-1.5">ชื่อผู้ส่ง (From Name)</label>
-                  <input v-model="smtpFrom" type="text" placeholder="Morespace Shop"
+                  <input v-model="smtpFrom" type="text" placeholder="Online Shop"
                     class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500">
                   <p class="text-xs text-gray-400 mt-1">ชื่อที่ลูกค้าจะเห็นในกล่อง Inbox</p>
                 </div>

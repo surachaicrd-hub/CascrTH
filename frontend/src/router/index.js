@@ -43,6 +43,10 @@ const routes = [
         meta: { title: 'คู่มือการเตรียมพื้นที่และติดตั้ง - STORAGE HOUSE', description: 'คลิปวิดีโอคู่มือและข้อมูลการเตรียมพื้นที่หน้างานก่อนการติดตั้งบ้านเก็บของหรือโรงเรือน' }
     },
     {
+        path: '/faq',
+        redirect: '/installation-guide'
+    },
+    {
         path: '/payment-methods',
         component: () => import('../pages/PaymentGuide.vue'),
         meta: { title: 'วิธีการสั่งซื้อและชำระเงิน - STORAGE HOUSE', description: 'ขั้นตอนการสั่งซื้อสินค้า ช่องทางการชำระเงิน และนโยบายทางการเงิน' }
@@ -248,13 +252,14 @@ router.beforeEach((to, from, next) => {
     document.title = title
 
     // Set Canonical URL
+    const currentOrigin = typeof window !== 'undefined' ? window.location.origin : 'https://บ้านเก็บของ.com'
     let canonical = document.querySelector('link[rel="canonical"]')
     if (!canonical) {
         canonical = document.createElement('link')
         canonical.setAttribute('rel', 'canonical')
         document.head.appendChild(canonical)
     }
-    canonical.setAttribute('href', `https://storagehouse.co.th${to.path === '/' ? '' : to.path}`)
+    canonical.setAttribute('href', `${currentOrigin}${to.path === '/' ? '' : to.path}`)
 
 
     // Set Meta Description
@@ -273,7 +278,7 @@ router.beforeEach((to, from, next) => {
     const ogTags = {
         'og:title': document.title,
         'og:description': description,
-        'og:url': `https://storagehouse.co.th${to.fullPath}`,
+        'og:url': `${currentOrigin}${to.fullPath}`,
         'twitter:title': document.title,
         'twitter:description': description,
     }

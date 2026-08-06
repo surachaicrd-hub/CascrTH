@@ -7,7 +7,6 @@ import { useWishlistStore } from '../stores/wishlistStore'
 import { useCompareStore } from '../stores/compareStore'
 import { useAuthStore } from '../stores/authStore'
 import { useToast } from '../composables/useToast'
-import AOS from 'aos'
 import FeatureIcon from '../components/ui/FeatureIcon.vue'
 import ProductCard from '../components/ProductCard.vue'
 import { getOptimizedImageUrl, onImageError } from '../utils/image'
@@ -151,10 +150,8 @@ const homeShowTestimonials = ref(true)
 const homeShowPartners = ref(true)
 const homeShowAffiliates = ref(true)
 const homeShowFaq = ref(true)
-// Removed Showcase Slider toggle
 const homeShowStats = ref(true)
 const homeShowFeatures = ref(true)
-const homeShowHowItWorks = ref(true)
 const ctaTitle = ref('')
 const ctaDesc = ref('')
 const ctaButtonText = ref('')
@@ -196,23 +193,23 @@ const highlightCategoriesList = ref([])
 // Removed homeShowcaseSlider ref
 
 // Banners & Why Choose Us Settings
-const bannerTag = ref('คัดสรรสินค้าคุณภาพ')
-const bannerTitle = ref('บ้านเก็บของ ที่แข็งแรง ทนทาน')
-const bannerSubtitle = ref('ใช้งานได้ยาวนาน คุ้มค่าคุ้มราคา')
-const bannerImage = ref('/images/home/banner-sheds.webp')
-const bannerBadgeText = ref('สินค้าขายดี')
-const bannerBadgeSub = ref('อันดับ 1')
-const bannerBullets = ref(['กันแดด กันฝน', 'วัสดุแข็งแรง', 'ประกอบง่าย', 'ดีไซน์สวย'])
+const bannerTag = ref('')
+const bannerTitle = ref('')
+const bannerSubtitle = ref('')
+const bannerImage = ref('')
+const bannerBadgeText = ref('')
+const bannerBadgeSub = ref('')
+const bannerBullets = ref([])
 
-const whyChooseUsTitle = ref('ทำไมต้องเลือกเรา?')
-const whyChooseUsBullets = ref(['ดีไซน์สวย ทันสมัย', 'วัสดุแข็งแรง ทนทาน', 'กันแดด กันฝน 100%', 'ประกอบง่าย รวดเร็ว', 'เพิ่มพื้นที่ใช้บ้านเป็นระเบียบ', 'คุ้มค่า คุ้มราคา'])
+const whyChooseUsTitle = ref('')
+const whyChooseUsBullets = ref([])
 
-const promoTag = ref('Premium Quality')
-const promoTitle = ref('โซลูชันจัดเก็บ ครบจบในที่เดียว')
-const promoDesc = ref('แข็งแรง ทนทาน ใช้งานได้นาน ดีไซน์สไตล์โมเดิร์น')
-const promoBtnText = ref('ดูเพิ่มเติม')
-const promoBtnLink = ref('/products')
-const promoImage = ref('/images/home/hdpe-shed-promo.webp')
+const promoTag = ref('')
+const promoTitle = ref('')
+const promoDesc = ref('')
+const promoBtnText = ref('')
+const promoBtnLink = ref('')
+const promoImage = ref('')
 
 // Removed Cinematic Bento Showcase Slider State
 
@@ -401,11 +398,11 @@ const loadHomepageSettings = async () => {
         const parsedPartners = s.home_partners ? JSON.parse(s.home_partners) : []
         partners.value = Array.isArray(parsedPartners) ? parsedPartners : []
       } catch(e) {}
-      try {
+      try { 
         const parsedCorp = s.home_corporate_reviews ? JSON.parse(s.home_corporate_reviews) : []
-        corporateReviews.value = Array.isArray(parsedCorp) && parsedCorp.length > 0 ? parsedCorp : defaultCorporateReviews
+        corporateReviews.value = Array.isArray(parsedCorp) ? parsedCorp : []
       } catch(e) {
-        corporateReviews.value = defaultCorporateReviews
+        corporateReviews.value = []
       }
       try { 
         const parsedAffiliates = s.home_affiliates ? JSON.parse(s.home_affiliates) : []
@@ -425,69 +422,13 @@ const loadHomepageSettings = async () => {
         if (parsedFaq && parsedFaq.length > 0) faqItems.value = parsedFaq
       } catch(e) {}
       try {
-        const parsedHowItWorks = s.home_how_it_works ? JSON.parse(s.home_how_it_works) : null
-        if (parsedHowItWorks && parsedHowItWorks.length > 0) {
-          const defaultStepsEnrichments = [
-            {
-              subtitle: 'พูดคุยความต้องการ',
-              desc: 'พูดคุยกับผู้เชี่ยวชาญหรือ AI เพื่อวิเคราะห์ความต้องการและแนะนำโซลูชันที่เหมาะสมกับธุรกิจของคุณ',
-              duration: 'ระยะเวลา: 15 - 30 นาที',
-              durationBg: 'bg-orange-50 dark:bg-orange-950/20 text-orange-700 dark:text-orange-300 border border-orange-100/50 dark:border-orange-900/30',
-              durationIconColor: 'text-orange-500'
-            },
-            {
-              subtitle: 'ประเมินหน้างาน',
-              desc: 'ทีมงานเข้าสำรวจและวิเคราะห์พื้นที่จริง ประเมินความต้องการ พร้อมให้คำแนะนำตำแหน่งติดตั้งที่ดีที่สุด',
-              duration: 'ระยะเวลา: 1 วัน',
-              durationBg: 'bg-blue-50 dark:bg-blue-950/20 text-blue-700 dark:text-blue-300 border border-blue-100/50 dark:border-blue-900/30',
-              durationIconColor: 'text-blue-500'
-            },
-            {
-              subtitle: 'รวดเร็ว ปลอดภัย',
-              desc: 'จัดส่งอุปกรณ์คุณภาพ พร้อมทีมช่างมืออาชีพติดตั้งอย่างประณีต ได้มาตรฐาน ใช้งานได้ทันที',
-              duration: 'ระยะเวลา: 1 - 2 วัน',
-              durationBg: 'bg-orange-50 dark:bg-orange-950/20 text-orange-700 dark:text-orange-300 border border-orange-100/50 dark:border-orange-900/30',
-              durationIconColor: 'text-orange-500'
-            },
-            {
-              subtitle: 'อุ่นใจตลอดการใช้งาน',
-              desc: 'มั่นใจด้วยการรับประกันโครงสร้าง 10 ปีเต็ม พร้อมบริการหลังการขาย ดูแลและให้คำปรึกษาตลอดอายุการใช้งาน',
-              duration: 'ระยะเวลา: ดูแลตลอดอายุการใช้งาน',
-              durationBg: 'bg-violet-50 dark:bg-violet-950/20 text-violet-700 dark:text-violet-300 border border-violet-100/50 dark:border-violet-900/30',
-              durationIconColor: 'text-violet-500'
-            }
-          ];
-          howItWorksSteps.value = parsedHowItWorks.map((step, idx) => {
-            const fallback = defaultStepsEnrichments[idx] || {};
-            const color = step.color || fallback.color || 'emerald';
-            const defaultBg = color === 'blue' ? 'bg-blue-50 dark:bg-blue-950/20 text-blue-700 dark:text-blue-300 border border-blue-100/50 dark:border-blue-900/30' :
-                             color === 'violet' ? 'bg-violet-50 dark:bg-violet-950/20 text-violet-700 dark:text-violet-300 border border-violet-100/50 dark:border-violet-900/30' :
-                             'bg-orange-50 dark:bg-orange-950/20 text-orange-700 dark:text-orange-300 border border-orange-100/50 dark:border-orange-900/30';
-            const defaultIconColor = color === 'blue' ? 'text-blue-500' :
-                                    color === 'violet' ? 'text-violet-500' :
-                                    'text-orange-500';
-
-            return {
-              ...fallback,
-              ...step,
-              title: step.title !== undefined ? step.title : fallback.title,
-              desc: step.desc !== undefined ? step.desc : fallback.desc,
-              subtitle: step.subtitle !== undefined ? step.subtitle : fallback.subtitle,
-              duration: step.duration !== undefined ? step.duration : fallback.duration,
-              durationBg: step.durationBg || fallback.durationBg || defaultBg,
-              durationIconColor: step.durationIconColor || fallback.durationIconColor || defaultIconColor
-            };
-          });
-        }
-      } catch(e) {}
-      try {
         const parsedTitles = s.home_section_titles ? JSON.parse(s.home_section_titles) : null
         if (parsedTitles && Object.keys(parsedTitles).length > 0) sectionTitles.value = { ...sectionTitles.value, ...parsedTitles }
       } catch(e) {}
 
       featuresHeading.value = s.home_features_heading || 'การจัดระเบียบพื้นที่นอกบ้านแบบพรีเมียม'
-      featuresTitle.value = s.home_features_title || 'Morespace: ผู้เชี่ยวชาญด้าน<br>บ้านเก็บของพรีเมียมระดับสากล<br>เพื่อความลงตัวของพื้นที่บ้านคุณ'
-      featuresDesc.value = s.home_features_desc || 'Morespace จาก ซีอาร์ ดิสทริบิวชั่น จำกัด คือผู้นำเข้าและผู้เชี่ยวชาญตัวจริงด้านบ้านเก็บของ ตู้เก็บของกลางแจ้ง และโรงเรือนพรีเมียม นำเสนอดีไซน์สไตล์อเมริกันและยุโรป ที่ผสานฟังก์ชันการใช้งานอย่างลงตัวกับความทนทาน 100% ตอบโจทย์การจัดระเบียบพื้นที่ภายนอกบ้านอย่างสวยงาม แข็งแรง ทนทานทุกสภาวะอากาศ พร้อมการรับประกันโครงสร้างยาวนาน 10 ปี'
+      featuresTitle.value = s.home_features_title || ''
+      featuresDesc.value = s.home_features_desc || ''
       const rawFeatImg = s.home_features_image || '/images/home/features-premium.webp'
       featuresImage.value = (rawFeatImg && rawFeatImg.length > 2) ? rawFeatImg : '/images/home/features-premium.webp'
       featuresBadgeTitle.value = s.home_features_badge_title || '10-Year Warranty'
@@ -499,37 +440,41 @@ const loadHomepageSettings = async () => {
       ctaButtonLink.value = s.home_cta_button_link || '/quotation'
 
       // Homepage Banners & Why Choose Us Settings
-      bannerTag.value = s.home_banner_tag || 'คัดสรรสินค้าคุณภาพ'
-      bannerTitle.value = s.home_banner_title || 'บ้านเก็บของ ที่แข็งแรง ทนทาน'
-      bannerSubtitle.value = s.home_banner_subtitle || 'ใช้งานได้ยาวนาน คุ้มค่าคุ้มราคา'
-      bannerImage.value = s.home_banner_image || '/images/home/banner-sheds.webp'
-      bannerBadgeText.value = s.home_banner_badge_text || 'สินค้าขายดี'
-      bannerBadgeSub.value = s.home_banner_badge_sub || 'อันดับ 1'
-      try { bannerBullets.value = s.home_banner_bullets ? JSON.parse(s.home_banner_bullets) : ['กันแดด กันฝน', 'วัสดุแข็งแรง', 'ประกอบง่าย', 'ดีไซน์สวย'] } catch(e) {
-        bannerBullets.value = ['กันแดด กันฝน', 'วัสดุแข็งแรง', 'ประกอบง่าย', 'ดีไซน์สวย']
+      bannerTag.value = s.home_banner_tag || ''
+      bannerTitle.value = s.home_banner_title || ''
+      bannerSubtitle.value = s.home_banner_subtitle || ''
+      bannerImage.value = s.home_banner_image || ''
+      bannerBadgeText.value = s.home_banner_badge_text || ''
+      bannerBadgeSub.value = s.home_banner_badge_sub || ''
+      try {
+        const parsed = s.home_banner_bullets ? JSON.parse(s.home_banner_bullets) : []
+        bannerBullets.value = Array.isArray(parsed) ? parsed : []
+      } catch(e) {
+        bannerBullets.value = []
       }
 
-      whyChooseUsTitle.value = s.home_why_choose_us_title || 'ทำไมต้องเลือกเรา?'
-      try { whyChooseUsBullets.value = s.home_why_choose_us_bullets ? JSON.parse(s.home_why_choose_us_bullets) : ['ดีไซน์สวย ทันสมัย', 'วัสดุแข็งแรง ทนทาน', 'กันแดด กันฝน 100%', 'ประกอบง่าย รวดเร็ว', 'เพิ่มพื้นที่ใช้บ้านเป็นระเบียบ', 'คุ้มค่า คุ้มราคา'] } catch(e) {
-        whyChooseUsBullets.value = ['ดีไซน์สวย ทันสมัย', 'วัสดุแข็งแรง ทนทาน', 'กันแดด กันฝน 100%', 'ประกอบง่าย รวดเร็ว', 'เพิ่มพื้นที่ใช้บ้านเป็นระเบียบ', 'คุ้มค่า คุ้มราคา']
+      whyChooseUsTitle.value = s.home_why_choose_us_title || ''
+      try {
+        const parsed = s.home_why_choose_us_bullets ? JSON.parse(s.home_why_choose_us_bullets) : []
+        whyChooseUsBullets.value = Array.isArray(parsed) ? parsed : []
+      } catch(e) {
+        whyChooseUsBullets.value = []
       }
 
-      promoTag.value = s.home_promo_tag || 'Premium Quality'
-      promoTitle.value = s.home_promo_title || 'โซลูชันจัดเก็บ ครบจบในที่เดียว'
-      promoDesc.value = s.home_promo_desc || 'แข็งแรง ทนทาน ใช้งานได้นาน ดีไซน์สไตล์โมเดิร์น'
-      promoBtnText.value = s.home_promo_btn_text || 'ดูเพิ่มเติม'
-      promoBtnLink.value = s.home_promo_btn_link || '/products'
-      promoImage.value = s.home_promo_image || '/images/home/hdpe-shed-promo.webp'
+      promoTag.value = s.home_promo_tag || ''
+      promoTitle.value = s.home_promo_title || ''
+      promoDesc.value = s.home_promo_desc || ''
+      promoBtnText.value = s.home_promo_btn_text || ''
+      promoBtnLink.value = s.home_promo_btn_link || ''
+      promoImage.value = s.home_promo_image || ''
 
       // Section visibility toggles
       homeShowTestimonials.value = s.home_show_testimonials !== 'false'
       homeShowPartners.value = s.home_show_partners !== 'false'
       homeShowAffiliates.value = s.home_show_affiliates !== 'false'
       homeShowFaq.value = s.home_show_faq !== 'false'
-// Removed homeShowShowcase loader
       homeShowStats.value = s.home_show_stats !== 'false'
       homeShowFeatures.value = s.home_show_features !== 'false'
-      homeShowHowItWorks.value = s.home_show_how_it_works !== 'false'
       homeShowHighlightCategories.value = s.home_show_highlight_categories !== 'false'
       try {
         const parsedCta = s.home_projects_cta ? JSON.parse(s.home_projects_cta) : null
@@ -653,7 +598,7 @@ const loadHomepageSettings = async () => {
 
 
 const SLIDE_DURATION = 7000 // 7 seconds per slide
-const PROGRESS_INTERVAL = 30 // update every 30ms for smooth animation
+const PROGRESS_INTERVAL = 100 // update every 100ms to save CPU
 const isHoveringHero = ref(false)
 
 const startSlideProgress = () => {
@@ -661,7 +606,7 @@ const startSlideProgress = () => {
   clearInterval(progressInterval)
   slideProgress.value = 0
   progressInterval = setInterval(() => {
-    if (!isHoveringHero.value) {
+    if (!isHoveringHero.value && document.visibilityState === 'visible') {
       slideProgress.value += (PROGRESS_INTERVAL / SLIDE_DURATION) * 100
       if (slideProgress.value >= 100) {
         slideProgress.value = 0
@@ -691,10 +636,10 @@ const addStructuredData = () => {
   const schema = {
     "@context": "https://schema.org",
     "@type": "LocalBusiness",
-    "name": "Morespace โดย บริษัท ซีอาร์ ดิสทริบิวชั่น จำกัด",
+    "name": settingsStore.storeName ? `${settingsStore.storeName} โดย บริษัท ซีอาร์ ดิสทริบิวชั่น จำกัด` : 'บริษัท ซีอาร์ ดิสทริบิวชั่น จำกัด',
     "image": "https://images.unsplash.com/photo-1600607686527-6fb886090705?w=1200",
-    "@id": "https://morespace.co.th",
-    "url": "https://morespace.co.th",
+    "@id": window.location.origin,
+    "url": window.location.origin,
     "telephone": "02-9081348-9",
     "address": {
       "@type": "PostalAddress",
@@ -723,56 +668,14 @@ const addStructuredData = () => {
 
 // FAQ Schema for SEO
 const faqItems = ref([
-  { q: 'บ้านเก็บของ Morespace ทนแดด ทนฝน ไหม?', a: 'ทนทานครับ โครงสร้างผลิตจากเหล็กเคลือบกันสนิม Galvalume พรีเมียมจากอเมริกา ทนแดด ทนฝน ทนลมแรง ผ่านมาตรฐานการทดสอบระดับสากล พร้อมรับประกันโครงสร้าง 10 ปีเต็ม', icon: 'home', color: 'orange', open: false },
+  { q: 'บ้านเก็บของทนแดด ทนฝน ไหม?', a: 'ทนทานครับ โครงสร้างผลิตจากเหล็กเคลือบกันสนิม Galvalume พรีเมียมจากอเมริกา ทนแดด ทนฝน ทนลมแรง ผ่านมาตรฐานการทดสอบระดับสากล พร้อมรับประกันโครงสร้าง 10 ปีเต็ม', icon: 'home', color: 'orange', open: false },
   { q: 'ใช้เวลาติดตั้งนานแค่ไหน?', a: 'ทีมช่างมืออาชีพของเราสามารถติดตั้งให้เสร็จสมบูรณ์ภายใน 1-2 วันทำการ ขึ้นอยู่กับขนาดรุ่นที่เลือก โดยไม่ต้องเทพื้นคอนกรีตล่วงหน้า', icon: 'clock', color: 'blue', open: false },
   { q: 'ต้องเตรียมพื้นที่อย่างไรก่อนติดตั้ง?', a: 'เพียงมีพื้นที่ราบเรียบ แน่น และมีระยะห่างจากรั้วอย่างน้อย 50 เซนติเมตร ทีมงานจะเข้าสำรวจพื้นที่ฟรีก่อนการติดตั้ง พร้อมให้คำแนะนำเพิ่มเติม', icon: 'measure', color: 'purple', open: false },
   { q: 'มีบริการจัดส่งและติดตั้งทั่วประเทศไหม?', a: 'มีครับ! เราให้บริการจัดส่งและติดตั้งทั่วประเทศไทย มีทีมช่างประจำภูมิภาคกระจายอยู่ทั่วประเทศ พร้อมรับประกันงานติดตั้ง', open: false },
   { q: 'สามารถผ่อนชำระได้ไหม?', a: 'ได้ครับ เรามีบริการผ่อนชำระ 0% สูงสุด 10 เดือน ผ่านบัตรเครดิตธนาคารชั้นนำ หรือสามารถชำระเงินสดพร้อมรับส่วนลดพิเศษ', open: false },
 ])
 
-// How It Works steps
-const howItWorksSteps = ref([
-  {
-    icon: 'chat',
-    title: 'ปรึกษาฟรี',
-    subtitle: 'พูดคุยความต้องการ',
-    desc: 'พูดคุยกับผู้เชี่ยวชาญหรือ AI เพื่อวิเคราะห์ความต้องการและแนะนำโซลูชันที่เหมาะสมกับธุรกิจของคุณ',
-    duration: 'ระยะเวลา: 15 - 30 นาที',
-    color: 'emerald',
-    durationBg: 'bg-orange-50 dark:bg-orange-950/20 text-orange-700 dark:text-orange-300 border border-orange-100/50 dark:border-orange-900/30',
-    durationIconColor: 'text-orange-500'
-  },
-  {
-    icon: 'search',
-    title: 'สำรวจพื้นที่',
-    subtitle: 'ประเมินหน้างาน',
-    desc: 'ทีมงานเข้าสำรวจและวิเคราะห์พื้นที่จริง ประเมินความต้องการ พร้อมให้คำแนะนำตำแหน่งติดตั้งที่ดีที่สุด',
-    duration: 'ระยะเวลา: 1 วัน',
-    color: 'blue',
-    durationBg: 'bg-blue-50 dark:bg-blue-950/20 text-blue-700 dark:text-blue-300 border border-blue-100/50 dark:border-blue-900/30',
-    durationIconColor: 'text-blue-500'
-  },
-  {
-    icon: 'truck',
-    title: 'จัดส่ง & ติดตั้ง',
-    subtitle: 'รวดเร็ว ปลอดภัย',
-    desc: 'จัดส่งอุปกรณ์คุณภาพ พร้อมทีมช่างมืออาชีพติดตั้งอย่างประณีต ได้มาตรฐาน ใช้งานได้ทันที',
-    duration: 'ระยะเวลา: 1 - 2 วัน',
-    color: 'amber',
-    durationBg: 'bg-orange-50 dark:bg-orange-950/20 text-orange-700 dark:text-orange-300 border border-orange-100/50 dark:border-orange-900/30',
-    durationIconColor: 'text-orange-500'
-  },
-  {
-    icon: 'shield',
-    title: 'รับประกัน 10 ปี',
-    subtitle: 'อุ่นใจตลอดการใช้งาน',
-    desc: 'มั่นใจด้วยการรับประกันโครงสร้าง 10 ปีเต็ม พร้อมบริการหลังการขาย ดูแลและให้คำปรึกษาตลอดอายุการใช้งาน',
-    duration: 'ระยะเวลา: ดูแลตลอดอายุการใช้งาน',
-    color: 'violet',
-    durationBg: 'bg-violet-50 dark:bg-violet-950/20 text-violet-700 dark:text-violet-300 border border-violet-100/50 dark:border-violet-900/30',
-    durationIconColor: 'text-violet-500'
-  }
-])
+
 
 const addFaqSchema = () => {
   const faqSchema = {
@@ -856,65 +759,7 @@ const getFaqIconColorClass = (item, idx) => {
 }
 
 // --- Corporate Partner Testimonials Carousel ---
-const defaultCorporateReviews = [
-  {
-    company: 'SCG Chemicals',
-    location: 'โรงงานบางปู',
-    rating: 5,
-    logo: 'scg',
-    image: '/images/partners/scg_building.webp',
-    review: 'งานติดตั้งรวดเร็ว วัสดุแข็งแรง ทีมงานมืออาชีพ บริการประทับใจมากครับ',
-    badge: 'ติดตั้งโรงเก็บของ MS-M005',
-    badgeColor: 'orange',
-    badgeIcon: 'wrench'
-  },
-  {
-    company: 'PTT Station',
-    location: 'สาขานครอินทร์',
-    rating: 5,
-    logo: 'ptt',
-    image: '/images/partners/ptt_building.webp',
-    review: 'คุณภาพดีเกินราคา ตรงปก แข็งแรงทนทาน ใช้เก็บอุปกรณ์ร้านได้ดีมาก',
-    badge: 'ติดตั้งบ้านเก็บของพลาสติก HDPE',
-    badgeColor: 'blue',
-    badgeIcon: 'home'
-  },
-  {
-    company: 'HomePro',
-    location: 'สาขาชลบุรี',
-    rating: 5,
-    logo: 'homepro',
-    image: '/images/partners/homepro_building.webp',
-    review: 'ทีมงานให้คำแนะนำดีมาก บริการหลังการขายยอดเยี่ยม ไว้ใจได้เลยค่ะ',
-    badge: 'ติดตั้งโรงเก็บของ MS-M003',
-    badgeColor: 'green',
-    badgeIcon: 'check'
-  },
-  {
-    company: 'Index Living Mall',
-    location: 'สาขาเชียงใหม่',
-    rating: 5,
-    logo: 'index',
-    image: '/images/partners/index_building.webp',
-    review: 'สวยงาม แข็งแรง ตรงตามแบบที่ต้องการ จัดส่งและติดตั้งตรงเวลา',
-    badge: 'ติดตั้งบ้านเก็บของ MS-S003D',
-    badgeColor: 'purple',
-    badgeIcon: 'home'
-  },
-  {
-    company: 'CPF (Thailand)',
-    location: 'โรงงานโคราช',
-    rating: 5,
-    logo: 'cpf',
-    image: '/images/partners/cpf_building.webp',
-    review: 'วางใจในคุณภาพและการบริการ แนะนำเลยครับ',
-    badge: 'ติดตั้งโรงเก็บของ MS-M002',
-    badgeColor: 'yellow',
-    badgeIcon: 'star'
-  }
-]
-
-const corporateReviews = ref([...defaultCorporateReviews])
+const corporateReviews = ref([])
 
 const partnersSliderContainer = ref(null)
 const partnersActiveIndex = ref(0)
@@ -1043,10 +888,7 @@ const formattedArticlesHeading = computed(() => {
 } )
 
 
-const formattedHowItWorksHeading = computed(() => {
-  const heading = sectionTitles.value.howItWorksHeading || 'ง่ายแค่ 4 ขั้นตอน พร้อมใช้งานทันที'
-  return heading.replace('4', '<span class="text-orange-500 text-4xl md:text-5xl lg:text-6xl mx-1.5 inline-block transform hover:scale-110 transition-transform duration-300 font-extrabold align-middle">4</span>')
-})
+
 
 const formattedProjectsHeading = computed(() => {
   const heading = sectionTitles.value.projectsHeading || 'ภาพผลงานติดตั้งจริงล่าสุด'
@@ -1087,9 +929,7 @@ const sectionTitles = ref({
   showcaseTitle: 'สินค้าแนะนำ',
   showcaseTitleHighlight: 'ที่ออกแบบเป็นพิเศษ',
   showcaseViewAllText: 'ดูรุ่นทั้งหมด (100+)',
-  howItWorksTitle: 'ขั้นตอนการบริการ',
-  howItWorksHeading: 'ง่ายแค่ 4 ขั้นตอน พร้อมใช้งานทันที',
-  howItWorksDesc: 'จากปรึกษาตัวเองถึงติดตั้งเสร็จสมบูรณ์ เราดูแลทุกขั้นตอนอย่างมืออาชีพ',
+
   projectsTitle: 'ผลงานของเรา',
   projectsHeading: 'ภาพผลงานติดตั้งจริงล่าสุด',
   projectsDesc: 'มั่นใจในคุณภาพจากผลงานจริงที่ลูกค้าไว้วางใจ',
@@ -1098,7 +938,7 @@ const sectionTitles = ref({
   testimonialsDesc: 'เราภูมิใจที่ได้เป็นส่วนหนึ่งในการดูแลบ้านและธุรกิจของลูกค้า\nด้วยคุณภาพงานที่ได้มาตรฐาน บริการที่จริงใจ และส่งมอบตรงเวลาเสมอ',
   partnersTitle: 'พาร์ทเนอร์ของเรา',
   partnersHeading: 'ความไว้วางใจจากองค์กรชั้นนำ',
-  partnersDesc: 'ขอขอบคุณทุกความไว้วางใจที่เลือก MoreSpace ดูแลพื้นที่ของคุณ',
+  partnersDesc: 'ขอขอบคุณทุกความไว้วางใจที่เลือกเราดูแลพื้นที่ของคุณ',
   articlesTitle: 'คลังสาระ',
   articlesHeading: 'อัพเดทข่าวสารน่ารู้',
   faqTitle: 'คำถามที่พบบ่อย',
@@ -1129,8 +969,8 @@ const fetchHighlightProducts = async (catIndex) => {
     try {
       const promises = selectedIds.map(id => 
         fetch(`/api/products/${id}`)
-          .then(r => r.json())
-          .catch(e => { console.warn(`Failed to fetch highlight product ID ${id}`, e); return null; })
+          .then(r => r.ok ? r.json() : null)
+          .catch(() => null)
       );
       const results = await Promise.all(promises);
       highlightCategoryProducts.value[catIndex] = results.filter(Boolean).map(r => r.data).filter(Boolean);
@@ -1270,7 +1110,7 @@ const getBusinessTag = (name) => {
   const lower = name.toLowerCase()
   if (lower.includes('crtech')) return 'เครื่องกำเนิดไฟฟ้า & วิศวกรรม'
   if (lower.includes('autosplice')) return 'เทคโนโลยีเชื่อมต่อโลหะ'
-  if (lower.includes('morespace')) return 'อาคาร & ห้องเก็บของสำเร็จรูป'
+  if (lower.includes('shed') || lower.includes('storage')) return 'อาคาร & ห้องเก็บของสำเร็จรูป'
   return 'บริษัทในเครือ'
 }
 
@@ -1708,12 +1548,10 @@ onMounted(async () => {
       // Restore smooth scroll behavior and start auto scroll
       container.style.scrollBehavior = 'smooth'
       startAutoScrollCat()
-    }, 100)
+    }, 50)
   } else {
     startAutoScrollCat()
   }
-
-  setTimeout(() => { if (window.AOS) AOS.refresh() }, 500)
 })
 
 // Dynamic contact channels for the home page banner
@@ -1730,16 +1568,16 @@ const bannerWorkingHours = computed(() => {
 })
 
 const bannerLineId = computed(() => {
-  return settingsStore.contactLines?.[0]?.value || '@morespace_official'
+  return settingsStore.contactLines?.[0]?.value || ''
 })
 
 const bannerLineLink = computed(() => {
   if (settingsStore.contactLines?.[0]?.url) return settingsStore.contactLines[0].url
-  return `https://line.me/R/ti/p/~${bannerLineId.value.replace('@', '')}`
+  return bannerLineId.value ? `https://line.me/R/ti/p/~${bannerLineId.value.replace('@', '')}` : '#'
 })
 
 const bannerCompanyName = computed(() => {
-  return settingsStore.contactCompanyName || 'MORESPACE CO., LTD.'
+  return settingsStore.contactCompanyName || ''
 })
 
 const bannerCompanyLocation = computed(() => {
@@ -1754,7 +1592,9 @@ const bannerCompanyLocation = computed(() => {
 const formatCTATitle = (text) => {
   if (!text) return '';
   let formatted = text;
-  formatted = formatted.replace('Morespace:', '<span class="text-[#ff7a00]">Morespace:</span>');
+  if (settingsStore.storeName) {
+    formatted = formatted.replace(`${settingsStore.storeName}:`, `<span class="text-[#ff7a00]">${settingsStore.storeName}:</span>`);
+  }
   formatted = formatted.replace('พื้นที่พรีเมียม', '<span class="bg-gradient-to-r from-[#ff7a00] via-[#ff9536] to-[#ff7a00] bg-clip-text text-transparent pb-1">พื้นที่พรีเมียม</span>');
   return formatted;
 }
@@ -1848,7 +1688,7 @@ onUnmounted(() => {
               
               <!-- Description -->
               <p class="hero-stagger-3 text-gray-300/90 text-sm md:text-[15px] font-normal leading-relaxed mb-6 max-w-lg">
-                {{ slides[currentSlide]?.desc || 'จัดระเบียบสิ่งของอย่างมีระดับ ด้วยดีไซน์มินิมอลที่แข็งแรง ทนทานทุกสภาพอากาศ นำเข้าจากอเมริกาโดย Morespace' }}
+                {{ slides[currentSlide]?.desc || 'จัดระเบียบสิ่งของอย่างมีระดับ ด้วยดีไซน์มินิมอลที่แข็งแรง ทนทานทุกสภาพอากาศ' }}
               </p>
               
               <!-- CTA Buttons -->
@@ -2029,225 +1869,21 @@ onUnmounted(() => {
       
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-10 relative z-10 flex flex-col md:flex-row items-center justify-between gap-8 md:gap-12">
         <!-- Text Content -->
-        <div class="flex-1 text-center md:text-left flex flex-col items-center md:items-start" data-aos="fade-right">
+        <div class="flex-1 text-center md:text-left flex flex-col items-center md:items-start">
           <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/20 backdrop-blur-md border border-white/30 text-white font-black tracking-widest text-xs lg:text-sm uppercase mb-4 shadow-sm">
             <svg class="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" /></svg>
             {{ settingsStore.holidayName || 'ประกาศพิเศษ' }}
           </div>
-          <h2 class="text-xl md:text-2xl lg:text-3xl font-bold text-white leading-relaxed mb-4 text-shadow-md">
-            {{ settingsStore.holidayMessage }}
+          <h2 class="text-2xl md:text-3xl lg:text-4xl font-black text-white tracking-tight mb-2">
+            {{ settingsStore.holidayTitle || 'โปรโมชั่นต้อนรับเทศกาล' }}
           </h2>
-          <div 
-             v-if="settingsStore.holidayStartDate && settingsStore.holidayEndDate"
-             class="inline-flex items-center gap-2 bg-black/20 rounded-full px-4 py-1.5 text-sm text-white font-bold tracking-wide border border-black/10"
-          >
-             <svg class="w-4 h-4 text-orange-200" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-             {{ new Date(settingsStore.holidayStartDate).toLocaleDateString('th-TH', {day:'numeric', month:'short'}) }}
-             {{ '–' }}
-             {{ new Date(settingsStore.holidayEndDate).toLocaleDateString('th-TH', {day:'numeric', month:'short', year:'numeric'}) }}
-          </div>
+          <p class="text-white/90 text-sm md:text-base font-medium max-w-xl">
+            {{ settingsStore.holidayDescription || 'เลือกซื้อสินค้าบ้านเก็บของและโรงเรือนพร้อมส่วนลดพิเศษวันนี้' }}
+          </p>
         </div>
-
-        <!-- Optional Image -->
-        <div v-if="settingsStore.holidayImage" class="w-full md:w-1/3 max-w-[350px] shrink-0" data-aos="fade-left" data-aos-delay="100">
-          <img :src="getOptimizedImageUrl(settingsStore.holidayImage, 500)" class="w-full h-auto object-contain rounded-2xl shadow-2xl ring-4 ring-white/20 transform hover:-translate-y-2 transition-transform duration-500 bg-white/5 backdrop-blur-sm" alt="Holiday Campaign" loading="lazy" @error="onImageError">
-        </div>
-      </div>
-    </section>
-
-
-
-    <!-- Best Sellers & Why Choose Us Section (Redesigned Bento Grid Layout) -->
-    <section class="py-16 md:py-20 bg-white dark:bg-[#0a0f16] relative overflow-hidden border-t border-gray-50 dark:border-white/5">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          
-          <!-- LEFT SIDEBAR: lg:col-span-3 -->
-          <div class="lg:col-span-3 flex flex-col gap-6" data-aos="fade-right">
-            
-            <!-- Category Sidebar Menu -->
-            <div class="bg-white dark:bg-[#121826] rounded-2xl border border-gray-150 dark:border-white/5 shadow-[0_4px_20px_rgba(0,0,0,0.02)] overflow-hidden">
-              <div class="bg-gradient-to-r from-[#b44800] to-[#cc5200] text-white px-5 py-4 flex items-center justify-between font-bold text-sm tracking-wide">
-                <div class="flex items-center gap-2.5">
-                  <!-- Grid Menu Icon -->
-                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
-                  </svg>
-                  <span>หมวดหมู่สินค้า</span>
-                </div>
-                <!-- Right Chevron -->
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
-                </svg>
-              </div>
-              
-              <!-- Category List -->
-              <div class="flex flex-col">
-                <router-link 
-                  v-for="cat in categories" 
-                  :key="cat.id" 
-                  :to="`/products?category=${encodeURIComponent(cat.name)}`"
-                  class="group flex items-center justify-between px-5 py-3.5 hover:bg-orange-50/50 dark:hover:bg-white/5 border-b border-gray-100 dark:border-white/5 text-gray-700 dark:text-gray-200 transition-colors last:border-0 text-sm font-medium"
-                >
-                  <div class="flex items-center gap-3">
-                    <img v-if="cat.icon_url" :src="getOptimizedImageUrl(cat.icon_url, 64)" class="w-5 h-5 object-contain opacity-75 group-hover:opacity-100 transition-opacity" alt="category icon" loading="lazy" @error="onImageError" />
-                    <!-- Fallback SVG icon if no icon_url -->
-                    <svg v-else class="w-5 h-5 text-gray-400 group-hover:text-[#c2410c]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2z" />
-                    </svg>
-                    <span class="font-bold group-hover:text-[#c2410c] transition-colors font-['IBM_Plex_Sans_Thai']">{{ cat.name }}</span>
-                  </div>
-                  <svg class="w-3.5 h-3.5 text-gray-400 group-hover:translate-x-1 group-hover:text-[#c2410c] transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
-                  </svg>
-                </router-link>
-              </div>
-            </div>
-
-            <!-- "โซลูชันจัดเก็บ" Promo Banner Card -->
-            <div class="group/promo bg-gradient-to-br from-white via-orange-50/20 to-orange-100/10 dark:from-[#131620] dark:via-[#1e1c26] dark:to-[#1a1310] rounded-3xl p-6 border border-orange-200/40 dark:border-white/5 shadow-[0_10px_35px_rgba(240,113,0,0.04)] dark:shadow-[0_10px_35px_rgba(0,0,0,0.3)] relative overflow-hidden flex flex-col justify-between min-h-[220px] transition-all duration-500 hover:shadow-[0_20px_45px_rgba(240,113,0,0.12)] hover:-translate-y-1">
-              
-              <!-- Ambient background decorative glows -->
-              <div class="absolute -right-16 -top-16 w-36 h-36 bg-gradient-to-br from-orange-400/20 to-red-400/10 rounded-full blur-2xl group-hover/promo:scale-125 transition-transform duration-700 pointer-events-none"></div>
-              <div class="absolute -left-12 -bottom-12 w-28 h-28 bg-[#ff7a00]/5 dark:bg-[#ff7a00]/10 rounded-full blur-xl pointer-events-none"></div>
-              
-              <div class="relative z-10 max-w-[62%] flex flex-col justify-between h-full">
-                <div>
-                  <!-- Tag or Badge -->
-                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[9px] font-extrabold uppercase tracking-wider bg-orange-100 dark:bg-orange-950/40 text-[#ff7a00] mb-3">
-                    {{ promoTag }}
-                  </span>
-                  
-                  <h2 v-html="promoTitle" class="text-gray-900 dark:text-white font-black text-xl leading-tight mb-2 font-['IBM_Plex_Sans_Thai'] tracking-tight group-hover/promo:text-[#c2410c] transition-colors duration-300">
-                  </h2>
-                  
-                  <p class="text-gray-500 dark:text-gray-400 text-xs mb-6 font-medium leading-relaxed font-['IBM_Plex_Sans_Thai']">
-                    {{ promoDesc }}
-                  </p>
-                </div>
-                
-                <router-link 
-                  :to="promoBtnLink"
-                  class="inline-flex items-center justify-center px-5 py-2.5 bg-gradient-to-r from-[#b44800] to-[#cc5200] hover:from-[#9c3e00] hover:to-[#b24800] text-white text-xs font-black rounded-xl shadow-[0_4px_15px_rgba(240,113,0,0.35)] hover:shadow-[0_6px_20px_rgba(240,113,0,0.5)] transition-all duration-300 gap-1.5 hover:scale-105 self-start"
-                >
-                  <span class="font-['IBM_Plex_Sans_Thai']">{{ promoBtnText }}</span>
-                  <!-- Animated Arrow -->
-                  <svg class="w-3.5 h-3.5 transform group-hover/promo:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
-                  </svg>
-                </router-link>
-              </div>
-              
-              <!-- Overlapping Transparent Shed Image with Ambient Glow and Hover Scale -->
-              <div class="absolute -right-3 bottom-0 w-[42%] h-[85%] flex items-end justify-center z-10 pointer-events-none">
-                <!-- Inner glow background for the image to pop -->
-                <div class="absolute inset-0 bg-gradient-to-t from-orange-200/10 to-transparent dark:from-orange-50/5 rounded-full blur-xl transform scale-75 group-hover/promo:scale-110 transition-transform duration-500"></div>
-                <img 
-                  :src="getOptimizedImageUrl(promoImage, 500)" 
-                  class="relative z-10 w-full h-[95%] object-contain drop-shadow-[0_15px_30px_rgba(0,0,0,0.18)] dark:drop-shadow-[0_15px_30px_rgba(0,0,0,0.5)] transform group-hover/promo:scale-[1.08] group-hover/promo:-translate-y-2 transition-all duration-500 ease-out" 
-                  :alt="promoTitle"
-                  @error="onImageError"
-                />
-              </div>
-            </div>
-
-
-
-          </div>
-
-          <!-- RIGHT COLUMN / MAIN SECTION: lg:col-span-9 -->
-          <div class="lg:col-span-9 flex flex-col animate-fade-in" data-aos="fade-left">
-            
-            <!-- Top Hero Banner with Fading Photo Blend -->
-            <div class="relative w-full aspect-[22/9] sm:aspect-[25/9] md:aspect-[28/9] lg:aspect-[2.7/1] rounded-2xl overflow-hidden border border-gray-100 dark:border-white/5 shadow-[0_8px_30px_rgba(0,0,0,0.03)] bg-gradient-to-r from-orange-50/80 via-white to-white dark:from-[#1b1c24] dark:via-[#12141c] dark:to-[#12141c] mb-8 group/banner">
-              
-              <!-- Banner Image positioned on the right -->
-              <img 
-                :src="getOptimizedImageUrl(bannerImage, 800)" 
-                class="absolute right-0 top-0 h-full w-[55%] sm:w-[50%] object-cover object-center z-0 select-none transition-transform duration-[8s] ease-out group-hover/banner:scale-105"
-                :alt="bannerTitle"
-                @error="onImageError"
-              />
-              
-              <!-- Gradient Overlay to blend background into the photo, perfectly masking the left vertical edge -->
-              <div class="absolute inset-y-0 left-[35%] sm:left-[40%] w-[35%] sm:w-[30%] bg-gradient-to-r from-white via-white to-transparent dark:from-[#12141c] dark:via-[#12141c] dark:to-transparent z-10 pointer-events-none"></div>
-              
-              <!-- Content Layer (Left Side) -->
-              <div class="relative z-20 h-full flex flex-col justify-center text-left pl-6 sm:pl-10 max-w-[55%]">
-                <!-- Tag Line -->
-                <div class="inline-flex items-center gap-1.5 text-[#ff7a00] font-black tracking-widest text-[10px] sm:text-xs uppercase mb-1 sm:mb-2 font-['IBM_Plex_Sans_Thai']">
-                  <span class="w-5 h-[2px] bg-[#ff7a00]"></span>
-                  {{ bannerTag }}
-                </div>
-                
-                <h2 v-html="bannerTitle" class="text-lg sm:text-xl md:text-2xl lg:text-3xl font-black text-gray-900 dark:text-white leading-[1.25] mb-1 sm:mb-2 font-['IBM_Plex_Sans_Thai']">
-                </h2>
-                <p class="text-xs sm:text-sm md:text-base font-extrabold text-[#ff7a00] mb-3 sm:mb-5 font-['IBM_Plex_Sans_Thai']">
-                  {{ bannerSubtitle }}
-                </p>
-                
-                <!-- Tiny icons feature row inside banner (Only visible on medium size screen up) -->
-                <div class="hidden sm:flex flex-wrap gap-x-4 gap-y-2 mt-1">
-                  <div v-for="(bullet, index) in bannerBullets" :key="index" class="flex items-center gap-1.5">
-                    <span class="w-4 h-4 rounded-full bg-orange-100 dark:bg-orange-950/40 flex items-center justify-center shrink-0 text-[#ff7a00]">
-                      <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-                    </span>
-                    <span class="text-[10px] font-bold text-gray-500 dark:text-gray-400">{{ bullet }}</span>
-                  </div>
-                </div>
-              </div>
-              
-            </div>
-
-            <!-- Bento Grid Row: Cards Slider -->
-            <div v-if="showcaseProducts.length > 0" class="w-full">
-              
-              <!-- Best Sellers Carousel -->
-              <div class="w-full relative flex flex-col justify-between group/slider" data-aos="fade-up">
-                <!-- Header -->
-                <div class="flex items-center justify-between mb-8 text-left">
-                  <div>
-                    <h2 class="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white flex items-center gap-2 font-['IBM_Plex_Sans_Thai'] tracking-tight">
-                      สินค้าลดราคา
-                      <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-red-100 dark:bg-red-950/40 text-red-600 dark:text-red-400 shadow-sm animate-pulse">
-                        <svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
-                          <path stroke-linecap="round" stroke-linejoin="round" d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581a1.125 1.125 0 001.59 0l4.318-4.317a1.125 1.125 0 000-1.591L9.581 3.658A2.25 2.25 0 009.568 3z" />
-                          <path stroke-linecap="round" stroke-linejoin="round" d="M6 6h.008v.008H6V6z" />
-                        </svg>
-                      </span>
-                    </h2>
-                    <p class="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mt-1 font-['IBM_Plex_Sans_Thai'] pl-0.5">คัดสรรสินค้าลดราคาที่ดีที่สุดสำหรับคุณ</p>
-                  </div>
-                  
-                  <router-link to="/products" class="text-xs sm:text-sm font-bold text-gray-500 hover:text-[#c2410c] transition-colors flex items-center gap-1 group">
-                    <span>ดูทั้งหมด</span>
-                    <svg class="w-4 h-4 transform group-hover:translate-x-1 transition-transform text-[#ff7a00]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
-                    </svg>
-                  </router-link>
-                </div>
-
-                <!-- Product Grid Container -->
-                <div class="w-full">
-                  <!-- Cards Container -->
-                  <div 
-                    class="flex sm:grid sm:grid-cols-3 gap-6 overflow-x-auto sm:overflow-visible hide-scrollbar pb-6 sm:pb-0 snap-x snap-mandatory scroll-smooth w-full"
-                  >
-                    <div 
-                      v-for="product in showcaseProducts.slice(0, 3)" 
-                      :key="product.id"
-                      class="flex-shrink-0 w-[240px] sm:w-auto snap-start"
-                    >
-                      <ProductCard :product="product" compact />
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-            </div>
-          </div>
-        </div>
+        <router-link v-if="settingsStore.holidayBtnText" :to="settingsStore.holidayBtnLink || '/products'" class="px-6 py-3 bg-white text-orange-600 hover:bg-orange-50 font-bold rounded-full shadow-lg transition-all text-sm shrink-0">
+          {{ settingsStore.holidayBtnText }}
+        </router-link>
       </div>
     </section>
     
@@ -2258,7 +1894,7 @@ onUnmounted(() => {
       <div class="absolute top-1/2 left-0 -translate-y-1/2 -translate-x-1/3 w-[800px] h-[800px] bg-emerald-500/5 rounded-full blur-[100px] pointer-events-none"></div>
 
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <div class="text-center mb-16" data-aos="fade-up">
+        <div class="text-center mb-16">
            <h2 class="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight text-gray-900 dark:text-white">{{ homeHighlightSettings?.title || 'หมวดหมู่สินค้าขายดี' }}<span class="text-emerald-500">{{ homeHighlightSettings?.titleHighlight ? ' '+homeHighlightSettings.titleHighlight : ' ยอดนิยม' }}</span></h2>
            <p class="mt-4 text-gray-500 dark:text-gray-400 max-w-2xl mx-auto text-sm md:text-base">{{ homeHighlightSettings?.subtitle || 'ค้นพบโซลูชันพื้นที่เก็บของที่ดีที่สุด การันตีด้วยยอดขายอันดับหนึ่ง' }}</p>
         </div>
@@ -2266,7 +1902,7 @@ onUnmounted(() => {
         <div v-if="highlightCategoriesList.length > 0" class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-stretch">
             
             <!-- Left Side: Recommended Products Showcase (lg:col-span-7) -->
-            <div class="lg:col-span-7 order-2 lg:order-1 flex flex-col justify-between" data-aos="fade-right">
+            <div class="lg:col-span-7 order-2 lg:order-1 flex flex-col justify-between">
                 <div>
                     <!-- Header with crown icon -->
                     <div class="flex items-center gap-2.5 mb-2 text-left">
@@ -2303,7 +1939,6 @@ onUnmounted(() => {
                             <div class="relative aspect-square rounded-[20px] overflow-hidden bg-gray-50 dark:bg-gray-800 mb-4 border border-gray-100 dark:border-gray-700/50 shrink-0">
                                 <img :src="getOptimizedImageUrl(product.image || product.image_url, 400) || '/images/placeholder.png'"
                                     :alt="product.name || 'สินค้ารุ่นแนะนำ'"
-                                    loading="lazy"
                                     class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
                                 >
                                 <div v-if="product.is_out_of_stock" class="absolute inset-0 bg-white/50 dark:bg-black/50 flex items-center justify-center z-[2]">
@@ -2360,7 +1995,7 @@ onUnmounted(() => {
             </div>
 
             <!-- Right Side: Category Showcase Card (lg:col-span-5) -->
-            <div class="lg:col-span-5 order-1 lg:order-2 relative" data-aos="fade-left">
+            <div class="lg:col-span-5 order-1 lg:order-2 relative">
                 <!-- Arrow controls centered vertically, overlapping left and right borders -->
                 <!-- Left arrow -->
                 <button
@@ -2385,15 +2020,12 @@ onUnmounted(() => {
                 <div class="w-full h-full rounded-[2.5rem] overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.12)] relative bg-gray-900 isolate min-h-[480px] lg:min-h-[520px] flex flex-col justify-between p-8 md:p-10 group/showcase">
                     
                     <!-- Background Category Image with Ken Burns / zoom effect -->
-                    <transition name="fade" mode="in-out">
-                        <img :key="highlightCatIndex"
-                            :src="getOptimizedImageUrl(highlightCategoriesList[highlightCatIndex].image_url, 800) || '/images/placeholder.png'" 
-                            :alt="highlightCategoriesList[highlightCatIndex].name"
-                            loading="lazy"
-                            class="absolute inset-0 w-full h-full object-cover transition-transform duration-[12s] scale-100 group-hover/showcase:scale-105 select-none pointer-events-none z-0"
-                            @error="onImageError"
-                        >
-                    </transition>
+                    <img :key="highlightCatIndex"
+                        :src="getOptimizedImageUrl(highlightCategoriesList[highlightCatIndex].image_url, 800) || '/images/placeholder.png'" 
+                        :alt="highlightCategoriesList[highlightCatIndex].name"
+                        class="absolute inset-0 w-full h-full object-cover transition-transform duration-[12s] scale-100 group-hover/showcase:scale-105 select-none pointer-events-none z-0"
+                        @error="onImageError"
+                    >
 
                     <!-- Premium dark visual gradient overlay -->
                     <div class="absolute inset-0 bg-gradient-to-tr from-[#0a0f18]/95 via-[#0d131f]/75 to-transparent z-10 pointer-events-none"></div>
@@ -2491,13 +2123,13 @@ onUnmounted(() => {
             </div>
             
             <!-- Headline with orange brand coloring gradient -->
-            <h3 v-html="featuresTitle || 'Morespace:<br>นวัตกรรมพื้นที่ส่วนตัวสไตล์มินิมอล<br>ตอบโจทย์ทุกความต้องการ'" class="text-2xl sm:text-3xl md:text-[38px] font-black tracking-tight text-gray-900 dark:text-white leading-[1.2] mb-4 font-['IBM_Plex_Sans_Thai']"></h3>
+            <h3 v-html="featuresTitle" class="text-2xl sm:text-3xl md:text-[38px] font-black tracking-tight text-gray-900 dark:text-white leading-[1.2] mb-4 font-['IBM_Plex_Sans_Thai']"></h3>
             
             <!-- Elegant gradient line -->
             <div class="w-16 h-1 bg-gradient-to-r from-[#ff7a00] via-[#ff8824] to-transparent rounded-full mb-4"></div>
             
             <p class="text-slate-500 dark:text-slate-400 text-xs sm:text-sm font-medium leading-relaxed mb-6 max-w-xl font-['IBM_Plex_Sans_Thai']">
-              {{ featuresDesc || 'Morespace คือผู้เชี่ยวชาญด้านนวัตกรรมโรงเก็บของและโรงเรือนพรีเมียม นำเสนอดีไซน์มินิมอลที่ผสานฟังก์ชันการใช้งานอย่างลงตัวกับความทนทาน' }}
+              {{ featuresDesc }}
             </p>
             
             <!-- Horizontal Cards list -->
@@ -2574,7 +2206,6 @@ onUnmounted(() => {
               :src="featuresImage || '/images/home/features-premium.webp'" 
               alt="Premium Shed Setup" 
               class="absolute inset-0 w-full h-full object-cover z-0 transition-transform duration-[10s] ease-out group-hover/panel:scale-105" 
-              loading="lazy"
             >
             <div class="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent"></div>
 
@@ -2734,7 +2365,7 @@ onUnmounted(() => {
     <template v-if="showcaseCategoriesData.length > 0">
       <section v-for="(showcase, index) in showcaseCategoriesData" :key="index" class="py-20 md:py-28 bg-white dark:bg-[#0a0f16] border-t border-gray-100 dark:border-gray-800/50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-12 md:mb-16 gap-4" data-aos="fade-up">
+          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-12 md:mb-16 gap-4">
             <div class="flex items-center gap-4">
               <div v-if="showcase.category.icon_url || showcase.category.image_url" 
                    class="w-16 h-16 rounded-2xl overflow-hidden bg-emerald-600 dark:bg-emerald-500/20 flex items-center justify-center shadow-md flex-shrink-0"
@@ -2758,7 +2389,7 @@ onUnmounted(() => {
           </div>
 
           <!-- Showcase Products Grid -->
-          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 md:gap-8 mt-12" data-aos="fade-up">
+          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 md:gap-8 mt-12">
             <ProductCard 
               v-for="product in showcase.products" 
               :key="product.id" 
@@ -2769,117 +2400,7 @@ onUnmounted(() => {
       </section>
     </template>
 
-    <!-- How It Works Section -->
-    <template v-if="false">
-    <section v-if="homeShowHowItWorks" class="py-20 md:py-28 bg-[#fffcf9] dark:bg-[#070b11] relative overflow-hidden">
-      <!-- Decorative background -->
-      <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[1000px] rounded-full bg-gradient-to-br from-orange-500/5 via-transparent to-amber-500/5 blur-3xl pointer-events-none"></div>
-      
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <div class="text-center mb-20" data-aos="fade-up">
-          <!-- Premium Orange Rounded Pill Tag -->
-          <div class="inline-flex items-center bg-gradient-to-r from-orange-400 to-orange-500 dark:from-orange-500 dark:to-orange-600 text-white text-xs font-bold px-6 py-2.5 rounded-full shadow-md shadow-orange-500/10 uppercase tracking-widest mb-6">
-            {{ sectionTitles.howItWorksTitle }}
-          </div>
-          <!-- Styled Heading with dynamic formatted 4 -->
-          <h3 class="text-3xl md:text-4xl lg:text-5xl font-black tracking-tight text-gray-900 dark:text-white mb-5" v-html="formattedHowItWorksHeading"></h3>
-          <p class="text-gray-500 dark:text-gray-400 max-w-2xl mx-auto font-light text-base md:text-lg leading-relaxed">{{ sectionTitles.howItWorksDesc }}</p>
-        </div>
 
-        <!-- Grid Cards Layout -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-6 lg:gap-8 relative">
-          <div 
-            v-for="(step, idx) in howItWorksSteps" 
-            :key="idx" 
-            class="relative bg-white dark:bg-[#0f172a] rounded-[32px] border border-gray-100 dark:border-gray-800/80 p-8 pt-12 pb-8 text-center group shadow-xl shadow-orange-500/[0.02] hover:shadow-2xl hover:shadow-orange-500/[0.06] hover:border-orange-500/20 dark:hover:border-orange-500/10 hover:-translate-y-1.5 transition-all duration-500 flex flex-col"
-            data-aos="fade-up"
-            :data-aos-delay="idx * 150"
-          >
-            <!-- Step Number Badge (Overlaps top border) -->
-            <div class="absolute -top-5 left-1/2 -translate-x-1/2 w-10 h-10 rounded-full bg-gradient-to-r from-orange-400 to-orange-500 text-white font-extrabold text-sm flex items-center justify-center shadow-md shadow-orange-500/20 border-2 border-white dark:border-gray-900 group-hover:scale-110 transition-transform duration-300">
-              {{ String(idx + 1).padStart(2, '0') }}
-            </div>
-
-            <!-- Horizontal Dashed Connector (Passes perfectly through the icon center line) -->
-            <div class="hidden lg:block absolute top-[88px] left-[calc(100%-18px)] w-[36px] h-[2px] z-20" v-if="idx < howItWorksSteps.length - 1">
-              <!-- Dashed line -->
-              <div class="w-full h-full border-t-2 border-dashed border-gray-200 dark:border-white/10"></div>
-              <!-- Flow Chevron Badge -->
-              <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-orange-500 text-white flex items-center justify-center shadow-md border border-white dark:border-gray-900 transition-transform duration-300 group-hover:translate-x-0.5">
-                <svg class="w-2.5 h-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 5l7 7-7 7"></path>
-                </svg>
-              </div>
-            </div>
-
-            <!-- double-circle Icon Container with color matched shadow glow -->
-            <div class="relative w-24 h-24 mx-auto flex items-center justify-center mb-6">
-              <!-- Glow shadow -->
-              <div :class="[
-                'absolute inset-0 rounded-full opacity-[0.08] blur-md scale-95 transition-all duration-500 group-hover:scale-110',
-                step.color === 'emerald' ? 'bg-orange-500' : '',
-                step.color === 'blue' ? 'bg-blue-500' : '',
-                step.color === 'amber' ? 'bg-amber-500' : '',
-                step.color === 'violet' ? 'bg-violet-500' : ''
-              ]"></div>
-              <!-- Outer circle -->
-              <div :class="[
-                'w-24 h-24 rounded-full border flex items-center justify-center relative transition-transform duration-500 group-hover:scale-105',
-                step.color === 'emerald' ? 'bg-orange-50/50 border-orange-100 dark:bg-orange-950/10 dark:border-orange-900/30' : '',
-                step.color === 'blue' ? 'bg-blue-50/50 border-blue-100 dark:bg-blue-950/10 dark:border-blue-900/30' : '',
-                step.color === 'amber' ? 'bg-amber-50/50 border-amber-100 dark:bg-amber-950/10 dark:border-amber-900/30' : '',
-                step.color === 'violet' ? 'bg-violet-50/50 border-violet-100 dark:bg-violet-950/10 dark:border-violet-900/30' : ''
-              ]">
-                <!-- Inner Colored Circle -->
-                <div :class="[
-                  'w-16 h-16 rounded-full flex items-center justify-center shadow-md',
-                  step.color === 'emerald' ? 'bg-gradient-to-br from-orange-400 to-orange-500 text-white' : '',
-                  step.color === 'blue' ? 'bg-gradient-to-br from-blue-400 to-blue-500 text-white' : '',
-                  step.color === 'amber' ? 'bg-gradient-to-br from-amber-400 to-amber-500 text-white' : '',
-                  step.color === 'violet' ? 'bg-gradient-to-br from-violet-400 to-violet-500 text-white' : ''
-                ]">
-                  <svg v-if="step.icon === 'chat'" class="w-8 h-8 text-white filter drop-shadow-sm" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
-                  </svg>
-                  <svg v-else-if="step.icon === 'search'" class="w-8 h-8 text-white filter drop-shadow-sm" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                  </svg>
-                  <svg v-else-if="step.icon === 'truck'" class="w-8 h-8 text-white filter drop-shadow-sm" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"></path>
-                  </svg>
-                  <svg v-else-if="step.icon === 'shield'" class="w-8 h-8 text-white filter drop-shadow-sm" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
-                  </svg>
-                </div>
-              </div>
-            </div>
-            
-            <!-- Step Titles & Description -->
-            <h4 class="text-xl font-bold text-gray-900 dark:text-white mb-1 group-hover:text-orange-500 transition-colors duration-300">{{ step.title }}</h4>
-            <div :class="[
-              'text-xs font-bold mb-4 tracking-wider uppercase',
-              step.color === 'emerald' ? 'text-orange-500 dark:text-orange-400' : '',
-              step.color === 'blue' ? 'text-blue-500 dark:text-blue-400' : '',
-              step.color === 'amber' ? 'text-orange-500 dark:text-orange-400' : '',
-              step.color === 'violet' ? 'text-violet-500 dark:text-violet-400' : ''
-            ]">{{ step.subtitle }}</div>
-            <p class="text-sm text-gray-500 dark:text-gray-400 font-light leading-relaxed mb-6 px-1 flex-grow">{{ step.desc }}</p>
-
-            <!-- Duration Badge (Sticks elegantly to the bottom of the card) -->
-            <div :class="[
-              'inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold tracking-wide shadow-sm mx-auto mt-auto border transition-all duration-300 group-hover:shadow-md',
-              step.durationBg
-            ]">
-              <svg class="w-3.5 h-3.5" :class="step.durationIconColor" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-              </svg>
-              <span>{{ step.duration }}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-    </template>
 
 
 
@@ -2888,7 +2409,7 @@ onUnmounted(() => {
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         <!-- Header -->
-        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-12 md:mb-16 gap-6" data-aos="fade-up">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-12 md:mb-16 gap-6">
           <div class="text-left">
             <!-- Pill badge -->
             <div class="inline-flex items-center gap-1.5 bg-orange-50 dark:bg-orange-950/20 text-[#c2410c] dark:text-orange-400 text-xs font-bold px-3 py-1.5 rounded-full border border-orange-100/50 dark:border-orange-900/30 uppercase tracking-widest mb-4">
@@ -3023,7 +2544,7 @@ onUnmounted(() => {
         </div>
 
         <!-- Bottom Feature Highlights Bar -->
-        <div class="max-w-7xl mx-auto mt-12 bg-white dark:bg-[#0f172a] rounded-[24px] border border-gray-100 dark:border-gray-800/80 shadow-md p-5 flex flex-col md:flex-row justify-between items-center gap-6 md:gap-4" data-aos="fade-up">
+        <div class="max-w-7xl mx-auto mt-12 bg-white dark:bg-[#0f172a] rounded-[24px] border border-gray-100 dark:border-gray-800/80 shadow-md p-5 flex flex-col md:flex-row justify-between items-center gap-6 md:gap-4">
           <!-- Item 1 -->
           <div class="flex items-center gap-4 w-full md:w-auto px-4 py-1.5 justify-center md:justify-start">
             <span class="w-10 h-10 rounded-full bg-orange-50 dark:bg-orange-950/20 flex items-center justify-center flex-shrink-0 text-orange-500">
@@ -3097,16 +2618,16 @@ onUnmounted(() => {
 
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <!-- Section Header -->
-        <div class="text-center mb-14" data-aos="fade-up">
+        <div class="text-center mb-14">
           <!-- Badge -->
           <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-orange-50 dark:bg-orange-950/30 border border-orange-200 dark:border-orange-800/50 mb-5">
             <svg class="w-4 h-4 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
             <span class="text-xs font-bold text-orange-600 dark:text-orange-400 tracking-wide">{{ sectionTitles.testimonialsTitle }}</span>
           </div>
           <!-- Main heading with orange highlight -->
-          <h3 class="text-3xl md:text-4xl lg:text-5xl font-black tracking-tight text-gray-900 dark:text-white mb-4" data-aos="fade-up" data-aos-delay="100" v-html="formattedTestimonialsHeading"></h3>
+          <h3 class="text-3xl md:text-4xl lg:text-5xl font-black tracking-tight text-gray-900 dark:text-white mb-4" v-html="formattedTestimonialsHeading"></h3>
           <!-- Subtitle -->
-          <p class="max-w-2xl mx-auto text-sm md:text-base text-gray-500 dark:text-gray-400 leading-relaxed whitespace-pre-line" data-aos="fade-up" data-aos-delay="150">
+          <p class="max-w-2xl mx-auto text-sm md:text-base text-gray-500 dark:text-gray-400 leading-relaxed whitespace-pre-line">
             {{ sectionTitles.testimonialsDesc || 'เราภูมิใจที่ได้เป็นส่วนหนึ่งในการดูแลบ้านและธุรกิจของลูกค้า\nด้วยคุณภาพงานที่ได้มาตรฐาน บริการที่จริงใจ และส่งมอบตรงเวลาเสมอ' }}
           </p>
         </div>
@@ -3115,7 +2636,7 @@ onUnmounted(() => {
         <div v-if="testimonials.length > 0" class="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 text-left mb-14">
           <div v-for="(review, index) in testimonials" :key="index"
             class="relative bg-white dark:bg-[#141c2b] rounded-2xl border border-gray-100 dark:border-white/5 shadow-[0_4px_24px_rgba(0,0,0,0.04)] dark:shadow-none transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_12px_40px_rgba(240,113,0,0.08)] group overflow-hidden flex flex-col"
-            data-aos="fade-up" :data-aos-delay="index * 120">
+          >
 
             <!-- Top bar: Stars + Score + Quote icon -->
             <div class="flex items-center justify-between px-6 pt-6 pb-0">
@@ -3185,8 +2706,8 @@ onUnmounted(() => {
     </template>
 
     <!-- Partners / Trusted By Section -->
-    <template v-if="false">
-    <section v-if="homeShowPartners" class="py-20 md:py-28 bg-[#f9fafb] dark:bg-[#0a0f16] relative overflow-hidden border-t border-gray-100 dark:border-white/5">
+    <template v-if="homeShowPartners && corporateReviews.length > 0">
+    <section class="py-20 md:py-28 bg-[#f9fafb] dark:bg-[#0a0f16] relative overflow-hidden border-t border-gray-100 dark:border-white/5">
       <!-- Background decoration -->
       <div class="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
         <div class="absolute top-1/4 left-[-10%] w-96 h-96 bg-orange-500/5 blur-[120px] rounded-full"></div>
@@ -3194,7 +2715,7 @@ onUnmounted(() => {
 
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <!-- Header -->
-        <div class="text-center mb-14" data-aos="fade-up">
+        <div class="text-center mb-14">
           <div class="inline-flex items-center justify-center gap-1.5 text-xs font-bold text-orange-500 tracking-wide uppercase mb-3">
             <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
             <span>รีวิวจากลูกค้าจริง</span>
@@ -3203,12 +2724,12 @@ onUnmounted(() => {
           <h3 class="text-3xl md:text-4xl lg:text-5xl font-black tracking-tight text-gray-900 dark:text-white mb-4" v-html="formattedPartnersHeading">
           </h3>
           <p class="max-w-2xl mx-auto text-sm md:text-base text-gray-500 dark:text-gray-400 font-light leading-relaxed">
-            {{ sectionTitles.partnersDesc || 'ขอขอบคุณทุกความไว้วางใจที่เลือก MoreSpace ดูแลพื้นที่ของคุณ' }}
+            {{ sectionTitles.partnersDesc || 'ขอขอบคุณทุกความไว้วางใจที่เลือกเราดูแลพื้นที่ของคุณ' }}
           </p>
         </div>
 
         <!-- Slider Carousel Container -->
-        <div class="relative px-0 md:px-8 mb-16" data-aos="fade-up">
+        <div class="relative px-0 md:px-8 mb-16">
           <!-- Left Arrow Navigation -->
           <button 
             @click="prevPartnerSlide" 
@@ -3395,7 +2916,7 @@ onUnmounted(() => {
       </div>
 
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-16 gap-6" data-aos="fade-up">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-16 gap-6">
           <div>
             <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-orange-50 dark:bg-orange-950/20 text-orange-500 dark:text-orange-400 text-xs font-bold tracking-wider uppercase mb-4 border border-orange-100 dark:border-orange-900/30">
               <svg class="w-4 h-4 text-orange-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -3415,7 +2936,7 @@ onUnmounted(() => {
         </div>
 
         <!-- Slider Carousel Container -->
-        <div class="relative px-0 md:px-8 mb-12" data-aos="fade-up">
+        <div class="relative px-0 md:px-8 mb-12">
           <!-- Left Arrow Navigation -->
           <button 
             v-if="recentArticles.length > 1"
@@ -3551,7 +3072,7 @@ onUnmounted(() => {
       <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
 
         <!-- Header: Badge + Heading + Decorative 3D question mark -->
-        <div class="relative text-center mb-14" data-aos="fade-up">
+        <div class="relative text-center mb-14">
           <!-- Pill Badge (Outlined) -->
           <div class="inline-flex items-center gap-2 px-5 py-1.5 rounded-full bg-[#fff4eb] border border-[#ffcca8] text-[#e65f00] text-xs font-bold uppercase mb-4 shadow-sm shadow-orange-500/5">
             <svg class="w-4 h-4 text-[#e65f00]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -3589,8 +3110,6 @@ onUnmounted(() => {
             :class="item.open 
               ? 'bg-white dark:bg-[#1e2738] border-2 border-orange-200 dark:border-orange-500/30 shadow-[0_12px_40px_-8px_rgba(249,115,22,0.1)]' 
               : 'bg-white dark:bg-[#1a2333]/90 border border-gray-200/80 dark:border-white/5 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.03)] hover:border-orange-200'"
-            data-aos="fade-up"
-            :data-aos-delay="idx * 50"
           >
             <div class="flex-1">
               <button 

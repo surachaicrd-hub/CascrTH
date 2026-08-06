@@ -26,7 +26,7 @@ const tabs = [
             <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
             System Blueprint v1.0
           </div>
-          <h1 class="text-3xl md:text-4xl font-black tracking-tight mb-2">คู่มือระบบ Morespace ฉบับสมบูรณ์</h1>
+          <h1 class="text-3xl md:text-4xl font-black tracking-tight mb-2">คู่มือระบบบริหารจัดการฉบับสมบูรณ์</h1>
           <p class="text-emerald-100/70 max-w-2xl text-sm md:text-base leading-relaxed">
             คู่มือการใช้งานเว็บไซต์ ระบบเชื่อมต่อฐานข้อมูล และการจัดการหลังบ้าน (CMS Master Guide) สำหรับแอดมิน ทีมผู้บริหาร และนักพัฒนา
           </p>
@@ -110,7 +110,7 @@ const tabs = [
               <h3 class="text-lg font-bold text-gray-900 mb-2">1.3 ฟีเจอร์ AI Consultant (น้องสเปซ)</h3>
               <div class="bg-indigo-50/50 p-4 rounded-xl mb-4 border border-indigo-100">
                 <p class="m-0 text-indigo-900"><strong>AI Consultant</strong> คือผู้ช่วยเสมือนจริงในหน้าเว็บ ใช้งานผ่าน <code>/ai-consultant</code></p>
-                <p class="m-0 text-indigo-700 text-sm mt-2">ลูกค้าระบุขนาดพื้นที่หรือจุดประสงค์ น้องสเปซจะประมวลผลและนำเสนอสินค้ารุ่นของ Morespace ที่สอดคล้องที่สุดแบบเรียลไทม์ พร้อมสรุปราคา</p>
+                <p class="m-0 text-indigo-700 text-sm mt-2">ลูกค้าระบุขนาดพื้นที่หรือจุดประสงค์ น้องสเปซจะประมวลผลและนำเสนอสินค้ารุ่นที่สอดคล้องที่สุดแบบเรียลไทม์ พร้อมสรุปราคา</p>
               </div>
             </div>
 
@@ -381,7 +381,7 @@ const tabs = [
           <p>เอกสารส่วนนี้มีไว้เพื่อส่งมอบงาน ให้นักพัฒนารายใหม่ หรือฝ่ายดูแลโฮสติ้ง เข้าใจกลไกระบบทั้งหมด</p>
 
           <h3 class="text-lg font-bold border-b pb-2">4.1 สถาปัตยกรรม ฐานข้อมูล (Database Architecture)</h3>
-          <p>เพื่อรับประกันว่า WebApp สามารถติดตั้งได้บน Shared Hosting แทบทุกแบบ ไม่เว้นแม้แต่เครื่องรุ่นเก่าที่ยังรัน MySQL 5.6 โครงสร้าง DB ของ Morespace จึงไม่ได้พึ่งพา JSON Field โดยตรง:</p>
+          <p>เพื่อรับประกันว่า WebApp สามารถติดตั้งได้บน Shared Hosting แทบทุกแบบ ไม่เว้นแม้แต่เครื่องรุ่นเก่าที่ยังรัน MySQL 5.6 โครงสร้าง DB ของระบบจึงไม่ได้พึ่งพา JSON Field โดยตรง:</p>
           <ul>
             <li>ฟิลด์ที่เก็บค่า Configuration เป็น Object ซ้อนกันในหน้าสินค้า เช่น ข้อมูลแกลลอรี่ภาพ หรือคุณสมบัติพิเศษ จะถูกบีบอัดลงฟิลด์ปะเภท <code>LONGTEXT</code> แทน <code>JSON</code></li>
             <li>ฟิลด์ที่เป็นดัชนีชี้วัดข้อมูล Unique Key ทั้งหมด (เช่น <code>slug</code>, <code>username</code>, <code>email</code>) จะถูกกำหนดโครงสร้างจำกัด (Varchar Length) ไว้ที่ <code>191</code> ตัวอักษร เพื่อหลีกเลี่ยงกฎ Key Limit ระดับระบบ 767 Bytes ที่พบเจอใน Default Engine รุ่นเก่า </li>
@@ -408,7 +408,7 @@ const tabs = [
               <p class="m-0 text-gray-500 text-sm mt-1">เครือข่ายส่งออกข้อมูลและเชื่อมต่อกับโปรแกรมภายนอก (Export APIs Hub)</p>
             </div>
           </div>
-          <p>เปิดทางให้ Morespace สามารถนำซอฟต์แวร์วิเคราะห์ข้อมูล หรือ ERP (เช่น SAP, โฟลว์แอคเคาท์) มาดึงข้อมูลไปทำการตลาดหรือลงบัญชีต่อได้อัตโนมัติ 
+          <p>เปิดทางให้ระบบสามารถนำซอฟต์แวร์วิเคราะห์ข้อมูล หรือ ERP (เช่น SAP, โฟลว์แอคเคาท์) มาดึงข้อมูลไปทำการตลาดหรือลงบัญชีต่อได้อัตโนมัติ 
           โดยระบบมีการรองรับการเชื่อมต่อผ่าน <strong>API Token (JWT)</strong> เพื่อความปลอดภัยสูงสุด</p>
 
           <div class="bg-gray-900 rounded-xl overflow-hidden mt-6 mb-8 shadow-inner">
@@ -421,11 +421,11 @@ const tabs = [
             </div>
             <div class="p-4 text-sm font-mono text-gray-300 overflow-x-auto whitespace-pre leading-relaxed">
 <span class="text-blue-400"># 1. ส่ง Request ขอ Token ด้วย API Key (Server-to-Server)</span>
-POST https://morespace.co.th/api/admin/api-token
+POST https://your-domain.com/api/admin/api-token
 Content-Type: application/json
 
 {
-  "api_key": "morespace-sync-2024"
+  "api_key": "YOUR_EXPORT_API_KEY"
 }
 
 <span class="text-emerald-400"># 2. ระบบจะคืนค่า Token (อายุ 2 ชั่วโมง)</span>
@@ -437,9 +437,9 @@ Content-Type: application/json
 }
 
 <span class="text-blue-400"># 3. นำ Token ไปใช้ดึงข้อมูลโดยแนบใน Header</span>
-GET https://morespace.co.th/api/orders/export
+GET https://your-domain.com/api/orders/export
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsIn...
-<span class="text-gray-500">(* หรือใช้วิธีแนบ ?apikey=morespace-sync-2024 ท้าย URL แบบดั้งเดิมแทนได้เช่นกัน)</span>
+<span class="text-gray-500">(* หรือใช้วิธีแนบ ?apikey=YOUR_EXPORT_API_KEY ท้าย URL แบบดั้งเดิมแทนได้เช่นกัน)</span>
             </div>
           </div>
           

@@ -1,8 +1,9 @@
 User-agent: *
 Allow: /
+Allow: /api/sitemap.xml
 Disallow: /admin/
 Disallow: /api/
 
-Sitemap: https://morespace.co.th/sitemap.xml
+Sitemap: /sitemap.xml
 
 # Morespace - Premium Storage Solutions
