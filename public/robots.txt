@@ -4,6 +4,6 @@ Allow: /api/sitemap.xml
 Disallow: /admin/
 Disallow: /api/
 
-Sitemap: /sitemap.xml
+Sitemap: https://morespace.co.th/sitemap.xml
 
 # Morespace - Premium Storage Solutions

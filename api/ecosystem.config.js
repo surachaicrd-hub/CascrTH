@@ -1,6 +1,6 @@
 module.exports = {
   apps: [{
-    name: 'storage-api',
+    name: 'morespace-api',
     script: './index.js',
     instances: 1,
     exec_mode: 'fork',

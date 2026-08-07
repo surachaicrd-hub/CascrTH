@@ -892,7 +892,7 @@ const formattedArticlesHeading = computed(() => {
 
 const formattedProjectsHeading = computed(() => {
   const heading = sectionTitles.value.projectsHeading || 'ภาพผลงานติดตั้งจริงล่าสุด'
-  return heading.replace('ล่าสุด', '<span class="text-[#ff7a00] dark:text-orange-400">ล่าสุด</span>')
+  return heading.replace('ล่าสุด', '<span class="text-[#c2410c] dark:text-orange-400">ล่าสุด</span>')
 })
 
 const formattedTestimonialsHeading = computed(() => {
@@ -1593,18 +1593,18 @@ const formatCTATitle = (text) => {
   if (!text) return '';
   let formatted = text;
   if (settingsStore.storeName) {
-    formatted = formatted.replace(`${settingsStore.storeName}:`, `<span class="text-[#ff7a00]">${settingsStore.storeName}:</span>`);
+    formatted = formatted.replace(`${settingsStore.storeName}:`, `<span class="text-[#c2410c] dark:text-orange-400">${settingsStore.storeName}:</span>`);
   }
-  formatted = formatted.replace('พื้นที่พรีเมียม', '<span class="bg-gradient-to-r from-[#ff7a00] via-[#ff9536] to-[#ff7a00] bg-clip-text text-transparent pb-1">พื้นที่พรีเมียม</span>');
+  formatted = formatted.replace('พื้นที่พรีเมียม', '<span class="bg-gradient-to-r from-[#c2410c] via-[#ea580c] to-[#c2410c] dark:from-orange-400 dark:to-amber-300 bg-clip-text text-transparent pb-1">พื้นที่พรีเมียม</span>');
   return formatted;
 }
 
 const formatCTADesc = (text) => {
   if (!text) return '';
   let formatted = text;
-  formatted = formatted.replace('โรงจอดรถ', '<span class="text-[#ff7a00] font-semibold">โรงจอดรถ</span>');
-  formatted = formatted.replace('โกดังเก็บของ', '<span class="text-[#ff7a00] font-semibold">โกดังเก็บของ</span>');
-  formatted = formatted.replace('พื้นที่อเนกประสงค์', '<span class="text-[#ff7a00] font-semibold">พื้นที่อเนกประสงค์</span>');
+  formatted = formatted.replace('โรงจอดรถ', '<span class="text-[#c2410c] dark:text-orange-400 font-semibold">โรงจอดรถ</span>');
+  formatted = formatted.replace('โกดังเก็บของ', '<span class="text-[#c2410c] dark:text-orange-400 font-semibold">โกดังเก็บของ</span>');
+  formatted = formatted.replace('พื้นที่อเนกประสงค์', '<span class="text-[#c2410c] dark:text-orange-400 font-semibold">พื้นที่อเนกประสงค์</span>');
   return formatted;
 }
 
@@ -1915,7 +1915,7 @@ onUnmounted(() => {
                             สินค้าขายดี
                         </h3>
                     </div>
-                    <p class="text-xs sm:text-sm font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-8 font-['IBM_Plex_Sans_Thai'] text-left pl-0.5">
+                    <p class="text-xs sm:text-sm font-bold text-gray-600 dark:text-gray-400 uppercase tracking-widest mb-8 font-['IBM_Plex_Sans_Thai'] text-left pl-0.5">
                         สินค้าขายดี คุณภาพพรีเมียม
                     </p>
 
@@ -2378,7 +2378,7 @@ onUnmounted(() => {
                  <svg class="w-8 h-8 text-white dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
               </div>
               <div>
-                <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider block mb-1">หมวดหมู่</span>
+                <span class="text-xs font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-wider block mb-1">หมวดหมู่</span>
                 <h2 class="text-3xl md:text-4xl font-black text-gray-900 dark:text-white">{{ showcase.category.name }}</h2>
               </div>
             </div>
@@ -2817,7 +2817,7 @@ onUnmounted(() => {
                       <!-- Name & Location -->
                       <div class="flex flex-col">
                         <span class="text-sm font-bold text-gray-900 dark:text-white leading-tight">{{ review.company }}</span>
-                        <span class="text-xs text-gray-400 mt-0.5">{{ review.location }}</span>
+                        <span class="text-xs text-gray-600 dark:text-gray-400 mt-0.5">{{ review.location }}</span>
                       </div>
                     </div>
 
@@ -2884,17 +2884,21 @@ onUnmounted(() => {
         </div>
 
         <!-- Slider Pagination Dots -->
-        <div class="flex xl:hidden justify-center gap-2 mb-16">
+        <div class="flex xl:hidden justify-center gap-1 mb-16">
           <button 
             v-for="(review, index) in corporateReviews" 
             :key="index"
             @click="scrollPartnersTo(index)"
-            :class="[
-              'w-2 h-2 rounded-full transition-all duration-300',
-              partnersActiveIndex === index ? 'bg-orange-500 w-5' : 'bg-gray-300 dark:bg-gray-700'
-            ]"
+            class="w-8 h-8 min-w-[32px] min-h-[32px] flex items-center justify-center focus:outline-none"
             :aria-label="`Go to slide ${index + 1}`"
-          ></button>
+          >
+            <span
+              :class="[
+                'h-2.5 rounded-full transition-all duration-300 block',
+                partnersActiveIndex === index ? 'bg-orange-600 w-5' : 'bg-gray-300 dark:bg-gray-700 w-2.5'
+              ]"
+            ></span>
+          </button>
         </div>
 
 
@@ -2918,8 +2922,8 @@ onUnmounted(() => {
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-16 gap-6">
           <div>
-            <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-orange-50 dark:bg-orange-950/20 text-orange-500 dark:text-orange-400 text-xs font-bold tracking-wider uppercase mb-4 border border-orange-100 dark:border-orange-900/30">
-              <svg class="w-4 h-4 text-orange-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-orange-50 dark:bg-orange-950/20 text-[#c2410c] dark:text-orange-400 text-xs font-bold tracking-wider uppercase mb-4 border border-orange-100 dark:border-orange-900/30">
+              <svg class="w-4 h-4 text-[#c2410c] dark:text-orange-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" />
               </svg>
               {{ sectionTitles.articlesTitle }}
@@ -2927,7 +2931,7 @@ onUnmounted(() => {
             <h3 class="text-3xl md:text-5xl font-black tracking-tight text-gray-900 dark:text-white" v-html="formattedArticlesHeading"></h3>
             <p class="mt-2 text-sm md:text-base text-gray-500 dark:text-gray-400 font-light">บทความและข่าวสารที่คัดสรรมาเพื่อคุณ</p>
           </div>
-          <router-link to="/blog" class="group inline-flex items-center gap-2.5 px-6 py-3 border border-orange-500/30 dark:border-orange-500/20 hover:border-orange-500 dark:hover:border-orange-500 rounded-full text-sm font-bold text-orange-500 dark:text-orange-400 bg-white dark:bg-gray-800 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_4px_12px_rgba(249,115,22,0.1)]">
+          <router-link to="/blog" class="group inline-flex items-center gap-2.5 px-6 py-3 border border-[#c2410c]/30 dark:border-orange-500/20 hover:border-[#c2410c] dark:hover:border-orange-500 rounded-full text-sm font-bold text-[#c2410c] dark:text-orange-400 bg-white dark:bg-gray-800 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_4px_12px_rgba(249,115,22,0.1)]">
             อ่านบทความทั้งหมด 
             <svg class="w-4 h-4 transform group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3" />
@@ -3004,13 +3008,13 @@ onUnmounted(() => {
               <div class="p-6 md:p-8 flex-grow flex flex-col justify-between relative text-left">
                 <div>
                   <div class="mb-4">
-                    <span class="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">{{ article.category || 'บทความทั่วไป' }}</span>
+                    <span class="text-[10px] font-bold text-gray-600 dark:text-gray-400 uppercase tracking-widest">{{ article.category || 'บทความทั่วไป' }}</span>
                   </div>
                   <h4 class="font-bold text-gray-900 dark:text-white text-xl md:text-2xl mb-3 line-clamp-2 leading-tight group-hover:text-orange-600 transition-colors">{{ article.title }}</h4>
                   <p class="text-sm text-gray-500 dark:text-gray-400 font-light line-clamp-3 leading-relaxed mb-6 flex-grow">{{ article.excerpt || article.seo_description || 'อ่านรายละเอียดเชิงลึกและเทคนิคต่างๆ เพิ่มเติมได้ภายในบทความนี้...' }}</p>
                 </div>
                 <div class="mt-auto pt-5 border-t border-gray-100 dark:border-white/5 flex items-center justify-between text-sm font-bold text-gray-900 dark:text-white group-hover:text-orange-600 transition-colors">
-                  <span class="flex items-center gap-1.5 text-gray-400 font-medium text-xs">
+                  <span class="flex items-center gap-1.5 text-gray-600 dark:text-gray-400 font-medium text-xs">
                     <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
@@ -3041,17 +3045,21 @@ onUnmounted(() => {
         </div>
 
         <!-- Pagination Dots -->
-        <div v-if="totalArticlePages > 1" :class="['flex justify-center gap-2 mb-16', recentArticles.length <= 4 ? 'xl:hidden' : '']">
+        <div v-if="totalArticlePages > 1" :class="['flex justify-center gap-1 mb-16', recentArticles.length <= 4 ? 'xl:hidden' : '']">
           <button 
             v-for="pageIdx in totalArticlePages" 
             :key="'dot-' + pageIdx"
             @click="scrollArticlesToPage(pageIdx - 1)"
-            :class="[
-              'w-2.5 h-2.5 rounded-full transition-all duration-300',
-              currentArticlePage === (pageIdx - 1) ? 'bg-orange-500 w-6' : 'bg-gray-300 dark:bg-gray-700'
-            ]"
+            class="w-8 h-8 min-w-[32px] min-h-[32px] flex items-center justify-center focus:outline-none"
             :aria-label="'Go to page ' + pageIdx"
-          ></button>
+          >
+            <span
+              :class="[
+                'h-2.5 rounded-full transition-all duration-300 block',
+                currentArticlePage === (pageIdx - 1) ? 'bg-orange-600 w-6' : 'bg-gray-300 dark:bg-gray-700 w-2.5'
+              ]"
+            ></span>
+          </button>
         </div>
 
       </div>

@@ -24,6 +24,23 @@ const Maintenance = defineAsyncComponent(() => import('./pages/Maintenance.vue')
 const authStore = useAuthStore()
 const cartStore = useCartStore()
 const settingsStore = useSettingsStore()
+
+const footerSitemapText = computed(() => {
+  const label = settingsStore.footerSitemapLabel
+  if (label && typeof label === 'string' && label.trim().length > 0) {
+    return label.trim()
+  }
+  return 'แผนผังเว็บไซต์'
+})
+
+const footerDistributorText = computed(() => {
+  const label = settingsStore.footerDistributorLabel
+  if (label && typeof label === 'string' && label.trim().length > 0) {
+    return label.trim()
+  }
+  return 'ผู้ช่วย AI / ตัวแทนจำหน่าย'
+})
+
 const isLoginModalOpen = ref(false)
 provide('openLoginModal', () => { isLoginModalOpen.value = true })
 
@@ -450,7 +467,7 @@ onUnmounted(() => {
       >
         
         <!-- Logo -->
-        <router-link to="/" class="group flex items-center gap-2 md:gap-2.5 z-50 transition-all duration-300 active:scale-95 shrink-0">
+        <router-link to="/" aria-label="Morespace - หน้าแรก" class="group flex items-center gap-2 md:gap-2.5 z-50 transition-all duration-300 active:scale-95 shrink-0">
           <template v-if="settingsStore.storeLogo">
             <img :src="getOptimizedImageUrl(settingsStore.storeLogo, 300)" alt="Store Logo" class="h-8 md:h-10 w-auto max-w-[130px] sm:max-w-[160px] md:max-w-[200px] object-contain transition-all duration-300" @error="onImageError" />
           </template>
@@ -1009,7 +1026,7 @@ onUnmounted(() => {
           
           <!-- Column 1: Brand & Address -->
           <div class="lg:col-span-3 flex flex-col items-start">
-            <router-link to="/" class="group inline-flex items-center gap-4 mb-6 shrink-0">
+            <router-link to="/" aria-label="Morespace - หน้าแรก" class="group inline-flex items-center gap-4 mb-6 shrink-0">
               <template v-if="settingsStore.storeLogo">
                  <img :src="getOptimizedImageUrl(settingsStore.storeLogo, 300)" alt="Store Logo" class="h-8 md:h-10 w-auto max-w-[130px] sm:max-w-[160px] md:max-w-[200px] object-contain grayscale opacity-80 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-300" @error="onImageError" />
               </template>
@@ -1076,7 +1093,7 @@ onUnmounted(() => {
             <ul class="flex flex-col gap-3.5 w-full">
               <li><router-link to="/about" class="text-[14px] font-semibold text-gray-600 dark:text-gray-400 hover:text-[#f07100] dark:hover:text-[#f07100] transition-colors flex items-center gap-1.5 group"><span class="text-[#f07100] font-black transform group-hover:translate-x-1 transition-transform">&gt;</span> เกี่ยวกับเรา</router-link></li>
               <li><router-link to="/contact" class="text-[14px] font-semibold text-gray-600 dark:text-gray-400 hover:text-[#f07100] dark:hover:text-[#f07100] transition-colors flex items-center gap-1.5 group"><span class="text-[#f07100] font-black transform group-hover:translate-x-1 transition-transform">&gt;</span> ติดต่อเรา</router-link></li>
-              <li v-if="(settingsStore.footerDistributorUrl || '/ai-consultant') !== '/ai-consultant' || settingsStore.isAiConsultantEnabled"><router-link :to="settingsStore.footerDistributorUrl" class="text-[14px] font-semibold text-gray-600 dark:text-gray-400 hover:text-[#f07100] dark:hover:text-[#f07100] transition-colors flex items-center gap-1.5 group"><span class="text-[#f07100] font-black transform group-hover:translate-x-1 transition-transform">&gt;</span> {{ settingsStore.footerDistributorLabel }}</router-link></li>
+              <li v-if="(settingsStore.footerDistributorUrl || '/ai-consultant') !== '/ai-consultant' || settingsStore.isAiConsultantEnabled"><router-link :to="settingsStore.footerDistributorUrl || '/ai-consultant'" class="text-[14px] font-semibold text-gray-600 dark:text-gray-400 hover:text-[#f07100] dark:hover:text-[#f07100] transition-colors flex items-center gap-1.5 group" :aria-label="footerDistributorText"><span class="text-[#f07100] font-black transform group-hover:translate-x-1 transition-transform">&gt;</span> {{ footerDistributorText }}</router-link></li>
               <li><router-link to="/privacy-policy" class="text-[14px] font-semibold text-gray-600 dark:text-gray-400 hover:text-[#f07100] dark:hover:text-[#f07100] transition-colors flex items-center gap-1.5 group"><span class="text-[#f07100] font-black transform group-hover:translate-x-1 transition-transform">&gt;</span> นโยบายความเป็นส่วนตัว</router-link></li>
               <li><router-link to="/terms-of-service" class="text-[14px] font-semibold text-gray-600 dark:text-gray-400 hover:text-[#f07100] dark:hover:text-[#f07100] transition-colors flex items-center gap-1.5 group"><span class="text-[#f07100] font-black transform group-hover:translate-x-1 transition-transform">&gt;</span> เงื่อนไขการใช้งาน</router-link></li>
             </ul>
@@ -1146,7 +1163,7 @@ onUnmounted(() => {
                 v-if="contactLines.length > 0"
                 :href="contactLines[0].url || 'https://line.me/ti/p/~' + contactLines[0].value.replace(/^@/, '')" 
                 target="_blank" 
-                class="w-full py-2.5 px-4 border-2 border-[#f07100] text-[#f07100] hover:bg-[#f07100] hover:text-white text-sm font-black rounded-full transition-all duration-300 flex items-center justify-center gap-2 group-hover:scale-105"
+                class="w-full py-2.5 px-4 border-2 border-[#c2410c] dark:border-orange-500 text-[#c2410c] dark:text-orange-400 hover:bg-[#c2410c] hover:text-white dark:hover:bg-orange-500 text-sm font-black rounded-full transition-all duration-300 flex items-center justify-center gap-2 group-hover:scale-105"
               >
                 <span>เพิ่มเพื่อน</span>
                 <svg class="w-4 h-4 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2.5">
@@ -1195,7 +1212,7 @@ onUnmounted(() => {
             <span class="opacity-50">|</span>
             <router-link to="/terms-of-service" class="hover:text-amber-100 transition-colors">เงื่อนไขการใช้งาน</router-link>
             <span class="opacity-50">|</span>
-            <router-link :to="settingsStore.footerSitemapUrl" class="hover:text-amber-100 transition-colors">{{ settingsStore.footerSitemapLabel }}</router-link>
+            <router-link :to="settingsStore.footerSitemapUrl || '/'" class="hover:text-amber-100 transition-colors" :aria-label="footerSitemapText">{{ footerSitemapText }}</router-link>
           </div>
 
           <button 

@@ -169,6 +169,22 @@ app.get(['/api/sitemap/ping-bing', '/ping-bing'], async (req, res) => {
     }
 });
 
+app.get(['/robots.txt', '/api/robots.txt'], (req, res) => {
+    const protocol = req.headers['x-forwarded-proto'] || req.protocol || 'https';
+    const host = req.headers['x-forwarded-host'] || req.headers.host || 'morespace.co.th';
+    const siteUrl = (process.env.SITE_URL || `${protocol}://${host}`).replace(/\/$/, '');
+    res.type('text/plain');
+    res.send(`User-agent: *
+Allow: /
+Allow: /api/sitemap.xml
+Disallow: /admin/
+Disallow: /api/
+
+Sitemap: ${siteUrl}/sitemap.xml
+
+# Morespace - Premium Storage Solutions`);
+});
+
 app.use(['/sitemap.xml', '/api/sitemap.xml', '/api/sitemap'], require('./routes/sitemap'));
 app.use('/api/articles', require('./routes/articles'));
 app.use('/api/users', require('./routes/users'));

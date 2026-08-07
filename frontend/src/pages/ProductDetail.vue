@@ -998,7 +998,7 @@ onUnmounted(() => {
                   <span class="w-10 text-center font-black text-gray-900 dark:text-white text-sm border-x border-gray-200 dark:border-gray-700 py-1.5">{{ quantity }}</span>
                   <button @click="product.stock_quantity === null || quantity < product.stock_quantity ? quantity++ : null" class="w-9 h-9 flex items-center justify-center text-gray-500 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 transition-colors font-black text-base" aria-label="เพิ่มจำนวน">+</button>
                 </div>
-                <span v-if="product.stock_quantity !== null" class="text-xs text-gray-400 dark:text-gray-500">มีสินค้า {{ product.stock_quantity }} ชิ้น</span>
+                <span v-if="product.stock_quantity !== null" class="text-xs text-gray-600 dark:text-gray-400">มีสินค้า {{ product.stock_quantity }} ชิ้น</span>
               </div>
 
               <!-- Out of Stock -->
@@ -1014,7 +1014,7 @@ onUnmounted(() => {
                   v-if="!product.is_out_of_stock && product.price !== 'สอบถามราคา'"
                   @click="addToCart"
                   id="add-to-cart-btn"
-                  class="flex-1 group relative flex items-center justify-center gap-2 bg-amber-600 hover:bg-amber-700 active:bg-amber-800 text-white font-extrabold text-sm sm:text-base py-3 px-5 rounded-xl shadow-md shadow-amber-600/20 transition-all duration-200 overflow-hidden"
+                  class="flex-1 group relative flex items-center justify-center gap-2 bg-[#b45309] hover:bg-[#92400e] active:bg-[#78350f] text-white font-extrabold text-sm sm:text-base py-3 px-5 rounded-xl shadow-md shadow-amber-700/20 transition-all duration-200 overflow-hidden"
                 >
                   <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
                   <span>เพิ่มลงตะกร้า</span>
@@ -1061,7 +1061,7 @@ onUnmounted(() => {
                 v-if="!product.is_out_of_stock && product.price !== 'สอบถามราคา'"
                 :href="getLineInquiryUrl(product.title)"
                 target="_blank" rel="noopener"
-                class="inline-flex items-center justify-center gap-1.5 text-xs font-bold text-[#06C755] dark:text-emerald-400 hover:underline py-1"
+                class="inline-flex items-center justify-center gap-1.5 text-xs font-bold text-[#047857] dark:text-emerald-400 hover:underline py-1"
               >
                 <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="currentColor"><path d="M24 10.314C24 4.943 18.615.572 12 .572S0 4.943 0 10.314c0 4.811 4.27 8.842 10.035 9.608.391.082.923.258 1.058.59.12.301.079.766.038 1.08l-.164 1.02c-.045.301-.24 1.186 1.049.645 1.291-.539 6.916-4.078 9.436-6.975C23.176 14.393 24 12.458 24 10.314"/></svg>
                 <span>หรือสอบถามเพิ่มเติมผ่าน LINE</span>
@@ -1153,28 +1153,43 @@ onUnmounted(() => {
           <!-- Description -->
           <div v-show="activeTab === 'description'" class="ck-content prose prose-gray dark:prose-invert max-w-none" v-html="product.description"></div>
 
-          <!-- Specs -->
+          <!-- Specs: 1-Column Space-Saving Compact Table -->
           <div v-show="activeTab === 'specs'">
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div v-for="(attr, i) in product.attributes" :key="i" class="flex items-start gap-3 bg-white dark:bg-gray-900/60 px-5 py-4 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm">
-                <div class="w-2 h-2 mt-2 rounded-full bg-emerald-500 shrink-0"></div>
-                <div>
-                  <p class="text-xs font-black text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-0.5">{{ attr.label || attr.key }}</p>
-                  <p class="text-sm font-bold text-gray-900 dark:text-white">{{ attr.value }}</p>
+            <div class="overflow-hidden rounded-2xl border border-gray-200/80 dark:border-gray-800 bg-white dark:bg-gray-900/60 shadow-sm">
+              <div 
+                v-for="(attr, i) in product.attributes" 
+                :key="i" 
+                class="flex flex-col sm:flex-row sm:items-center py-3 px-5 sm:px-6 border-b border-gray-100 dark:border-gray-800/80 last:border-b-0 even:bg-gray-50/50 dark:even:bg-gray-800/20 hover:bg-amber-50/30 dark:hover:bg-amber-950/20 transition-colors duration-150 gap-1 sm:gap-6"
+              >
+                <div class="sm:w-2/5 shrink-0 flex items-center">
+                  <span class="text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">{{ attr.label || attr.key }}</span>
+                </div>
+                <div class="sm:w-3/5 text-sm font-black text-gray-900 dark:text-white leading-relaxed">
+                  {{ attr.value }}
                 </div>
               </div>
             </div>
           </div>
 
-          <!-- FAQ -->
-          <div v-show="activeTab === 'faq'" class="space-y-3 max-w-3xl">
-            <details v-for="(item, i) in product.faq" :key="i" class="group bg-white dark:bg-gray-900/60 rounded-2xl border border-gray-100 dark:border-gray-800 overflow-hidden shadow-sm open:shadow-md open:border-emerald-200/50 dark:open:border-emerald-800/30 transition-all duration-300">
-              <summary class="flex items-center justify-between gap-4 px-6 py-5 cursor-pointer select-none list-none font-bold text-gray-900 dark:text-white text-sm md:text-base hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">
-                <span>{{ item.question }}</span>
-                <svg class="w-5 h-5 text-emerald-500 shrink-0 transition-transform duration-300 group-open:rotate-45" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
-              </summary>
-              <div class="px-6 pb-5 text-sm text-gray-600 dark:text-gray-400 leading-relaxed border-t border-gray-100 dark:border-gray-800 pt-4">{{ item.answer }}</div>
-            </details>
+          <!-- FAQ: Full-Width Space-Saving Compact Accordion Container -->
+          <div v-show="activeTab === 'faq'" class="w-full">
+            <div class="overflow-hidden rounded-2xl border border-gray-200/80 dark:border-gray-800 bg-white dark:bg-gray-900/60 shadow-sm">
+              <details 
+                v-for="(item, i) in product.faq" 
+                :key="i" 
+                class="group border-b border-gray-100 dark:border-gray-800/80 last:border-b-0 even:bg-gray-50/50 dark:even:bg-gray-800/20 hover:bg-amber-50/30 dark:hover:bg-amber-950/20 transition-colors duration-150"
+              >
+                <summary class="flex items-center justify-between gap-4 py-3.5 px-5 sm:px-6 cursor-pointer select-none list-none font-bold text-gray-900 dark:text-white text-sm md:text-base hover:text-amber-600 dark:hover:text-amber-400 transition-colors">
+                  <span>{{ item.question }}</span>
+                  <svg class="w-5 h-5 text-amber-500 shrink-0 transition-transform duration-300 group-open:rotate-45" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
+                  </svg>
+                </summary>
+                <div class="px-5 sm:px-6 pb-4 pt-2 text-sm text-gray-700 dark:text-gray-200 leading-relaxed border-t border-gray-100 dark:border-gray-800/60">
+                  {{ item.answer }}
+                </div>
+              </details>
+            </div>
           </div>
 
           <!-- Reviews -->
@@ -1185,7 +1200,7 @@ onUnmounted(() => {
                 <div class="flex justify-center gap-0.5 mt-1">
                   <svg v-for="i in 5" :key="i" class="w-4 h-4" :class="i <= Math.round(reviewsSummary.average) ? 'text-amber-400' : 'text-gray-200 dark:text-gray-700'" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
                 </div>
-                <p class="text-xs text-gray-400 mt-1">{{ reviewsSummary.total }} รีวิว</p>
+                <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">{{ reviewsSummary.total }} รีวิว</p>
               </div>
               <div class="flex-1 w-full space-y-2">
                 <div v-for="star in [5,4,3,2,1]" :key="star" class="flex items-center gap-2">
@@ -1194,7 +1209,7 @@ onUnmounted(() => {
                   <div class="flex-1 bg-gray-100 dark:bg-gray-800 rounded-full h-2 overflow-hidden">
                     <div class="bg-amber-400 h-2 rounded-full transition-all duration-700" :style="`width: ${reviewsSummary.total > 0 ? (reviewsSummary.distribution[star] / reviewsSummary.total * 100) : 0}%`"></div>
                   </div>
-                  <span class="text-xs text-gray-400 w-6 text-right">{{ reviewsSummary.distribution[star] || 0 }}</span>
+                  <span class="text-xs text-gray-600 dark:text-gray-400 w-6 text-right">{{ reviewsSummary.distribution[star] || 0 }}</span>
                 </div>
               </div>
             </div>
@@ -1206,7 +1221,7 @@ onUnmounted(() => {
                   <div class="flex-1 min-w-0">
                     <div class="flex items-center justify-between gap-2 flex-wrap">
                       <p class="font-bold text-gray-900 dark:text-white text-sm">{{ getReviewerName(review) }}</p>
-                      <span class="text-xs text-gray-400">{{ timeAgo(review.created_at) }}</span>
+                      <span class="text-xs text-gray-600 dark:text-gray-400">{{ timeAgo(review.created_at) }}</span>
                     </div>
                     <div class="flex gap-0.5 my-1">
                       <svg v-for="i in 5" :key="i" class="w-3.5 h-3.5" :class="i <= review.rating ? 'text-amber-400' : 'text-gray-200 dark:text-gray-700'" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>

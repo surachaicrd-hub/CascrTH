@@ -356,9 +356,9 @@ onUnmounted(() => {
       <!-- Article Header -->
       <header class="mb-10">
         <div class="flex items-center gap-3 mb-4">
-          <span class="px-3 py-1 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 text-xs font-bold rounded-full">{{ article.category }}</span>
-          <span class="text-sm text-gray-400">{{ formatDate(article.created_at) }}</span>
-          <span class="text-sm text-gray-400 flex items-center gap-1">
+          <span class="px-3 py-1 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 text-xs font-bold rounded-full">{{ article.category }}</span>
+          <span class="text-sm text-gray-600 dark:text-gray-400">{{ formatDate(article.created_at) }}</span>
+          <span class="text-sm text-gray-600 dark:text-gray-400 flex items-center gap-1">
             <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
             {{ article.view_count || 0 }}
           </span>
@@ -414,7 +414,7 @@ onUnmounted(() => {
                     <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
                     สินค้าในบทความนี้
                   </span>
-                  <span v-if="article.product.category" class="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">{{ article.product.category }}</span>
+                  <span v-if="article.product.category" class="text-[10px] font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider">{{ article.product.category }}</span>
                 </div>
 
                 <h4 class="text-xl md:text-2xl font-black text-gray-900 dark:text-white mb-2 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors leading-tight">{{ article.product.name }}</h4>
@@ -527,7 +527,7 @@ onUnmounted(() => {
             </div>
           </div>
           <div class="flex-1 text-center sm:text-left">
-            <span class="text-xs font-bold text-emerald-600 bg-emerald-100 dark:bg-emerald-900/40 px-3 py-1 rounded-full mb-3 inline-block">{{ article.product.category }}</span>
+            <span class="text-xs font-bold text-emerald-700 bg-emerald-100 dark:bg-emerald-900/40 dark:text-emerald-400 px-3 py-1 rounded-full mb-3 inline-block">{{ article.product.category }}</span>
             <h4 class="text-xl font-bold text-gray-900 dark:text-white mb-2 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">{{ article.product.name }}</h4>
             <p v-if="article.product.excerpt || article.product.description" class="text-sm text-gray-500 dark:text-gray-400 line-clamp-2 mb-4">
               {{ article.product.excerpt || article.product.description.replace(/<[^>]*>?/gm, '') }}
@@ -648,8 +648,8 @@ onUnmounted(() => {
             </div>
             <div class="p-3 md:p-4">
               <h3 class="font-bold text-gray-900 dark:text-white text-sm line-clamp-2 group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors leading-snug">{{ ra.title }}</h3>
-              <p v-if="ra.excerpt" class="text-xs text-gray-400 dark:text-gray-500 mt-1.5 line-clamp-2">{{ ra.excerpt }}</p>
-              <div class="flex items-center gap-2 mt-2 text-[11px] text-gray-400">
+              <p v-if="ra.excerpt" class="text-xs text-gray-600 dark:text-gray-400 mt-1.5 line-clamp-2">{{ ra.excerpt }}</p>
+              <div class="flex items-center gap-2 mt-2 text-[11px] text-gray-600 dark:text-gray-400">
                 <span>{{ formatDate(ra.created_at) }}</span>
                 <span v-if="ra.view_count" class="flex items-center gap-0.5">
                   <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
@@ -679,7 +679,7 @@ onUnmounted(() => {
             <div class="p-4">
               <span class="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider">{{ ra.category }}</span>
               <h3 class="font-bold text-gray-900 dark:text-white text-sm line-clamp-2 mt-1 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">{{ ra.title }}</h3>
-              <p class="text-xs text-gray-400 mt-2">{{ formatDate(ra.created_at) }}</p>
+              <p class="text-xs text-gray-600 dark:text-gray-400 mt-2">{{ formatDate(ra.created_at) }}</p>
             </div>
           </router-link>
         </div>
