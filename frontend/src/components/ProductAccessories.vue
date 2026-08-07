@@ -105,7 +105,7 @@ onMounted(async () => {
              <img 
                 :src="getOptimizedImageUrl(item.image, 200)" 
                 :alt="item.title" 
-                class="w-full h-full object-cover mix-blend-multiply dark:mix-blend-normal transform group-hover:scale-105 transition-transform duration-500"
+                class="w-full h-full object-contain p-1 mix-blend-multiply dark:mix-blend-normal transform group-hover:scale-105 transition-transform duration-500"
                 @error="onImageError"
              />
              <!-- Discount Tag -->

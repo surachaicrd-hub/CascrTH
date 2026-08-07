@@ -1661,10 +1661,12 @@ onUnmounted(() => {
         </div>
       </div>
 
-      <!-- Overlay Gradient — strong left for text readability, fully bright and clear on the right -->
-      <div class="absolute inset-0 z-10 pointer-events-none" style="background: linear-gradient(90deg, rgba(8,10,15,0.96) 0%, rgba(8,10,15,0.85) 35%, rgba(8,10,15,0.2) 55%, rgba(0,0,0,0) 75%);"></div>
+      <!-- Mobile Overlay — full dark cover on mobile for maximum text readability -->
+      <div class="absolute inset-0 z-10 pointer-events-none md:hidden bg-gradient-to-b from-[#080a0f]/90 via-[#080a0f]/75 to-[#080a0f]/85"></div>
+      <!-- Desktop Overlay — strong left for text readability, clear on right -->
+      <div class="absolute inset-0 z-10 pointer-events-none hidden md:block" style="background: linear-gradient(90deg, rgba(8,10,15,0.96) 0%, rgba(8,10,15,0.85) 35%, rgba(8,10,15,0.2) 55%, rgba(0,0,0,0) 75%);"></div>
       <!-- Bottom fade -->
-      <div class="absolute bottom-0 left-0 right-0 h-20 z-10 pointer-events-none" style="background: linear-gradient(to top, rgba(12,14,20,0.8) 0%, transparent 100%);"></div>
+      <div class="absolute bottom-0 left-0 right-0 h-24 z-10 pointer-events-none bg-gradient-to-t from-[#0c0e14] via-[#0c0e14]/80 to-transparent"></div>
 
       <!-- Main Content Container -->
       <div class="relative z-20 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 md:pt-32 pb-24 md:pb-40">
@@ -1939,7 +1941,7 @@ onUnmounted(() => {
                             <div class="relative aspect-square rounded-[20px] overflow-hidden bg-gray-50 dark:bg-gray-800 mb-4 border border-gray-100 dark:border-gray-700/50 shrink-0">
                                 <img :src="getOptimizedImageUrl(product.image || product.image_url, 400) || '/images/placeholder.png'"
                                     :alt="product.name || 'สินค้ารุ่นแนะนำ'"
-                                    class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
+                                    class="w-full h-full object-contain p-2 group-hover:scale-105 transition-transform duration-500 ease-out"
                                 >
                                 <div v-if="product.is_out_of_stock" class="absolute inset-0 bg-white/50 dark:bg-black/50 flex items-center justify-center z-[2]">
                                     <span class="text-base font-black text-gray-500/35 dark:text-gray-400/35 -rotate-12 select-none pointer-events-none tracking-widest">หมดแล้ว</span>

@@ -216,7 +216,7 @@ const insertQuickPrompt = (prompt) => {
                 <div class="space-y-3 overflow-y-auto scrollbar-hide pb-4 flex-1">
                     <div v-for="item in sidebarProducts" :key="item.id" @click="goToProduct(item.slug)" class="flex gap-3 bg-white dark:bg-gray-900 p-3 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 cursor-pointer hover:border-emerald-300 dark:hover:border-emerald-700 transition-colors group">
                         <div class="w-16 h-16 bg-gray-50 dark:bg-gray-800 rounded-xl overflow-hidden shrink-0">
-                             <img :src="getImageUrl(getParsedImage(item.images) || item.image_url)" class="w-full h-full object-cover mix-blend-multiply dark:mix-blend-normal group-hover:scale-110 transition-transform duration-500">
+                             <img :src="getImageUrl(getParsedImage(item.images) || item.image_url)" class="w-full h-full object-contain p-1 mix-blend-multiply dark:mix-blend-normal group-hover:scale-110 transition-transform duration-500">
                         </div>
                         <div class="flex-1 min-w-0 flex flex-col justify-between py-0.5">
                             <div>
@@ -323,7 +323,7 @@ const insertQuickPrompt = (prompt) => {
                                     class="group flex-shrink-0 snap-center flex flex-col bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl overflow-hidden hover:shadow-md hover:border-emerald-200 dark:hover:border-emerald-700/50 transition-all duration-300 w-[200px] sm:w-[220px] cursor-pointer"
                                 >
                                     <!-- Product Image Area -->
-                                    <div class="w-full h-40 bg-gray-50/50 dark:bg-gray-900 relative">
+                                    <div class="w-full aspect-square bg-gray-50/50 dark:bg-gray-900 relative">
                                         <!-- Badges -->
                                         <div class="absolute top-2 left-2 flex flex-col gap-1 z-10">
                                             <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-blue-50/90 backdrop-blur-sm text-blue-600 text-[9px] font-bold shadow-sm">

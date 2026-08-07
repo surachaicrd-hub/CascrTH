@@ -225,7 +225,8 @@ const formatPrice = (price) => {
 .rv-card-img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
+  padding: 0.25rem;
   transition: transform 0.5s ease;
 }
 

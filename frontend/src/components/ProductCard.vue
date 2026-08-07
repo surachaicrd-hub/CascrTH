@@ -133,10 +133,9 @@ const getTimeRemaining = (endTime) => {
   >
     <!-- Image Section (Top half) -->
     <div 
-      class="relative bg-gray-50 dark:bg-gray-800/50 flex items-center justify-center overflow-hidden transition-all duration-300"
-      :class="compact ? 'h-[180px] sm:h-[200px] lg:h-[220px]' : 'h-[280px] md:h-[320px]'"
+      class="relative aspect-square w-full bg-gray-50 dark:bg-gray-800/50 flex items-center justify-center overflow-hidden transition-all duration-300"
     >
-      <img :src="getOptimizedImageUrl(product.image || product.image_url, 400)" :alt="product.title || product.name" width="600" height="600" class="w-full h-full object-cover object-center transform group-hover:scale-105 transition-transform duration-[1s] relative z-[1]" @error="onImageError">
+      <img :src="getOptimizedImageUrl(product.image || product.image_url, 400)" :alt="product.title || product.name" width="600" height="600" class="w-full h-full object-contain p-2 transform group-hover:scale-105 transition-transform duration-[1s] relative z-[1]" @error="onImageError">
       
       <!-- Background decoration for image -->
       <div class="absolute inset-0 bg-gradient-to-b from-black/5 to-transparent z-[2] opacity-0 group-hover:opacity-100 transition-opacity"></div>

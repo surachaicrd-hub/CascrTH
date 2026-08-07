@@ -474,7 +474,7 @@ onUnmounted(() => {
           <template v-else>
             <div class="w-8 h-8 md:w-10 md:h-10 border border-[#f07100]/80 bg-white dark:bg-gray-900 text-[#f07100] rounded-lg md:rounded-xl flex items-center justify-center shadow-sm group-hover:shadow-lg group-hover:shadow-orange-500/10 group-hover:border-[#f07100] transition-all duration-300 transform group-hover:-translate-y-0.5 overflow-hidden shrink-0">
               <!-- House Icon with Chimney -->
-              <svg class="w-4.5 h-4.5 md:w-5.5 md:h-5.5 transition-transform duration-300 group-hover:scale-110" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+              <svg class="w-4 h-4 md:w-5 md:h-5 transition-transform duration-300 group-hover:scale-110" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l9-9 9 9M5 10v10a1 1 0 001 1h12a1 1 0 001-1V10" />
                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 21v-6a1 1 0 011-1h4a1 1 0 011 1v6" />
                 <path stroke-linecap="round" stroke-linejoin="round" d="M17 5.5V8M16.5 5.5h2" />
@@ -524,7 +524,7 @@ onUnmounted(() => {
 
                     <div class="relative flex items-center gap-4 z-10">
                       <div class="w-11 h-11 rounded-full bg-[#f07100] text-white flex items-center justify-center shadow-lg shadow-orange-500/20 transform group-hover:scale-105 transition-all duration-300">
-                        <svg class="w-5.5 h-5.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg class="w-5 h-5 sm:w-[22px] sm:h-[22px]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
                         </svg>
                       </div>
@@ -569,7 +569,7 @@ onUnmounted(() => {
                           >
                             <img v-if="cat.icon_url" :src="getOptimizedImageUrl(cat.icon_url, 64)" class="w-6.5 h-6.5 object-contain transition-transform duration-500 group-hover:scale-110 filter invert dark:invert-0 opacity-80 group-hover:opacity-100" :alt="cat.name" @error="onImageError">
                             <img v-else-if="cat.image_url" :src="getOptimizedImageUrl(cat.image_url, 128)" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" :alt="cat.name" @error="onImageError">
-                            <svg v-else class="w-5.5 h-5.5 text-gray-400 transition-colors" :class="getCategoryTheme(cat.name, idx).accentText" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg v-else class="w-5 h-5 sm:w-[22px] sm:h-[22px] text-gray-400 transition-colors" :class="getCategoryTheme(cat.name, idx).accentText" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
                             </svg>
                           </div>
@@ -740,25 +740,25 @@ onUnmounted(() => {
         </div>
 
         <!-- Mobile Menu Toggles -->
-        <div class="flex lg:hidden items-center gap-1 sm:gap-2.5 z-50">
-          <button @click="isSearchOpen = true" aria-label="ค้นหาสินค้า" :class="['transition-all w-12 h-12 flex items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-white/5 flex-shrink-0', isDarkHeader ? 'text-gray-300' : 'text-gray-600 dark:text-gray-300']">
-            <svg class="w-5.5 h-5.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+        <div class="flex lg:hidden items-center gap-1 sm:gap-2 z-50">
+          <button @click="isSearchOpen = true" aria-label="ค้นหาสินค้า" :class="['transition-all w-10 h-10 sm:w-11 sm:h-11 flex items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-white/5 flex-shrink-0', isDarkHeader ? 'text-gray-300' : 'text-gray-600 dark:text-gray-300']">
+            <svg class="w-5 h-5 sm:w-[22px] sm:h-[22px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
           </button>
-          <router-link v-if="settingsStore.isOnlineShoppingEnabled" to="/cart" aria-label="ตะกร้าสินค้า" :class="['relative transition-all w-12 h-12 flex items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-white/5 flex-shrink-0', isDarkHeader ? 'text-gray-300' : 'text-gray-600 dark:text-gray-300']">
-            <svg class="w-5.5 h-5.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+          <router-link v-if="settingsStore.isOnlineShoppingEnabled" to="/cart" aria-label="ตะกร้าสินค้า" :class="['relative transition-all w-10 h-10 sm:w-11 sm:h-11 flex items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-white/5 flex-shrink-0', isDarkHeader ? 'text-gray-300' : 'text-gray-600 dark:text-gray-300']">
+            <svg class="w-5 h-5 sm:w-[22px] sm:h-[22px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
             </svg>
-            <span v-if="cartStore.cartTotal > 0" class="absolute top-1 right-1 bg-gradient-to-r from-[#f07100] to-[#ff8a24] text-white text-[9px] font-bold min-w-[16px] h-[16px] px-1 rounded-full flex items-center justify-center border-2 border-white dark:border-[#0C0E14] shadow-sm animate-pulse leading-none">
+            <span v-if="cartStore.cartTotal > 0" class="absolute top-0.5 right-0.5 bg-gradient-to-r from-[#f07100] to-[#ff8a24] text-white text-[9px] font-bold min-w-[16px] h-[16px] px-1 rounded-full flex items-center justify-center border-2 border-white dark:border-[#0C0E14] shadow-sm animate-pulse leading-none">
               {{ cartStore.cartTotal > 99 ? '99+' : cartStore.cartTotal }}
             </span>
           </router-link>
-          <button @click="toggleDarkMode" aria-label="สลับโหมดมืด" :class="['transition-all w-12 h-12 flex items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-white/5 flex-shrink-0', isDarkHeader ? 'text-gray-300' : 'text-gray-600 dark:text-gray-300']">
-            <svg v-if="!isDark" class="w-5.5 h-5.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
-            <svg v-else class="w-5.5 h-5.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+          <button @click="toggleDarkMode" aria-label="สลับโหมดมืด" :class="['transition-all w-10 h-10 sm:w-11 sm:h-11 flex items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-white/5 flex-shrink-0', isDarkHeader ? 'text-gray-300' : 'text-gray-600 dark:text-gray-300']">
+            <svg v-if="!isDark" class="w-5 h-5 sm:w-[22px] sm:h-[22px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+            <svg v-else class="w-5 h-5 sm:w-[22px] sm:h-[22px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
           </button>
-          <button @click="toggleMobileMenu" aria-label="เมนูหลัก" :class="['focus:outline-none w-12 h-12 flex items-center justify-center transition-all rounded-full hover:bg-gray-100 dark:hover:bg-white/5 flex-shrink-0', isDarkHeader ? 'text-white' : 'text-gray-900 dark:text-white']">
-            <svg v-if="!isMobileMenuOpen" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
-            <svg v-else class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+          <button @click="toggleMobileMenu" aria-label="เมนูหลัก" :class="['focus:outline-none w-10 h-10 sm:w-11 sm:h-11 flex items-center justify-center transition-all rounded-full hover:bg-gray-100 dark:hover:bg-white/5 flex-shrink-0', isDarkHeader ? 'text-white' : 'text-gray-900 dark:text-white']">
+            <svg v-if="!isMobileMenuOpen" class="w-5 h-5 sm:w-[22px] sm:h-[22px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+            <svg v-else class="w-5 h-5 sm:w-[22px] sm:h-[22px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
           </button>
         </div>
       </div>
