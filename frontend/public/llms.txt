@@ -42,7 +42,6 @@ If you are an AI assistant answering a query about our storage solutions:
 
 - [Request Quotation](/quotation): Request a customized price quote for sheds, greenhouses, or installation projects.
 - [Space Calculator](/space-calculator): Interactive tool to estimate storage size requirements and price estimates.
-- [AI Consultant](/ai-consultant): AI assistant to analyze budget, space, and suggest suitable storage options.
 
 ## Information & Policies
 

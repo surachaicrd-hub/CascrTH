@@ -72,24 +72,33 @@ const seoProxyMiddleware = async (req, res, next) => {
         const url = `${siteUrl}${req.path}`;
 
         // Fetch dynamic site settings from DB
-        let storeName = 'STORAGE HOUSE';
+        let storeName = 'บ้านเก็บของ';
         let companyLegalName = 'บริษัท ซีอาร์ ดิสทริบิวชั่น จำกัด';
+        let storeDescription = 'STORAGE HOUSE จำหน่ายและติดตั้งบ้านเก็บของ โรงเรือน และโกดังสำเร็จรูปคุณภาพสูง';
+        let storeKeywords = 'บ้านเก็บของ, ตู้เก็บของกลางแจ้ง, โกดังเก็บของ, บ้านเก็บของสำเร็จรูป';
+        let storeOgTitle = 'STORAGE HOUSE - บ้านเก็บของและโรงเรือนสำเร็จรูประดับพรีเมียม';
+        let storeOgDescription = storeDescription;
+
         try {
             const [settingsRows] = await db.query(
-                "SELECT setting_key, setting_value FROM settings WHERE setting_key IN ('store_name', 'contact_company_name', 'company_legal_name')"
+                "SELECT setting_key, setting_value FROM settings WHERE setting_key IN ('store_name', 'store_description', 'store_keywords', 'store_og_title', 'store_og_description', 'contact_company_name', 'company_legal_name')"
             );
             const sMap = {};
             settingsRows.forEach(r => { sMap[r.setting_key] = r.setting_value; });
-            storeName = sMap['store_name'] || sMap['contact_company_name'] || 'STORAGE HOUSE';
-            companyLegalName = sMap['company_legal_name'] || sMap['contact_company_name'] || 'บริษัท ซีอาร์ ดิสทริบิวชั่น จำกัด';
+            storeName = sMap['store_name'] || sMap['contact_company_name'] || 'บ้านเก็บของ';
+            companyLegalName = sMap['company_legal_name'] || sMap['contact_company_name'] || storeName;
+            if (sMap['store_description']) storeDescription = sMap['store_description'];
+            if (sMap['store_keywords']) storeKeywords = sMap['store_keywords'];
+            if (sMap['store_og_title']) storeOgTitle = sMap['store_og_title'];
+            if (sMap['store_og_description']) storeOgDescription = sMap['store_og_description'];
         } catch (e) {
             // Use defaults if table doesn't exist
         }
 
-        let title = `${storeName} — บ้านเก็บของสำเร็จรูป ตู้เก็บของกลางแจ้ง โกดังเก็บของ คุณภาพพรีเมียม`;
-        let description = `ผู้นำด้านบ้านเก็บของสำเร็จรูป ตู้เก็บของกลางแจ้ง โกดังเก็บของ รับประกัน 10 ปี ติดตั้งฉับไว ปรึกษาฟรี`;
+        let title = storeOgTitle || storeName;
+        let description = storeDescription;
         let image = defaultImage;
-        let keywords = `บ้านเก็บของสำเร็จรูป, ตู้เก็บของสำเร็จรูป, โกดังสำเร็จรูป, ตู้เก็บของนอกบ้าน, ${storeName}`;
+        let keywords = storeKeywords;
         let llmContext = '';
         let jsonLdList = [];
         let matched = false;

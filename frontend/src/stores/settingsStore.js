@@ -5,6 +5,10 @@ export const useSettingsStore = defineStore('settings', () => {
     // Store Profile Settings
     const storeName = ref('')
     const storeDescription = ref('')
+    const storeKeywords = ref('')
+    const storeOgTitle = ref('')
+    const storeOgDescription = ref('')
+    const companyLegalName = ref('')
     const storeLogo = ref('')
     const storeFavicon = ref('')
     const storeAddress = ref('')
@@ -18,7 +22,6 @@ export const useSettingsStore = defineStore('settings', () => {
     const isOnlineShoppingEnabled = ref(true)
     const isWishlistEnabled = ref(true)
     const isCompareEnabled = ref(true)
-    const isAiConsultantEnabled = ref(true)
     const showProductRating = ref(true)
     const showProductReview = ref(true)
     
@@ -92,9 +95,7 @@ export const useSettingsStore = defineStore('settings', () => {
         if (pubSettings.wishlist_enabled !== undefined) {
             isWishlistEnabled.value = String(pubSettings.wishlist_enabled) === 'true'
         }
-        if (pubSettings.ai_consultant_enabled !== undefined) {
-            isAiConsultantEnabled.value = String(pubSettings.ai_consultant_enabled) === 'true'
-        }
+
         if (pubSettings.compare_enabled !== undefined) {
             isCompareEnabled.value = String(pubSettings.compare_enabled) === 'true'
         }
@@ -133,7 +134,11 @@ export const useSettingsStore = defineStore('settings', () => {
 
         // Store Settings
         if (pubSettings.store_name !== undefined) storeName.value = pubSettings.store_name || '';
-        if (pubSettings.store_description !== undefined) storeDescription.value = pubSettings.store_description;
+        if (pubSettings.store_description !== undefined) storeDescription.value = pubSettings.store_description || '';
+        if (pubSettings.store_keywords !== undefined) storeKeywords.value = pubSettings.store_keywords || '';
+        if (pubSettings.store_og_title !== undefined) storeOgTitle.value = pubSettings.store_og_title || '';
+        if (pubSettings.store_og_description !== undefined) storeOgDescription.value = pubSettings.store_og_description || '';
+        if (pubSettings.company_legal_name !== undefined) companyLegalName.value = pubSettings.company_legal_name || '';
         if (pubSettings.store_logo !== undefined) storeLogo.value = pubSettings.store_logo;
         if (pubSettings.store_favicon !== undefined) storeFavicon.value = pubSettings.store_favicon;
         if (pubSettings.store_address !== undefined) storeAddress.value = pubSettings.store_address;
@@ -179,23 +184,8 @@ export const useSettingsStore = defineStore('settings', () => {
         if (pubSettings.footer_sitemap_label !== undefined) footerSitemapLabel.value = pubSettings.footer_sitemap_label || '';
         if (pubSettings.footer_sitemap_url !== undefined) footerSitemapUrl.value = pubSettings.footer_sitemap_url || '';
 
-        // Apply dynamically to DOM
-        if (storeName.value) {
-            document.title = storeName.value;
-        }
-        const iconUrl = storeFavicon.value || storeLogo.value;
-        if (iconUrl) {
-            let links = document.querySelectorAll("link[rel*='icon']");
-            if (links.length === 0) {
-                const link = document.createElement('link');
-                link.rel = 'icon';
-                document.getElementsByTagName('head')[0].appendChild(link);
-                links = [link];
-            }
-            links.forEach(link => {
-                link.href = iconUrl;
-            });
-        }
+        // Apply dynamic SEO and Branding to DOM
+        applySeoToDOM();
 
         if (pubSettings.payment_promptpay_enabled !== undefined) {
             paymentPromptpayEnabled.value = String(pubSettings.payment_promptpay_enabled) === 'true'
@@ -250,20 +240,108 @@ export const useSettingsStore = defineStore('settings', () => {
         }
     }
 
+    const applySeoToDOM = () => {
+        const name = storeName.value || 'บ้านเก็บของ';
+        const desc = storeDescription.value || '';
+        const keywords = storeKeywords.value || '';
+        const ogTitle = storeOgTitle.value || name;
+        const ogDesc = storeOgDescription.value || desc;
+
+        if (name) {
+            document.title = name;
+        }
+
+        const updateMeta = (selector, attrName, attrValue) => {
+            if (!attrValue) return;
+            let tag = document.querySelector(selector);
+            if (!tag) {
+                tag = document.createElement('meta');
+                if (selector.includes('property=')) {
+                    const match = selector.match(/property="([^"]+)"/);
+                    if (match) tag.setAttribute('property', match[1]);
+                } else if (selector.includes('name=')) {
+                    const match = selector.match(/name="([^"]+)"/);
+                    if (match) tag.setAttribute('name', match[1]);
+                }
+                document.head.appendChild(tag);
+            }
+            tag.setAttribute(attrName, attrValue);
+        };
+
+        updateMeta('meta[name="description"]', 'content', desc);
+        updateMeta('meta[name="keywords"]', 'content', keywords);
+        updateMeta('meta[property="og:title"]', 'content', ogTitle);
+        updateMeta('meta[property="og:description"]', 'content', ogDesc);
+        updateMeta('meta[property="og:site_name"]', 'content', name);
+        updateMeta('meta[name="twitter:title"]', 'content', ogTitle);
+        updateMeta('meta[name="twitter:description"]', 'content', ogDesc);
+
+        const iconUrl = storeFavicon.value || storeLogo.value;
+        if (iconUrl) {
+            let links = document.querySelectorAll("link[rel*='icon']");
+            if (links.length === 0) {
+                const link = document.createElement('link');
+                link.rel = 'icon';
+                document.head.appendChild(link);
+                links = [link];
+            }
+            links.forEach(link => {
+                link.href = iconUrl;
+            });
+        }
+
+        // Dynamic JSON-LD Organization & WebSite
+        let orgScript = document.getElementById('json-ld-organization');
+        if (!orgScript) {
+            orgScript = document.createElement('script');
+            orgScript.id = 'json-ld-organization';
+            orgScript.type = 'application/ld+json';
+            document.head.appendChild(orgScript);
+        }
+        orgScript.textContent = JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Organization",
+            "name": name,
+            "legalName": companyLegalName.value || contactCompanyName.value || name,
+            "logo": storeLogo.value ? (storeLogo.value.startsWith('http') ? storeLogo.value : window.location.origin + storeLogo.value) : undefined,
+            "description": desc,
+            "url": storeUrl.value || window.location.origin
+        });
+
+        let websiteScript = document.getElementById('json-ld-website');
+        if (!websiteScript) {
+            websiteScript = document.createElement('script');
+            websiteScript.id = 'json-ld-website';
+            websiteScript.type = 'application/ld+json';
+            document.head.appendChild(websiteScript);
+        }
+        websiteScript.textContent = JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "WebSite",
+            "name": name,
+            "description": desc,
+            "url": storeUrl.value || window.location.origin
+        });
+    };
+
     return {
         storeName,
         storeDescription,
+        storeKeywords,
+        storeOgTitle,
+        storeOgDescription,
+        companyLegalName,
         storeLogo,
         storeFavicon,
         storeAddress,
         storeTaxId,
         storePhone,
+        applySeoToDOM,
         warehouseLat,
         warehouseLng,
         isOnlineShoppingEnabled,
         isWishlistEnabled,
         isCompareEnabled,
-        isAiConsultantEnabled,
         paymentPromptpayEnabled,
         paymentBankTransferEnabled,
         paymentIpayEnabled,

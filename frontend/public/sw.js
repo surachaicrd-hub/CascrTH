@@ -3,6 +3,8 @@ const ASSETS_TO_CACHE = [
     '/',
     '/index.html',
     '/manifest.json',
+    '/favicon.ico',
+    '/favicon.svg',
     '/logo.webp'
 ];
 

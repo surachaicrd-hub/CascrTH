@@ -106,6 +106,11 @@ const holidayEndDate = ref('')
 const holidayImage = ref('')
 const uploadingHolidayImage = ref(false)
 const storeName = ref('')
+const storeDescription = ref('')
+const storeKeywords = ref('')
+const storeOgTitle = ref('')
+const storeOgDescription = ref('')
+const companyLegalName = ref('')
 const storeUrl = ref('')
 const storeLogo = ref('')
 const storeFavicon = ref('')
@@ -158,7 +163,7 @@ const notifyLineOaEnabled = ref(false)
 const notifyLineOaToken = ref('')
 const notifyLineOaUserId = ref('')
 const testingLineOa = ref(false)
-const aiConsultantEnabled = ref(true)
+
 const googleLoginEnabled = ref(false)
 const googleClientId = ref('')
 const lineLoginEnabled = ref(false)
@@ -373,6 +378,11 @@ const loadSettings = async () => {
       }
       // Load Store Settings
       if (data.data.store_name !== undefined) storeName.value = data.data.store_name
+      if (data.data.store_description !== undefined) storeDescription.value = data.data.store_description
+      if (data.data.store_keywords !== undefined) storeKeywords.value = data.data.store_keywords
+      if (data.data.store_og_title !== undefined) storeOgTitle.value = data.data.store_og_title
+      if (data.data.store_og_description !== undefined) storeOgDescription.value = data.data.store_og_description
+      if (data.data.company_legal_name !== undefined) companyLegalName.value = data.data.company_legal_name
       if (data.data.store_url !== undefined) storeUrl.value = data.data.store_url
       if (data.data.store_logo !== undefined) storeLogo.value = data.data.store_logo
       if (data.data.store_favicon !== undefined) storeFavicon.value = data.data.store_favicon
@@ -481,10 +491,7 @@ const loadSettings = async () => {
         notifyBrowserEnabled.value = data.data.notify_browser_enabled === 'true'
       }
       
-      // Load Social Login Settings
-      if (data.data.ai_consultant_enabled !== undefined) {
-        aiConsultantEnabled.value = data.data.ai_consultant_enabled === 'true'
-      }
+
       if (data.data.google_login_enabled !== undefined) {
         googleLoginEnabled.value = data.data.google_login_enabled === 'true'
       }
@@ -533,8 +540,7 @@ const saveSettings = async () => {
     const settingsPayload = [
       { key: 'gemini_api_key', value: apiKey.value },
       { key: 'gemini_preferred_model', value: geminiPreferredModel.value },
-      { key: 'gemini_available_models', value: JSON.stringify(availableModels.value) },
-      { key: 'ai_consultant_enabled', value: aiConsultantEnabled.value.toString() },
+
       { key: 'ai_recommendation_enabled', value: aiRecommendationEnabled.value.toString() },
       { key: 'ai_widget_delay', value: aiWidgetDelay.value.toString() },
       { key: 'ai_widget_cooldown', value: aiWidgetCooldown.value.toString() },
@@ -563,6 +569,11 @@ const saveSettings = async () => {
       
       // Store Settings
       { key: 'store_name', value: storeName.value },
+      { key: 'store_description', value: storeDescription.value },
+      { key: 'store_keywords', value: storeKeywords.value },
+      { key: 'store_og_title', value: storeOgTitle.value },
+      { key: 'store_og_description', value: storeOgDescription.value },
+      { key: 'company_legal_name', value: companyLegalName.value },
       { key: 'store_url', value: storeUrl.value },
       { key: 'store_logo', value: storeLogo.value },
       { key: 'store_favicon', value: storeFavicon.value },
@@ -1183,13 +1194,44 @@ onMounted(() => {
                 <input v-model="storePhone" type="text" placeholder="02-XXX-XXXX" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500">
               </div>
               <div>
+                <label class="block text-sm font-bold text-gray-700 mb-1">ชื่อบริษัท / นิติบุคคล (Company Legal Name)</label>
+                <input v-model="companyLegalName" type="text" placeholder="เช่น บริษัท ซีอาร์ ดิสทริบิวชั่น จำกัด" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500">
+              </div>
+              <div>
                 <label class="block text-sm font-bold text-gray-700 mb-1">เลขประจำตัวผู้เสียภาษี (TAX ID)</label>
                 <input v-model="storeTaxId" type="text" placeholder="010XXXXXXXXXX" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm font-mono tracking-widest focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500">
               </div>
             </div>
           </div>
           
-          <div>
+          <div class="space-y-4 pt-4 border-t border-gray-100">
+            <h3 class="text-md font-bold text-gray-900 flex items-center gap-2">
+              <svg class="w-4 h-4 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+              การตั้งค่า SEO & Social Sharing (Search Engine & Open Graph)
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-bold text-gray-700 mb-1">รายละเอียดเว็บไซต์หลัก (Site Meta Description)</label>
+                <textarea v-model="storeDescription" rows="3" placeholder="ระบุรายละเอียดสั้นๆ สำหรับแสดงในผลการค้นหา Google (แนะนำ 120-160 ตัวอักษร)" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-xs focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"></textarea>
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-gray-700 mb-1">คำค้นหาหลัก (Site Meta Keywords)</label>
+                <textarea v-model="storeKeywords" rows="3" placeholder="เช่น บ้านเก็บของ, ตู้เก็บของกลางแจ้ง, โกดังเก็บของ, ห้องเก็บของ" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-xs focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"></textarea>
+              </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+              <div>
+                <label class="block text-xs font-bold text-gray-700 mb-1">หัวข้อแสดงผลบนโซเชียล (OG / Social Title)</label>
+                <input v-model="storeOgTitle" type="text" placeholder="เช่น STORAGE HOUSE - บ้านเก็บของและโรงเรือนสำเร็จรูประดับพรีเมียม" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-xs focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500">
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-gray-700 mb-1">คำอธิบายบนโซเชียล (OG / Social Description)</label>
+                <input v-model="storeOgDescription" type="text" placeholder="เช่น จำหน่ายและติดตั้งบ้านเก็บของ โรงเรือนสำเร็จรูป คุณภาพพรีเมียม" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-xs focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500">
+              </div>
+            </div>
+          </div>
+
+          <div class="pt-4 border-t border-gray-100">
             <label class="block text-sm font-bold text-gray-700 mb-1">ที่อยู่ร้านค้าแบบเต็ม (จัดแสดงบนใบหน้าบิล/PDF)</label>
             <textarea v-model="storeAddress" rows="2" placeholder="กรอกที่อยู่บริษัท, อาคาร, ชั้น, ถนน, เขต/อำเภอ, จังหวัด, รหัสไปรษณีย์" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"></textarea>
           </div>
@@ -2292,21 +2334,7 @@ onMounted(() => {
             <svg class="w-5 h-5 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg> 
             Google Gemini AI <button @click.prevent="openGuide('gemini')" type="button" class="ml-2 inline-flex items-center justify-center bg-blue-50 hover:bg-blue-100 text-blue-500 rounded-full w-7 h-7 transition-colors" title="คู่มือการตั้งค่า"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path></svg></button>
           </h2>
-          
-          <!-- AI Consultant Toggle -->
-          <div class="flex items-center justify-between p-4 border border-gray-200 rounded-xl bg-gray-50/50 mb-6">
-            <div>
-              <h4 class="font-bold text-gray-900 text-sm flex items-center gap-1.5">
-                <svg class="w-4 h-4 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-                เปิดใช้งานหน้า AI Consultant (AI ผู้ช่วยส่วนตัว)
-              </h4>
-              <p class="text-xs text-gray-500 mt-1">แสดงหน้า /ai-consultant ในระบบหน้าบ้าน และแสดงปุ่มเข้าถึงทางด่วน</p>
-            </div>
-            <label class="relative inline-flex items-center cursor-pointer">
-              <input type="checkbox" v-model="aiConsultantEnabled" class="sr-only peer">
-              <div class="w-11 h-7 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-indigo-600"></div>
-            </label>
-          </div>
+
 
           <!-- AI Product Recommendation Widget Control Card -->
           <div class="p-5 border border-gray-200 rounded-2xl bg-gray-50/40 mb-6 space-y-4">

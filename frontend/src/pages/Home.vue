@@ -286,9 +286,9 @@ const loadHomepageSettings = async () => {
           ctaText: 'ดูคอลเลกชันทั้งหมด',
           ctaLink: '/products',
           ctaAction: 'view_products',
-          ctaText2: 'ปรึกษาฟรีกับ AI',
-          ctaLink2: '/ai-consultant',
-          ctaAction2: 'consult_ai'
+          ctaText2: 'คำนวณพื้นที่จัดเก็บ',
+          ctaLink2: '/space-calculator',
+          ctaAction2: 'space_calc'
         },
         {
           tag: 'บ้านเก็บของพลาสติก HDPE ลายไม้',
@@ -298,9 +298,9 @@ const loadHomepageSettings = async () => {
           ctaText: 'เลือกดูรุ่นพลาสติก',
           ctaLink: '/products',
           ctaAction: 'view_plastic_sheds',
-          ctaText2: 'ปรึกษาฟรีกับ AI',
-          ctaLink2: '/ai-consultant',
-          ctaAction2: 'consult_ai'
+          ctaText2: 'คำนวณพื้นที่จัดเก็บ',
+          ctaLink2: '/space-calculator',
+          ctaAction2: 'space_calc'
         },
         {
           tag: 'บ้านเก็บของโลหะ Galvalume',
@@ -310,9 +310,9 @@ const loadHomepageSettings = async () => {
           ctaText: 'เลือกดูรุ่นโลหะ',
           ctaLink: '/products',
           ctaAction: 'view_metal_sheds',
-          ctaText2: 'ปรึกษาฟรีกับ AI',
-          ctaLink2: '/ai-consultant',
-          ctaAction2: 'consult_ai'
+          ctaText2: 'คำนวณพื้นที่จัดเก็บ',
+          ctaLink2: '/space-calculator',
+          ctaAction2: 'space_calc'
         }
       ]
       if (slides.value.length > 0) {
@@ -362,9 +362,9 @@ const loadHomepageSettings = async () => {
             ctaText: safeString(slide.ctaText, fallback.ctaText),
             ctaLink: safeString(slide.ctaLink, fallback.ctaLink),
             ctaAction: safeString(slide.ctaAction, fallback.ctaAction),
-            ctaText2: safeString(slide.ctaText2, fallback.ctaText2 || 'ปรึกษาฟรีกับ AI'),
-            ctaLink2: safeString(slide.ctaLink2, fallback.ctaLink2 || '/ai-consultant'),
-            ctaAction2: safeString(slide.ctaAction2, fallback.ctaAction2 || 'consult_ai'),
+            ctaText2: safeString(slide.ctaText2, fallback.ctaText2 || 'คำนวณพื้นที่จัดเก็บ'),
+            ctaLink2: safeString(slide.ctaLink2, fallback.ctaLink2 || '/space-calculator'),
+            ctaAction2: safeString(slide.ctaAction2, fallback.ctaAction2 || 'space_calc'),
             badgeHighlight: safeString(slide.badgeHighlight, defaultBadges.badgeHighlight),
             badgeHighlightIcon: safeString(slide.badgeHighlightIcon, defaultBadges.badgeHighlightIcon),
             badgeHighlightLabel: safeString(slide.badgeHighlightLabel, 'จุดเด่น'),
@@ -501,9 +501,9 @@ const loadHomepageSettings = async () => {
           ctaText: 'ดูคอลเลกชันทั้งหมด',
           ctaLink: '/products',
           ctaAction: 'view_products',
-          ctaText2: 'ปรึกษาฟรีกับ AI',
-          ctaLink2: '/ai-consultant',
-          ctaAction2: 'consult_ai',
+          ctaText2: 'คำนวณพื้นที่จัดเก็บ',
+          ctaLink2: '/space-calculator',
+          ctaAction2: 'space_calc',
           badgeHighlight: 'เกรดพรีเมียม',
           badgeHighlightIcon: 'trophy',
           badgeFeature: 'รับประกัน 10 ปี',
@@ -520,9 +520,9 @@ const loadHomepageSettings = async () => {
           ctaText: 'เลือกดูรุ่นพลาสติก',
           ctaLink: '/products',
           ctaAction: 'view_plastic_sheds',
-          ctaText2: 'ปรึกษาฟรีกับ AI',
-          ctaLink2: '/ai-consultant',
-          ctaAction2: 'consult_ai',
+          ctaText2: 'คำนวณพื้นที่จัดเก็บ',
+          ctaLink2: '/space-calculator',
+          ctaAction2: 'space_calc',
           badgeHighlight: 'ผิวลายไม้ธรรมชาติ',
           badgeHighlightIcon: 'leaf',
           badgeFeature: 'กันรังสี UV 100%',
@@ -539,9 +539,9 @@ const loadHomepageSettings = async () => {
           ctaText: 'เลือกดูรุ่นโลหะ',
           ctaLink: '/products',
           ctaAction: 'view_metal_sheds',
-          ctaText2: 'ปรึกษาฟรีกับ AI',
-          ctaLink2: '/ai-consultant',
-          ctaAction2: 'consult_ai',
+          ctaText2: 'คำนวณพื้นที่จัดเก็บ',
+          ctaLink2: '/space-calculator',
+          ctaAction2: 'space_calc',
           badgeHighlight: 'เหล็ก Galvalume USA',
           badgeHighlightIcon: 'shield',
           badgeFeature: 'ทนลมแรง 120 กม./ชม.',
@@ -1706,24 +1706,17 @@ onUnmounted(() => {
                   </svg>
                 </router-link>
 
-                <!-- Dark Translucent AI Consultation Button -->
-                <router-link v-if="(slides[currentSlide]?.ctaLink2 || '/ai-consultant') !== '/ai-consultant' || settingsStore.isAiConsultantEnabled" :to="slides[currentSlide]?.ctaLink2 || '/ai-consultant'" @click="trackCTA(slides[currentSlide]?.ctaAction2 || 'consult_ai')" 
+                <!-- Dark Translucent Secondary Button -->
+                <router-link v-if="slides[currentSlide]?.ctaLink2 && slides[currentSlide]?.ctaLink2 !== '/ai-consultant'" :to="slides[currentSlide]?.ctaLink2" @click="trackCTA(slides[currentSlide]?.ctaAction2 || 'click_secondary')" 
                   class="group inline-flex items-center justify-center px-6 py-3.5 text-sm font-bold tracking-wide text-white bg-black/45 hover:bg-black/60 border border-white/10 hover:border-[#ff7a00]/40 rounded-full shadow-[0_4px_20px_rgba(0,0,0,0.15)] hover:shadow-[0_4px_25px_rgba(255,122,0,0.15)] hover:scale-[1.03] active:scale-95 gap-2.5 backdrop-blur-md transition-all duration-300 whitespace-nowrap"
                 >
-                  <!-- Robot Head/AI Chatbot Icon -->
+                  <!-- Calculator / Action Icon -->
                   <div class="w-5 h-5 rounded-full bg-[#ff7a00]/10 border border-[#ff7a00]/25 flex items-center justify-center shrink-0 p-0.5 group-hover:bg-[#ff7a00]/20 transition-colors">
-                    <svg class="w-full h-full text-[#ff7a00]" viewBox="0 0 24 24" fill="none">
-                      <rect x="5" y="7" width="14" height="11" rx="3" fill="currentColor" fill-opacity="0.15" stroke="currentColor" stroke-width="1.5"/>
-                      <rect x="8" y="10" width="8" height="5" rx="1.5" fill="#0c0e14" stroke="currentColor" stroke-width="1.2"/>
-                      <circle cx="10" cy="12.5" r="1" fill="#ff7a00" />
-                      <circle cx="14" cy="12.5" r="1" fill="#ff7a00" />
-                      <path d="M12 7V4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
-                      <circle cx="12" cy="3.5" r="0.75" fill="currentColor" />
-                      <rect x="3" y="11" width="2" height="3" rx="0.5" fill="currentColor" />
-                      <rect x="19" y="11" width="2" height="3" rx="0.5" fill="currentColor" />
+                    <svg class="w-full h-full text-[#ff7a00]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
                     </svg>
                   </div>
-                  <span>{{ slides[currentSlide]?.ctaText2 || 'ปรึกษาฟรีกับ AI' }}</span>
+                  <span>{{ slides[currentSlide]?.ctaText2 || 'คำนวณพื้นที่จัดเก็บ' }}</span>
                 </router-link>
               </div>
 

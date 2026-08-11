@@ -21,7 +21,7 @@ const getIcon = (type) => {
 const getBgColor = (type) => {
   switch (type) {
     case 'success':
-      return 'bg-emerald-50 text-emerald-950 border-emerald-500 border-2'
+      return 'bg-green-50 text-green-950 border-green-500 border-2'
     case 'error':
       return 'bg-red-50 text-red-950 border-red-500 border-2'
     case 'warning':
@@ -35,7 +35,7 @@ const getBgColor = (type) => {
 const getIconColor = (type) => {
   switch (type) {
     case 'success':
-      return 'text-emerald-600'
+      return 'text-green-600'
     case 'error':
       return 'text-red-600'
     case 'warning':

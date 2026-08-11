@@ -15,7 +15,6 @@ const STATIC_PAGES = [
     { path: '/about', changefreq: 'yearly', priority: '0.7' },
     { path: '/contact', changefreq: 'yearly', priority: '0.8' },
     { path: '/quotation', changefreq: 'monthly', priority: '0.9' },
-    { path: '/ai-consultant', changefreq: 'monthly', priority: '0.9' },
     { path: '/installation-guide', changefreq: 'monthly', priority: '0.7' },
     { path: '/blog', changefreq: 'daily', priority: '0.8' },
     { path: '/privacy-policy', changefreq: 'yearly', priority: '0.3' },
@@ -68,22 +67,8 @@ router.get('/', async (req, res) => {
         xml += `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"\n`;
         xml += `        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">\n`;
 
-        // Check if AI Consultant is enabled
-        let aiConsultantEnabled = true;
-        try {
-            const [settingsRows] = await db.query("SELECT setting_value FROM settings WHERE setting_key = 'ai_consultant_enabled'");
-            if (settingsRows.length > 0) {
-                aiConsultantEnabled = settingsRows[0].setting_value !== 'false';
-            }
-        } catch (e) {
-            console.error('Failed to fetch ai_consultant_enabled for sitemap:', e);
-        }
-
         // Static pages
         for (const page of STATIC_PAGES) {
-            if (page.path === '/ai-consultant' && !aiConsultantEnabled) {
-                continue;
-            }
             xml += `  <url>\n`;
             xml += `    <loc>${siteUrl}${page.path}</loc>\n`;
             xml += `    <changefreq>${page.changefreq}</changefreq>\n`;

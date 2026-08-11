@@ -31,8 +31,8 @@ const defaultSlides = [
     desc: 'ผลิตด้วยพลาสติก PP (Polypropylene) แข็งแรง ทนแดด',
     ctaText: 'บ้านเก็บของพลาสติก PP',
     ctaLink: '/products',
-    ctaText2: 'ปรึกษาฟรีกับ AI',
-    ctaLink2: '/ai-consultant',
+    ctaText2: 'คำนวณพื้นที่จัดเก็บ',
+    ctaLink2: '/space-calculator',
     image: '/images/home/hero-slide-1.webp',
     badgeHighlight: 'เกรดพรีเมียม',
     badgeHighlightIcon: 'trophy',
@@ -49,8 +49,8 @@ const defaultSlides = [
     desc: 'ผลิตจากพลาสติก HDPE หนาสองชั้น ป้องกันรังสี UV 100% ไม่เป็นสนิม ไม่ผุกร่อน ตลอดอายุการใช้งาน',
     ctaText: 'เลือกดูรุ่นพลาสติก',
     ctaLink: '/products',
-    ctaText2: 'ปรึกษาฟรีกับ AI',
-    ctaLink2: '/ai-consultant',
+    ctaText2: 'คำนวณพื้นที่จัดเก็บ',
+    ctaLink2: '/space-calculator',
     image: '/images/home/hero-slide-2.webp',
     badgeHighlight: 'ผิวลายไม้ธรรมชาติ',
     badgeHighlightIcon: 'leaf',
@@ -67,8 +67,8 @@ const defaultSlides = [
     desc: 'ทนลมแรงสูงสุด 120 กม./ชม. อบสีความร้อน 4 ชั้น กันสนิม พร้อมช่องระบายอากาศป้องกันกลิ่นอับชื้น',
     ctaText: 'เลือกดูรุ่นโลหะ',
     ctaLink: '/products',
-    ctaText2: 'ปรึกษาฟรีกับ AI',
-    ctaLink2: '/ai-consultant',
+    ctaText2: 'คำนวณพื้นที่จัดเก็บ',
+    ctaLink2: '/space-calculator',
     image: '/images/home/hero-slide-3.webp',
     badgeHighlight: 'เหล็ก Galvalume USA',
     badgeHighlightIcon: 'shield',
@@ -177,8 +177,8 @@ const addSlide = () => {
     desc: 'ยกระดับพื้นที่ด้วยบ้านเก็บของและโรงจอดรถคุณภาพสูง ทนทานทุกสภาวะอากาศ',
     ctaText: 'เลือกชมสินค้า',
     ctaLink: '/products',
-    ctaText2: 'ปรึกษาฟรีกับ AI',
-    ctaLink2: '/ai-consultant',
+    ctaText2: 'คำนวณพื้นที่จัดเก็บ',
+    ctaLink2: '/space-calculator',
     image: '/images/home/hero-slide-1.webp',
     badgeHighlight: 'เกรดพรีเมียม',
     badgeHighlightIcon: 'trophy',
@@ -543,11 +543,11 @@ onMounted(() => {
                           <div class="grid grid-cols-2 gap-2">
                             <div>
                               <label class="block text-[10px] font-bold text-gray-500 mb-1">ข้อความบนปุ่ม</label>
-                              <input type="text" v-model="slide.ctaText2" placeholder="ปรึกษาฟรีกับ AI" class="w-full border border-gray-300 rounded-lg px-2.5 py-1.5 text-xs font-bold">
+                              <input type="text" v-model="slide.ctaText2" placeholder="คำนวณพื้นที่จัดเก็บ" class="w-full border border-gray-300 rounded-lg px-2.5 py-1.5 text-xs font-bold">
                             </div>
                             <div>
                               <label class="block text-[10px] font-bold text-gray-500 mb-1">ลิงก์ปลายทาง</label>
-                              <input type="text" v-model="slide.ctaLink2" placeholder="/ai-consultant" class="w-full border border-gray-300 rounded-lg px-2.5 py-1.5 text-xs">
+                              <input type="text" v-model="slide.ctaLink2" placeholder="/space-calculator" class="w-full border border-gray-300 rounded-lg px-2.5 py-1.5 text-xs">
                             </div>
                           </div>
                         </div>

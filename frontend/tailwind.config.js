@@ -38,7 +38,7 @@ export default {
   },
   safelist: [
     {
-      pattern: /(bg|text|border|ring)-(emerald|blue|teal|amber|rose|indigo|purple|gray|red|orange|cyan|pink)-(50|100|200|300|400|500|600|700)/,
+      pattern: /(bg|text|border|ring)-(emerald|green|blue|teal|amber|rose|indigo|purple|gray|red|orange|cyan|pink)-(50|100|200|300|400|500|600|700|800|900|950)/,
     }
   ],
   plugins: [],

@@ -8,22 +8,25 @@ export function useSEO() {
    * Set basic document title and meta description dynamically
    */
   const setMeta = (title, description, image = '') => {
-    const storeName = settingsStore.storeName || 'STORAGE HOUSE';
-    document.title = title ? `${title} | ${storeName}` : `${storeName} — บ้านเก็บของสำเร็จรูป ตู้เก็บของกลางแจ้ง โกดังเก็บของ คุณภาพพรีเมียม`;
+    const storeName = settingsStore.storeName || 'บ้านเก็บของ';
+    const storeDesc = description || settingsStore.storeDescription || '';
+    const pageTitle = title ? `${title} | ${storeName}` : (settingsStore.storeOgTitle || storeName);
+
+    document.title = pageTitle;
 
     const descTag = document.querySelector('meta[name="description"]');
-    if (descTag && description) {
-      descTag.setAttribute('content', description);
+    if (descTag && storeDesc) {
+      descTag.setAttribute('content', storeDesc);
     }
 
     const ogTitle = document.querySelector('meta[property="og:title"]');
-    if (ogTitle && title) {
-      ogTitle.setAttribute('content', title);
+    if (ogTitle) {
+      ogTitle.setAttribute('content', pageTitle);
     }
 
     const ogDesc = document.querySelector('meta[property="og:description"]');
-    if (ogDesc && description) {
-      ogDesc.setAttribute('content', description);
+    if (ogDesc && storeDesc) {
+      ogDesc.setAttribute('content', storeDesc);
     }
   };
 
@@ -49,9 +52,9 @@ export function useSEO() {
     if (scriptTag) {
       scriptTag.remove();
     }
-    // Restore default title when leaving component (optional but good practice)
-    const storeName = settingsStore.storeName || 'STORAGE HOUSE';
-    document.title = `${storeName} — บ้านเก็บของสำเร็จรูป ตู้เก็บของกลางแจ้ง โกดังเก็บของ คุณภาพพรีเมียม`;
+    if (typeof settingsStore.applySeoToDOM === 'function') {
+      settingsStore.applySeoToDOM();
+    }
   });
 
   return {

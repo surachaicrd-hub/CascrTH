@@ -52,6 +52,14 @@ watch(() => authStore.currentUser?.avatar_url, () => {
   mobileAvatarError.value = false
 })
 
+watch(() => settingsStore.storeFavicon, (newFavicon) => {
+  if (!newFavicon) return
+  const links = document.querySelectorAll("link[rel*='icon'], link[rel='shortcut icon']")
+  links.forEach(link => {
+    link.href = getOptimizedImageUrl(newFavicon, 192)
+  })
+}, { immediate: true })
+
 // Floating contact hub state
 const isContactHubOpen = ref(false)
 const contactHubRef = ref(null)
@@ -844,20 +852,6 @@ onUnmounted(() => {
       <transition name="contact-hub">
         <div v-if="isContactHubOpen" class="flex flex-col items-end gap-2 mb-1">
           
-          <!-- AI Consultant -->
-          <router-link 
-            v-if="settingsStore.isAiConsultantEnabled"
-            to="/ai-consultant" 
-            class="flex items-center gap-3 text-white rounded-full shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200 pl-4 pr-5 py-2.5 min-w-[200px] bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500"
-          >
-            <div class="flex-shrink-0 w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
-              <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-            </div>
-            <div class="leading-tight">
-              <div class="text-xs font-black tracking-wide">AI ผู้ช่วยส่วนตัว</div>
-              <div class="text-[10px] opacity-80">ปรึกษาฟรี 24 ชม.</div>
-            </div>
-          </router-link>
 
           <!-- LINE entries -->
           <a v-for="(line, i) in contactLines" :key="'line-'+i"
@@ -1093,7 +1087,7 @@ onUnmounted(() => {
             <ul class="flex flex-col gap-3.5 w-full">
               <li><router-link to="/about" class="text-[14px] font-semibold text-gray-600 dark:text-gray-400 hover:text-[#f07100] dark:hover:text-[#f07100] transition-colors flex items-center gap-1.5 group"><span class="text-[#f07100] font-black transform group-hover:translate-x-1 transition-transform">&gt;</span> เกี่ยวกับเรา</router-link></li>
               <li><router-link to="/contact" class="text-[14px] font-semibold text-gray-600 dark:text-gray-400 hover:text-[#f07100] dark:hover:text-[#f07100] transition-colors flex items-center gap-1.5 group"><span class="text-[#f07100] font-black transform group-hover:translate-x-1 transition-transform">&gt;</span> ติดต่อเรา</router-link></li>
-              <li v-if="(settingsStore.footerDistributorUrl || '/ai-consultant') !== '/ai-consultant' || settingsStore.isAiConsultantEnabled"><router-link :to="settingsStore.footerDistributorUrl || '/ai-consultant'" class="text-[14px] font-semibold text-gray-600 dark:text-gray-400 hover:text-[#f07100] dark:hover:text-[#f07100] transition-colors flex items-center gap-1.5 group" :aria-label="footerDistributorText"><span class="text-[#f07100] font-black transform group-hover:translate-x-1 transition-transform">&gt;</span> {{ footerDistributorText }}</router-link></li>
+              <li v-if="settingsStore.footerDistributorUrl && settingsStore.footerDistributorUrl !== '/ai-consultant'"><router-link :to="settingsStore.footerDistributorUrl" class="text-[14px] font-semibold text-gray-600 dark:text-gray-400 hover:text-[#f07100] dark:hover:text-[#f07100] transition-colors flex items-center gap-1.5 group" :aria-label="footerDistributorText"><span class="text-[#f07100] font-black transform group-hover:translate-x-1 transition-transform">&gt;</span> {{ footerDistributorText }}</router-link></li>
               <li><router-link to="/privacy-policy" class="text-[14px] font-semibold text-gray-600 dark:text-gray-400 hover:text-[#f07100] dark:hover:text-[#f07100] transition-colors flex items-center gap-1.5 group"><span class="text-[#f07100] font-black transform group-hover:translate-x-1 transition-transform">&gt;</span> นโยบายความเป็นส่วนตัว</router-link></li>
               <li><router-link to="/terms-of-service" class="text-[14px] font-semibold text-gray-600 dark:text-gray-400 hover:text-[#f07100] dark:hover:text-[#f07100] transition-colors flex items-center gap-1.5 group"><span class="text-[#f07100] font-black transform group-hover:translate-x-1 transition-transform">&gt;</span> เงื่อนไขการใช้งาน</router-link></li>
             </ul>

@@ -128,7 +128,6 @@ app.use('/api/products', require('./routes/products'));
 app.use('/api/upload', require('./routes/upload'));
 app.use('/api/quotation-submit', require('./routes/quotation'));
 app.use('/api/track-interest', require('./routes/tracking'));
-app.use('/api/ai-chat', require('./routes/ai-chat'));
 app.use('/api/admin', require('./routes/auth').router);
 app.use('/api/admin/users', require('./routes/admin-users'));
 app.use('/api/admin/customers', require('./routes/admin-customers'));

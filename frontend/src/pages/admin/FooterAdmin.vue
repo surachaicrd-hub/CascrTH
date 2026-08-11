@@ -14,7 +14,7 @@ const form = ref({
   footer_newsletter_subtitle: 'สมัครฟรี รับสิทธิ์ก่อนใคร',
   footer_newsletter_privacy: 'ข้อมูลปลอดภัย ยกเลิกได้ทุกเมื่อ',
   footer_distributor_label: 'ตัวแทนจำหน่าย',
-  footer_distributor_url: '/ai-consultant',
+  footer_distributor_url: '/about',
   footer_sitemap_label: 'แผนผังเว็บไซต์',
   footer_sitemap_url: '/contact'
 })
@@ -198,15 +198,15 @@ onMounted(() => {
           <div class="p-6 space-y-5">
             <!-- Link 1: Distributor / AI advisor -->
             <div class="border-b border-gray-100 dark:border-gray-700 pb-5 space-y-4">
-              <h3 class="text-sm font-bold text-gray-800 dark:text-gray-200">ลิงก์ตัวแทนจำหน่าย / AI Consultant</h3>
+              <h3 class="text-sm font-bold text-gray-800 dark:text-gray-200">ลิงก์ตัวแทนจำหน่าย</h3>
               <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div>
                   <label class="block text-xs font-bold text-gray-500 mb-1">ชื่อป้ายเมนู (Label)</label>
-                  <input v-model="form.footer_distributor_label" type="text" placeholder="เช่น AI ผู้ช่วยส่วนตัว" class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl px-4 py-2 text-sm focus:ring-1 focus:ring-blue-500">
+                  <input v-model="form.footer_distributor_label" type="text" placeholder="เช่น ตัวแทนจำหน่าย" class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl px-4 py-2 text-sm focus:ring-1 focus:ring-blue-500">
                 </div>
                 <div>
                   <label class="block text-xs font-bold text-gray-500 mb-1">URL ปลายทาง (Path)</label>
-                  <input v-model="form.footer_distributor_url" type="text" placeholder="เช่น /ai-consultant" class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl px-4 py-2 text-sm focus:ring-1 focus:ring-blue-500">
+                  <input v-model="form.footer_distributor_url" type="text" placeholder="เช่น /about" class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl px-4 py-2 text-sm focus:ring-1 focus:ring-blue-500">
                 </div>
               </div>
             </div>

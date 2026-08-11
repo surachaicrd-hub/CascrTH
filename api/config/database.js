@@ -336,7 +336,12 @@ async function initDB() {
       ['home_promo_btn_text', 'ดูเพิ่มเติม'],
       ['home_promo_btn_link', '/products'],
       ['home_promo_image', '/images/home/hdpe-shed-promo.webp'],
-      ['ai_consultant_enabled', 'true']
+      ['store_name', 'บ้านเก็บของ'],
+      ['store_description', 'STORAGE HOUSE จำหน่ายและติดตั้งบ้านเก็บของ โรงเรือน และโกดังสำเร็จรูปคุณภาพสูง รับประกัน 10 ปี'],
+      ['store_keywords', 'บ้านเก็บของ, ตู้เก็บของกลางแจ้ง, โกดังเก็บของ, บ้านเก็บของสำเร็จรูป, ห้องเก็บของ, บ้านโลหะ'],
+      ['store_og_title', 'STORAGE HOUSE - บ้านเก็บของและโรงเรือนสำเร็จรูประดับพรีเมียม'],
+      ['store_og_description', 'STORAGE HOUSE จำหน่ายและติดตั้งบ้านเก็บของ โรงเรือน และโกดังสำเร็จรูปคุณภาพสูง รับประกัน 10 ปี'],
+      ['company_legal_name', 'บริษัท ซีอาร์ ดิสทริบิวชั่น จำกัด']
     ];
     for (const [key, value] of defaultContactSettings) {
       await connection.query('INSERT IGNORE INTO settings (setting_key, setting_value) VALUES (?, ?)', [key, value]);

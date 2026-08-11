@@ -37,7 +37,7 @@ const share = (platform) => {
   <div class="flex items-center gap-2 relative">
     <!-- Copy Toast -->
     <Transition name="fade">
-      <div v-if="copyToastVisible" class="absolute -top-10 left-1/2 -translate-x-1/2 px-3 py-1.5 bg-emerald-600 text-white text-xs font-bold rounded-lg shadow-lg whitespace-nowrap z-50 flex items-center gap-1">
+      <div v-if="copyToastVisible" class="absolute -top-10 left-1/2 -translate-x-1/2 px-3 py-1.5 bg-green-600 text-white text-xs font-bold rounded-lg shadow-lg whitespace-nowrap z-50 flex items-center gap-1">
         <span>คัดลอกลิงก์แล้ว</span>
         <svg class="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
           <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />

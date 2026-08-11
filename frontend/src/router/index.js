@@ -57,11 +57,6 @@ const routes = [
         meta: { title: 'เกี่ยวกับเรา - บริษัท ซีอาร์ ดิสทริบิวชั่น จำกัด', description: 'ทำความรู้จักกับบริษัท ซีอาร์ ดิสทริบิวชั่น ผู้เชี่ยวชาญด้านสินค้านำเข้าอุตสาหกรรมด้วยประสบการณ์กว่า 20 ปี' }
     },
     {
-        path: '/ai-consultant',
-        component: () => import('../pages/AIConsultant.vue'),
-        meta: { title: 'AI ผู้ช่วยส่วนตัว - วิเคราะห์งบประมาณและพื้นที่', description: 'ทดลองใช้ AI Consultant ของ STORAGE HOUSE เพื่อช่วยคำนวณพื้นที่และประเมินงบประมาณของคุณ ฟรี' }
-    },
-    {
         path: '/verify-email',
         component: () => import('../pages/VerifyEmail.vue'),
         meta: { title: 'ยืนยันอีเมลของคุณ - STORAGE HOUSE', description: 'ยืนยันตัวตนเพื่อเข้าถึงสิทธิประโยชน์จาก STORAGE HOUSE แบบเต็มรูปแบบ' }
@@ -239,20 +234,30 @@ const router = createRouter({
 
 // Navigation Guard for SEO Meta Tags
 router.beforeEach((to, from, next) => {
-    // Set Title
-    let title = to.meta.title || 'STORAGE HOUSE - ระบบจัดการบ้านเก็บของอัจฉริยะ'
+    // Set Dynamic Title & Description from settingsStore
+    let title = to.meta.title || ''
+    let description = to.meta.description || ''
+
     try {
         const settingsStore = useSettingsStore()
-        if (settingsStore.storeName) {
-            title = title.replace(/STORAGE HOUSE/g, settingsStore.storeName)
+        const sName = settingsStore.storeName || 'บ้านเก็บของ'
+        if (title) {
+            title = title.replace(/STORAGE HOUSE/g, sName)
+            if (!title.includes(sName)) {
+                title = `${title} | ${sName}`
+            }
+        } else {
+            title = settingsStore.storeOgTitle || sName
         }
-    } catch (e) {
-        // Pinia might not be fully initialized yet on startup
-    }
-    document.title = title
+        if (!description && settingsStore.storeDescription) {
+            description = settingsStore.storeDescription
+        }
+    } catch (e) {}
+
+    document.title = title || 'บ้านเก็บของ'
 
     // Set Canonical URL
-    const currentOrigin = typeof window !== 'undefined' ? window.location.origin : 'https://บ้านเก็บของ.com'
+    const currentOrigin = typeof window !== 'undefined' ? window.location.origin : (window.location.origin || '')
     let canonical = document.querySelector('link[rel="canonical"]')
     if (!canonical) {
         canonical = document.createElement('link')
@@ -261,17 +266,10 @@ router.beforeEach((to, from, next) => {
     }
     canonical.setAttribute('href', `${currentOrigin}${to.path === '/' ? '' : to.path}`)
 
-
     // Set Meta Description
-    const description = to.meta.description || 'เว็บไซต์จำหน่ายและให้คำปรึกษาการสร้างบ้านเก็บของและโรงเรือน'
     const metaDescriptionTag = document.querySelector('meta[name="description"]')
-    if (metaDescriptionTag) {
+    if (metaDescriptionTag && description) {
         metaDescriptionTag.setAttribute('content', description)
-    } else if (to.meta.description) {
-        const meta = document.createElement('meta')
-        meta.name = 'description'
-        meta.content = description
-        document.head.appendChild(meta)
     }
 
     // Dynamic OG Meta Tags for social sharing
@@ -317,13 +315,6 @@ router.beforeEach((to, from, next) => {
         }
     } catch (e) {}
 
-    // AI Consultant Guard
-    try {
-        const settingsStore = useSettingsStore()
-        if (to.path === '/ai-consultant' && !settingsStore.isAiConsultantEnabled) {
-            return next('/')
-        }
-    } catch (e) {}
 
     // Online Shopping Guard
     try {

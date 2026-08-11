@@ -24,7 +24,7 @@ router.get('/public', async (req, res) => {
             'payment_bank_accounts', 'payment_promptpay_number',
             'shipping_restricted_provinces',
             'free_install_provinces',
-            'store_name', 'store_description', 'store_logo', 'store_favicon', 
+            'store_name', 'store_description', 'store_keywords', 'store_og_title', 'store_og_description', 'company_legal_name', 'store_logo', 'store_favicon', 
             'store_address', 'store_tax_id', 'store_phone', 
             'warehouse_lat', 'warehouse_lng',
             'home_category_showcase', 'show_product_rating', 'show_product_review',
@@ -62,8 +62,7 @@ router.get('/public', async (req, res) => {
             'services_items', 'services_stats', 'services_cta_title', 'services_cta_desc', 'services_content_rich',
             'footer_newsletter_title', 'footer_newsletter_subtitle', 'footer_newsletter_privacy',
             'footer_trust_badges', 'footer_distributor_label', 'footer_distributor_url',
-            'footer_sitemap_label', 'footer_sitemap_url',
-            'ai_consultant_enabled'
+            'footer_sitemap_label', 'footer_sitemap_url'
         ];
 
         const placeholders = publicKeys.map(() => '?').join(',');

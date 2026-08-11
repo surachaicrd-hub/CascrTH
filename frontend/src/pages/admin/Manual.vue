@@ -106,13 +106,7 @@ const tabs = [
               </ul>
             </div>
 
-            <div class="border-l-2 border-gray-200 pl-6">
-              <h3 class="text-lg font-bold text-gray-900 mb-2">1.3 ฟีเจอร์ AI Consultant (น้องสเปซ)</h3>
-              <div class="bg-indigo-50/50 p-4 rounded-xl mb-4 border border-indigo-100">
-                <p class="m-0 text-indigo-900"><strong>AI Consultant</strong> คือผู้ช่วยเสมือนจริงในหน้าเว็บ ใช้งานผ่าน <code>/ai-consultant</code></p>
-                <p class="m-0 text-indigo-700 text-sm mt-2">ลูกค้าระบุขนาดพื้นที่หรือจุดประสงค์ น้องสเปซจะประมวลผลและนำเสนอสินค้ารุ่นที่สอดคล้องที่สุดแบบเรียลไทม์ พร้อมสรุปราคา</p>
-              </div>
-            </div>
+
 
             <div class="border-l-2 border-gray-200 pl-6">
               <h3 class="text-lg font-bold text-gray-900 mb-2">1.4 ระบบคอนเทนต์และผลงานติดตั้ง</h3>
