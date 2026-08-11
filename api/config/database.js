@@ -61,11 +61,22 @@ async function initDB() {
       )
     `);
 
-    // Insert default admin if not exists
-    // NOTE: Password is bcrypt hash of 'password' (cost 12). Change immediately after first login!
-    await connection.query(`
-      INSERT IGNORE INTO admins (id, username, password) VALUES ('default-admin-uuid-1234', 'admin', '$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewdBPj2fYMrxsyu6')
-    `);
+    // Insert default admin ONLY if no admins exist — generates a random password
+    const [existingAdmins] = await connection.query('SELECT COUNT(*) as count FROM admins');
+    if (existingAdmins[0].count === 0) {
+      const bcryptForSeed = require('bcryptjs');
+      const defaultPassword = require('crypto').randomBytes(12).toString('base64url');
+      const hashedDefaultPassword = await bcryptForSeed.hash(defaultPassword, 12);
+      await connection.query(
+        'INSERT INTO admins (id, username, password) VALUES (?, ?, ?)',
+        ['default-admin-uuid-1234', 'admin', hashedDefaultPassword]
+      );
+      console.log('\n⚠️  ===== DEFAULT ADMIN CREATED =====');
+      console.log(`   Username: admin`);
+      console.log(`   Password: ${defaultPassword}`);
+      console.log('   ⚠️  CHANGE THIS PASSWORD IMMEDIATELY!');
+      console.log('   ====================================\n');
+    }
 
     // Create admin_notification_settings table
     await connection.query(`

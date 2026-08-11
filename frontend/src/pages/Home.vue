@@ -7,6 +7,7 @@ import { useWishlistStore } from '../stores/wishlistStore'
 import { useCompareStore } from '../stores/compareStore'
 import { useAuthStore } from '../stores/authStore'
 import { useToast } from '../composables/useToast'
+import { useSEO } from '../composables/useSEO'
 import FeatureIcon from '../components/ui/FeatureIcon.vue'
 import ProductCard from '../components/ProductCard.vue'
 import { getOptimizedImageUrl, onImageError } from '../utils/image'
@@ -18,6 +19,7 @@ const wishlistStore = useWishlistStore()
 const compareStore = useCompareStore()
 const authStore = useAuthStore()
 const { showToast } = useToast()
+const { setMeta, setStructuredData } = useSEO()
 
 // Hero AI Chatbot state
 const heroAiMessages = ref([])
@@ -1523,6 +1525,40 @@ onMounted(async () => {
   if (authStore.isAuthenticated) {
     wishlistStore.fetchWishlist()
   }
+
+  // Dynamic Home SEO & GEO Tags
+  setMeta({
+    title: settingsStore.storeOgTitle || settingsStore.storeName || 'บ้านเก็บของและโกดังสำเร็จรูประดับพรีเมียม',
+    description: settingsStore.storeDescription || 'จำหน่ายและติดตั้งบ้านเก็บของ โรงเรือน และโกดังสำเร็จรูปคุณภาพสูง',
+    keywords: settingsStore.storeKeywords || 'บ้านเก็บของ, ตู้เก็บของกลางแจ้ง, โกดังสำเร็จรูป',
+    llmContext: settingsStore.storeDefaultLlmContext || 'ผู้เชี่ยวชาญด้านบ้านเก็บของ โกดังสำเร็จรูป และตู้เก็บของกลางแจ้ง ทนแดด ทนฝน พร้อมบริการประกอบและติดตั้งทั่วประเทศ',
+    canonicalUrl: `${window.location.origin}/`,
+    type: 'website'
+  })
+
+  // Home Organization & WebSite Schemas
+  setStructuredData([
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": settingsStore.companyLegalName || settingsStore.storeName || "บริษัท ซีอาร์ ดิสทริบิวชั่น จำกัด",
+      "alternateName": settingsStore.storeName || "บ้านเก็บของ",
+      "url": window.location.origin,
+      "logo": `${window.location.origin}/logo.png`,
+      "description": settingsStore.storeDescription || "จำหน่ายและติดตั้งบ้านเก็บของ โรงเรือน และโกดังสำเร็จรูปคุณภาพสูง"
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": settingsStore.storeName || "บ้านเก็บของ",
+      "url": window.location.origin,
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": `${window.location.origin}/products?search={search_term_string}`,
+        "query-input": "required name=search_term_string"
+      }
+    }
+  ], 'dynamic-structured-data')
   
   // Refresh AOS after content loads
   await nextTick()

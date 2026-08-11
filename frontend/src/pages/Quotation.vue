@@ -6,10 +6,12 @@ import { searchAddressByDistrict, searchAddressByAmphoe, searchAddressByProvince
 
 import { useRoute } from 'vue-router'
 import { useTrackingStore } from '../stores/tracking'
+import { useSEO } from '../composables/useSEO'
 
 const route = useRoute()
 const { showToast } = useToast()
 const trackingStore = useTrackingStore()
+const { setMeta, setStructuredData } = useSEO()
 
 const form = ref({
   requestType: 'individual',
@@ -203,6 +205,22 @@ const submitQuotation = async () => {
 }
 
 onMounted(() => {
+  setMeta({
+    title: 'ขอใบเสนอราคาด่วน (Request Quotation)',
+    description: 'รับบริการประเมินราคาและเสนอราคาสินค้าบ้านเก็บของสำเร็จรูปสำหรับบุคคลและนิติบุคคล ฟรีไม่มีค่าใช้จ่าย',
+    canonicalUrl: window.location.href,
+    type: 'website'
+  })
+
+  setStructuredData({
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": `${window.location.origin}/` },
+      { "@type": "ListItem", "position": 2, "name": "ขอใบเสนอราคา", "item": window.location.href }
+    ]
+  }, 'dynamic-breadcrumb-data')
+
   if (route.query.product) {
     form.value.attachedProduct = route.query.product
   }

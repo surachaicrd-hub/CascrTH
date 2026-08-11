@@ -3,9 +3,11 @@ import { ref, onMounted, onUnmounted, nextTick } from 'vue'
 import { useToast } from '../composables/useToast'
 import { isValidThaiPhone, isValidEmail } from '../composables/useValidation'
 import { useTrackingStore } from '../stores/tracking'
+import { useSEO } from '../composables/useSEO'
 
 const { showToast } = useToast()
 const trackingStore = useTrackingStore()
+const { setMeta, setStructuredData } = useSEO()
 
 const form = ref({
   name: '',
@@ -176,14 +178,21 @@ const submitContact = async () => {
 
 // Add Structured Data (JSON-LD) for Contact Page
 const addStructuredData = () => {
-  const schema = {
+  setMeta({
+    title: 'ติดต่อเรา (Contact Us)',
+    description: 'ช่องทางการติดต่อ Morespace เบอร์โทรศัพท์ LINE อีเมล และที่อยู่โชว์รูม/คลังสินค้า',
+    canonicalUrl: window.location.href,
+    type: 'website'
+  })
+
+  setStructuredData({
     "@context": "https://schema.org",
     "@type": "ContactPage",
     "name": settingsStore.storeName ? `ติดต่อเรา - ${settingsStore.storeName}` : 'ติดต่อเรา',
     "description": "ติดต่อและสอบถามข้อมูลเพิ่มเติมเกี่ยวกับสินค้าและบริการติดตั้งบ้านเก็บของ",
     "mainEntity": {
       "@type": "LocalBusiness",
-      "name": contact.value.contact_company_name,
+      "name": contact.value.contact_company_name || settingsStore.storeName,
       "telephone": phones.value.length > 0 ? phones.value[0].value : '',
       "email": emails.value.length > 0 ? emails.value[0].value : '',
       "address": {
@@ -192,25 +201,21 @@ const addStructuredData = () => {
         "addressCountry": "TH"
       }
     }
-  }
+  }, 'dynamic-structured-data')
 
-  const script = document.createElement('script')
-  script.type = 'application/ld+json'
-  script.text = JSON.stringify(schema)
-  script.id = 'json-ld-contact'
-  document.head.appendChild(script)
+  setStructuredData({
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": `${window.location.origin}/` },
+      { "@type": "ListItem", "position": 2, "name": "ติดต่อเรา", "item": window.location.href }
+    ]
+  }, 'dynamic-breadcrumb-data')
 }
 
 onMounted(async () => {
   await loadContact()
   addStructuredData()
-})
-
-onUnmounted(() => {
-  const script = document.getElementById('json-ld-contact')
-  if (script) {
-    document.head.removeChild(script)
-  }
 })
 </script>
 

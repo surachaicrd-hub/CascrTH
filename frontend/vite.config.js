@@ -38,10 +38,20 @@ export default defineConfig({
             if (id.includes('marked') || id.includes('highlight.js')) {
               return 'vendor-markdown';
             }
+            // Split heavy libraries to reduce large page bundles
+            if (id.includes('html2pdf') || id.includes('html2canvas') || id.includes('jspdf')) {
+              return 'vendor-pdf';
+            }
+            if (id.includes('sweetalert2')) {
+              return 'vendor-sweetalert';
+            }
+            if (id.includes('vuedraggable') || id.includes('sortablejs')) {
+              return 'vendor-draggable';
+            }
           }
         }
       }
     },
-    chunkSizeWarningLimit: 2500
+    chunkSizeWarningLimit: 1500
   }
 })

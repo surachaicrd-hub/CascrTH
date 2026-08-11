@@ -110,6 +110,50 @@ const storeDescription = ref('')
 const storeKeywords = ref('')
 const storeOgTitle = ref('')
 const storeOgDescription = ref('')
+const seoDefaultLlmContext = ref('ผู้เชี่ยวชาญด้านบ้านเก็บของ โกดังสำเร็จรูป และตู้เก็บของกลางแจ้ง ทนแดด ทนฝน พร้อมบริการประกอบและติดตั้งทั่วประเทศ')
+const seoAiCrawlingEnabled = ref(true)
+
+// SEO & GEO Real-Data Previewer State
+const previewType = ref('home')
+const previewTargetId = ref('')
+const previewLoading = ref(false)
+const previewData = ref(null)
+const previewSubTab = ref('google') // 'google', 'social', 'ai', 'schema'
+const pingingIndexNow = ref(false)
+
+const fetchSeoPreview = async () => {
+  previewLoading.value = true
+  try {
+    const url = `/api/settings/seo-preview?type=${previewType.value}&id=${previewTargetId.value}`
+    const res = await apiFetch(url)
+    const data = await res.json()
+    if (data.success) {
+      previewData.value = data
+    }
+  } catch (e) {
+    console.error('Failed to fetch SEO preview:', e)
+  } finally {
+    previewLoading.value = false
+  }
+}
+
+const triggerIndexNowPing = async () => {
+  pingingIndexNow.value = true
+  try {
+    const res = await apiFetch('/api/sitemap/ping-bing')
+    const data = await res.json()
+    if (data.success) {
+      showToast(data.message || 'ส่งสัญญาณ Bing IndexNow เรียบร้อยแล้ว', 'success')
+    } else {
+      showToast(data.error || 'ไม่สามารถส่งสัญญาณ IndexNow ได้', 'error')
+    }
+  } catch (e) {
+    showToast('เกิดข้อผิดพลาดในการเชื่อมต่อ IndexNow', 'error')
+  } finally {
+    pingingIndexNow.value = false
+  }
+}
+
 const companyLegalName = ref('')
 const storeUrl = ref('')
 const storeLogo = ref('')
@@ -382,6 +426,8 @@ const loadSettings = async () => {
       if (data.data.store_keywords !== undefined) storeKeywords.value = data.data.store_keywords
       if (data.data.store_og_title !== undefined) storeOgTitle.value = data.data.store_og_title
       if (data.data.store_og_description !== undefined) storeOgDescription.value = data.data.store_og_description
+      if (data.data.seo_default_llm_context !== undefined) seoDefaultLlmContext.value = data.data.seo_default_llm_context
+      if (data.data.seo_ai_crawling_enabled !== undefined) seoAiCrawlingEnabled.value = data.data.seo_ai_crawling_enabled === 'true'
       if (data.data.company_legal_name !== undefined) companyLegalName.value = data.data.company_legal_name
       if (data.data.store_url !== undefined) storeUrl.value = data.data.store_url
       if (data.data.store_logo !== undefined) storeLogo.value = data.data.store_logo
@@ -525,6 +571,9 @@ const loadSettings = async () => {
 
     // Load Cron Info
     await loadCronInfo()
+
+    // Fetch live SEO real data preview
+    await fetchSeoPreview()
   } catch (error) {
     if (error.message !== 'Unexpected end of JSON input') {
       console.error('Failed to load settings:', error)
@@ -573,6 +622,8 @@ const saveSettings = async () => {
       { key: 'store_keywords', value: storeKeywords.value },
       { key: 'store_og_title', value: storeOgTitle.value },
       { key: 'store_og_description', value: storeOgDescription.value },
+      { key: 'seo_default_llm_context', value: seoDefaultLlmContext.value },
+      { key: 'seo_ai_crawling_enabled', value: seoAiCrawlingEnabled.value.toString() },
       { key: 'company_legal_name', value: companyLegalName.value },
       { key: 'store_url', value: storeUrl.value },
       { key: 'store_logo', value: storeLogo.value },
@@ -1112,9 +1163,15 @@ onMounted(() => {
         </button>
 
         <!-- Tab: Cron Jobs -->
-        <button @click="activeTab = 'cron'" :class="[activeTab === 'cron' ? 'bg-white text-indigo-600 shadow-sm ring-1 ring-black/5' : 'text-gray-500 hover:text-gray-800 hover:bg-white/50', 'group flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm transition-all duration-300 whitespace-nowrap']">
+        <button type="button" @click="activeTab = 'cron'" :class="[activeTab === 'cron' ? 'bg-white text-indigo-600 shadow-sm ring-1 ring-black/5' : 'text-gray-500 hover:text-gray-800 hover:bg-white/50', 'group flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm transition-all duration-300 whitespace-nowrap']">
           <svg class="w-4 h-4" :class="activeTab === 'cron' ? 'text-indigo-500' : 'text-gray-400'" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
           งานอัตโนมัติ (Cron Jobs)
+        </button>
+
+        <!-- Tab: SEO & AI (GEO Engine) -->
+        <button type="button" @click="activeTab = 'seo'" :class="[activeTab === 'seo' ? 'bg-amber-500 text-white shadow-md' : 'text-gray-600 hover:text-gray-900 hover:bg-white/60', 'group flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm transition-all duration-300 whitespace-nowrap']">
+          <svg class="w-4 h-4" :class="activeTab === 'seo' ? 'text-white' : 'text-amber-500'" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+          SEO & AI (GEO Engine)
         </button>
       </nav>
     </div>
@@ -2882,6 +2939,229 @@ onMounted(() => {
               <svg class="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
               กด "บันทึกการตั้งค่า" ก่อนทดสอบ เพื่อให้ระบบใช้ค่าล่าสุด
             </p>
+          </div>
+        </div>
+
+        <!-- ======================= -->
+        <!-- SEO & AI (GEO ENGINE) TAB -->
+        <!-- ======================= -->
+        <div v-if="activeTab === 'seo'" class="space-y-8 animate-fade-in-up">
+          <!-- Banner / Header -->
+          <div class="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 rounded-3xl p-8 text-white shadow-xl relative overflow-hidden border border-white/10">
+            <div class="absolute -right-10 -bottom-10 w-64 h-64 bg-amber-500/10 rounded-full blur-3xl pointer-events-none"></div>
+            <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+              <div class="space-y-2 max-w-2xl">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 text-xs font-bold uppercase tracking-wider">
+                  <span class="w-2 h-2 rounded-full bg-amber-400 animate-ping"></span>
+                  Generative Engine Optimization (GEO Ready)
+                </div>
+                <h2 class="text-2xl md:text-3xl font-black tracking-tight text-white">
+                  ศูนย์ควบคุม SEO & AI Knowledge Engine
+                </h2>
+                <p class="text-slate-300 text-sm leading-relaxed">
+                  จัดการโครงสร้าง Meta Tags, JSON-LD Schema และไฟล์ <code class="text-amber-300 bg-black/40 px-1.5 py-0.5 rounded font-mono">llms.txt</code> สำหรับบอทค้นหาทั้ง Googlebot และ AI Search Engines (ChatGPT, Perplexity, Claude, Gemini) พร้อมระบบทดสอบและจำลองตัวอย่างข้อมูลจริงแบบเรียลไทม์
+                </p>
+              </div>
+              <div class="flex flex-wrap items-center gap-3">
+                <button type="button" @click="triggerIndexNowPing" :disabled="pingingIndexNow" class="px-5 py-3 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-sm rounded-2xl shadow-lg transition-all flex items-center gap-2 disabled:opacity-50">
+                  <svg v-if="pingingIndexNow" class="w-4 h-4 animate-spin text-slate-950" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                  <svg v-else class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                  {{ pingingIndexNow ? 'กำลังส่ง IndexNow...' : 'ส่ง IndexNow Ping ไปยัง Bing' }}
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 1: Global Site Meta & AI Settings -->
+          <div class="bg-white rounded-3xl p-8 shadow-sm border border-gray-200 space-y-6">
+            <h3 class="text-lg font-bold text-gray-900 flex items-center gap-2 border-b border-gray-100 pb-4">
+              <svg class="w-5 h-5 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+              ตั้งค่าข้อมูล SEO & AI Context ประจำเว็บไซต์ (Global Context)
+            </h3>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label class="block text-xs font-bold text-gray-700 mb-1">ชื่อแสดงผล Meta Title บนโซเชียลและ Search</label>
+                <input v-model="storeOgTitle" type="text" placeholder="เช่น STORAGE HOUSE - บ้านเก็บของและโรงเรือนสำเร็จรูประดับพรีเมียม" class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-xs focus:ring-2 focus:ring-indigo-500">
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-gray-700 mb-1">คำอธิบายหลัก (Site Meta Description)</label>
+                <input v-model="storeDescription" type="text" placeholder="รายละเอียดสั้นๆ แสดงใน Google Search" class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-xs focus:ring-2 focus:ring-indigo-500">
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-gray-700 mb-1">คำค้นหาหลัก (Meta Keywords)</label>
+                <input v-model="storeKeywords" type="text" placeholder="เช่น บ้านเก็บของ, ตู้เก็บของกลางแจ้ง, โกดังสำเร็จรูป" class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-xs focus:ring-2 focus:ring-indigo-500">
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-gray-700 mb-1">บริบทสำหรับ AI Search (Default LLM Context)</label>
+                <input v-model="seoDefaultLlmContext" type="text" placeholder="คำอธิบายสรุปสั้นๆ สำหรับระบบ AI Search เช่น ChatGPT/Perplexity" class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-xs focus:ring-2 focus:ring-indigo-500">
+              </div>
+            </div>
+
+            <div class="pt-4 border-t border-gray-100 flex items-center justify-between">
+              <div>
+                <h4 class="text-sm font-bold text-gray-900">อนุญาตให้ AI Search Bots เข้าถึงข้อมูล (GEO Crawling)</h4>
+                <p class="text-xs text-gray-500">เปิดให้ GPTBot, ChatGPT-User, PerplexityBot, ClaudeBot ดึงข้อมูลสินค้าและบทความจาก llms.txt และ Meta Tags</p>
+              </div>
+              <label class="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" v-model="seoAiCrawlingEnabled" class="sr-only peer">
+                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+              </label>
+            </div>
+          </div>
+
+          <!-- Section 2: Real-Data Live Preview Suite -->
+          <div class="bg-white rounded-3xl p-8 shadow-sm border border-gray-200 space-y-6">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-gray-100 pb-4">
+              <div>
+                <h3 class="text-lg font-bold text-gray-900 flex items-center gap-2">
+                  <svg class="w-5 h-5 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                  ชุดเครื่องมือตรวจสอบและจำลองการแสดงผลข้อมูลจริง (Real Live Data Inspector)
+                </h3>
+                <p class="text-xs text-gray-500">เลือกดูตัวอย่างข้อมูลจริงจากสินค้าหรือบทความในฐานข้อมูล เพื่อตรวจสอบว่า Google, โซเชียลมีเดีย และ AI จะมองเห็นเว็บไซต์อย่างไร</p>
+              </div>
+
+              <!-- Selector Controls -->
+              <div class="flex items-center gap-3">
+                <select v-model="previewType" @change="previewTargetId = ''; fetchSeoPreview();" class="border border-gray-300 rounded-xl px-3 py-2 text-xs font-bold focus:ring-2 focus:ring-amber-500">
+                  <option value="home">หน้าหลัก (Home)</option>
+                  <option value="product">สินค้าจริง (Product)</option>
+                  <option value="article">บทความจริง (Article)</option>
+                  <option value="project">ผลงานจริง (Project)</option>
+                </select>
+
+                <select v-if="previewType === 'product' && previewData?.productsList" v-model="previewTargetId" @change="fetchSeoPreview()" class="border border-gray-300 rounded-xl px-3 py-2 text-xs font-bold max-w-[200px] truncate focus:ring-2 focus:ring-amber-500">
+                  <option value="">-- เลือกสินค้า --</option>
+                  <option v-for="p in previewData.productsList" :key="p.id" :value="p.id">{{ p.name }}</option>
+                </select>
+
+                <select v-if="previewType === 'article' && previewData?.articlesList" v-model="previewTargetId" @change="fetchSeoPreview()" class="border border-gray-300 rounded-xl px-3 py-2 text-xs font-bold max-w-[200px] truncate focus:ring-2 focus:ring-amber-500">
+                  <option value="">-- เลือกบทความ --</option>
+                  <option v-for="a in previewData.articlesList" :key="a.id" :value="a.id">{{ a.title }}</option>
+                </select>
+
+                <select v-if="previewType === 'project' && previewData?.projectsList" v-model="previewTargetId" @change="fetchSeoPreview()" class="border border-gray-300 rounded-xl px-3 py-2 text-xs font-bold max-w-[200px] truncate focus:ring-2 focus:ring-amber-500">
+                  <option value="">-- เลือกผลงาน --</option>
+                  <option v-for="prj in previewData.projectsList" :key="prj.id" :value="prj.id">{{ prj.title }}</option>
+                </select>
+
+                <button type="button" @click="fetchSeoPreview" class="px-3.5 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 text-xs font-bold rounded-xl transition-colors shrink-0">
+                  โหลดข้อมูล
+                </button>
+              </div>
+            </div>
+
+            <!-- Preview Sub-Tabs -->
+            <div class="flex items-center gap-2 border-b border-gray-200 pb-2">
+              <button type="button" @click="previewSubTab = 'google'" :class="[previewSubTab === 'google' ? 'bg-indigo-50 text-indigo-700 font-bold border-indigo-500' : 'text-gray-500 border-transparent', 'px-4 py-2 border-b-2 text-xs transition-all flex items-center gap-1.5']">
+                <svg class="w-4 h-4 text-emerald-600" fill="currentColor" viewBox="0 0 24 24"><path d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 15.9 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z"/></svg>
+                Google Search Card
+              </button>
+              <button type="button" @click="previewSubTab = 'social'" :class="[previewSubTab === 'social' ? 'bg-indigo-50 text-indigo-700 font-bold border-indigo-500' : 'text-gray-500 border-transparent', 'px-4 py-2 border-b-2 text-xs transition-all flex items-center gap-1.5']">
+                <svg class="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+                Social Card (FB & X)
+              </button>
+              <button type="button" @click="previewSubTab = 'ai'" :class="[previewSubTab === 'ai' ? 'bg-indigo-50 text-indigo-700 font-bold border-indigo-500' : 'text-gray-500 border-transparent', 'px-4 py-2 border-b-2 text-xs transition-all flex items-center gap-1.5']">
+                <svg class="w-4 h-4 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+                AI Knowledge (LLMs)
+              </button>
+              <button type="button" @click="previewSubTab = 'schema'" :class="[previewSubTab === 'schema' ? 'bg-indigo-50 text-indigo-700 font-bold border-indigo-500' : 'text-gray-500 border-transparent', 'px-4 py-2 border-b-2 text-xs transition-all flex items-center gap-1.5']">
+                <svg class="w-4 h-4 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
+                JSON-LD Inspector
+              </button>
+            </div>
+
+            <!-- Preview Displays -->
+            <div v-if="previewLoading" class="p-8 text-center text-gray-500">
+              <div class="w-8 h-8 border-2 border-amber-500 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
+              กำลังดึงและสกัดข้อมูล real-time จากฐานข้อมูล...
+            </div>
+
+            <div v-else-if="previewData?.data" class="space-y-4">
+              <!-- SubTab: Google -->
+              <div v-if="previewSubTab === 'google'" class="p-6 bg-slate-50 border border-gray-200 rounded-2xl space-y-3">
+                <div class="flex items-center gap-2 text-xs text-slate-500">
+                  <div class="w-4 h-4 bg-emerald-600 text-white rounded-full flex items-center justify-center text-[9px] font-bold">M</div>
+                  <span class="truncate font-mono text-slate-600">{{ previewData.data.googleSnippet.url }}</span>
+                </div>
+                <h4 class="text-lg font-medium text-blue-800 hover:underline cursor-pointer leading-snug">
+                  {{ previewData.data.googleSnippet.title }}
+                </h4>
+                <p class="text-xs text-slate-600 leading-relaxed max-w-2xl line-clamp-2">
+                  {{ previewData.data.googleSnippet.description }}
+                </p>
+                <div v-if="previewData.data.googleSnippet.priceFormatted" class="flex items-center gap-3 text-xs pt-1">
+                  <span class="font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">{{ previewData.data.googleSnippet.priceFormatted }}</span>
+                  <span class="text-amber-600 font-bold">★ {{ previewData.data.googleSnippet.rating }} ({{ previewData.data.googleSnippet.reviewCount }} รีวิว)</span>
+                  <span class="text-emerald-600 font-bold" v-if="previewData.data.googleSnippet.inStock">✓ มีสินค้าพร้อมจัดส่ง</span>
+                </div>
+              </div>
+
+              <!-- SubTab: Social -->
+              <div v-if="previewSubTab === 'social'" class="max-w-md bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-md">
+                <div class="h-48 bg-slate-100 overflow-hidden relative">
+                  <img :src="previewData.data.socialCard.image" class="w-full h-full object-cover" @error="previewData.data.socialCard.image = '/og-image.jpg'">
+                  <div class="absolute bottom-2 left-2 px-2 py-1 bg-black/60 text-white text-[10px] rounded font-mono uppercase">Open Graph Preview</div>
+                </div>
+                <div class="p-4 space-y-1.5 bg-slate-50">
+                  <span class="text-[10px] text-slate-400 font-mono uppercase">{{ previewData.data.socialCard.domain }}</span>
+                  <h4 class="font-bold text-sm text-slate-900 line-clamp-1">{{ previewData.data.socialCard.title }}</h4>
+                  <p class="text-xs text-slate-500 line-clamp-2">{{ previewData.data.socialCard.description }}</p>
+                </div>
+              </div>
+
+              <!-- SubTab: AI -->
+              <div v-if="previewSubTab === 'ai'" class="p-6 bg-slate-900 text-slate-100 rounded-2xl font-mono text-xs space-y-4">
+                <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                  <span class="text-amber-400 font-bold flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+                    ข้อมูลที่ส่งให้ AI Crawlers (llm-context & llms.txt Feed)
+                  </span>
+                  <span class="text-[10px] text-slate-400">Content-Type: text/plain</span>
+                </div>
+                <div class="space-y-2">
+                  <p class="text-slate-400">// Direct LLM Context Meta Tag:</p>
+                  <pre class="bg-slate-950 p-3 rounded-xl text-amber-200 whitespace-pre-wrap">&lt;meta name="llm-context" content="{{ previewData.data.aiPreview.llmContext }}" /&gt;</pre>
+                </div>
+                <div class="space-y-2 pt-2">
+                  <p class="text-slate-400">// Markdown Knowledge Feed Snippet:</p>
+                  <pre class="bg-slate-950 p-3 rounded-xl text-slate-300 whitespace-pre-wrap">{{ previewData.data.aiPreview.knowledgeFeedSnippet }}</pre>
+                </div>
+              </div>
+
+              <!-- SubTab: Schema -->
+              <div v-if="previewSubTab === 'schema'" class="relative">
+                <pre class="p-5 bg-slate-900 text-emerald-400 rounded-2xl font-mono text-xs overflow-x-auto max-h-96 leading-relaxed">{{ previewData.data.jsonLdSchema }}</pre>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 3: Live Files & Bot Action Center -->
+          <div class="bg-white rounded-3xl p-8 shadow-sm border border-gray-200 space-y-4">
+            <h3 class="text-lg font-bold text-gray-900 flex items-center gap-2">
+              <svg class="w-5 h-5 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+              ไฟล์สำหรับบอทและลิงก์ตรวจสอบฉบับจริง (Live Endpoints)
+            </h3>
+            <p class="text-xs text-gray-500">คุณสามารถเปิดทดสอบลิงก์ที่สร้างขึ้นสำหรับ Search Engine และ AI Models ได้ทันที:</p>
+
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 pt-2">
+              <a href="/sitemap.xml" target="_blank" class="p-4 bg-gray-50 hover:bg-indigo-50 border border-gray-200 hover:border-indigo-300 rounded-2xl text-center group transition-all">
+                <span class="block font-mono text-xs font-bold text-indigo-600 group-hover:underline">/sitemap.xml</span>
+                <span class="text-[10px] text-gray-500 mt-1 block">แผนผังเว็บไซต์ Google</span>
+              </a>
+              <a href="/robots.txt" target="_blank" class="p-4 bg-gray-50 hover:bg-indigo-50 border border-gray-200 hover:border-indigo-300 rounded-2xl text-center group transition-all">
+                <span class="block font-mono text-xs font-bold text-indigo-600 group-hover:underline">/robots.txt</span>
+                <span class="text-[10px] text-gray-500 mt-1 block">กฎสำหรับ Search Crawlers</span>
+              </a>
+              <a href="/llms.txt" target="_blank" class="p-4 bg-gray-50 hover:bg-amber-50 border border-gray-200 hover:border-amber-300 rounded-2xl text-center group transition-all">
+                <span class="block font-mono text-xs font-bold text-amber-600 group-hover:underline">/llms.txt</span>
+                <span class="text-[10px] text-gray-500 mt-1 block">ดรรชนีความรู้สำหรับ AI</span>
+              </a>
+              <a href="/llms-full.txt" target="_blank" class="p-4 bg-gray-50 hover:bg-amber-50 border border-gray-200 hover:border-amber-300 rounded-2xl text-center group transition-all">
+                <span class="block font-mono text-xs font-bold text-amber-600 group-hover:underline">/llms-full.txt</span>
+                <span class="text-[10px] text-gray-500 mt-1 block">ฐานข้อมูลสินค้าฉบับเต็ม</span>
+              </a>
+            </div>
           </div>
         </div>
 

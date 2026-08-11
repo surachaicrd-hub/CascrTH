@@ -11,8 +11,10 @@ const generateMetaTags = ({ title, description, image, url, keywords = '', llmCo
   <title>${title}</title>
   <meta name="title" content="${title}" />
   <meta name="description" content="${description}" />
-  <meta name="robots" content="index, follow, max-image-preview:large" />
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
   <link rel="canonical" href="${url}" />
+  <meta name="author" content="Morespace Storage Solutions" />
+  <meta name="ai-content-type" content="e-commerce, product-catalog, technical-knowledge" />
 `;
 
     if (keywords) {
@@ -29,17 +31,19 @@ const generateMetaTags = ({ title, description, image, url, keywords = '', llmCo
   <meta property="og:title" content="${title}" />
   <meta property="og:description" content="${description}" />
   <meta property="og:image" content="${image}" />
+  <meta property="og:site_name" content="Morespace" />
+  <meta property="og:locale" content="th_TH" />
 
-  <!-- Twitter -->
-  <meta property="twitter:card" content="summary_large_image" />
-  <meta property="twitter:url" content="${url}" />
-  <meta property="twitter:title" content="${title}" />
-  <meta property="twitter:description" content="${description}" />
-  <meta property="twitter:image" content="${image}" />
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:url" content="${url}" />
+  <meta name="twitter:title" content="${title}" />
+  <meta name="twitter:description" content="${description}" />
+  <meta name="twitter:image" content="${image}" />
 `;
 
     if (jsonLdHtml) {
-        tags += `\n  <!-- Structured Data JSON-LD -->\n${jsonLdHtml}\n`;
+        tags += `\n  <!-- Structured Data JSON-LD (Schema.org) -->\n${jsonLdHtml}\n`;
     }
 
     return tags;

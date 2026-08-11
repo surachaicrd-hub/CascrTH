@@ -3,9 +3,11 @@ import { ref, onMounted, onUnmounted, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { getOptimizedImageUrl, onImageError } from '../utils/image'
 import { useSettingsStore } from '../stores/settingsStore'
+import { useSEO } from '../composables/useSEO'
 
 const settingsStore = useSettingsStore()
 const route = useRoute()
+const { setMeta, setStructuredData } = useSEO()
 const articles = ref([])
 const categories = ref([])
 const loading = ref(true)
@@ -130,9 +132,17 @@ const gridArticles = computed(() => {
 
 // Schema
 const addSchema = () => {
-  const storeName = settingsStore.storeName || ''
+  const storeName = settingsStore.storeName || 'บ้านเก็บของ'
   const baseUrl = window.location.origin
-  const schema = {
+  
+  setMeta({
+    title: 'บทความและสาระน่ารู้',
+    description: 'รวบรวมไอเดียการจัดบ้าน เทคนิคการดูแลบ้านเก็บของ และคู่มือเลือกตู้เก็บของกลางแจ้ง',
+    canonicalUrl: `${baseUrl}/blog`,
+    type: 'website'
+  })
+
+  setStructuredData({
     "@context": "https://schema.org",
     "@type": "Blog",
     "name": `บทความ ${storeName}`.trim(),
@@ -143,23 +153,22 @@ const addSchema = () => {
       "name": storeName,
       "url": baseUrl
     }
-  }
-  const s = document.createElement('script')
-  s.type = 'application/ld+json'
-  s.text = JSON.stringify(schema)
-  s.id = 'json-ld-blog'
-  document.head.appendChild(s)
+  }, 'dynamic-structured-data')
+
+  setStructuredData({
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": `${baseUrl}/` },
+      { "@type": "ListItem", "position": 2, "name": "บทความ", "item": `${baseUrl}/blog` }
+    ]
+  }, 'dynamic-breadcrumb-data')
 }
 
 onMounted(() => {
   loadArticles()
   loadCategories()
   addSchema()
-})
-
-onUnmounted(() => {
-  const s = document.getElementById('json-ld-blog')
-  if (s) document.head.removeChild(s)
 })
 </script>
 

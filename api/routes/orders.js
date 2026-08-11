@@ -308,13 +308,12 @@ router.post('/', verifyCustomerOptional, async (req, res) => {
                 }
             }
 
-            await connection.commit();
-
-            // Increment coupon used_count (non-blocking)
+            // Increment coupon used_count within the transaction to prevent race conditions
             if (couponRow) {
-                db.query('UPDATE coupon_codes SET used_count = used_count + 1 WHERE id = ?', [couponRow.id])
-                    .catch(e => console.error('[Coupon] Failed to increment used_count:', e.message));
+                await connection.query('UPDATE coupon_codes SET used_count = used_count + 1 WHERE id = ?', [couponRow.id]);
             }
+
+            await connection.commit();
 
             // Send Email Confirmation (Non-blocking) — supports both logged-in and guest
             sendOrderConfirmation(
@@ -758,10 +757,35 @@ router.put('/:id/cancel', verifyCustomerOptional, async (req, res) => {
             return res.status(400).json({ success: false, error: 'ไม่สามารถยกเลิกคำสั่งซื้อที่ชำระเงินแล้วหรืออยู่ระหว่างตรวจสอบ' });
         }
 
-        await db.query(
-            'UPDATE orders SET payment_status = ?, order_status = ? WHERE id = ?',
-            ['cancelled', 'cancelled', orderId]
-        );
+        // Use a transaction to cancel order and restore stock atomically
+        const connection = await db.getConnection();
+        await connection.beginTransaction();
+        try {
+            await connection.query(
+                'UPDATE orders SET payment_status = ?, order_status = ?, cancelled_at = NOW() WHERE id = ?',
+                ['cancelled', 'cancelled', orderId]
+            );
+
+            // Restore stock quantities for all items in this order
+            const [orderItems] = await connection.query(
+                'SELECT product_id, quantity FROM order_items WHERE order_id = ?',
+                [orderId]
+            );
+            for (const item of orderItems) {
+                await connection.query(
+                    'UPDATE products SET stock_quantity = stock_quantity + ?, is_out_of_stock = 0 WHERE id = ? AND stock_quantity IS NOT NULL',
+                    [item.quantity, item.product_id]
+                );
+            }
+
+            await connection.commit();
+            console.log(`[Stock] Restored stock for ${orderItems.length} items from customer-cancelled order ${orderId}`);
+        } catch (txnErr) {
+            await connection.rollback();
+            throw txnErr;
+        } finally {
+            connection.release();
+        }
 
         res.json({ success: true, message: 'ยกเลิกคำสั่งซื้อเรียบร้อยแล้ว' });
     } catch (err) {

@@ -2,12 +2,14 @@
 import { ref, onMounted, onUnmounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useSettingsStore } from '../stores/settingsStore'
+import { useSEO } from '../composables/useSEO'
 import SocialShare from '../components/SocialShare.vue'
 import { getOptimizedImageUrl, onImageError } from '../utils/image'
 
 const route = useRoute()
 const router = useRouter()
 const settingsStore = useSettingsStore()
+const { setMeta, setStructuredData } = useSEO()
 const article = ref(null)
 const loading = ref(true)
 const relatedArticles = ref([])
@@ -84,53 +86,21 @@ const loadArticle = async () => {
 }
 
 const updateMetaTags = () => {
-    const titleText = article.value.seo_title || article.value.title || (settingsStore.storeName ? `${settingsStore.storeName} บทความ` : 'บทความ')
-    document.title = titleText
-
-    const setMeta = (name, content, isProp = false) => {
-        if (!content) return
-        const attr = isProp ? 'property' : 'name'
-        let el = document.querySelector(`meta[${attr}="${name}"]`)
-        if (!el) {
-            el = document.createElement('meta')
-            el.setAttribute(attr, name)
-            document.head.appendChild(el)
-            el.classList.add('dynamic-seo-tag')
-        }
-        el.setAttribute('content', content)
-    }
-
-    const desc = article.value.seo_description || article.value.excerpt || ''
+    if (!article.value) return
+    const titleText = article.value.seo_title || article.value.title
+    const desc = article.value.seo_description || article.value.excerpt || (article.value.content ? article.value.content.replace(/<[^>]*>?/gm, '').substring(0, 160) : '')
     const keywords = article.value.seo_keywords || article.value.tags || ''
-    const url = window.location.href
     const image = article.value.cover_image || ''
 
-    // Standard SEO
-    setMeta('description', desc)
-    setMeta('keywords', keywords)
-
-    // OpenGraph (Facebook, Line)
-    setMeta('og:title', titleText, true)
-    setMeta('og:description', desc, true)
-    setMeta('og:image', image, true)
-    setMeta('og:url', url, true)
-    setMeta('og:type', 'article', true)
-
-    // Twitter Card
-    setMeta('twitter:card', 'summary_large_image')
-    setMeta('twitter:title', titleText)
-    setMeta('twitter:description', desc)
-    setMeta('twitter:image', image)
-
-    // Canonical
-    let canonical = document.querySelector('link[rel="canonical"]')
-    if (!canonical) {
-        canonical = document.createElement('link')
-        canonical.setAttribute('rel', 'canonical')
-        canonical.classList.add('dynamic-seo-tag')
-        document.head.appendChild(canonical)
-    }
-    canonical.setAttribute('href', url)
+    setMeta({
+      title: titleText,
+      description: desc,
+      image,
+      keywords,
+      llmContext: article.value.llm_context || '',
+      canonicalUrl: window.location.href,
+      type: 'article'
+    })
 }
 
 const loadRelated = async () => {
@@ -183,17 +153,12 @@ const formatPrice = (price) => {
 }
 
 const addSchema = () => {
-  // Remove existing
-  ['json-ld-article', 'json-ld-article-bc', 'json-ld-article-faq'].forEach(id => {
-    const existing = document.getElementById(id)
-    if (existing) document.head.removeChild(existing)
-  })
-
+  if (!article.value) return
   const aiDescription = article.value.llm_context
     ? `${article.value.seo_description || article.value.excerpt || ''} [AI Context: ${article.value.llm_context}]`
     : (article.value.seo_description || article.value.excerpt || '')
 
-  const schema = {
+  setStructuredData({
     "@context": "https://schema.org",
     "@type": "Article",
     "headline": article.value.title,
@@ -211,15 +176,10 @@ const addSchema = () => {
       "@type": "WebPage",
       "@id": window.location.href
     }
-  }
-  const s = document.createElement('script')
-  s.type = 'application/ld+json'
-  s.text = JSON.stringify(schema)
-  s.id = 'json-ld-article'
-  document.head.appendChild(s)
+  }, 'dynamic-structured-data')
 
-  // Breadcrumb
-  const bc = {
+  // Breadcrumb Schema
+  setStructuredData({
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     "itemListElement": [
@@ -227,24 +187,19 @@ const addSchema = () => {
       { "@type": "ListItem", "position": 2, "name": "บทความ", "item": `${window.location.origin}/blog` },
       { "@type": "ListItem", "position": 3, "name": article.value.title, "item": window.location.href }
     ]
-  }
-  const bcS = document.createElement('script')
-  bcS.type = 'application/ld+json'
-  bcS.text = JSON.stringify(bc)
-  bcS.id = 'json-ld-article-bc'
-  document.head.appendChild(bcS)
+  }, 'dynamic-breadcrumb-data')
 
   // FAQ Schema
   if (article.value.faq && article.value.faq.length > 0) {
     let parsedFaq = []
     if (typeof article.value.faq === 'string') {
-      try { parsedFaq = JSON.parse(article.value.faq) } catch (e) { console.error('Error parsing FAQ schema:', e) }
+      try { parsedFaq = JSON.parse(article.value.faq) } catch (e) {}
     } else {
       parsedFaq = article.value.faq
     }
 
     if (parsedFaq.length > 0) {
-      const faqSchema = {
+      setStructuredData({
         "@context": "https://schema.org",
         "@type": "FAQPage",
         "mainEntity": parsedFaq.map(item => ({
@@ -255,12 +210,7 @@ const addSchema = () => {
             "text": item.answer
           }
         }))
-      }
-      const faqS = document.createElement('script')
-      faqS.type = 'application/ld+json'
-      faqS.text = JSON.stringify(faqSchema)
-      faqS.id = 'json-ld-article-faq'
-      document.head.appendChild(faqS)
+      }, 'dynamic-faq-data')
     }
   }
 }

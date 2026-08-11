@@ -65,6 +65,14 @@ router.get('/resize', async (req, res) => {
         const cachedFileDir = path.join(uploadDir, subfolder, 'cache');
         const cachedFilePath = path.join(cachedFileDir, cachedFilename);
 
+        // Security: Prevent path traversal attacks
+        const resolvedOriginal = path.resolve(originalFilePath);
+        const resolvedCached = path.resolve(cachedFilePath);
+        const resolvedUploadDir = path.resolve(uploadDir);
+        if (!resolvedOriginal.startsWith(resolvedUploadDir) || !resolvedCached.startsWith(resolvedUploadDir)) {
+            return res.status(403).json({ success: false, error: 'Access denied: invalid path' });
+        }
+
         // If the original file does not exist, serve SVG placeholder instead of 404
         if (!fs.existsSync(originalFilePath)) {
             res.setHeader('Content-Type', 'image/svg+xml');

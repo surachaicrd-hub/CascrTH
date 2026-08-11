@@ -567,11 +567,31 @@ import { ref, reactive, onMounted, computed } from 'vue'
 import { useCalculator } from '../composables/useCalculator'
 import { useToast } from '../composables/useToast'
 import { useSettingsStore } from '../stores/settingsStore'
+import { useSEO } from '../composables/useSEO'
 import { apiFetch } from '../utils/apiFetch'
 
 const { parseProductDimensions, checkFit, calculateFoundation, estimateInstallation } = useCalculator()
 const { showToast } = useToast()
 const settingsStore = useSettingsStore()
+const { setMeta, setStructuredData } = useSEO()
+
+onMounted(() => {
+  setMeta({
+    title: 'คำนวณพื้นที่จัดเก็บ (Space Calculator)',
+    description: 'โปรแกรมคำนวณพื้นที่ติดตั้งและค้นหาขนาดบ้านเก็บของที่พอดีกับพื้นที่ของคุณแบบอัตโนมัติ',
+    canonicalUrl: window.location.href,
+    type: 'website'
+  })
+
+  setStructuredData({
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": `${window.location.origin}/` },
+      { "@type": "ListItem", "position": 2, "name": "คำนวณพื้นที่จัดเก็บ", "item": window.location.href }
+    ]
+  }, 'dynamic-breadcrumb-data')
+})
 
 const form = reactive({
   categoryName: '',

@@ -62,7 +62,8 @@ router.get('/public', async (req, res) => {
             'services_items', 'services_stats', 'services_cta_title', 'services_cta_desc', 'services_content_rich',
             'footer_newsletter_title', 'footer_newsletter_subtitle', 'footer_newsletter_privacy',
             'footer_trust_badges', 'footer_distributor_label', 'footer_distributor_url',
-            'footer_sitemap_label', 'footer_sitemap_url'
+            'footer_sitemap_label', 'footer_sitemap_url',
+            'seo_default_llm_context', 'seo_ai_crawling_enabled'
         ];
 
         const placeholders = publicKeys.map(() => '?').join(',');
@@ -77,6 +78,225 @@ router.get('/public', async (req, res) => {
     } catch (error) {
         console.error('Fetch public settings error:', error);
         res.status(500).json({ success: false, error: 'Failed to fetch public settings' });
+    }
+});
+
+// GET /api/settings/seo-preview - Live real-data SEO & GEO preview for Admin
+router.get('/seo-preview', async (req, res) => {
+    try {
+        const protocol = req.headers['x-forwarded-proto'] || req.protocol || 'https';
+        const host = req.headers['x-forwarded-host'] || req.headers.host || 'morespace.co.th';
+        const siteUrl = (process.env.SITE_URL || `${protocol}://${host}`).replace(/\/$/, '');
+
+        const type = req.query.type || 'home';
+        const targetId = req.query.id || '';
+
+        // 1. Fetch site settings map
+        const [sRows] = await db.query("SELECT setting_key, setting_value FROM settings");
+        const sMap = {};
+        sRows.forEach(r => { sMap[r.setting_key] = r.setting_value; });
+
+        const storeName = sMap['store_name'] || 'บ้านเก็บของ';
+        const companyLegalName = sMap['company_legal_name'] || storeName;
+        const defaultDesc = sMap['store_description'] || 'จำหน่ายและติดตั้งบ้านเก็บของ โรงเรือน และโกดังสำเร็จรูปคุณภาพสูง';
+        const defaultKeywords = sMap['store_keywords'] || 'บ้านเก็บของ, ตู้เก็บของกลางแจ้ง, โกดังสำเร็จรูป';
+        const defaultOgTitle = sMap['store_og_title'] || `${storeName} - บ้านเก็บของสำเร็จรูประดับพรีเมียม`;
+        const defaultOgDesc = sMap['store_og_description'] || defaultDesc;
+        const defaultLlmContext = sMap['seo_default_llm_context'] || 'ผู้เชี่ยวชาญด้านบ้านเก็บของ โกดังสำเร็จรูป และตู้เก็บของกลางแจ้ง ทนแดด ทนฝน พร้อมบริการประกอบและติดตั้งทั่วประเทศ';
+
+        // 2. Fetch list of real products, articles, projects for dropdown selector
+        let productsList = [];
+        let articlesList = [];
+        let projectsList = [];
+        try {
+            const [pRows] = await db.query("SELECT id, name, slug FROM products WHERE is_active = 1 ORDER BY id DESC LIMIT 50");
+            productsList = pRows;
+        } catch (e) {}
+
+        try {
+            const [aRows] = await db.query("SELECT id, title, slug FROM articles WHERE is_published = 1 ORDER BY id DESC LIMIT 50");
+            articlesList = aRows;
+        } catch (e) {}
+
+        try {
+            const [prjRows] = await db.query("SELECT id, title FROM projects WHERE is_published = 1 ORDER BY id DESC LIMIT 50");
+            projectsList = prjRows;
+        } catch (e) {}
+
+        // 3. Compile target preview payload
+        let title = defaultOgTitle;
+        let description = defaultDesc;
+        let keywords = defaultKeywords;
+        let llmContext = defaultLlmContext;
+        let image = `${siteUrl}/og-image.jpg`;
+        let canonicalUrl = siteUrl;
+        let rating = 4.9;
+        let reviewCount = 128;
+        let inStock = true;
+        let price = null;
+        let schemaList = [];
+
+        if (type === 'product' && (targetId || productsList.length > 0)) {
+            const pid = targetId || (productsList[0] ? productsList[0].id : '');
+            const [pRows] = await db.query(
+                "SELECT id, name, slug, short_description, description, price, image_url, seo_title, seo_description, seo_keywords, llm_context, sku, is_out_of_stock, rating, review_count, faq FROM products WHERE id = ? OR slug = ?",
+                [pid, pid]
+            );
+            if (pRows.length > 0) {
+                const prod = pRows[0];
+                title = prod.seo_title || `${prod.name} | ${storeName}`;
+                description = prod.seo_description || prod.short_description || prod.description?.replace(/<[^>]*>?/gm, '').substring(0, 160) || defaultDesc;
+                keywords = prod.seo_keywords || defaultKeywords;
+                llmContext = prod.llm_context || defaultLlmContext;
+                if (prod.image_url) {
+                    image = prod.image_url.startsWith('http') ? prod.image_url : `${siteUrl}${prod.image_url}`;
+                }
+                canonicalUrl = `${siteUrl}/products/${prod.slug || prod.id}`;
+                inStock = !prod.is_out_of_stock;
+                price = prod.price;
+                rating = prod.rating || 4.9;
+                reviewCount = prod.review_count || 35;
+
+                schemaList.push({
+                    "@context": "https://schema.org",
+                    "@type": "Product",
+                    "name": prod.name,
+                    "image": [image],
+                    "description": description,
+                    "sku": prod.sku || `PROD-${prod.id}`,
+                    "brand": { "@type": "Brand", "name": storeName },
+                    "offers": {
+                        "@type": "Offer",
+                        "url": canonicalUrl,
+                        "priceCurrency": "THB",
+                        "price": String(prod.price || 0),
+                        "availability": inStock ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+                        "seller": { "@type": "Organization", "name": companyLegalName }
+                    },
+                    "aggregateRating": {
+                        "@type": "AggregateRating",
+                        "ratingValue": String(rating),
+                        "reviewCount": String(reviewCount)
+                    }
+                });
+            }
+        } else if (type === 'article' && (targetId || articlesList.length > 0)) {
+            const aid = targetId || (articlesList[0] ? articlesList[0].id : '');
+            const [aRows] = await db.query(
+                "SELECT id, title, slug, excerpt, content, cover_image, author, created_at, updated_at, seo_title, seo_description, seo_keywords, llm_context FROM articles WHERE id = ? OR slug = ?",
+                [aid, aid]
+            );
+            if (aRows.length > 0) {
+                const art = aRows[0];
+                title = art.seo_title || `${art.title} | ${storeName} Blog`;
+                description = art.seo_description || art.excerpt || art.content?.replace(/<[^>]*>?/gm, '').substring(0, 160) || defaultDesc;
+                keywords = art.seo_keywords || defaultKeywords;
+                llmContext = art.llm_context || defaultLlmContext;
+                if (art.cover_image) {
+                    image = art.cover_image.startsWith('http') ? art.cover_image : `${siteUrl}${art.cover_image}`;
+                }
+                canonicalUrl = `${siteUrl}/blog/${art.slug || art.id}`;
+
+                schemaList.push({
+                    "@context": "https://schema.org",
+                    "@type": "Article",
+                    "headline": art.title,
+                    "description": description,
+                    "image": image,
+                    "author": { "@type": "Person", "name": art.author || "Admin" },
+                    "publisher": { "@type": "Organization", "name": storeName, "url": siteUrl },
+                    "datePublished": art.created_at,
+                    "dateModified": art.updated_at
+                });
+            }
+        } else if (type === 'project' && (targetId || projectsList.length > 0)) {
+            const prjid = targetId || (projectsList[0] ? projectsList[0].id : '');
+            const [prjRows] = await db.query(
+                "SELECT id, title, description, cover_image, location FROM projects WHERE id = ?",
+                [prjid]
+            );
+            if (prjRows.length > 0) {
+                const prj = prjRows[0];
+                title = `${prj.title} | ผลงานของเรา ${storeName}`;
+                description = prj.description?.replace(/<[^>]*>?/gm, '').substring(0, 160) || defaultDesc;
+                if (prj.cover_image) {
+                    image = prj.cover_image.startsWith('http') ? prj.cover_image : `${siteUrl}${prj.cover_image}`;
+                }
+                canonicalUrl = `${siteUrl}/projects/${prj.id}`;
+
+                schemaList.push({
+                    "@context": "https://schema.org",
+                    "@type": "CreativeWork",
+                    "name": prj.title,
+                    "description": description,
+                    "image": image,
+                    "provider": { "@type": "LocalBusiness", "name": storeName }
+                });
+            }
+        } else {
+            // Default Home schema
+            schemaList.push({
+                "@context": "https://schema.org",
+                "@type": "Organization",
+                "name": companyLegalName,
+                "alternateName": storeName,
+                "url": siteUrl,
+                "logo": `${siteUrl}/logo.png`,
+                "description": defaultDesc
+            });
+            schemaList.push({
+                "@context": "https://schema.org",
+                "@type": "WebSite",
+                "name": storeName,
+                "url": siteUrl,
+                "potentialAction": {
+                    "@type": "SearchAction",
+                    "target": `${siteUrl}/products?search={search_term_string}`,
+                    "query-input": "required name=search_term_string"
+                }
+            });
+        }
+
+        return res.json({
+            success: true,
+            type,
+            targetId,
+            productsList,
+            articlesList,
+            projectsList,
+            data: {
+                title,
+                description,
+                keywords,
+                llmContext,
+                image,
+                canonicalUrl,
+                googleSnippet: {
+                    title,
+                    url: canonicalUrl,
+                    description,
+                    rating,
+                    reviewCount,
+                    inStock,
+                    priceFormatted: price ? `฿${Number(price).toLocaleString()}` : null
+                },
+                socialCard: {
+                    title,
+                    description,
+                    image,
+                    domain: host
+                },
+                aiPreview: {
+                    llmContext,
+                    knowledgeFeedSnippet: `### ${title}\n- URL: ${canonicalUrl}\n- Context: ${llmContext}\n- Summary: ${description}`
+                },
+                jsonLdSchema: JSON.stringify(schemaList, null, 2)
+            }
+        });
+
+    } catch (error) {
+        console.error('SEO Preview Endpoint Error:', error);
+        return res.status(500).json({ success: false, error: error.message });
     }
 });
 

@@ -4,10 +4,12 @@ import { useRoute, useRouter } from 'vue-router'
 import { apiFetch } from '../utils/apiFetch'
 import { getOptimizedImageUrl, onImageError } from '../utils/image'
 import { useSettingsStore } from '../stores/settingsStore'
+import { useSEO } from '../composables/useSEO'
 
 const route = useRoute()
 const router = useRouter()
 const settingsStore = useSettingsStore()
+const { setMeta, setStructuredData } = useSEO()
 
 const project = ref(null)
 const loading = ref(true)
@@ -93,6 +95,41 @@ const fetchProjectDetail = async () => {
       } else if (project.value.description) {
         project.value.description = transformOembed(project.value.description)
       }
+
+      // Update Dynamic SEO & GEO Tags
+      const pTitle = `${project.value.title} | ผลงานติดตั้ง`
+      const pDesc = project.value.description ? project.value.description.replace(/<[^>]*>?/gm, '').substring(0, 160) : 'ผลงานติดตั้งบ้านเก็บของจากลูกค้าที่ไว้วางใจ Morespace'
+      const pImage = project.value.cover_image || ''
+
+      setMeta({
+        title: pTitle,
+        description: pDesc,
+        image: pImage,
+        canonicalUrl: window.location.href,
+        type: 'article'
+      })
+
+      setStructuredData({
+        "@context": "https://schema.org",
+        "@type": "CreativeWork",
+        "name": project.value.title,
+        "description": pDesc,
+        "image": pImage,
+        "provider": {
+          "@type": "LocalBusiness",
+          "name": settingsStore.storeName || "บ้านเก็บของ"
+        }
+      }, 'dynamic-structured-data')
+
+      setStructuredData({
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          { "@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": `${window.location.origin}/` },
+          { "@type": "ListItem", "position": 2, "name": "ผลงานติดตั้ง", "item": `${window.location.origin}/projects` },
+          { "@type": "ListItem", "position": 3, "name": project.value.title, "item": window.location.href }
+        ]
+      }, 'dynamic-breadcrumb-data')
     }
   } catch (error) {
     console.error('Fetch error:', error)

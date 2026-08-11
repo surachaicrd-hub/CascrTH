@@ -9,6 +9,7 @@ import { useCompareStore } from '../stores/compareStore'
 import { useAuthStore } from '../stores/authStore'
 import { useTrackingStore } from '../stores/tracking'
 import { useToast } from '../composables/useToast'
+import { useSEO } from '../composables/useSEO'
 import { getOptimizedImageUrl, onImageError } from '../utils/image'
 
 const route = useRoute()
@@ -20,6 +21,7 @@ const compareStore = useCompareStore()
 const authStore = useAuthStore()
 const trackingStore = useTrackingStore()
 const { showToast } = useToast()
+const { setMeta, setStructuredData } = useSEO()
 
 const addToCart = async (product) => {
   try {
@@ -240,6 +242,30 @@ const setCategory = (cat) => {
     router.push(`/products/category/${encodeURIComponent(cat)}`)
   }
 }
+
+watch(activeCategory, (cat) => {
+  const isAll = !cat || cat === 'ทุกหมวดหมู่'
+  const titleText = isAll ? 'รายการสินค้าทั้งหมด' : `สินค้าหมวดหมู่ ${cat}`
+  const descText = isAll 
+    ? 'รวมสินค้าบ้านเก็บของ โรงเรือน และตู้เก็บของกลางแจ้งคุณภาพสูงทุกประเภท'
+    : `เลือกซื้อ ${cat} คุณภาพพรีเมียม ทนแดด ทนฝน พร้อมบริการประกอบและติดตั้งทั่วประเทศ`
+
+  setMeta({
+    title: titleText,
+    description: descText,
+    canonicalUrl: window.location.href,
+    type: 'website'
+  })
+
+  setStructuredData({
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": `${window.location.origin}/` },
+      { "@type": "ListItem", "position": 2, "name": titleText, "item": window.location.href }
+    ]
+  }, 'dynamic-breadcrumb-data')
+}, { immediate: true })
 
 const formatPrice = (price) => {
   if (!price) return '0'

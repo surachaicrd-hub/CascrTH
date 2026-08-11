@@ -8,6 +8,8 @@ export const useSettingsStore = defineStore('settings', () => {
     const storeKeywords = ref('')
     const storeOgTitle = ref('')
     const storeOgDescription = ref('')
+    const storeDefaultLlmContext = ref('')
+    const storeAiCrawlingEnabled = ref(true)
     const companyLegalName = ref('')
     const storeLogo = ref('')
     const storeFavicon = ref('')
@@ -138,6 +140,8 @@ export const useSettingsStore = defineStore('settings', () => {
         if (pubSettings.store_keywords !== undefined) storeKeywords.value = pubSettings.store_keywords || '';
         if (pubSettings.store_og_title !== undefined) storeOgTitle.value = pubSettings.store_og_title || '';
         if (pubSettings.store_og_description !== undefined) storeOgDescription.value = pubSettings.store_og_description || '';
+        if (pubSettings.seo_default_llm_context !== undefined) storeDefaultLlmContext.value = pubSettings.seo_default_llm_context || '';
+        if (pubSettings.seo_ai_crawling_enabled !== undefined) storeAiCrawlingEnabled.value = String(pubSettings.seo_ai_crawling_enabled) !== 'false';
         if (pubSettings.company_legal_name !== undefined) companyLegalName.value = pubSettings.company_legal_name || '';
         if (pubSettings.store_logo !== undefined) storeLogo.value = pubSettings.store_logo;
         if (pubSettings.store_favicon !== undefined) storeFavicon.value = pubSettings.store_favicon;
@@ -305,7 +309,7 @@ export const useSettingsStore = defineStore('settings', () => {
             "legalName": companyLegalName.value || contactCompanyName.value || name,
             "logo": storeLogo.value ? (storeLogo.value.startsWith('http') ? storeLogo.value : window.location.origin + storeLogo.value) : undefined,
             "description": desc,
-            "url": storeUrl.value || window.location.origin
+            "url": window.location.origin
         });
 
         let websiteScript = document.getElementById('json-ld-website');
@@ -320,7 +324,7 @@ export const useSettingsStore = defineStore('settings', () => {
             "@type": "WebSite",
             "name": name,
             "description": desc,
-            "url": storeUrl.value || window.location.origin
+            "url": window.location.origin
         });
     };
 
@@ -330,6 +334,8 @@ export const useSettingsStore = defineStore('settings', () => {
         storeKeywords,
         storeOgTitle,
         storeOgDescription,
+        storeDefaultLlmContext,
+        storeAiCrawlingEnabled,
         companyLegalName,
         storeLogo,
         storeFavicon,

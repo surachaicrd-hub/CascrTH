@@ -13,6 +13,7 @@ import { useAuthStore } from '../stores/authStore'
 import { useWishlistStore } from '../stores/wishlistStore'
 import { useCompareStore } from '../stores/compareStore'
 import { useToast } from '../composables/useToast'
+import { useSEO } from '../composables/useSEO'
 import { apiFetch } from '../utils/apiFetch'
 import { getOptimizedImageUrl, onImageError } from '../utils/image'
 
@@ -24,6 +25,7 @@ const authStore = useAuthStore()
 const wishlistStore = useWishlistStore()
 const compareStore = useCompareStore()
 const { showToast } = useToast()
+const { setMeta, setStructuredData } = useSEO()
 const productId = route.params.id
 
 const quantity = ref(1)
@@ -239,6 +241,65 @@ const loadProduct = async () => {
         faq: parsedFaq.filter(f => f.question && f.answer),
         badgeIds: parsedBadges, // เก็บแค่ ID array
         categories: parsedCategories
+      }
+
+      // Update Dynamic SEO & GEO Tags
+      const seoTitle = p.seo_title || p.name
+      const seoDesc = p.seo_description || p.short_description || (p.description ? p.description.replace(/<[^>]*>?/gm, '').substring(0, 160) : '')
+      const seoImg = p.image_url || (allImages.length > 0 ? allImages[0] : '')
+
+      setMeta({
+        title: seoTitle,
+        description: seoDesc,
+        image: seoImg,
+        keywords: p.seo_keywords || '',
+        llmContext: p.llm_context || '',
+        canonicalUrl: window.location.href,
+        type: 'product'
+      })
+
+      // Set Product JSON-LD Schema
+      const origin = window.location.origin
+      setStructuredData({
+        "@context": "https://schema.org",
+        "@type": "Product",
+        "name": p.name,
+        "image": allImages.map(img => img.startsWith('http') ? img : `${origin}${img}`),
+        "description": p.llm_context ? `${seoDesc} [AI Context: ${p.llm_context}]` : seoDesc,
+        "sku": p.sku || `PROD-${p.id}`,
+        "brand": { "@type": "Brand", "name": settingsStore.storeName || 'บ้านเก็บของ' },
+        "offers": {
+          "@type": "Offer",
+          "url": window.location.href,
+          "priceCurrency": "THB",
+          "price": String(p.price || 0),
+          "availability": p.is_active && !p.is_out_of_stock ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+          "seller": { "@type": "Organization", "name": settingsStore.companyLegalName || 'บริษัท ซีอาร์ ดิสทริบิวชั่น จำกัด' }
+        }
+      }, 'dynamic-structured-data')
+
+      // Set Breadcrumb JSON-LD Schema
+      setStructuredData({
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          { "@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": `${origin}/` },
+          { "@type": "ListItem", "position": 2, "name": "สินค้า", "item": `${origin}/products` },
+          { "@type": "ListItem", "position": 3, "name": p.name, "item": window.location.href }
+        ]
+      }, 'dynamic-breadcrumb-data')
+
+      // Set FAQ JSON-LD Schema
+      if (parsedFaq.length > 0) {
+        setStructuredData({
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          "mainEntity": parsedFaq.map(f => ({
+            "@type": "Question",
+            "name": f.question,
+            "acceptedAnswer": { "@type": "Answer", "text": f.answer }
+          }))
+        }, 'dynamic-faq-data')
       }
 
       // Fetch category attribute templates to map friendly labels and sort by template order

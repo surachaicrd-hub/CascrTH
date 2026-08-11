@@ -2,8 +2,10 @@
 import { ref, onMounted, computed } from 'vue'
 import { useSettingsStore } from '../stores/settingsStore'
 import { getOptimizedImageUrl, onImageError } from '../utils/image'
+import { useSEO } from '../composables/useSEO'
 
 const settingsStore = useSettingsStore()
+const { setMeta, setStructuredData } = useSEO()
 const projects = ref([])
 const loading   = ref(true)
 const showAll   = ref(false)
@@ -80,6 +82,22 @@ const lineHref = computed(() => {
 
 /* ── Lifecycle ── */
 onMounted(async () => {
+  setMeta({
+    title: 'ผลงานการติดตั้งที่ผ่านๆ มา',
+    description: 'ชมตัวอย่างผลงานการติดตั้งบ้านเก็บของ โกดังสำเร็จรูป และตู้เก็บของกลางแจ้งจากลูกค้าทั่วประเทศ',
+    canonicalUrl: window.location.href,
+    type: 'website'
+  })
+
+  setStructuredData({
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": `${window.location.origin}/` },
+      { "@type": "ListItem", "position": 2, "name": "ผลงานติดตั้ง", "item": window.location.href }
+    ]
+  }, 'dynamic-breadcrumb-data')
+
   await fetchProjects()
 })
 

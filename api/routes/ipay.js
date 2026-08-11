@@ -13,6 +13,27 @@ const IPAY_GATEWAY_URL = process.env.IPAY_GATEWAY_URL || 'https://ipay.bangkokba
 // The base frontend URL (where the user's browser should ultimately end up)
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
 
+// Helper: Restore stock quantities when an order is cancelled or payment fails
+async function restoreOrderStock(orderRef) {
+    try {
+        const [orderItems] = await db.query(
+            'SELECT product_id, quantity FROM order_items WHERE order_id = ?',
+            [orderRef]
+        );
+        for (const item of orderItems) {
+            await db.query(
+                'UPDATE products SET stock_quantity = stock_quantity + ?, is_out_of_stock = 0 WHERE id = ? AND stock_quantity IS NOT NULL',
+                [item.quantity, item.product_id]
+            );
+        }
+        if (orderItems.length > 0) {
+            console.log(`[iPay Stock] Restored stock for ${orderItems.length} items from order ${orderRef}`);
+        }
+    } catch (err) {
+        console.error(`[iPay Stock] Failed to restore stock for order ${orderRef}:`, err.message);
+    }
+}
+
 /**
  * POST /api/payments/ipay/checkout
  * Generates the required parameters for the frontend to submit to Bangkok Bank iPay.
@@ -128,6 +149,8 @@ router.post('/fail', async (req, res) => {
                     "UPDATE orders SET payment_status = 'failed', updated_at = NOW() WHERE id = ?",
                     [orderRef]
                 );
+                // Restore stock since payment failed
+                await restoreOrderStock(orderRef);
             }
         }
 
@@ -153,6 +176,8 @@ router.post('/cancel', async (req, res) => {
                     "UPDATE orders SET payment_status = 'cancelled', order_status = 'cancelled', updated_at = NOW() WHERE id = ?",
                     [orderRef]
                 );
+                // Restore stock since user cancelled payment
+                await restoreOrderStock(orderRef);
             }
         }
 
@@ -239,14 +264,16 @@ router.post('/webhook', async (req, res) => {
             }
         } else {
              // Handle payment failure in background
-             const [orders] = await db.query('SELECT payment_status FROM orders WHERE id = ?', [orderRef]);
-             if (orders.length > 0 && orders[0].payment_status === 'pending') {
-                 await db.query(
-                     "UPDATE orders SET payment_status = 'failed', updated_at = NOW() WHERE id = ?",
-                     [orderRef]
-                 );
-                 console.log(`[iPay Webhook] Order ${orderRef} updated to failed.`);
-             }
+              const [orders] = await db.query('SELECT payment_status FROM orders WHERE id = ?', [orderRef]);
+              if (orders.length > 0 && orders[0].payment_status === 'pending') {
+                  await db.query(
+                      "UPDATE orders SET payment_status = 'failed', updated_at = NOW() WHERE id = ?",
+                      [orderRef]
+                  );
+                  // Restore stock since payment failed via webhook
+                  await restoreOrderStock(orderRef);
+                  console.log(`[iPay Webhook] Order ${orderRef} updated to failed.`);
+              }
         }
 
         // Respond OK so the bank doesn't retry

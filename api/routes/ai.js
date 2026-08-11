@@ -5,6 +5,25 @@ const { GoogleGenAI } = require('@google/genai');
 const gemini = require('../services/geminiService');
 const { verifyAdmin } = require('./auth');
 
+// Safe JSON parser for AI responses - extracts JSON even if wrapped in extra text
+function safeJsonParse(text) {
+    try {
+        return JSON.parse(text);
+    } catch (e) {
+        // Try to extract JSON object from the text
+        const match = text.match(/\{[\s\S]*\}/);
+        if (match) {
+            try { return JSON.parse(match[0]); } catch (e2) { /* ignore */ }
+        }
+        // Try to extract JSON array
+        const arrayMatch = text.match(/\[[\s\S]*\]/);
+        if (arrayMatch) {
+            try { return JSON.parse(arrayMatch[0]); } catch (e3) { /* ignore */ }
+        }
+        throw new Error('Failed to parse AI response as JSON: ' + text.substring(0, 200));
+    }
+}
+
 router.post('/generate-seo', verifyAdmin, async (req, res) => {
     try {
         const { productName, category, description } = req.body;
@@ -50,12 +69,72 @@ Return the response strictly as a JSON object with the following keys and no mar
         // Strip out markdown block if Gemini wraps it
         const cleanedText = response.text.replace(/```json\n?|```\n?/g, '').trim();
 
-        const result = JSON.parse(cleanedText);
+        const result = safeJsonParse(cleanedText);
 
         res.status(200).json({ success: true, data: result });
     } catch (error) {
         console.error('AI SEO Generation error:', error);
         res.status(500).json({ success: false, error: 'Failed to generate SEO content: ' + error.message });
+    }
+});
+
+router.post('/generate-full-seo-geo', verifyAdmin, async (req, res) => {
+    try {
+        const { productName, category, description, size, sku, price } = req.body;
+
+        if (!productName) {
+            return res.status(400).json({ success: false, error: 'Product name is required' });
+        }
+
+        let storeName = 'STORAGE HOUSE';
+        let companyLegalName = 'บริษัท ซีอาร์ ดิสทริบิวชั่น จำกัด';
+        try {
+            const [sRows] = await db.query("SELECT setting_key, setting_value FROM settings WHERE setting_key IN ('store_name', 'contact_company_name', 'company_legal_name')");
+            const sMap = {};
+            sRows.forEach(r => { sMap[r.setting_key] = r.setting_value; });
+            storeName = sMap['store_name'] || sMap['contact_company_name'] || 'STORAGE HOUSE';
+            companyLegalName = sMap['company_legal_name'] || sMap['contact_company_name'] || 'บริษัท ซีอาร์ ดิสทริบิวชั่น จำกัด';
+        } catch (e) {}
+
+        const prompt = `
+You are an elite 12-Layer SEO (Search Engine Optimization) and GEO (Generative Engine Optimization) AI Agent for ${storeName} (${companyLegalName}).
+You optimize products for both traditional Google/Bing crawlers and AI Search Engines (ChatGPT, Perplexity, Claude, Gemini, Google AI Overviews).
+
+Product Input:
+- Name: ${productName}
+- Category: ${category || 'สินค้าทั่วไป'}
+- SKU: ${sku || 'N/A'}
+- Size/Dimensions: ${size || 'N/A'}
+- Price: ${price || 'N/A'}
+- Description Context: ${description || ''}
+
+Generate a comprehensive 12-Layer SEO & GEO Payload strictly as a valid JSON object (no markdown wrappers) containing:
+1. "seo_title": SEO title (under 60 characters, captivating with key terms & brand).
+2. "seo_description": Meta description (under 160 characters, with key specs & call-to-action).
+3. "seo_keywords": High-intent keywords list in Thai & English separated by commas.
+4. "llm_context": Data-rich factual narrative (in Thai) specifically formatted for LLMs (ChatGPT/Perplexity) explaining product entities, materials, resistance, warranty, supplier (${companyLegalName}), and usage scenarios.
+5. "image_alt": Optimized image alt text describing the product appearance, material, and function.
+6. "attributes": Array of key-value objects [{ "name": "...", "value": "..." }] mapping specs (materials, durability, usage, UV protection, suitable for, warranty).
+7. "faq": Array of 3 to 4 Question-Answer objects [{ "q": "...", "a": "..." }] addressing primary search intent (material/durability, delivery/installation in Thailand, warranty/care).
+8. "search_intent": A string summarizing primary intent (e.g. "Transactional / Commercial Investigation").
+9. "information_gain_tips": Array of 2-3 specific optimization suggestions to outperform competitors on Google/AI.
+
+Strict Output Format:
+Return ONLY the JSON object. Do not include markdown code block syntax (\`\`\`json).
+`;
+
+        const response = await gemini.generateContent({
+            prompt,
+            label: 'Full 12-Layer SEO GEO Request'
+        });
+
+        const cleanedText = response.text.replace(/```json\n?|```\n?/g, '').trim();
+        const result = safeJsonParse(cleanedText);
+
+        res.status(200).json({ success: true, data: result });
+    } catch (error) {
+        console.error('AI Full SEO GEO Generation error:', error);
+        res.status(500).json({ success: false, error: 'Failed to generate 12-Layer SEO/GEO payload: ' + error.message });
     }
 });
 
@@ -156,7 +235,7 @@ IMPORTANT: For any custom attributes you create that are NOT in the predefined t
         });
 
         const cleanedText = response.text.replace(/```json\n?|```\n?/g, '').trim();
-        const result = JSON.parse(cleanedText);
+        const result = safeJsonParse(cleanedText);
 
         res.status(200).json({ success: true, data: result });
     } catch (error) {
@@ -192,7 +271,7 @@ Example: [{"question": "ทนแดดทนฝนไหม?", "answer": "ท�
         });
 
         const cleanedText = response.text.replace(/```json\n?|```\n?/g, '').trim();
-        const result = JSON.parse(cleanedText);
+        const result = safeJsonParse(cleanedText);
 
         res.status(200).json({ success: true, data: result });
     } catch (error) {
@@ -285,7 +364,7 @@ No markdown formatting (like \`\`\`json) outside the JSON block. Just pure JSON.
         });
 
         const cleanedText = response.text.replace(/```json\n?|```\n?/g, '').trim();
-        const result = JSON.parse(cleanedText);
+        const result = safeJsonParse(cleanedText);
 
         res.status(200).json({ success: true, data: result });
     } catch (error) {
@@ -346,7 +425,7 @@ No markdown formatting (like \`\`\`json) outside the JSON block. Just pure JSON.
         });
 
         const cleanedText = response.text.replace(/```json\n?|```\n?/g, '').trim();
-        const result = JSON.parse(cleanedText);
+        const result = safeJsonParse(cleanedText);
 
         res.status(200).json({ success: true, data: result });
     } catch (error) {
@@ -423,7 +502,7 @@ No markdown formatting (like \`\`\`json) outside the JSON block. Just pure JSON.
         });
 
         const cleanedText = response.text.replace(/```json\n?|```\n?/g, '').trim();
-        const result = JSON.parse(cleanedText);
+        const result = safeJsonParse(cleanedText);
 
         res.status(200).json({ success: true, data: result });
     } catch (error) {

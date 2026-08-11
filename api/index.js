@@ -172,18 +172,42 @@ app.get(['/robots.txt', '/api/robots.txt'], (req, res) => {
     const protocol = req.headers['x-forwarded-proto'] || req.protocol || 'https';
     const host = req.headers['x-forwarded-host'] || req.headers.host || 'morespace.co.th';
     const siteUrl = (process.env.SITE_URL || `${protocol}://${host}`).replace(/\/$/, '');
-    res.type('text/plain');
+    res.type('text/plain; charset=utf-8');
     res.send(`User-agent: *
 Allow: /
 Allow: /api/sitemap.xml
+Allow: /llms.txt
+Allow: /llms-full.txt
 Disallow: /admin/
 Disallow: /api/
 
-Sitemap: ${siteUrl}/sitemap.xml
+# AI Search & LLM Crawlers Directives (GEO Optimization)
+User-agent: GPTBot
+Allow: /
+User-agent: ChatGPT-User
+Allow: /
+User-agent: PerplexityBot
+Allow: /
+User-agent: ClaudeBot
+Allow: /
+User-agent: Google-Extended
+Allow: /
+User-agent: ByteDance
+Allow: /
+User-agent: CCBot
+Allow: /
 
-# Morespace - Premium Storage Solutions`);
+Sitemap: ${siteUrl}/sitemap.xml
+LLMs-txt: ${siteUrl}/llms.txt
+
+# Morespace - Premium Storage Solutions & GEO Engine`);
 });
 
+app.use(['/llms.txt', '/api/llms.txt'], require('./routes/llms'));
+app.use(['/llms-full.txt', '/api/llms-full.txt'], (req, res, next) => {
+    req.url = '/full';
+    require('./routes/llms')(req, res, next);
+});
 app.use(['/sitemap.xml', '/api/sitemap.xml', '/api/sitemap'], require('./routes/sitemap'));
 app.use('/api/articles', require('./routes/articles'));
 app.use('/api/users', require('./routes/users'));
@@ -219,6 +243,13 @@ app.get(['/uploads/cache/:filename', '/uploads/:subfolder/cache/:filename'], asy
     const currentUploadsDir = subfolder ? path.join(uploadsDir, subfolder) : uploadsDir;
     const currentCacheDir = path.join(currentUploadsDir, 'cache');
     const cachedFilePath = path.join(currentCacheDir, filename);
+
+    // Security: Prevent path traversal attacks
+    const resolvedCachedPath = path.resolve(cachedFilePath);
+    const resolvedUploadsDir = path.resolve(uploadsDir);
+    if (!resolvedCachedPath.startsWith(resolvedUploadsDir)) {
+        return res.status(403).json({ success: false, error: 'Access denied' });
+    }
 
     // If cached file already exists, let static middleware serve it
     if (fs.existsSync(cachedFilePath)) {

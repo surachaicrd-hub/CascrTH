@@ -2,8 +2,10 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 import { getImageUrl } from '../utils/image'
 import { useSettingsStore } from '../stores/settingsStore'
+import { useSEO } from '../composables/useSEO'
 
 const settingsStore = useSettingsStore()
+const { setMeta, setStructuredData } = useSEO()
 const loading = ref(true)
 const visibleSections = ref(new Set())
 let observer = null
@@ -127,7 +129,25 @@ const loadSettings = async () => {
   }
 }
 
-onMounted(() => loadSettings())
+onMounted(() => {
+  setMeta({
+    title: 'เกี่ยวกับเรา (About Us)',
+    description: 'ทำความรู้จัก Morespace ผู้เชี่ยวชาญด้านการออกแบบ จำหน่าย และติดตั้งบ้านเก็บของสำเร็จรูประดับพรีเมียม',
+    canonicalUrl: window.location.href,
+    type: 'website'
+  })
+
+  setStructuredData({
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": `${window.location.origin}/` },
+      { "@type": "ListItem", "position": 2, "name": "เกี่ยวกับเรา", "item": window.location.href }
+    ]
+  }, 'dynamic-breadcrumb-data')
+
+  loadSettings()
+})
 onUnmounted(() => { 
   if (observer) observer.disconnect() 
 })

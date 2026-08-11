@@ -37,7 +37,7 @@ router.get('/', async (req, res) => {
 
         // 1. Fetch all active products
         const [products] = await db.query(
-            `SELECT slug, id FROM products WHERE is_active = 1 
+            `SELECT slug, id, name, image_url, updated_at FROM products WHERE is_active = 1 
                AND NOT EXISTS (
                    SELECT 1 FROM categories c
                    WHERE c.is_active = false
@@ -46,23 +46,28 @@ router.get('/', async (req, res) => {
              ORDER BY sort_order ASC, id DESC`
         );
 
-        // 2. Fetch all published projects
+        // 2. Fetch active categories
+        let categories = [];
+        try {
+            const [catRows] = await db.query(`SELECT name FROM categories WHERE is_active = 1`);
+            categories = catRows;
+        } catch (e) {}
+
+        // 3. Fetch all published projects
         const [projects] = await db.query(
-            `SELECT id, title, updated_at FROM projects WHERE is_published = 1 ORDER BY created_at DESC`
+            `SELECT id, title, cover_image, updated_at FROM projects WHERE is_published = 1 ORDER BY created_at DESC`
         );
 
-        // 3. Fetch all published articles (future-proof)
+        // 4. Fetch all published articles
         let articles = [];
         try {
             const [articleRows] = await db.query(
-                `SELECT slug, id, updated_at FROM articles WHERE is_published = 1 ORDER BY created_at DESC`
+                `SELECT slug, id, title, cover_image, updated_at FROM articles WHERE is_published = 1 ORDER BY created_at DESC`
             );
             articles = articleRows;
-        } catch (e) {
-            // articles table doesn't exist yet — that's fine
-        }
+        } catch (e) {}
 
-        // 4. Build XML
+        // 5. Build XML
         let xml = `<?xml version="1.0" encoding="UTF-8"?>\n`;
         xml += `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"\n`;
         xml += `        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">\n`;
@@ -76,13 +81,32 @@ router.get('/', async (req, res) => {
             xml += `  </url>\n`;
         }
 
+        // Category pages
+        for (const cat of categories) {
+            xml += `  <url>\n`;
+            xml += `    <loc>${siteUrl}/products?category=${encodeURIComponent(cat.name)}</loc>\n`;
+            xml += `    <changefreq>daily</changefreq>\n`;
+            xml += `    <priority>0.8</priority>\n`;
+            xml += `  </url>\n`;
+        }
+
         // Product pages
         for (const product of products) {
             const productPath = product.slug || product.id;
             xml += `  <url>\n`;
             xml += `    <loc>${siteUrl}/products/${encodeURI(productPath)}</loc>\n`;
+            if (product.updated_at) {
+                xml += `    <lastmod>${formatDate(product.updated_at)}</lastmod>\n`;
+            }
             xml += `    <changefreq>weekly</changefreq>\n`;
-            xml += `    <priority>0.8</priority>\n`;
+            xml += `    <priority>0.9</priority>\n`;
+            if (product.image_url) {
+                const imgLoc = product.image_url.startsWith('http') ? product.image_url : `${siteUrl}${product.image_url}`;
+                xml += `    <image:image>\n`;
+                xml += `      <image:loc>${imgLoc}</image:loc>\n`;
+                xml += `      <image:title>${product.name.replace(/[<>&'"]/g, '')}</image:title>\n`;
+                xml += `    </image:image>\n`;
+            }
             xml += `  </url>\n`;
         }
 
@@ -93,17 +117,31 @@ router.get('/', async (req, res) => {
             xml += `    <lastmod>${formatDate(project.updated_at)}</lastmod>\n`;
             xml += `    <changefreq>monthly</changefreq>\n`;
             xml += `    <priority>0.7</priority>\n`;
+            if (project.cover_image) {
+                const imgLoc = project.cover_image.startsWith('http') ? project.cover_image : `${siteUrl}${project.cover_image}`;
+                xml += `    <image:image>\n`;
+                xml += `      <image:loc>${imgLoc}</image:loc>\n`;
+                xml += `      <image:title>${project.title.replace(/[<>&'"]/g, '')}</image:title>\n`;
+                xml += `    </image:image>\n`;
+            }
             xml += `  </url>\n`;
         }
 
-        // Article pages (future)
+        // Article pages
         for (const article of articles) {
             const articlePath = article.slug || article.id;
             xml += `  <url>\n`;
-            xml += `    <loc>${siteUrl}/blog/${articlePath}</loc>\n`;
+            xml += `    <loc>${siteUrl}/blog/${encodeURI(articlePath)}</loc>\n`;
             xml += `    <lastmod>${formatDate(article.updated_at)}</lastmod>\n`;
             xml += `    <changefreq>monthly</changefreq>\n`;
-            xml += `    <priority>0.7</priority>\n`;
+            xml += `    <priority>0.8</priority>\n`;
+            if (article.cover_image) {
+                const imgLoc = article.cover_image.startsWith('http') ? article.cover_image : `${siteUrl}${article.cover_image}`;
+                xml += `    <image:image>\n`;
+                xml += `      <image:loc>${imgLoc}</image:loc>\n`;
+                xml += `      <image:title>${article.title.replace(/[<>&'"]/g, '')}</image:title>\n`;
+                xml += `    </image:image>\n`;
+            }
             xml += `  </url>\n`;
         }
 

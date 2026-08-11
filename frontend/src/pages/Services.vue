@@ -2,8 +2,10 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 import { apiFetch } from '../utils/apiFetch'
 import { useSettingsStore } from '../stores/settingsStore'
+import { useSEO } from '../composables/useSEO'
 
 const settingsStore = useSettingsStore()
+const { setMeta, setStructuredData } = useSEO()
 const loading = ref(true)
 const visibleSections = ref(new Set())
 
@@ -91,7 +93,25 @@ const loadSettings = async () => {
   }
 }
 
-onMounted(() => loadSettings())
+onMounted(() => {
+  setMeta({
+    title: 'บริการประกอบและติดตั้ง',
+    description: 'บริการประกอบและติดตั้งบ้านเก็บของ โกดังสำเร็จรูป และตู้เก็บของกลางแจ้ง โดยทีมช่างผู้เชี่ยวชาญทั่วประเทศ',
+    canonicalUrl: window.location.href,
+    type: 'website'
+  })
+
+  setStructuredData({
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": `${window.location.origin}/` },
+      { "@type": "ListItem", "position": 2, "name": "บริการของเรา", "item": window.location.href }
+    ]
+  }, 'dynamic-breadcrumb-data')
+
+  loadSettings()
+})
 onUnmounted(() => {
   if (observer) observer.disconnect()
   if (slider.value) {
