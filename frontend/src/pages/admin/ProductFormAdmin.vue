@@ -53,9 +53,12 @@ const editorConfig = ref({
 const activeTab = ref('basic')
 const tabs = [
   { id: 'basic', label: 'ข้อมูลพื้นฐาน', icon: 'M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z' },
-  { id: 'details', label: 'รายละเอียด & สเปก', icon: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z' },
+  { id: 'details', label: 'รายละเอียดสินค้า', icon: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z' },
+  { id: 'attributes', label: 'สเปกสินค้า (Attributes)', icon: 'M4 6h16M4 10h16M4 14h16M4 18h16' },
   { id: 'media', label: 'รูปภาพ', icon: 'M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z' },
-  { id: 'sales', label: 'ฟีเจอร์การขาย', icon: 'M13 7h8m0 0v8m0-8l-8 8-4-4-6 6' },
+  { id: 'sales', label: 'สินค้าเกี่ยวเนื่อง', icon: 'M13 7h8m0 0v8m0-8l-8 8-4-4-6 6' },
+  { id: 'faq', label: 'คำถามที่พบบ่อย (FAQ)', icon: 'M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z' },
+  { id: 'marketplaces', label: 'ลิงก์ร้านค้าภายนอก', icon: 'M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z' },
   { id: 'card_ui', label: 'การ์ดสินค้า', icon: 'M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z' },
   { id: 'seo', label: 'ตั้งค่า SEO', icon: 'M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z' }
 ]
@@ -1009,7 +1012,7 @@ const autoFillBasicFromDescription = async () => {
 
   const rawText = parts.join('\n')
   if (rawText.length < 20) {
-    showToast('กรุณากรอกรายละเอียดสินค้าในแท็บ "รายละเอียด & สเปก" ก่อน แล้วค่อยใช้ AI ช่วยกรอกข้อมูลอัตโนมัติ', 'warning')
+    showToast('กรุณากรอกรายละเอียดสินค้าในแท็บ "รายละเอียดสินค้า" หรือ "สเปกสินค้า" ก่อน แล้วค่อยใช้ AI ช่วยกรอกข้อมูลอัตโนมัติ', 'warning')
     return
   }
 
@@ -1503,7 +1506,7 @@ ${aiModelParams.value.highlights}
           <!-- AI description tip -->
           <div v-if="!form.description && !aiAutoFillBasic" class="mt-4 sm:ml-14 flex items-start gap-2 p-3 bg-amber-50/60 border border-amber-200/50 rounded-xl">
             <svg class="w-4 h-4 text-amber-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-            <p class="text-xs text-amber-700 font-medium leading-relaxed"><strong>เคล็ดลับ:</strong> ไปที่แท็บ "รายละเอียด & สเปก" แล้วกรอกหรือวางข้อมูลสินค้าก่อน จากนั้นกลับมากดปุ่ม AI ที่นี่ ระบบจะวิเคราะห์และกรอกทุกช่องให้อัตโนมัติ</p>
+            <p class="text-xs text-amber-700 font-medium leading-relaxed"><strong>เคล็ดลับ:</strong> ไปที่แท็บ "รายละเอียดสินค้า" แล้วกรอกหรือวางข้อมูลสินค้าก่อน จากนั้นกลับมากดปุ่ม AI ที่นี่ ระบบจะวิเคราะห์และกรอกทุกช่องให้อัตโนมัติ</p>
           </div>
         </div>
         
@@ -1948,90 +1951,88 @@ ${aiModelParams.value.highlights}
             :config="editorConfig"
           />
         </div>
+      </div>
 
-        <!-- Attributes section -->
-        <div class="mt-8 bg-gradient-to-br from-[#F8FAFC] to-[#F1F5F9] rounded-2xl p-6 sm:p-8 border border-slate-200 shadow-sm relative overflow-hidden">
-          <div class="absolute top-0 right-0 -mr-8 -mt-8 w-32 h-32 rounded-full bg-emerald-500/5 blur-2xl pointer-events-none"></div>
-          
-          <div class="flex flex-col xl:flex-row xl:items-center justify-between gap-6 mb-8 relative z-10">
-            <div>
-              <h3 class="text-lg font-black text-slate-900 flex items-center gap-3">
-                <div class="p-2 bg-white text-emerald-600 rounded-xl shadow-sm border border-slate-200/60">
-                  <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path></svg>
-                </div>
-                ตารางสเปกสินค้า (Attributes)
-              </h3>
-              <p class="text-sm text-slate-500 mt-2 xl:ml-14 font-medium">ข้อมูลจำเพาะที่ช่วยในการจัดหมวดหมู่และระบบเปรียบเทียบสินค้า</p>
-            </div>
-            <div class="flex flex-wrap items-center gap-3">
-              <button 
-                type="button" 
-                @click="generateAttributes" 
-                :disabled="aiGeneratingAttributes || !form.name"
-                class="inline-flex items-center justify-center text-sm font-bold text-white bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 px-4 py-2 rounded-lg transition-all shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed border border-transparent active:scale-95 group"
-              >
-                <span v-if="aiGeneratingAttributes" class="mr-1.5">
-                  <svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                </span>
-                <svg v-else class="w-4 h-4 mr-1.5 group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09l2.846.813-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
+      <!-- TAB: Attributes (Specs) -->
+      <div v-show="activeTab === 'attributes'" class="bg-white rounded-[2rem] shadow-[0_8px_30px_rgba(0,0,0,0.04)] border border-slate-200/60 p-7 sm:p-10 animate-[fadeIn_0.3s_ease-out] ring-1 ring-slate-900/5">
+        <div class="mb-10 pb-6 border-b border-slate-100/80 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+          <div>
+            <h2 class="text-xl sm:text-2xl font-black text-slate-900 flex items-center gap-3">
+              <div class="p-2.5 bg-emerald-50 text-emerald-600 rounded-xl shadow-[0_2px_10px_rgba(16,185,129,0.2)] border border-emerald-100/50">
+                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path></svg>
+              </div>
+              ตารางสเปกสินค้า (Attributes)
+            </h2>
+            <p class="text-[13px] text-slate-500 mt-2 sm:ml-14 font-bold">ข้อมูลจำเพาะที่ช่วยในการจัดหมวดหมู่และระบบเปรียบเทียบสินค้า</p>
+          </div>
+          <div class="flex flex-wrap items-center gap-3">
+            <button 
+              type="button" 
+              @click="generateAttributes" 
+              :disabled="aiGeneratingAttributes || !form.name"
+              class="inline-flex items-center justify-center text-sm font-bold text-white bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 px-4 py-2 rounded-lg transition-all shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed border border-transparent active:scale-95 group"
+            >
+              <span v-if="aiGeneratingAttributes" class="mr-1.5">
+                <svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
-                AI ดึงข้อมูลมาเติมสเปก
+              </span>
+              <svg v-else class="w-4 h-4 mr-1.5 group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09l2.846.813-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
+              </svg>
+              AI ดึงข้อมูลมาเติมสเปก
+            </button>
+            <button type="button" @click="addAttribute" class="inline-flex items-center justify-center text-sm font-bold text-slate-700 hover:text-slate-900 bg-white hover:bg-slate-50 px-4 py-2 rounded-lg transition-all border border-slate-200 shadow-sm active:scale-95">
+              <svg class="w-4 h-4 mr-1.5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
+              เพิ่มสเปก (Custom)
+            </button>
+          </div>
+        </div>
+
+        <div class="space-y-3.5 relative z-10">
+          <div v-for="(attr, index) in form.attributes" :key="'attr-'+index" class="flex flex-col sm:flex-row sm:items-center gap-3 bg-white p-3 sm:p-2 sm:pl-4 rounded-2xl border border-slate-200/80 shadow-[0_2px_8px_-4px_rgba(0,0,0,0.05)] transition-all hover:border-emerald-300 group">
+            <!-- Template Attributes -->
+            <template v-if="attr.isTemplate">
+              <div class="w-full sm:w-1/3 py-1 text-sm font-bold text-slate-700 flex items-center gap-1.5 shrink-0">
+                <div class="w-1.5 h-1.5 rounded-full bg-emerald-400"></div>
+                {{ attr.label }}
+                <span v-if="attr.required" class="text-rose-500">*</span>
+              </div>
+              <!-- Input Based on Type -->
+              <template v-if="attr.type === 'select'">
+                <select v-model="attr.value" class="flex-1 w-full bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-xl px-4 py-2.5 hover:bg-white focus:bg-white focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all font-medium outline-none">
+                  <option value="">-- ไม่ระบุ --</option>
+                  <option v-for="opt in attr.options" :key="opt" :value="opt">{{ opt }}</option>
+                </select>
+              </template>
+              <template v-else-if="attr.type === 'number'">
+                <input v-model="attr.value" type="number" step="any" placeholder="ระบุตัวเลข (เช่น 2.5)" class="flex-1 w-full bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-xl px-4 py-2.5 hover:bg-white focus:bg-white focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all font-medium outline-none placeholder:text-slate-400">
+              </template>
+              <template v-else>
+                <input v-model="attr.value" type="text" placeholder="ระบุรายละเอียด (เว้นว่างได้)" class="flex-1 w-full bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-xl px-4 py-2.5 hover:bg-white focus:bg-white focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all font-medium outline-none placeholder:text-slate-400">
+              </template>
+              <div class="w-[42px] shrink-0 hidden sm:block"></div> <!-- Placeholder for alignment with delete button -->
+            </template>
+            
+            <!-- Custom Attributes -->
+            <template v-else>
+              <div class="w-full sm:w-1/3 shrink-0 flex items-center gap-2">
+                <div class="w-1.5 h-1.5 rounded-full bg-slate-200 ml-1"></div>
+                <input v-model="attr.key" type="text" placeholder="หัวข้อสเปก (เช่น วัสดุโครง)" class="w-full bg-white border border-slate-200 text-slate-900 text-sm rounded-xl px-4 py-2.5 focus:bg-white focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all font-medium outline-none placeholder:text-slate-400">
+              </div>
+              <input v-model="attr.value" type="text" placeholder="รายละเอียด (เช่น เหล็กกัลวาไนซ์)" class="flex-1 w-full bg-white border border-slate-200 text-slate-900 text-sm rounded-xl px-4 py-2.5 focus:bg-white focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all font-medium outline-none placeholder:text-slate-400">
+              <button type="button" @click="removeAttribute(index)" class="p-2.5 text-slate-400 hover:text-rose-500 hover:bg-rose-50 bg-white border border-slate-200 rounded-xl transition-colors shrink-0 outline-none flex items-center justify-center focus:ring-2 focus:ring-rose-500/20 w-fit self-end sm:self-auto shadow-sm active:scale-95">
+                <svg class="w-4.5 h-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
               </button>
-              <button type="button" @click="addAttribute" class="inline-flex items-center justify-center text-sm font-bold text-slate-700 hover:text-slate-900 bg-white hover:bg-slate-50 px-4 py-2 rounded-lg transition-all border border-slate-200 shadow-sm active:scale-95">
-                <svg class="w-4 h-4 mr-1.5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
-                เพิ่มสเปก (Custom)
-              </button>
-            </div>
+            </template>
           </div>
           
-          <div class="space-y-3.5 relative z-10">
-            <div v-for="(attr, index) in form.attributes" :key="'attr-'+index" class="flex flex-col sm:flex-row sm:items-center gap-3 bg-white p-3 sm:p-2 sm:pl-4 rounded-2xl border border-slate-200/80 shadow-[0_2px_8px_-4px_rgba(0,0,0,0.05)] transition-all hover:border-emerald-300 group">
-              <!-- Template Attributes -->
-              <template v-if="attr.isTemplate">
-                <div class="w-full sm:w-1/3 py-1 text-sm font-bold text-slate-700 flex items-center gap-1.5 shrink-0">
-                  <div class="w-1.5 h-1.5 rounded-full bg-emerald-400"></div>
-                  {{ attr.label }}
-                  <span v-if="attr.required" class="text-rose-500">*</span>
-                </div>
-                <!-- Input Based on Type -->
-                <template v-if="attr.type === 'select'">
-                  <select v-model="attr.value" class="flex-1 w-full bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-xl px-4 py-2.5 hover:bg-white focus:bg-white focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all font-medium outline-none">
-                    <option value="">-- ไม่ระบุ --</option>
-                    <option v-for="opt in attr.options" :key="opt" :value="opt">{{ opt }}</option>
-                  </select>
-                </template>
-                <template v-else-if="attr.type === 'number'">
-                  <input v-model="attr.value" type="number" step="any" placeholder="ระบุตัวเลข (เช่น 2.5)" class="flex-1 w-full bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-xl px-4 py-2.5 hover:bg-white focus:bg-white focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all font-medium outline-none placeholder:text-slate-400">
-                </template>
-                <template v-else>
-                  <input v-model="attr.value" type="text" placeholder="ระบุรายละเอียด (เว้นว่างได้)" class="flex-1 w-full bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-xl px-4 py-2.5 hover:bg-white focus:bg-white focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all font-medium outline-none placeholder:text-slate-400">
-                </template>
-                <div class="w-[42px] shrink-0 hidden sm:block"></div> <!-- Placeholder for alignment with delete button -->
-              </template>
-              
-              <!-- Custom Attributes -->
-              <template v-else>
-                <div class="w-full sm:w-1/3 shrink-0 flex items-center gap-2">
-                  <div class="w-1.5 h-1.5 rounded-full bg-slate-200 ml-1"></div>
-                  <input v-model="attr.key" type="text" placeholder="หัวข้อสเปก (เช่น วัสดุโครง)" class="w-full bg-white border border-slate-200 text-slate-900 text-sm rounded-xl px-4 py-2.5 focus:bg-white focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all font-medium outline-none placeholder:text-slate-400">
-                </div>
-                <input v-model="attr.value" type="text" placeholder="รายละเอียด (เช่น เหล็กกัลวาไนซ์)" class="flex-1 w-full bg-white border border-slate-200 text-slate-900 text-sm rounded-xl px-4 py-2.5 focus:bg-white focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all font-medium outline-none placeholder:text-slate-400">
-                <button type="button" @click="removeAttribute(index)" class="p-2.5 text-slate-400 hover:text-rose-500 hover:bg-rose-50 bg-white border border-slate-200 rounded-xl transition-colors shrink-0 outline-none flex items-center justify-center focus:ring-2 focus:ring-rose-500/20 w-fit self-end sm:self-auto shadow-sm active:scale-95">
-                  <svg class="w-4.5 h-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                </button>
-              </template>
+          <div v-if="!form.attributes || form.attributes.length === 0" class="text-center py-10 bg-white/50 rounded-2xl border border-dashed border-slate-300">
+            <div class="w-12 h-12 bg-slate-100 text-slate-400 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
             </div>
-            
-            <div v-if="!form.attributes || form.attributes.length === 0" class="text-center py-10 bg-white/50 rounded-2xl border border-dashed border-slate-300">
-              <div class="w-12 h-12 bg-slate-100 text-slate-400 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
-              </div>
-              <p class="text-sm font-bold text-slate-500">กรุณาเลือกหมวดหมู่หน้าแรกสุด เพื่อโหลดตารางสเปกแนะนำ</p>
-            </div>
+            <p class="text-sm font-bold text-slate-500">กรุณาเลือกหมวดหมู่หน้าแรกสุด เพื่อโหลดตารางสเปกแนะนำ</p>
           </div>
         </div>
       </div>
@@ -2136,7 +2137,7 @@ ${aiModelParams.value.highlights}
       </div>
 
       <!-- TAB: Sales & Related -->
-      <div v-show="activeTab === 'sales'" class="bg-white rounded-[2rem] shadow-[0_8px_30px_rgba(0,0,0,0.04)] border border-slate-200/60 p-7 sm:p-10 animate-[fadeIn_0.3s_ease-out] ring-1 ring-slate-900/5 space-y-10">
+      <div v-show="activeTab === 'sales'" class="bg-white rounded-[2rem] shadow-[0_8px_30px_rgba(0,0,0,0.04)] border border-slate-200/60 p-7 sm:p-10 animate-[fadeIn_0.3s_ease-out] ring-1 ring-slate-900/5">
         <div>
           <div class="mb-10 pb-6 border-b border-slate-100/80 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
             <div>
@@ -2144,17 +2145,17 @@ ${aiModelParams.value.highlights}
                 <div class="p-2.5 bg-emerald-50 text-emerald-600 rounded-xl shadow-[0_2px_10px_rgba(16,185,129,0.2)] border border-emerald-100/50">
                   <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg> 
                 </div>
-                ฟีเจอร์การขายและบริการลูกค้า
+                สินค้าเกี่ยวเนื่องและอะไหล่ (Related Products)
               </h2>
-              <p class="text-[13px] text-slate-500 mt-2 sm:ml-14 font-bold">เพิ่มยอดขายด้วยการจับคู่สินค้าและให้ข้อมูล FAQ</p>
+              <p class="text-[13px] text-slate-500 mt-2 sm:ml-14 font-bold">เพิ่มโอกาสในการขายด้วยการจับคู่สินค้าหรืออะไหล่แนะนำที่เกี่ยวข้องกัน</p>
             </div>
           </div>
           
-          <div class="mb-10">
+          <div>
             <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-3">
               <label class="text-sm font-black text-slate-800 flex items-center gap-2">
                 <div class="w-2 h-2 rounded-full bg-indigo-500"></div>
-                สินค้าที่เกี่ยวข้อง / อะไหล่ (Related Products / Spare Parts)
+                เลือกสินค้าที่เกี่ยวข้อง / อะไหล่แนะนำ
               </label>
               
               <!-- Filter Select -->
@@ -2202,58 +2203,60 @@ ${aiModelParams.value.highlights}
               </div>
             </div>
           </div>
+        </div>
+      </div>
 
-          <!-- FAQ List -->
-          <div class="pt-6 border-t border-gray-100/80">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-              <div>
-                <label class="block text-sm font-black text-slate-800 flex items-center gap-2">
-                  <div class="w-2 h-2 rounded-full bg-emerald-500"></div>
-                  FAQ (คำถามที่พบบ่อย)
-                </label>
-                <p class="text-xs text-slate-500 mt-2 ml-4">ตั้งกลุ่มคำถาม-ตอบเพื่อช่วยตัดสินใจซื้อได้เร็วขึ้น ลดภาระแอดมิน</p>
+      <!-- TAB: FAQ -->
+      <div v-show="activeTab === 'faq'" class="bg-white rounded-[2rem] shadow-[0_8px_30px_rgba(0,0,0,0.04)] border border-slate-200/60 p-7 sm:p-10 animate-[fadeIn_0.3s_ease-out] ring-1 ring-slate-900/5">
+        <div class="mb-10 pb-6 border-b border-slate-100/80 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+          <div>
+            <h2 class="text-xl sm:text-2xl font-black text-slate-900 flex items-center gap-3">
+              <div class="p-2.5 bg-emerald-50 text-emerald-600 rounded-xl shadow-[0_2px_10px_rgba(16,185,129,0.2)] border border-emerald-100/50">
+                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
               </div>
-              <div class="flex flex-wrap items-center gap-3">
-                <button type="button" @click.prevent="generateFaq" :disabled="aiGeneratingFaq || !form.name" class="flex flex-row items-center justify-center gap-2 px-5 py-2.5 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 font-bold text-sm rounded-xl transition-all disabled:opacity-50 border border-indigo-200/60 shadow-sm active:scale-95 group whitespace-nowrap">
-                  <svg v-if="aiGeneratingFaq" class="animate-spin w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                  <svg v-else class="w-5 h-5 group-hover:scale-110 transition-transform shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
-                  <span>{{ aiGeneratingFaq ? 'กำลังประมวลผล...' : 'ให้ AI ช่วยคิด FAQ' }}</span>
-                </button>
-                <button type="button" @click.prevent="addFaq" class="flex flex-row items-center justify-center gap-2 px-5 py-2.5 bg-white text-slate-700 hover:text-slate-900 border border-slate-200 hover:bg-slate-50 font-bold text-sm rounded-xl transition-all shadow-sm active:scale-95 whitespace-nowrap">
-                  <svg class="w-5 h-5 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" /></svg>
-                  <span>เพิ่มด้วยตัวเอง</span>
-                </button>
-              </div>
-            </div>
+              คำถามที่พบบ่อย (FAQ)
+            </h2>
+            <p class="text-[13px] text-slate-500 mt-2 sm:ml-14 font-bold">ตั้งกลุ่มคำถาม-ตอบเพื่อช่วยลูกค้าตัดสินใจซื้อได้เร็วขึ้น และลดภาระแอดมิน</p>
+          </div>
+          <div class="flex flex-wrap items-center gap-3">
+            <button type="button" @click.prevent="generateFaq" :disabled="aiGeneratingFaq || !form.name" class="flex flex-row items-center justify-center gap-2 px-5 py-2.5 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 font-bold text-sm rounded-xl transition-all disabled:opacity-50 border border-indigo-200/60 shadow-sm active:scale-95 group whitespace-nowrap">
+              <svg v-if="aiGeneratingFaq" class="animate-spin w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+              <svg v-else class="w-5 h-5 group-hover:scale-110 transition-transform shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
+              <span>{{ aiGeneratingFaq ? 'กำลังประมวลผล...' : 'ให้ AI ช่วยคิด FAQ' }}</span>
+            </button>
+            <button type="button" @click.prevent="addFaq" class="flex flex-row items-center justify-center gap-2 px-5 py-2.5 bg-white text-slate-700 hover:text-slate-900 border border-slate-200 hover:bg-slate-50 font-bold text-sm rounded-xl transition-all shadow-sm active:scale-95 whitespace-nowrap">
+              <svg class="w-5 h-5 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" /></svg>
+              <span>เพิ่มด้วยตัวเอง</span>
+            </button>
+          </div>
+        </div>
 
-            <!-- Empty State -->
-            <div v-if="!form.faq || form.faq.length === 0" class="bg-slate-50/50 rounded-2xl p-10 text-center border-2 border-dashed border-slate-200">
-              <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm border border-slate-100 text-indigo-300">
-                <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-              </div>
-              <p class="text-base font-black text-slate-600 mb-1">ยังไม่มีคำถามที่พบบ่อย</p>
-              <p class="text-sm font-medium text-slate-400">เพิ่มคำถามที่ลูกค้ามักจะถามบ่อยๆ เพิ่มเติมด้วยตัวเอง หรือใช้ AI ช่วยคิดจากรายละเอียดสินค้า</p>
-            </div>
+        <!-- Empty State -->
+        <div v-if="!form.faq || form.faq.length === 0" class="bg-slate-50/50 rounded-2xl p-10 text-center border-2 border-dashed border-slate-200">
+          <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm border border-slate-100 text-indigo-300">
+            <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+          </div>
+          <p class="text-base font-black text-slate-600 mb-1">ยังไม่มีคำถามที่พบบ่อย</p>
+          <p class="text-sm font-medium text-slate-400">เพิ่มคำถามที่ลูกค้ามักจะถามบ่อยๆ เพิ่มเติมด้วยตัวเอง หรือใช้ AI ช่วยคิดจากรายละเอียดสินค้า</p>
+        </div>
 
-            <!-- List -->
-            <div v-else class="space-y-5">
-              <div v-for="(item, idx) in form.faq" :key="'faq-item-'+idx" class="relative group bg-white border border-slate-200/80 rounded-2xl p-6 sm:p-7 shadow-[0_2px_10px_-4px_rgba(0,0,0,0.05)] hover:border-indigo-300 transition-all hover:shadow-md">
-                <div class="absolute -top-3.5 left-6 bg-indigo-50 text-indigo-600 text-[11px] font-black uppercase tracking-wider px-3.5 py-1 rounded-full border border-indigo-100 shadow-sm">คำถามที่ {{ idx + 1 }}</div>
-                
-                <button type="button" @click.prevent="removeFaq(idx)" class="absolute top-4 right-4 p-2.5 text-white bg-rose-400 hover:bg-rose-500 rounded-xl transition-all shadow-sm hover:shadow-md border border-rose-400/50 hover:scale-105 z-10" title="ลบคำถามนี้">
-                  <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                </button>
-                
-                <div class="space-y-5 mt-2 pr-10">
-                  <div class="relative">
-                    <div class="absolute left-0 top-1/2 -translate-y-1/2 text-indigo-300 font-serif font-black text-xl italic opacity-50">Q</div>
-                    <input v-model="item.question" placeholder="คำถามที่เป็นประโยชน์กับลูกค้า (เช่น รับประกันกี่ปี?)" class="w-full pl-6 border-b-2 border-transparent hover:border-slate-200 focus:border-indigo-500 py-2 text-base font-black text-slate-800 focus:outline-none transition-colors bg-transparent placeholder:text-slate-300">
-                  </div>
-                  <div class="relative">
-                    <div class="absolute left-0 top-3 text-emerald-300 font-serif font-black text-xl italic opacity-50">A</div>
-                    <textarea v-model="item.answer" placeholder="คำตอบที่กระชับและให้ข้อมูลครบถ้วน..." rows="2" class="w-full pl-6 border-none rounded-xl px-0 py-2.5 text-sm font-medium text-slate-600 focus:ring-0 focus:outline-none transition-colors resize-none placeholder:text-slate-400 bg-transparent custom-scrollbar leading-relaxed"></textarea>
-                  </div>
-                </div>
+        <!-- List -->
+        <div v-else class="space-y-5">
+          <div v-for="(item, idx) in form.faq" :key="'faq-item-'+idx" class="relative group bg-white border border-slate-200/80 rounded-2xl p-6 sm:p-7 shadow-[0_2px_10px_-4px_rgba(0,0,0,0.05)] hover:border-indigo-300 transition-all hover:shadow-md">
+            <div class="absolute -top-3.5 left-6 bg-indigo-50 text-indigo-600 text-[11px] font-black uppercase tracking-wider px-3.5 py-1 rounded-full border border-indigo-100 shadow-sm">คำถามที่ {{ idx + 1 }}</div>
+            
+            <button type="button" @click.prevent="removeFaq(idx)" class="absolute top-4 right-4 p-2.5 text-white bg-rose-400 hover:bg-rose-500 rounded-xl transition-all shadow-sm hover:shadow-md border border-rose-400/50 hover:scale-105 z-10" title="ลบคำถามนี้">
+              <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+            </button>
+            
+            <div class="space-y-5 mt-2 pr-10">
+              <div class="relative">
+                <div class="absolute left-0 top-1/2 -translate-y-1/2 text-indigo-300 font-serif font-black text-xl italic opacity-50">Q</div>
+                <input v-model="item.question" placeholder="คำถามที่เป็นประโยชน์กับลูกค้า (เช่น รับประกันกี่ปี?)" class="w-full pl-6 border-b-2 border-transparent hover:border-slate-200 focus:border-indigo-500 py-2 text-base font-black text-slate-800 focus:outline-none transition-colors bg-transparent placeholder:text-slate-300">
+              </div>
+              <div class="relative">
+                <div class="absolute left-0 top-3 text-emerald-300 font-serif font-black text-xl italic opacity-50">A</div>
+                <textarea v-model="item.answer" placeholder="คำตอบที่กระชับและให้ข้อมูลครบถ้วน..." rows="2" class="w-full pl-6 border-none rounded-xl px-0 py-2.5 text-sm font-medium text-slate-600 focus:ring-0 focus:outline-none transition-colors resize-none placeholder:text-slate-400 bg-transparent custom-scrollbar leading-relaxed"></textarea>
               </div>
             </div>
           </div>
@@ -2384,8 +2387,51 @@ ${aiModelParams.value.highlights}
         </div>
       </div>
 
+      <!-- TAB: Marketplaces -->
+      <div v-show="activeTab === 'marketplaces'" class="bg-white rounded-[2rem] shadow-[0_8px_30px_rgba(0,0,0,0.04)] border border-slate-200/60 p-7 sm:p-10 animate-[fadeIn_0.3s_ease-out] ring-1 ring-slate-900/5">
+        <div class="mb-10 pb-6 border-b border-slate-100/80">
+          <h2 class="text-xl sm:text-2xl font-black text-slate-900 flex items-center gap-3">
+            <div class="p-2.5 bg-orange-50 text-orange-600 rounded-xl shadow-[0_2px_10px_rgba(249,115,22,0.2)] border border-orange-100/50">
+              <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
+            </div>
+            ลิงก์ร้านค้าภายนอก (Marketplaces)
+          </h2>
+          <p class="text-[13px] text-slate-500 mt-2 sm:ml-14 font-bold">ใส่ลิงก์สินค้าจากแพลตฟอร์มมาร์เก็ตเพลสภายนอก เช่น Shopee, Lazada, และ TikTok Shop เพื่อให้ลูกค้าเลือกสั่งซื้อตามช่องทางที่สะดวก</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div class="bg-gradient-to-br from-orange-50/50 to-white p-6 rounded-2xl border border-orange-100 shadow-sm relative overflow-hidden group hover:border-orange-300 transition-colors">
+            <div class="absolute right-0 top-0 w-24 h-24 bg-orange-500/5 rounded-full blur-2xl -mr-5 -mt-5 pointer-events-none group-hover:bg-orange-500/10 transition-colors"></div>
+            <label class="block text-sm font-black text-[#EE4D2D] mb-4 flex items-center gap-2">
+              <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M12,2C6.477,2,2,6.477,2,12s4.477,10,10,10s10-4.477,10-10S17.523,2,12,2z M16.32,15.772c-0.27,0.73-1.077,1.066-1.846,1.066  c-0.627,0-1.229-0.218-1.691-0.623l-1.041-0.906l-1.037,0.908c-0.457,0.401-1.06,0.621-1.69,0.621  c-0.78,0-1.58-0.344-1.848-1.068l-0.896-2.428l2.482-1.39l0.981,2.656c0.048,0.129,0.165,0.207,0.297,0.207  c0.125,0,0.231-0.081,0.297-0.197L11.516,13h0.963l0.893,1.616c0.065,0.117,0.174,0.198,0.298,0.198  c0.133,0,0.252-0.077,0.301-0.205l0.985-2.671l2.48,1.394L16.32,15.772z M12.569,8.711V8.222c0-1.082,0.881-1.963,1.963-1.963  c1.08,0,1.961,0.881,1.961,1.963v0.489h0.982V10.74h-6.872V8.711H12.569z M13.551,8.711h1.961V8.222  c0-0.54-0.44-0.981-0.98-0.981c-0.542,0-0.981,0.441-0.981,0.981V8.711z"/></svg>
+              ลิงก์ร้านค้า Shopee
+              <span class="ml-auto text-xs font-bold text-orange-900/40 font-mono">{{ form.shopee_link?.length || 0 }}/1000</span>
+            </label>
+            <input v-model="form.shopee_link" type="url" maxlength="1000" placeholder="https://shopee.co.th/..." class="w-full border border-orange-200/80 rounded-xl px-4 py-3 focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500 transition-all font-medium text-sm bg-white outline-none relative z-10 placeholder:text-orange-900/30">
+          </div>
+          <div class="bg-gradient-to-br from-blue-50/50 to-white p-6 rounded-2xl border border-blue-100 shadow-sm relative overflow-hidden group hover:border-blue-300 transition-colors">
+            <div class="absolute right-0 top-0 w-24 h-24 bg-blue-500/5 rounded-full blur-2xl -mr-5 -mt-5 pointer-events-none group-hover:bg-blue-500/10 transition-colors"></div>
+            <label class="block text-sm font-black text-[#0F136D] mb-4 flex items-center gap-2">
+              <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M12,2C6.477,2,2,6.477,2,12s4.477,10,10,10s10-4.477,10-10S17.523,2,12,2z M16.425,13.67c0,1.523-1.631,2.378-2.914,2.378  c-1.373,0-2.887-0.87-2.887-2.433c0-0.076,0.004-0.155,0.013-0.233h-1.229c0,0.011,0.001,0.021,0.001,0.033  c0,2.155,1.93,3.435,3.951,3.435c2.31,0,4.194-1.423,4.194-3.551c0-2.919-4.103-2.919-4.103-4.22c0-0.457,0.487-0.783,1.155-0.783  c0.812,0,1.298,0.463,1.401,1.139h1.306V9.418h-1.312C15.897,8.601,14.795,8.19,13.438,8.19c-1.635,0-2.584,0.91-2.584,1.88  C10.854,12.338,16.425,12.019,16.425,13.67z M8.07,16.7h1.41V8.344H8.07V16.7z"/></svg> 
+              ลิงก์ร้านค้า Lazada
+              <span class="ml-auto text-xs font-bold text-blue-900/40 font-mono">{{ form.lazada_link?.length || 0 }}/1000</span>
+            </label>
+            <input v-model="form.lazada_link" type="url" maxlength="1000" placeholder="https://www.lazada.co.th/..." class="w-full border border-blue-200/80 rounded-xl px-4 py-3 focus:ring-4 focus:ring-blue-500/10 focus:border-blue-700 transition-all font-medium text-sm bg-white outline-none relative z-10 placeholder:text-blue-900/30">
+          </div>
+          <div class="bg-gradient-to-br from-slate-50/50 to-white p-6 rounded-2xl border border-slate-200 shadow-sm relative overflow-hidden group hover:border-slate-300 transition-colors">
+            <div class="absolute right-0 top-0 w-24 h-24 bg-slate-500/5 rounded-full blur-2xl -mr-5 -mt-5 pointer-events-none group-hover:bg-slate-500/10 transition-colors"></div>
+            <label class="block text-sm font-black text-slate-800 mb-4 flex items-center gap-2">
+              <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-5.2 1.34 2.88 2.88 0 012.31-4.53 2.66 2.66 0 011.61.53v-3.46a6.18 6.18 0 00-1.61-.22 6.33 6.33 0 106.33 6.33V8.16a8.4 8.4 0 004.78 1.49V6.21a4.91 4.91 0 01-1-0.52z"/></svg>
+              ลิงก์ร้านค้า Tiktok
+              <span class="ml-auto text-xs font-bold text-slate-400 font-mono">{{ form.tiktok_link?.length || 0 }}/1000</span>
+            </label>
+            <input v-model="form.tiktok_link" type="url" maxlength="1000" placeholder="https://www.tiktok.com/..." class="w-full border border-slate-200/80 rounded-xl px-4 py-3 focus:ring-4 focus:ring-slate-500/10 focus:border-slate-700 transition-all font-medium text-sm bg-white outline-none relative z-10 placeholder:text-slate-400">
+          </div>
+        </div>
+      </div>
+
       <!-- TAB: SEO & Advanced -->
-      <div v-show="activeTab === 'seo'" class="bg-white rounded-[2rem] shadow-[0_8px_30px_rgba(0,0,0,0.04)] border border-slate-200/60 p-7 sm:p-10 animate-[fadeIn_0.3s_ease-out] ring-1 ring-slate-900/5 space-y-10">
+      <div v-show="activeTab === 'seo'" class="bg-white rounded-[2rem] shadow-[0_8px_30px_rgba(0,0,0,0.04)] border border-slate-200/60 p-7 sm:p-10 animate-[fadeIn_0.3s_ease-out] ring-1 ring-slate-900/5">
         <div>
           <div class="mb-10 pb-6 border-b border-slate-100/80 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
             <div>
@@ -2395,38 +2441,7 @@ ${aiModelParams.value.highlights}
                 </div>
                 ตั้งค่าเนื้อหาพิเศษและ SEO
               </h2>
-              <p class="text-[13px] text-slate-500 mt-2 sm:ml-14 font-bold">ตั้งค่าระบบการค้นหาบน Google และลิงก์ไปยังแพลตฟอร์มโซเชียลคอมเมิร์ซ</p>
-            </div>
-          </div>
-
-          <!-- Marketplaces -->
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-            <div class="bg-gradient-to-br from-orange-50/50 to-white p-6 rounded-2xl border border-orange-100 shadow-sm relative overflow-hidden group hover:border-orange-300 transition-colors">
-              <div class="absolute right-0 top-0 w-24 h-24 bg-orange-500/5 rounded-full blur-2xl -mr-5 -mt-5 pointer-events-none group-hover:bg-orange-500/10 transition-colors"></div>
-              <label class="block text-sm font-black text-[#EE4D2D] mb-4 flex items-center gap-2">
-                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M12,2C6.477,2,2,6.477,2,12s4.477,10,10,10s10-4.477,10-10S17.523,2,12,2z M16.32,15.772c-0.27,0.73-1.077,1.066-1.846,1.066  c-0.627,0-1.229-0.218-1.691-0.623l-1.041-0.906l-1.037,0.908c-0.457,0.401-1.06,0.621-1.69,0.621  c-0.78,0-1.58-0.344-1.848-1.068l-0.896-2.428l2.482-1.39l0.981,2.656c0.048,0.129,0.165,0.207,0.297,0.207  c0.125,0,0.231-0.081,0.297-0.197L11.516,13h0.963l0.893,1.616c0.065,0.117,0.174,0.198,0.298,0.198  c0.133,0,0.252-0.077,0.301-0.205l0.985-2.671l2.48,1.394L16.32,15.772z M12.569,8.711V8.222c0-1.082,0.881-1.963,1.963-1.963  c1.08,0,1.961,0.881,1.961,1.963v0.489h0.982V10.74h-6.872V8.711H12.569z M13.551,8.711h1.961V8.222  c0-0.54-0.44-0.981-0.98-0.981c-0.542,0-0.981,0.441-0.981,0.981V8.711z"/></svg>
-                ลิงก์ร้านค้า Shopee
-                <span class="ml-auto text-xs font-bold text-orange-900/40 font-mono">{{ form.shopee_link?.length || 0 }}/1000</span>
-              </label>
-              <input v-model="form.shopee_link" type="url" maxlength="1000" placeholder="https://shopee.co.th/..." class="w-full border border-orange-200/80 rounded-xl px-4 py-3 focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500 transition-all font-medium text-sm bg-white outline-none relative z-10 placeholder:text-orange-900/30">
-            </div>
-            <div class="bg-gradient-to-br from-blue-50/50 to-white p-6 rounded-2xl border border-blue-100 shadow-sm relative overflow-hidden group hover:border-blue-300 transition-colors">
-              <div class="absolute right-0 top-0 w-24 h-24 bg-blue-500/5 rounded-full blur-2xl -mr-5 -mt-5 pointer-events-none group-hover:bg-blue-500/10 transition-colors"></div>
-              <label class="block text-sm font-black text-[#0F136D] mb-4 flex items-center gap-2">
-                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M12,2C6.477,2,2,6.477,2,12s4.477,10,10,10s10-4.477,10-10S17.523,2,12,2z M16.425,13.67c0,1.523-1.631,2.378-2.914,2.378  c-1.373,0-2.887-0.87-2.887-2.433c0-0.076,0.004-0.155,0.013-0.233h-1.229c0,0.011,0.001,0.021,0.001,0.033  c0,2.155,1.93,3.435,3.951,3.435c2.31,0,4.194-1.423,4.194-3.551c0-2.919-4.103-2.919-4.103-4.22c0-0.457,0.487-0.783,1.155-0.783  c0.812,0,1.298,0.463,1.401,1.139h1.306V9.418h-1.312C15.897,8.601,14.795,8.19,13.438,8.19c-1.635,0-2.584,0.91-2.584,1.88  C10.854,12.338,16.425,12.019,16.425,13.67z M8.07,16.7h1.41V8.344H8.07V16.7z"/></svg> 
-                ลิงก์ร้านค้า Lazada
-                <span class="ml-auto text-xs font-bold text-blue-900/40 font-mono">{{ form.lazada_link?.length || 0 }}/1000</span>
-              </label>
-              <input v-model="form.lazada_link" type="url" maxlength="1000" placeholder="https://www.lazada.co.th/..." class="w-full border border-blue-200/80 rounded-xl px-4 py-3 focus:ring-4 focus:ring-blue-500/10 focus:border-blue-700 transition-all font-medium text-sm bg-white outline-none relative z-10 placeholder:text-blue-900/30">
-            </div>
-            <div class="bg-gradient-to-br from-slate-50/50 to-white p-6 rounded-2xl border border-slate-200 shadow-sm relative overflow-hidden group hover:border-slate-300 transition-colors">
-              <div class="absolute right-0 top-0 w-24 h-24 bg-slate-500/5 rounded-full blur-2xl -mr-5 -mt-5 pointer-events-none group-hover:bg-slate-500/10 transition-colors"></div>
-              <label class="block text-sm font-black text-slate-800 mb-4 flex items-center gap-2">
-                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-5.2 1.34 2.88 2.88 0 012.31-4.53 2.66 2.66 0 011.61.53v-3.46a6.18 6.18 0 00-1.61-.22 6.33 6.33 0 106.33 6.33V8.16a8.4 8.4 0 004.78 1.49V6.21a4.91 4.91 0 01-1-0.52z"/></svg>
-                ลิงก์ร้านค้า Tiktok
-                <span class="ml-auto text-xs font-bold text-slate-400 font-mono">{{ form.tiktok_link?.length || 0 }}/1000</span>
-              </label>
-              <input v-model="form.tiktok_link" type="url" maxlength="1000" placeholder="https://www.tiktok.com/..." class="w-full border border-slate-200/80 rounded-xl px-4 py-3 focus:ring-4 focus:ring-slate-500/10 focus:border-slate-700 transition-all font-medium text-sm bg-white outline-none relative z-10 placeholder:text-slate-400">
+              <p class="text-[13px] text-slate-500 mt-2 sm:ml-14 font-bold">ตั้งค่าระบบการค้นหาบน Google (Search Engine Optimization) และ LLM Context</p>
             </div>
           </div>
 
