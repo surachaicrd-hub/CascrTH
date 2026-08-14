@@ -207,7 +207,7 @@ const submitQuotation = async () => {
 onMounted(() => {
   setMeta({
     title: 'ขอใบเสนอราคาด่วน (Request Quotation)',
-    description: 'รับบริการประเมินราคาและเสนอราคาสินค้าบ้านเก็บของสำเร็จรูปสำหรับบุคคลและนิติบุคคล ฟรีไม่มีค่าใช้จ่าย',
+    description: settingsStore.storeDescription || 'รับบริการประเมินราคาและเสนอราคาสินค้าสำหรับบุคคลและนิติบุคคล ฟรีไม่มีค่าใช้จ่าย',
     canonicalUrl: window.location.href,
     type: 'website'
   })

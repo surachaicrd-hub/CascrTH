@@ -393,7 +393,7 @@ onMounted(() => {
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                     </svg>
                   </button>
-                  <button @click="toggleBlacklist(customer)" :title="customer.is_blacklisted ? 'ปลดบัญชีดำ' : 'ขึ้นบัญชีดำ'" :class="customer.is_blacklisted ? 'text-orange-500 hover:text-gray-500 hover:bg-gray-100' : 'text-gray-400 hover:text-orange-500 hover:bg-orange-50'" class="p-2 rounded-xl transition-all">
+                  <button @click="toggleBlacklist(customer)" :title="customer.is_blacklisted ? 'ปลดบัญชีดำ' : 'ขึ้นบัญชีดำ'" :class="customer.is_blacklisted ? 'text-blue-500 hover:text-gray-500 hover:bg-gray-100' : 'text-gray-400 hover:text-blue-500 hover:bg-blue-50'" class="p-2 rounded-xl transition-all">
                     <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path v-if="customer.is_blacklisted" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                       <path v-else stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />

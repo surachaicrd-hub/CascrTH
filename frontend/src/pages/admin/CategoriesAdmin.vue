@@ -18,6 +18,68 @@ const currentCategoryForAttr = ref(null)
 const categoryAttributes = ref([])
 const attrLoading = ref(false)
 const attrSaving = ref(false)
+const aiGeneratingTemplates = ref(false)
+
+const COMMON_ATTRIBUTE_PRESETS = [
+  { label: 'รุ่นสินค้า', key: 'model', type: 'text', required: true },
+  { label: 'ขนาดสายไฟที่รองรับ', key: 'wire_size_range', type: 'text', required: true },
+  { label: 'ความยาวในการตัด', key: 'cutting_length', type: 'text', required: false },
+  { label: 'ความยาวปอกสายไฟ', key: 'strip_length', type: 'text', required: false },
+  { label: 'แรงอัดย้ำ', key: 'crimping_force', type: 'text', required: false },
+  { label: 'แหล่งจ่ายไฟ', key: 'power_supply', type: 'text', required: false },
+  { label: 'กำลังไฟฟ้า', key: 'power_consumption', type: 'text', required: false },
+  { label: 'ขนาดตัวเครื่อง (กxลxส)', key: 'machine_dimensions', type: 'text', required: false },
+  { label: 'น้ำหนักตัวเครื่อง', key: 'machine_weight', type: 'text', required: false }
+]
+
+const applyPreset = (preset) => {
+  attrForm.value.attribute_label = preset.label
+  attrForm.value.attribute_key = preset.key
+  attrForm.value.attribute_type = preset.type || 'text'
+  attrForm.value.is_required = preset.required || false
+}
+
+const isAiAttrModalOpen = ref(false)
+const aiCustomText = ref('')
+
+const openAiAttrModal = () => {
+  aiCustomText.value = ''
+  isAiAttrModalOpen.value = true
+}
+
+const closeAiAttrModal = () => {
+  isAiAttrModalOpen.value = false
+  aiCustomText.value = ''
+}
+
+const submitAiGenerateAttributes = async () => {
+  if (!currentCategoryForAttr.value) return
+
+  aiGeneratingTemplates.value = true
+  try {
+    const res = await apiFetch('/api/category-attributes/ai-generate-template', {
+      method: 'POST',
+      body: JSON.stringify({ 
+        category_name: currentCategoryForAttr.value.name,
+        custom_text: aiCustomText.value.trim()
+      })
+    })
+    const data = await res.json()
+    if (data.success) {
+      showToast(`AI สร้างแม่แบบสเปกสำเร็จ (${data.data.length} รายการ)`, 'success')
+      closeAiAttrModal()
+      await loadCategoryAttributes(currentCategoryForAttr.value.name)
+    } else {
+      showToast(data.error || 'ไม่สามารถสร้างแม่แบบได้', 'error')
+    }
+  } catch (error) {
+    console.error('AI Generate templates error:', error)
+    showToast('เกิดข้อผิดพลาดในการเชื่อมต่อ AI', 'error')
+  } finally {
+    aiGeneratingTemplates.value = false
+  }
+}
+
 const attrForm = ref({
   id: null,
   attribute_key: '',
@@ -356,7 +418,7 @@ onMounted(() => {
     >
       <div v-if="isAttrModalOpen" class="fixed inset-0 z-50 flex items-center justify-center p-4">
         <!-- Backdrop -->
-        <div class="fixed inset-0 bg-gray-900/40 backdrop-blur-sm transition-opacity" @click="closeAttrModal"></div>
+        <div class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm transition-opacity" @click="closeAttrModal"></div>
 
         <!-- Modal Panel -->
         <transition
@@ -367,83 +429,254 @@ onMounted(() => {
           leave-from-class="scale-100 opacity-100 translate-y-0"
           leave-to-class="scale-95 opacity-0 translate-y-4 sm:translate-y-0"
         >
-          <div v-if="isAttrModalOpen" class="relative bg-white rounded-3xl shadow-2xl p-6 sm:p-8 w-full max-w-4xl overflow-hidden transform transition-all border border-gray-100 flex flex-col max-h-[90vh]">
-            <div class="flex justify-between items-center mb-6">
-              <h3 class="text-xl font-black text-gray-900 flex items-center gap-2">
-                <svg class="w-6 h-6 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path></svg>
-                คุณสมบัติ (Attributes): <span class="text-indigo-600">{{ currentCategoryForAttr?.name }}</span>
-              </h3>
-              <button @click="closeAttrModal" class="p-2 text-gray-400 hover:text-gray-600 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors">
+          <div v-if="isAttrModalOpen" class="relative bg-white rounded-3xl shadow-2xl p-6 sm:p-8 w-full max-w-5xl overflow-hidden transform transition-all border border-gray-100 flex flex-col max-h-[90vh]">
+            <!-- Modal Header -->
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 border-b border-gray-100 pb-4">
+              <div class="flex items-center gap-3">
+                <div class="p-2.5 bg-indigo-50 text-indigo-600 rounded-xl">
+                  <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path></svg>
+                </div>
+                <div>
+                  <div class="flex items-center gap-2">
+                    <h3 class="text-lg font-black text-gray-900">แม่แบบคุณสมบัติ (Attributes Template)</h3>
+                    <span class="px-2.5 py-0.5 bg-indigo-50 text-indigo-700 text-xs font-bold rounded-full border border-indigo-100">{{ currentCategoryForAttr?.name }}</span>
+                    <span v-if="categoryAttributes.length > 0" class="px-2 py-0.5 bg-emerald-50 text-emerald-700 text-xs font-bold rounded-full border border-emerald-100">{{ categoryAttributes.length }} สเปก</span>
+                  </div>
+                  <p class="text-xs text-gray-500 mt-0.5">กำหนดหัวข้อสเปกมาตรฐานของหมวดนี้ เพื่อให้หน้าเพิ่มสินค้าและตารางเปรียบเทียบสเปกเป็นระเบียบ</p>
+                </div>
+              </div>
+
+              <div class="flex items-center gap-2 shrink-0">
+                <button 
+                  type="button" 
+                  @click="openAiAttrModal" 
+                  :disabled="aiGeneratingTemplates || attrLoading"
+                  class="px-3.5 py-2 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white text-xs font-bold rounded-xl shadow-xs transition-all flex items-center gap-1.5 disabled:opacity-50"
+                  title="ให้ AI ช่วยสร้างแม่แบบสเปกมาตรฐานที่ตรงกับหมวดหมู่นี้อัตโนมัติ"
+                >
+                  <svg v-if="aiGeneratingTemplates" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                  <svg v-else class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                  <span>{{ aiGeneratingTemplates ? 'AI กำลังสร้าง...' : '⚡ AI สร้างแม่แบบอัตโนมัติ' }}</span>
+                </button>
+
+                <button @click="closeAttrModal" class="p-2 text-gray-400 hover:text-gray-600 rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors">
+                  <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+              </div>
+            </div>
+            
+            <div class="flex flex-col lg:flex-row gap-6 overflow-hidden flex-1 min-h-[460px]">
+              <!-- List Panel -->
+              <div class="flex-1 min-w-0 overflow-y-auto bg-slate-50/80 rounded-2xl border border-slate-200/80 p-4">
+                <div v-if="attrLoading" class="text-center py-16 text-slate-500 text-sm flex flex-col items-center gap-2">
+                  <svg class="w-6 h-6 animate-spin text-indigo-600" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                  <span>กำลังโหลดรายการคุณสมบัติ...</span>
+                </div>
+
+                <div v-else-if="categoryAttributes.length === 0" class="text-center py-12 px-6 bg-white rounded-2xl border border-dashed border-slate-300 flex flex-col items-center">
+                  <div class="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center mb-3">
+                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                  </div>
+                  <h4 class="text-sm font-bold text-slate-800 mb-1">ยังไม่มีแม่แบบคุณสมบัติสำหรับหมวดหมู่นี้</h4>
+                  <p class="text-xs text-slate-500 max-w-sm mb-4">การเพิ่มแม่แบบสเปกจะช่วยให้หน้าเพิ่มสินค้าและตารางเปรียบเทียบแสดงผลตรงตามมาตรฐานอุตสาหกรรม</p>
+                  <button 
+                    type="button" 
+                    @click="openAiAttrModal" 
+                    :disabled="aiGeneratingTemplates"
+                    class="px-4 py-2 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white text-xs font-bold rounded-xl shadow-xs transition-all flex items-center gap-1.5"
+                  >
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                    <span>สร้างแม่แบบอัตโนมัติด้วย AI</span>
+                  </button>
+                </div>
+
+                <div v-else class="space-y-2">
+                  <div class="flex items-center justify-between text-xs text-slate-500 px-2 pb-1 font-semibold">
+                    <span>ลากเพื่อเรียงลำดับการแสดงผล</span>
+                    <span>{{ categoryAttributes.length }} รายการ</span>
+                  </div>
+
+                  <draggable v-model="categoryAttributes" :animation="200" handle=".drag-handle" item-key="id" @end="onAttrReorder" class="space-y-2">
+                    <template #item="{ element, index }">
+                      <div class="flex items-center gap-3 bg-white p-3.5 rounded-xl border border-slate-200 shadow-xs hover:border-indigo-300 transition-all group">
+                        <div class="cursor-grab drag-handle text-slate-300 hover:text-slate-600 p-1 shrink-0" title="คลิกค้างเพื่อลากสลับลำดับ">
+                          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16"></path></svg>
+                        </div>
+                        <span class="text-xs font-mono font-bold text-slate-400 w-5 text-center shrink-0">{{ index + 1 }}</span>
+                        <div class="flex-1 min-w-0">
+                          <div class="font-bold text-slate-800 text-sm flex items-center gap-2">
+                            <span>{{ element.attribute_label }}</span>
+                            <span v-if="element.is_required" class="text-[10px] bg-rose-50 text-rose-600 border border-rose-200 px-1.5 py-0.2 rounded font-bold">จำเป็น</span>
+                          </div>
+                          <div class="text-xs text-slate-500 font-mono mt-0.5 flex items-center gap-1.5">
+                            <span class="text-indigo-600 bg-indigo-50 px-1.5 py-0.2 rounded text-[11px] font-semibold">{{ element.attribute_key }}</span>
+                            <span class="text-slate-300">•</span>
+                            <span class="text-slate-400 text-[11px]">{{ element.attribute_type }}</span>
+                          </div>
+                        </div>
+                        <div class="flex opacity-0 group-hover:opacity-100 transition-opacity gap-1 shrink-0">
+                          <button type="button" @click="editAttribute(element)" class="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="แก้ไข">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                          </button>
+                          <button type="button" @click="deleteAttribute(element)" class="p-1.5 text-rose-600 hover:bg-rose-50 rounded-lg transition-colors" title="ลบ">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                          </button>
+                        </div>
+                      </div>
+                    </template>
+                  </draggable>
+                </div>
+              </div>
+              
+              <!-- Form Panel -->
+              <div class="w-full lg:w-96 shrink-0 bg-white border border-slate-200 rounded-2xl p-5 shadow-xs overflow-y-auto flex flex-col justify-between">
+                <div>
+                  <h4 class="font-bold text-slate-800 border-b border-slate-100 pb-3 mb-3 flex items-center justify-between">
+                    <span>{{ attrForm.id ? '✏️ แก้ไขคุณสมบัติ' : '➕ เพิ่มคุณสมบัติใหม่' }}</span>
+                    <button v-if="attrForm.id" type="button" @click="resetAttrForm" class="text-xs text-indigo-600 hover:underline font-normal">เพิ่มใหม่</button>
+                  </h4>
+
+                  <!-- Presets -->
+                  <div v-if="!attrForm.id" class="mb-4">
+                    <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">แม่แบบแนะนำด่วน:</label>
+                    <div class="flex flex-wrap gap-1.5">
+                      <button 
+                        v-for="p in COMMON_ATTRIBUTE_PRESETS" 
+                        :key="p.key"
+                        type="button" 
+                        @click="applyPreset(p)"
+                        class="text-[11px] px-2 py-1 bg-slate-100 hover:bg-indigo-50 hover:text-indigo-700 text-slate-600 rounded-lg transition-colors border border-slate-200/60 font-medium"
+                      >
+                        + {{ p.label }}
+                      </button>
+                    </div>
+                  </div>
+
+                  <form @submit.prevent="saveAttribute" class="space-y-3.5">
+                    <div>
+                      <label class="block text-xs font-bold text-slate-700 mb-1">ชื่อคุณสมบัติ (Label ภาษาไทย) <span class="text-rose-500">*</span></label>
+                      <input v-model="attrForm.attribute_label" type="text" required placeholder="เช่น รุ่นสินค้า, ขนาดสายไฟ (sq mm)" class="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all">
+                    </div>
+                    <div>
+                      <label class="block text-xs font-bold text-slate-700 mb-1 flex items-center justify-between">
+                        <span>รหัสคุณสมบัติ (Key - ภาษาอังกฤษ) <span class="text-rose-500">*</span></span>
+                      </label>
+                      <input v-model="attrForm.attribute_key" type="text" required placeholder="เช่น model, wire_size, cutting_length" class="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 font-mono outline-none transition-all">
+                      <p class="text-[10px] text-slate-400 mt-1">ใช้ตัวพิมพ์เล็กและขีดล่าง เช่น model, wire_size, power_supply</p>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                      <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">ประเภทข้อมูล</label>
+                        <select v-model="attrForm.attribute_type" class="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none">
+                          <option value="text">ข้อความทั่วไป (Text)</option>
+                          <option value="number">ตัวเลข (Number)</option>
+                          <option value="select">ตัวเลือก (Select)</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">&nbsp;</label>
+                        <label class="flex items-center gap-2 mt-1.5 cursor-pointer">
+                          <input type="checkbox" v-model="attrForm.is_required" class="rounded text-indigo-600 focus:ring-indigo-500 w-4 h-4 cursor-pointer">
+                          <span class="text-xs text-slate-700 font-medium select-none">สเปกสำคัญ</span>
+                        </label>
+                      </div>
+                    </div>
+                    <div v-if="attrForm.attribute_type === 'select'">
+                      <label class="block text-xs font-bold text-slate-700 mb-1">ตัวเลือก (คั่นด้วยเครื่องหมายจุลภาค)</label>
+                      <input v-model="attrForm.options" type="text" placeholder="เช่น 220V, 380V หรือ Single, Dual" class="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none">
+                    </div>
+                    <div class="pt-3 flex gap-2 border-t border-slate-100 mt-4">
+                      <button v-if="attrForm.id" type="button" @click="resetAttrForm" class="flex-1 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition-colors">ยกเลิก</button>
+                      <button type="submit" :disabled="attrSaving" class="flex-1 py-2 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white text-xs font-bold rounded-xl transition-all shadow-xs disabled:opacity-50">
+                        {{ attrSaving ? 'กำลังบันทึก...' : (attrForm.id ? 'อัปเดตสเปก' : 'เพิ่มคุณสมบัติ') }}
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+        </transition>
+      </div>
+    </transition>
+
+    <!-- AI Attribute Extraction Modal -->
+    <transition
+      enter-active-class="transition duration-200 ease-out"
+      enter-from-class="opacity-0"
+      enter-to-class="opacity-100"
+      leave-active-class="transition duration-150 ease-in"
+      leave-from-class="opacity-100"
+      leave-to-class="opacity-0"
+    >
+      <div v-if="isAiAttrModalOpen" class="fixed inset-0 z-[70] flex items-center justify-center p-4">
+        <!-- Backdrop -->
+        <div class="fixed inset-0 bg-gray-900/60 backdrop-blur-xs transition-opacity" @click="closeAiAttrModal"></div>
+
+        <!-- Modal Panel -->
+        <transition
+          enter-active-class="transition duration-300 ease-out"
+          enter-from-class="scale-95 opacity-0 translate-y-4 sm:translate-y-0"
+          enter-to-class="scale-100 opacity-100 translate-y-0"
+          leave-active-class="transition duration-200 ease-in"
+          leave-from-class="scale-100 opacity-100 translate-y-0"
+          leave-to-class="scale-95 opacity-0 translate-y-4 sm:translate-y-0"
+        >
+          <div class="relative bg-white rounded-3xl shadow-2xl p-6 sm:p-7 w-full max-w-xl overflow-hidden transform transition-all border border-gray-100">
+            <div class="flex items-start justify-between gap-3 mb-4">
+              <div class="flex items-center gap-3">
+                <div class="p-2.5 bg-gradient-to-tr from-violet-600 to-indigo-600 text-white rounded-2xl shadow-sm">
+                  <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                </div>
+                <div>
+                  <h3 class="text-base font-black text-gray-900 flex items-center gap-2">
+                    <span>AI สกัดสเปกและสร้างแม่แบบอัตโนมัติ</span>
+                  </h3>
+                  <span class="inline-block mt-0.5 px-2 py-0.5 bg-indigo-50 text-indigo-700 text-xs font-bold rounded-md border border-indigo-100">หมวดหมู่: {{ currentCategoryForAttr?.name }}</span>
+                </div>
+              </div>
+              <button @click="closeAiAttrModal" class="p-1.5 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100 transition-colors">
                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
               </button>
             </div>
-            
-            <div class="flex flex-col lg:flex-row gap-6 overflow-hidden flex-1 min-h-[400px]">
-              <!-- List -->
-              <div class="flex-1 overflow-y-auto bg-gray-50 rounded-xl border border-gray-200 p-4">
-                <div v-if="attrLoading" class="text-center py-8 text-gray-500">กำลังโหลด...</div>
-                <div v-else-if="categoryAttributes.length === 0" class="text-center py-8 text-gray-500 text-sm bg-white rounded-lg border border-dashed border-gray-300">ยังไม่มีแม่แบบคุณสมบัติสำหรับหมวดหมู่นี้<br>การเพิ่ม Template จะช่วยให้หน้าเปรียบเทียบเรียงสวยงามขึ้น</div>
-                <draggable v-else v-model="categoryAttributes" :animation="200" handle=".drag-handle" item-key="id" @end="onAttrReorder" class="space-y-2">
-                  <template #item="{ element }">
-                    <div class="flex items-center gap-3 bg-white p-3 rounded-lg border border-gray-200 shadow-sm group">
-                      <div class="cursor-grab drag-handle text-gray-400 hover:text-gray-600" title="คลิกค้างเพื่อลากสลับลำดับ"><svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16"></path></svg></div>
-                      <div class="flex-1 min-w-0">
-                        <div class="font-bold text-gray-900 text-sm flex items-center gap-2">
-                          {{ element.attribute_label }}
-                          <span v-if="element.is_required" class="text-[10px] bg-red-100 text-red-600 px-1.5 py-0.5 rounded font-bold">จำเป็น</span>
-                        </div>
-                        <div class="text-xs text-gray-500 font-mono mt-0.5">{{ element.attribute_key }} <span class="mx-1 text-gray-300">|</span> {{ element.attribute_type }}</div>
-                      </div>
-                      <div class="flex opacity-0 group-hover:opacity-100 transition-opacity gap-1 shrink-0">
-                        <button type="button" @click="editAttribute(element)" class="p-1.5 text-blue-600 hover:bg-blue-50 rounded transition-colors"><svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg></button>
-                        <button type="button" @click="deleteAttribute(element)" class="p-1.5 text-red-600 hover:bg-red-50 rounded transition-colors"><svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>
-                      </div>
-                    </div>
-                  </template>
-                </draggable>
+
+            <div class="space-y-4">
+              <div class="bg-indigo-50/70 border border-indigo-100 rounded-2xl p-3.5 text-xs text-indigo-900 leading-relaxed">
+                💡 <span class="font-bold">คำแนะนำ:</span> หากคุณมีข้อมูลสเปกสินค้า, แคตตาล็อก, โบรชัวร์ หรือข้อความภาษาไทย/อังกฤษ สามารถนำมาวางในช่องด้านล่างได้เลย AI จะวิเคราะห์และสกัดคุณสมบัติทางเทคนิคออกมาเป็นแม่แบบให้อัตโนมัติ (หรือหากปล่อยว่างไว้ AI จะวิเคราะห์จากชื่อหมวดและสินค้าในระบบ)
               </div>
-              
-              <!-- Form -->
-              <div class="w-full lg:w-80 bg-white border border-gray-200 rounded-xl p-5 shadow-sm overflow-y-auto shrink-0">
-                <h4 class="font-bold text-gray-900 border-b border-gray-100 pb-3 mb-4">{{ attrForm.id ? 'แก้ไขคุณสมบัติ' : 'เพิ่มคุณสมบัติใหม่' }}</h4>
-                <form @submit.prevent="saveAttribute" class="space-y-4">
-                  <div>
-                    <label class="block text-xs font-bold text-gray-700 mb-1.5">ชื่อคุณสมบัติ (Label) <span class="text-red-500">*</span></label>
-                    <input v-model="attrForm.attribute_label" type="text" required placeholder="เช่น รุ่น, ซีรีส์, ความกว้าง" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 outline-none">
-                  </div>
-                  <div>
-                    <label class="block text-xs font-bold text-gray-700 mb-1.5">รหัสคุณสมบัติ (Key - ภาษาอังกฤษ) <span class="text-red-500">*</span></label>
-                    <input v-model="attrForm.attribute_key" type="text" required placeholder="เช่น series, width_cm" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 font-mono outline-none" :disabled="attrForm.id !== null && false">
-                    <p class="text-[10px] text-gray-500 mt-1">ตัวพิมพ์เล็ก ไม่มีเว้นวรรค เช่น model, width, origin</p>
-                  </div>
-                  <div class="grid grid-cols-2 gap-3">
-                    <div>
-                      <label class="block text-xs font-bold text-gray-700 mb-1.5">ประเภทข้อมูล</label>
-                      <select v-model="attrForm.attribute_type" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 outline-none bg-white">
-                        <option value="text">ข้อความทั่วไป</option>
-                        <option value="number">ตัวเลข (Number)</option>
-                        <option value="select">ตัวเลือก (Select)</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label class="block text-xs font-bold text-gray-700 mb-1.5">&nbsp;</label>
-                      <label class="flex items-center gap-2 mt-2 cursor-pointer">
-                        <input type="checkbox" v-model="attrForm.is_required" class="rounded text-emerald-600 focus:ring-emerald-500 w-4 h-4 cursor-pointer">
-                        <span class="text-sm text-gray-700 font-medium select-none">บังคับต้องระบุ</span>
-                      </label>
-                    </div>
-                  </div>
-                  <div v-if="attrForm.attribute_type === 'select'" class="animate-fade-in">
-                    <label class="block text-xs font-bold text-gray-700 mb-1.5">ตัวเลือก (คั่นด้วยเครื่องหมายลูกน้ำ)</label>
-                    <input v-model="attrForm.options" type="text" placeholder="เช่น แดง, น้ำเงิน, ดำ หรือ S, M, L" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 outline-none">
-                  </div>
-                  <div class="pt-4 flex gap-2 border-t border-gray-100 mt-6">
-                    <button v-if="attrForm.id" type="button" @click="resetAttrForm" class="flex-1 py-2.5 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 text-sm font-bold rounded-xl transition-colors">ยกเลิกดารแก้ไข</button>
-                    <button type="submit" :disabled="attrSaving" class="flex-1 py-2.5 bg-emerald-600 text-white hover:bg-emerald-700 text-sm font-bold rounded-xl transition-colors shadow-sm disabled:opacity-50">
-                      {{ attrSaving ? 'กำลังบันทึก...' : (attrForm.id ? 'อัปเดตข้อมูล' : 'เพิ่มคุณสมบัติ') }}
-                    </button>
-                  </div>
-                </form>
+
+              <div>
+                <label class="block text-xs font-bold text-gray-700 mb-1.5 flex items-center justify-between">
+                  <span>ข้อมูลสินค้า / โบรชัวร์ / ข้อความสเปกตัวอย่าง (ไม่บังคับ)</span>
+                  <span class="text-[11px] text-gray-400 font-normal">รองรับทั้งไทยและอังกฤษ</span>
+                </label>
+                <textarea
+                  v-model="aiCustomText"
+                  rows="6"
+                  placeholder="วางข้อมูลสเปกสินค้า เช่น:&#10;Model: KODERA C371G&#10;Wire Size: 0.08 - 10 sq mm / AWG#7 - #28&#10;Cutting Length: 0.1 - 99999 mm&#10;Stripping Length: Front 0.1-30mm, Rear 0.1-70mm&#10;Blade Material: Tungsten Carbide&#10;Power Supply: AC 220V 50/60Hz 450W&#10;Dimensions: 550 x 500 x 400 mm&#10;Weight: 45 kg"
+                  class="w-full bg-slate-50 border border-slate-200 rounded-2xl p-3.5 text-xs text-slate-800 focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 font-mono outline-none transition-all placeholder:text-slate-400"
+                ></textarea>
+              </div>
+
+              <div class="pt-2 flex items-center gap-3">
+                <button
+                  type="button"
+                  @click="closeAiAttrModal"
+                  :disabled="aiGeneratingTemplates"
+                  class="flex-1 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-bold rounded-xl transition-colors disabled:opacity-50"
+                >
+                  ยกเลิก
+                </button>
+                <button
+                  type="button"
+                  @click="submitAiGenerateAttributes"
+                  :disabled="aiGeneratingTemplates"
+                  class="flex-2 py-2.5 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white text-xs font-bold rounded-xl shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                >
+                  <svg v-if="aiGeneratingTemplates" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                  <svg v-else class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                  <span>{{ aiGeneratingTemplates ? 'AI กำลังวิเคราะห์และสกัดข้อมูล...' : '⚡ สกัดและสร้างแม่แบบด้วย AI' }}</span>
+                </button>
               </div>
             </div>
           </div>

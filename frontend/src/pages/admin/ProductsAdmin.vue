@@ -436,13 +436,19 @@ onMounted(() => {
                 </div>
               </td>
               <td class="px-6 py-5">
-                <div class="font-bold text-gray-900 mb-1.5 text-base group-hover:text-emerald-700 transition-colors">
+                <div class="font-extrabold text-gray-900 mb-1.5 text-base leading-snug group-hover:text-emerald-700 transition-colors">
                   {{ product.name }}
-                  <span v-if="product.sku" class="text-[11px] font-semibold text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full ml-2 align-middle border border-gray-200/50">SKU: {{ product.sku }}</span>
                 </div>
-                <div class="flex items-center gap-1.5 mt-1 flex-wrap">
-                  <span v-for="cat in product.categories" :key="cat" class="text-[11px] font-bold text-emerald-600 bg-emerald-50 border border-emerald-100 inline-flex items-center px-2 py-0.5 rounded-md">{{ cat }}</span>
-                  <div v-if="settingsStore.showProductRating && product.review_count > 0" class="inline-flex items-center gap-1 text-[11px] font-bold text-yellow-700 bg-yellow-50 border border-yellow-200/60 px-2 py-1 rounded-lg shadow-sm">
+                <div class="flex items-center gap-2 mt-1.5 flex-wrap">
+                  <!-- SKU Badge (Prominent, same row as category) -->
+                  <span v-if="product.sku" class="inline-flex items-center gap-1 text-[11px] font-black font-mono text-slate-800 bg-slate-100 border border-slate-300/80 px-2.5 py-0.5 rounded-md shadow-2xs tracking-wide" title="รหัส SKU">
+                    <span class="text-[10px] text-slate-400 font-sans font-bold uppercase tracking-wider">SKU:</span>
+                    <span>{{ product.sku }}</span>
+                  </span>
+                  <!-- Category Badges -->
+                  <span v-for="cat in product.categories" :key="cat" class="text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200/80 inline-flex items-center px-2.5 py-0.5 rounded-md">{{ cat }}</span>
+                  <!-- Review Rating Badge -->
+                  <div v-if="settingsStore.showProductRating && product.review_count > 0" class="inline-flex items-center gap-1 text-[11px] font-bold text-yellow-700 bg-yellow-50 border border-yellow-200/60 px-2 py-0.5 rounded-md shadow-2xs">
                      <svg class="w-3.5 h-3.5 text-yellow-500" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
                      {{ Number(product.rating || 5).toFixed(1) }} <span class="text-yellow-600/70">({{ product.review_count }})</span>
                   </div>
@@ -503,13 +509,26 @@ onMounted(() => {
               </td>
 
               <td class="px-6 py-5">
-                <div class="flex justify-end gap-2">
-                  <router-link :to="`/admin/products/${product.id}/edit`" class="inline-flex items-center justify-center w-10 h-10 bg-white border border-gray-200 text-gray-500 hover:text-blue-600 hover:border-blue-200 hover:bg-blue-50 rounded-xl transition-all shadow-sm hover:shadow" title="แก้ไข">
-                    <svg class="w-4.5 h-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                <div class="flex items-center justify-end gap-2">
+                  <router-link 
+                    :to="`/admin/products/${product.id}/edit`" 
+                    class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-blue-700 bg-blue-50/90 hover:bg-blue-600 hover:text-white border border-blue-200/80 hover:border-blue-600 rounded-xl transition-all duration-200 shadow-2xs hover:shadow-md hover:-translate-y-0.5 group/btn" 
+                    title="แก้ไขสินค้า"
+                  >
+                    <svg class="w-4 h-4 transition-transform group-hover/btn:scale-110" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                    </svg>
+                    <span>แก้ไข</span>
                   </router-link>
-                  <button @click="deleteProduct(product)" :disabled="deletingId === product.id" class="inline-flex items-center justify-center w-10 h-10 bg-white border border-gray-200 text-gray-400 hover:text-red-600 hover:border-red-200 hover:bg-red-50 rounded-xl transition-all shadow-sm hover:shadow disabled:opacity-50 disabled:cursor-wait" title="ลบ">
-                    <svg v-if="deletingId === product.id" class="animate-spin h-4.5 w-4.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                    <svg v-else class="w-4.5 h-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                  <button 
+                    @click="deleteProduct(product)" 
+                    :disabled="deletingId === product.id" 
+                    class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-rose-700 bg-rose-50/90 hover:bg-rose-600 hover:text-white border border-rose-200/80 hover:border-rose-600 rounded-xl transition-all duration-200 shadow-2xs hover:shadow-md hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-wait group/btn" 
+                    title="ลบสินค้า"
+                  >
+                    <svg v-if="deletingId === product.id" class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                    <svg v-else class="w-4 h-4 transition-transform group-hover/btn:scale-110" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                    <span>ลบ</span>
                   </button>
                 </div>
               </td>

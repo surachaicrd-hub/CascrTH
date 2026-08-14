@@ -153,7 +153,7 @@
                       <svg class="w-4 h-4 text-white translate-y-1 -translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
                     </div>
                     <span :class="['block text-sm font-bold mb-1', form.floorType === 'earth' ? 'text-emerald-700 dark:text-emerald-400' : 'text-gray-900 dark:text-white']">พื้นดินแข็ง</span>
-                    <span class="block text-[10px] text-gray-500 dark:text-gray-400 flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-orange-400"></span> ต้องใช้แผ่นปูพื้น</span>
+                    <span class="block text-[10px] text-gray-500 dark:text-gray-400 flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-blue-400"></span> ต้องใช้แผ่นปูพื้น</span>
                   </button>
                   <!-- Grass -->
                   <button type="button" @click="form.floorType = 'grass'"
@@ -162,7 +162,7 @@
                       <svg class="w-4 h-4 text-white translate-y-1 -translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
                     </div>
                     <span :class="['block text-sm font-bold mb-1', form.floorType === 'grass' ? 'text-emerald-700 dark:text-emerald-400' : 'text-gray-900 dark:text-white']">สนามหญ้า</span>
-                    <span class="block text-[10px] text-gray-500 dark:text-gray-400 flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-orange-400"></span> ต้องใช้แผ่นปูพื้น</span>
+                    <span class="block text-[10px] text-gray-500 dark:text-gray-400 flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-blue-400"></span> ต้องใช้แผ่นปูพื้น</span>
                   </button>
                   <!-- Concrete -->
                   <button type="button" @click="form.floorType = 'concrete'"
@@ -409,16 +409,16 @@
                 
                 <!-- Separator for Alternatives -->
                 <div v-if="!item.fit.fits && (index === 0 || [...recommendedProducts, ...alternativeProducts][index-1].fit.fits)" class="mt-8 mb-4 border-t border-gray-200 dark:border-gray-800 pt-8 text-center relative z-0">
-                   <span class="bg-gray-50 dark:bg-[#0a0f16] px-4 text-sm font-bold text-orange-600 dark:text-orange-400 absolute left-1/2 -top-3 -translate-x-1/2 whitespace-nowrap">
+                   <span class="bg-gray-50 dark:bg-[#0a0f16] px-4 text-sm font-bold text-red-600 dark:text-red-400 absolute left-1/2 -top-3 -translate-x-1/2 whitespace-nowrap">
                      {{ recommendedProducts.length === 0 ? 'ไม่มีสินค้าที่ฟิตพอดีเป๊ะ แต่เรามีทางเลือกที่ใกล้เคียงที่สุด' : 'ทางเลือกที่ใกล้เคียง (หากเพิ่มพื้นที่ได้อีกนิด)' }}
                    </span>
                 </div>
 
                 <div class="group bg-white dark:bg-gray-800 rounded-3xl shadow-sm border overflow-hidden hover:shadow-xl transition-all duration-300"
-                   :class="item.fit.fits ? 'border-gray-100 dark:border-gray-700/80' : 'border-orange-200 dark:border-orange-800/50 relative'">
+                   :class="item.fit.fits ? 'border-gray-100 dark:border-gray-700/80' : 'border-red-200 dark:border-red-800/50 relative'">
                 
                 <!-- Badge for Alternative Products -->
-                <div v-if="!item.fit.fits" class="absolute top-0 right-0 bg-orange-500 text-white text-[10px] font-bold px-3 py-1 rounded-bl-lg shadow-sm z-10 flex items-center gap-1">
+                <div v-if="!item.fit.fits" class="absolute top-0 right-0 bg-red-500 text-white text-[10px] font-bold px-3 py-1 rounded-bl-lg shadow-sm z-10 flex items-center gap-1">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" /></svg>
                   ต้องการพื้นที่เพิ่ม
                 </div>
@@ -426,7 +426,7 @@
                 <div class="flex flex-col md:flex-row">
                   <!-- Image Box -->
                   <div class="md:w-[200px] lg:w-[240px] shrink-0 p-4 bg-gray-50/50 dark:bg-black/20 flex flex-col items-center justify-center relative overflow-hidden">
-                    <div v-if="item.fit.fits && index === 0" class="absolute top-3 left-3 bg-gradient-to-r from-amber-400 to-orange-500 text-white text-[10px] font-bold px-2.5 py-1 rounded-full shadow-sm z-10 flex items-center gap-1.5">
+                    <div v-if="item.fit.fits && index === 0" class="absolute top-3 left-3 bg-gradient-to-r from-blue-400 to-blue-500 text-white text-[10px] font-bold px-2.5 py-1 rounded-full shadow-sm z-10 flex items-center gap-1.5">
                       <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
                       คุ้มค่าที่สุด
                     </div>
@@ -461,7 +461,7 @@
                         <p class="text-xs text-gray-500 dark:text-gray-400 font-medium leading-relaxed">
                           ขนาดสินค้า: กว้าง {{ item.dims.w.toFixed(2) }} x ลึก {{ item.dims.l.toFixed(2) }} x สูง {{ item.dims.h.toFixed(2) }} ม.
                         </p>
-                        <p class="text-[11px] font-semibold" :class="item.fit.fits ? 'text-emerald-600 dark:text-emerald-400' : 'text-orange-600 dark:text-orange-400'">
+                        <p class="text-[11px] font-semibold" :class="item.fit.fits ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'">
                           {{ item.fit.reason }}
                         </p>
                       </div>
@@ -484,7 +484,7 @@
                             <span class="text-gray-700 dark:text-gray-300 font-medium">ค่าบริการช่างติดตั้ง 
                               <span v-if="item.cost.isSelfInstall" class="text-[10px] text-teal-600 ml-1">(ลูกค้าติดตั้งเอง)</span>
                               <span v-else-if="item.cost.isFreeInstallBkk" class="text-[10px] text-teal-600 ml-1">(ฟรี กทม.และปริมณฑล)</span>
-                              <span v-else-if="item.cost.isFixedCost" class="text-[10px] text-orange-500 ml-1">(ราคาเหมา)</span>
+                              <span v-else-if="item.cost.isFixedCost" class="text-[10px] text-blue-500 ml-1">(ราคาเหมา)</span>
                             </span>
                             <span class="font-bold text-gray-900 dark:text-white group-hover/line:text-emerald-500 transition-colors">
                               <span v-if="item.cost.isSelfInstall || item.cost.isFreeInstallBkk">฿0</span>
@@ -578,7 +578,7 @@ const { setMeta, setStructuredData } = useSEO()
 onMounted(() => {
   setMeta({
     title: 'คำนวณพื้นที่จัดเก็บ (Space Calculator)',
-    description: 'โปรแกรมคำนวณพื้นที่ติดตั้งและค้นหาขนาดบ้านเก็บของที่พอดีกับพื้นที่ของคุณแบบอัตโนมัติ',
+    description: settingsStore.storeDescription || 'โปรแกรมคำนวณพื้นที่ติดตั้งและค้นหาขนาดสินค้าที่พอดีกับพื้นที่ของคุณแบบอัตโนมัติ',
     canonicalUrl: window.location.href,
     type: 'website'
   })

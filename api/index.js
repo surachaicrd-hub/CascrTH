@@ -13,7 +13,7 @@ const path = require('path');
 
 const app = express();
 app.set('trust proxy', 1);
-const PORT = process.env.PORT || 8080;
+const PORT = process.env.PORT || 8201;
 
 // ========== Startup Validation ==========
 const requiredEnvVars = ['JWT_SECRET'];
@@ -59,8 +59,11 @@ app.use('/api', limiter);
 app.use(compression());
 // CORS — restrict allowed origins in production
 const allowedOrigins = [
+    'http://localhost:8200',
+    'http://127.0.0.1:8200',
+    'http://localhost:8201',
+    'http://127.0.0.1:8201',
     'http://localhost:8000',
-    'http://127.0.0.1:8000',
     'http://localhost:8080'
 ];
 
@@ -145,7 +148,7 @@ app.use('/api/analytics', require('./routes/analytics'));
 app.get(['/api/sitemap/ping-bing', '/ping-bing'], async (req, res) => {
     try {
         const protocol = req.headers['x-forwarded-proto'] || req.protocol || 'https';
-        const host = req.headers['x-forwarded-host'] || req.headers.host || 'บ้านเก็บของ.com';
+        const host = req.headers['x-forwarded-host'] || req.headers.host || 'localhost';
         const siteUrl = process.env.SITE_URL || `${protocol}://${host}`;
 
         const { notifyIndexNow } = require('./services/indexNowService');
@@ -284,9 +287,20 @@ app.get(['/uploads/cache/:filename', '/uploads/:subfolder/cache/:filename'], asy
             fs.mkdirSync(currentCacheDir, { recursive: true });
         }
 
-        await sharp(originalFilePath)
-            .resize({ width: targetWidth, withoutEnlargement: true })
-            .toFile(cachedFilePath);
+        let sharpTransform = sharp(originalFilePath)
+            .rotate()
+            .resize({ width: targetWidth, withoutEnlargement: true, kernel: 'lanczos3' });
+
+        const extLower = ext.toLowerCase();
+        if (extLower === '.webp') {
+            sharpTransform = sharpTransform.webp({ quality: 90, effort: 4, smartSubsample: true });
+        } else if (extLower === '.png') {
+            sharpTransform = sharpTransform.png({ compressionLevel: 8, quality: 95 });
+        } else if (extLower === '.jpg' || extLower === '.jpeg') {
+            sharpTransform = sharpTransform.jpeg({ quality: 90, mozjpeg: true });
+        }
+
+        await sharpTransform.toFile(cachedFilePath);
 
         res.setHeader('Cache-Control', 'public, max-age=2592000'); // 30 days
         return res.sendFile(cachedFilePath);
@@ -333,10 +347,21 @@ app.get('/uploads/:filename', async (req, res, next) => {
     }
 
     try {
-        // Resize using sharp, preserving aspect ratio
-        await sharp(originalFilePath)
-            .resize({ width: targetWidth, withoutEnlargement: true })
-            .toFile(cachedFilePath);
+        // Resize using sharp with Lanczos3, preserving aspect ratio and high fidelity
+        let dynamicTransform = sharp(originalFilePath)
+            .rotate()
+            .resize({ width: targetWidth, withoutEnlargement: true, kernel: 'lanczos3' });
+
+        const extLower = ext.toLowerCase();
+        if (extLower === '.webp') {
+            dynamicTransform = dynamicTransform.webp({ quality: 90, effort: 4, smartSubsample: true });
+        } else if (extLower === '.png') {
+            dynamicTransform = dynamicTransform.png({ compressionLevel: 8, quality: 95 });
+        } else if (extLower === '.jpg' || extLower === '.jpeg') {
+            dynamicTransform = dynamicTransform.jpeg({ quality: 90, mozjpeg: true });
+        }
+
+        await dynamicTransform.toFile(cachedFilePath);
 
         return res.sendFile(cachedFilePath);
     } catch (err) {

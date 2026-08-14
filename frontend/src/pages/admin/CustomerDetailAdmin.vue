@@ -159,7 +159,7 @@ onMounted(() => {
         กลับไปหน้ารายการ
       </button>
       <div class="flex items-center gap-2">
-        <button v-if="profile" @click="toggleBlacklist" class="flex items-center gap-2 transition-colors font-bold text-sm px-4 py-2 rounded-xl" :class="profile.is_blacklisted ? 'text-gray-500 hover:text-emerald-600 hover:bg-emerald-50' : 'text-orange-600 hover:text-orange-700 hover:bg-orange-50'">
+        <button v-if="profile" @click="toggleBlacklist" class="flex items-center gap-2 transition-colors font-bold text-sm px-4 py-2 rounded-xl" :class="profile.is_blacklisted ? 'text-gray-500 hover:text-emerald-600 hover:bg-emerald-50' : 'text-blue-600 hover:text-blue-700 hover:bg-blue-50'">
           <svg v-if="profile.is_blacklisted" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
           <svg v-else class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" /></svg>
           {{ profile.is_blacklisted ? 'ปลดบัญชีดำ' : 'ขึ้นบัญชีดำ' }}

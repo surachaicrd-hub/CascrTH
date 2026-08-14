@@ -13,7 +13,16 @@ import { apiFetch } from '../../utils/apiFetch'
 import AdminCategoryDropdown from '../../components/admin/AdminCategoryDropdown.vue'
 import AdminCategoryMultiDropdown from '../../components/admin/AdminCategoryMultiDropdown.vue'
 import ProductCard from '../../components/ProductCard.vue'
+import WireSample from '../../components/ui/WireSample.vue'
 import { useSettingsStore } from '../../stores/settingsStore'
+import { 
+  defaultWireTypeGroups, 
+  defaultWirePresets, 
+  parseWireTypeGroups, 
+  parseWirePresets, 
+  wireDefaultTitles, 
+  getWireSampleTitle 
+} from '../../utils/wire'
 
 const settingsStore = useSettingsStore()
 
@@ -115,12 +124,26 @@ const form = ref({
   compare_enabled: true,
   card_features: {
     enabled: true,
-    show_stack: true,
-    show_badge: true,
-    show_bottom_bar: true,
-    stack: [],
-    badge: { icon: '', text1: '', text2: '' },
-    bottom_bar: []
+    top_badge: '',
+    model_name: '',
+    subtitle: '',
+    spec_range: '',
+    capabilities: [
+      { id: 'cut', label: 'ตัด', icon: 'cut', enabled: true },
+      { id: 'strip_end', label: 'ปอกปลาย', icon: 'strip_end', enabled: true },
+      { id: 'strip_mid', label: 'ปอกกลางสาย', icon: 'strip_mid', enabled: true },
+      { id: 'twist', label: 'ปั่นเกลียว', icon: 'twist', enabled: false },
+      { id: 'ribbon', label: 'แยกสายแพ', icon: 'ribbon', enabled: false }
+    ],
+    summary: '',
+    wire_samples: [
+      { type: 'single_black', title: 'สายเดี่ยวสีดำ' },
+      { type: 'single_blue', title: 'สายเดี่ยวสีน้ำเงิน' },
+      { type: 'single_grey', title: 'สายเดี่ยวสีเทา' }
+    ],
+    wire_sample_image: '',
+    service_call: '',
+    hotline: ''
   }
 })
 
@@ -138,31 +161,18 @@ const previewProduct = computed(() => {
   const mainImg = (allImages.value && allImages.value.length > 0) ? allImages.value[0] : (form.value.image_url || '')
   return {
     id: productId.value || 999999,
-    name: form.value.name || 'ชื่อสินค้าตัวอย่าง',
-    title: form.value.name || 'ชื่อสินค้าตัวอย่าง',
+    name: form.value.name || 'เครื่องตัดปอกสายไฟอัตโนมัติ',
+    title: form.value.name || 'เครื่องตัดปอกสายไฟอัตโนมัติ',
+    sku: form.value.sku || 'C300A',
+    category: form.value.category || 'CASTING',
     price: form.value.price || 0,
     original_price: form.value.original_price || 0,
     image_url: mainImg,
     images: allImages.value && allImages.value.length > 0 ? allImages.value : (mainImg ? [mainImg] : []),
     slug: form.value.slug || '',
-    category: form.value.category || '',
-    badge_free_shipping: form.value.badge_free_shipping,
-    free_shipping_bkk: form.value.free_shipping_bkk,
-    badge_warranty: form.value.badge_warranty,
-    badge_installation: form.value.badge_installation,
-    badge_new: form.value.badge_new,
-    badge_bestseller: form.value.badge_bestseller,
-    badge_recommended: form.value.badge_recommended,
-    badges: form.value.badges || [],
-    card_features: form.value.card_features || {
-      enabled: true,
-      show_stack: true,
-      show_badge: true,
-      show_bottom_bar: true,
-      stack: [],
-      badge: { icon: '', text1: '', text2: '' },
-      bottom_bar: []
-    }
+    short_description: form.value.short_description || '',
+    attributes: form.value.attributes || [],
+    card_features: form.value.card_features || {}
   }
 })
 
@@ -346,15 +356,8 @@ const handleFullSeoGeoAutoFix = async () => {
       if (payload.seo_keywords) form.value.seo_keywords = payload.seo_keywords
       if (payload.llm_context) form.value.llm_context = payload.llm_context
       if (payload.image_alt) form.value.image_alt = payload.image_alt
-      
-      if (Array.isArray(payload.attributes) && payload.attributes.length > 0) {
-        form.value.attributes = payload.attributes.map(a => ({ name: a.name || a.key, value: a.value }))
-      }
-      if (Array.isArray(payload.faq) && payload.faq.length > 0) {
-        form.value.faq = payload.faq.map(f => ({ question: f.question || f.q, answer: f.answer || f.a }))
-      }
 
-      showToast('ยกระดับและเติมเต็มข้อมูลสินค้าทั้ง 12 SEO & GEO Layers เรียบร้อยแล้ว!', 'success')
+      showToast('สร้างข้อมูล SEO และ AI Context เรียบร้อยแล้ว!', 'success')
     } else {
       showToast(data.error || 'ไม่สามารถประมวลผล AI SEO & GEO ได้', 'error')
     }
@@ -522,6 +525,7 @@ onMounted(async () => {
   await loadCategories()
   await loadAllProductsForSelect()
   await loadBadges()
+  await loadMasterWireData()
   
   if (route.params.id) {
     isEdit.value = true
@@ -566,33 +570,41 @@ const syncAttributesWithTemplate = () => {
   
   const existingAttrsMap = new Map()
   form.value.attributes.forEach(attr => {
-    if (attr && attr.key) existingAttrsMap.set(attr.key, attr)
+    if (attr && attr.key) {
+      existingAttrsMap.set(attr.key.trim().toLowerCase(), attr)
+    }
   })
   
   const newAttributes = []
   
   // Add template attributes
   categoryTemplates.value.forEach(template => {
-    const existing = existingAttrsMap.get(template.attribute_key)
+    const keyLower = template.attribute_key ? template.attribute_key.trim().toLowerCase() : ''
+    const labelLower = template.attribute_label ? template.attribute_label.trim().toLowerCase() : ''
+    const existing = (keyLower ? existingAttrsMap.get(keyLower) : null) || (labelLower ? existingAttrsMap.get(labelLower) : null)
+    
     newAttributes.push({
       key: template.attribute_key,
       value: existing ? existing.value : '',
       isTemplate: true,
       label: template.attribute_label,
       type: template.attribute_type,
-      options: template.options ? JSON.parse(template.options) : [],
+      options: template.options ? (typeof template.options === 'string' ? JSON.parse(template.options) : template.options) : [],
       required: template.is_required
     })
-    existingAttrsMap.delete(template.attribute_key)
+    if (keyLower) existingAttrsMap.delete(keyLower)
+    if (labelLower) existingAttrsMap.delete(labelLower)
   })
   
   // Append custom attributes
   existingAttrsMap.forEach(attr => {
-    newAttributes.push({
-      key: attr.key,
-      value: attr.value,
-      isTemplate: false
-    })
+    if (attr && (attr.key?.trim() || attr.value?.trim())) {
+      newAttributes.push({
+        key: attr.key,
+        value: attr.value,
+        isTemplate: false
+      })
+    }
   })
   
   // If empty and no templates, add a blank row
@@ -693,17 +705,75 @@ const loadProduct = async () => {
       if (!p.related_products) p.related_products = []
 
       // Ensure card_features has default structure
-      if (!p.card_features) {
-        p.card_features = { enabled: true, show_stack: true, show_badge: true, show_bottom_bar: true, stack: [], badge: { icon: '', text1: '', text2: '' }, bottom_bar: [] }
-      } else {
-        if (p.card_features.enabled === undefined) p.card_features.enabled = true
-        if (p.card_features.show_stack === undefined) p.card_features.show_stack = true
-        if (p.card_features.show_badge === undefined) p.card_features.show_badge = true
-        if (p.card_features.show_bottom_bar === undefined) p.card_features.show_bottom_bar = true
-        if (!p.card_features.stack) p.card_features.stack = []
-        if (!p.card_features.badge) p.card_features.badge = { icon: '', text1: '', text2: '' }
-        if (!p.card_features.bottom_bar) p.card_features.bottom_bar = []
+      if (!p.card_features || typeof p.card_features !== 'object') {
+        p.card_features = {}
       }
+      if (p.card_features.enabled === undefined) p.card_features.enabled = true
+      if (!p.card_features.top_badge) p.card_features.top_badge = p.category || 'CASTING'
+      if (!p.card_features.model_name) p.card_features.model_name = p.sku || ''
+      if (!p.card_features.subtitle) p.card_features.subtitle = 'เครื่องตัดปลอกสายไฟ KODERA'
+      if (!p.card_features.spec_range) {
+        if (p.attributes) {
+          try {
+            const attrs = typeof p.attributes === 'string' ? JSON.parse(p.attributes) : p.attributes
+            const f = attrs?.find(a => a.key?.includes('ขนาดสายไฟ') || a.value?.includes('AWG'))
+            if (f) p.card_features.spec_range = f.value
+          } catch(e) {}
+        }
+      }
+      if (!p.card_features.capabilities || !Array.isArray(p.card_features.capabilities) || p.card_features.capabilities.length === 0) {
+        const m = (p.sku || p.name || '').toUpperCase()
+        if (m.includes('371AF') || m.includes('371AG')) {
+          p.card_features.capabilities = [
+            { id: 'cut', label: 'ตัด', icon: 'cut', enabled: true },
+            { id: 'strip_end', label: 'ปอกปลาย', icon: 'strip_end', enabled: true },
+            { id: 'strip_mid', label: 'ปอกกลางสาย', icon: 'strip_mid', enabled: true },
+            { id: 'twist', label: 'ปั่นเกลียว', icon: 'twist', enabled: true },
+            { id: 'ribbon', label: 'แยกสายแพ', icon: 'ribbon', enabled: true }
+          ]
+        } else if (m.includes('371G') || m.includes('371')) {
+          p.card_features.capabilities = [
+            { id: 'cut', label: 'ตัด', icon: 'cut', enabled: true },
+            { id: 'strip_end', label: 'ปอกปลาย', icon: 'strip_end', enabled: true },
+            { id: 'strip_mid', label: 'ปอกกลางสาย', icon: 'strip_mid', enabled: true },
+            { id: 'twist', label: 'ปั่นเกลียว', icon: 'twist', enabled: true }
+          ]
+        } else {
+          p.card_features.capabilities = [
+            { id: 'cut', label: 'ตัด', icon: 'cut', enabled: true },
+            { id: 'strip_end', label: 'ปอกปลาย', icon: 'strip_end', enabled: true },
+            { id: 'strip_mid', label: 'ปอกกลางสาย', icon: 'strip_mid', enabled: true }
+          ]
+        }
+      }
+      if (!p.card_features.wire_samples || !Array.isArray(p.card_features.wire_samples) || p.card_features.wire_samples.length === 0) {
+        const m = (p.sku || p.name || '').toUpperCase()
+        if (m.includes('371AF') || m.includes('371AG')) {
+          p.card_features.wire_samples = [
+            { type: 'flat_ribbon_grey', title: 'สายแพแบนสีเทา' },
+            { type: 'flat_ribbon_rainbow', title: 'สายแพแบนสีรุ้ง' }
+          ]
+        } else if (m.includes('371G')) {
+          p.card_features.wire_samples = [
+            { type: 'single_black', title: 'สายเดี่ยวสีดำ' },
+            { type: 'single_grey', title: 'สายเดี่ยวสีเทา' },
+            { type: 'twisted_pair', title: 'สายตีเกลียว' }
+          ]
+        } else if (m.includes('370G')) {
+          p.card_features.wire_samples = [
+            { type: 'single_black', title: 'สายเดี่ยวสีดำ' },
+            { type: 'single_grey', title: 'สายเดี่ยวสีเทา' },
+            { type: 'ground_yellow_green', title: 'สายดินเขียว-เหลือง' }
+          ]
+        } else {
+          p.card_features.wire_samples = [
+            { type: 'single_black', title: 'สายเดี่ยวสีดำ' },
+            { type: 'single_blue', title: 'สายเดี่ยวสีน้ำเงิน' },
+            { type: 'single_grey', title: 'สายเดี่ยวสีเทา' }
+          ]
+        }
+      }
+      if (!p.card_features.summary) p.card_features.summary = p.short_description || ''
 
       // ── Single assign to form.value (without attributes — will be synced via template) ──
       const { attributes: rawAttributes, ...restData } = p
@@ -803,8 +873,8 @@ const generateSEO = async () => {
 }
 
 const generateAttributes = async () => {
-  if (!form.value.description && !form.value.name) {
-    showToast('กรุณากรอกชื่อและรายละเอียดสินค้าก่อนให้ AI สร้างสเปก', 'warning')
+  if (!form.value.description && !form.value.name && !form.value.short_description) {
+    showToast('กรุณากรอกชื่อหรือรายละเอียดสินค้าก่อนให้ AI ดึงสเปก', 'warning')
     return
   }
 
@@ -815,17 +885,24 @@ const generateAttributes = async () => {
       body: JSON.stringify({
         productName: form.value.name,
         category: form.value.category,
-        description: form.value.description || ''
+        categories: form.value.categories,
+        shortDescription: form.value.short_description || '',
+        description: form.value.description || '',
+        sku: form.value.sku || '',
+        size: form.value.size || '',
+        price: form.value.price || '',
+        remarks: form.value.remarks || ''
       })
     })
 
     const data = await res.json()
     if (data.success && data.data && Array.isArray(data.data)) {
-      form.value.attributes = data.data
+      const validAttrs = data.data.filter(a => (a.key && String(a.key).trim()) || (a.value && String(a.value).trim()))
+      form.value.attributes = validAttrs
       if (categoryTemplates.value && categoryTemplates.value.length > 0) {
         syncAttributesWithTemplate()
       }
-      showToast('AI สร้างตารางสเปกสินค้าสำเร็จแล้ว', 'success')
+      showToast('AI ดึงสเปกสินค้าอัตโนมัติสำเร็จแล้ว (' + validAttrs.length + ' รายการ)', 'success')
     } else {
       showToast(data.error || 'AI ไม่สามารถสร้างข้อมูลได้', 'error')
     }
@@ -872,6 +949,193 @@ const generateFaq = async () => {
     showToast('เกิดข้อผิดพลาดในการเชื่อมต่อ AI', 'error')
   } finally {
     aiGeneratingFaq.value = false
+  }
+}
+
+const standardCapabilities = [
+  { id: 'cut', label: 'ตัด', icon: 'cut' },
+  { id: 'strip_end', label: 'ปอกปลาย', icon: 'strip_end' },
+  { id: 'strip_mid', label: 'ปอกกลางสาย', icon: 'strip_mid' },
+  { id: 'twist', label: 'ปั่นเกลียว', icon: 'twist' },
+  { id: 'ribbon', label: 'แยกสายแพ', icon: 'ribbon' }
+]
+
+const toggleCapability = (capId) => {
+  if (!form.value.card_features.capabilities) form.value.card_features.capabilities = []
+  const existing = form.value.card_features.capabilities.find(c => (c.id || c.icon) === capId)
+  if (existing) {
+    existing.enabled = !existing.enabled
+  } else {
+    const std = standardCapabilities.find(s => s.id === capId)
+    if (std) {
+      form.value.card_features.capabilities.push({ ...std, enabled: true })
+    }
+  }
+}
+
+const isCapabilityEnabled = (capId) => {
+  if (!form.value.card_features?.capabilities) return false
+  const found = form.value.card_features.capabilities.find(c => (c.id || c.icon) === capId)
+  return found ? found.enabled !== false : false
+}
+
+const addCustomCapability = () => {
+  if (!form.value.card_features.capabilities) form.value.card_features.capabilities = []
+  form.value.card_features.capabilities.push({
+    id: 'custom_' + Date.now(),
+    label: 'ฟังก์ชันใหม่',
+    icon: 'cut',
+    enabled: true
+  })
+}
+
+const removeCapability = (idx) => {
+  form.value.card_features.capabilities.splice(idx, 1)
+}
+
+const autoDetectSpecFromAttributes = () => {
+  if (form.value.attributes && form.value.attributes.length > 0) {
+    const found = form.value.attributes.find(a => 
+      a.key?.includes('ขนาดสายไฟ') || a.value?.includes('AWG') || a.key?.includes('สเปก')
+    )
+    if (found && found.value) {
+      form.value.card_features.spec_range = found.value
+      showToast('ดึงขนาดสายไฟจาก Attributes สำเร็จ', 'success')
+      return
+    }
+  }
+  if (form.value.size) {
+    form.value.card_features.spec_range = form.value.size
+    showToast('ดึงขนาดจากข้อมูลสินค้าสำเร็จ', 'success')
+    return
+  }
+  showToast('ไม่พบข้อมูลขนาดสายไฟใน Attributes', 'warning')
+}
+
+const autoFillSummaryFromDescription = () => {
+  if (form.value.short_description) {
+    form.value.card_features.summary = form.value.short_description
+    showToast('คัดลอกจากคำอธิบายย่อเรียบร้อย', 'success')
+  } else if (form.value.description) {
+    const clean = form.value.description.replace(/<[^>]*>?/gm, '').trim().slice(0, 120)
+    form.value.card_features.summary = clean
+    showToast('สร้างสรุปจากรายละเอียดเรียบร้อย', 'success')
+  } else {
+    showToast('ยังไม่มีคำอธิบายสินค้า', 'warning')
+  }
+}
+
+const wireTypeOptions = ref(parseWireTypeGroups(null))
+const wirePresets = ref(parseWirePresets(null))
+
+const loadMasterWireData = async () => {
+  try {
+    const res = await apiFetch('/api/settings/public')
+    const json = await res.json()
+    if (json.success && json.data) {
+      if (json.data.wire_master_types) {
+        wireTypeOptions.value = parseWireTypeGroups(json.data.wire_master_types)
+      }
+      if (json.data.wire_presets) {
+        wirePresets.value = parseWirePresets(json.data.wire_presets)
+      }
+    }
+  } catch (e) {
+    console.error('Error loading master wire data:', e)
+  }
+}
+
+const applyWirePreset = (preset) => {
+  form.value.card_features.wire_samples = JSON.parse(JSON.stringify(preset.samples))
+  showToast(`นำเข้าตัวอย่างสายไฟชุด "${preset.name}" สำเร็จ`, 'success')
+}
+
+const addWireSample = (type = 'single_black', title = '', image = '') => {
+  if (!form.value.card_features.wire_samples) form.value.card_features.wire_samples = []
+  form.value.card_features.wire_samples.push({
+    type,
+    title: title || wireDefaultTitles[type] || 'ตัวอย่างสายไฟ',
+    image: image || ''
+  })
+}
+
+const addCustomImageWireSample = () => {
+  addWireSample('custom_image', 'สายไฟกำหนดเอง', '')
+}
+
+const removeWireSample = (idx) => {
+  form.value.card_features.wire_samples.splice(idx, 1)
+}
+
+const moveWireSample = (idx, direction) => {
+  const list = form.value.card_features.wire_samples
+  const targetIdx = idx + direction
+  if (targetIdx < 0 || targetIdx >= list.length) return
+  const item = list.splice(idx, 1)[0]
+  list.splice(targetIdx, 0, item)
+}
+
+const duplicateWireSample = (idx) => {
+  const item = form.value.card_features.wire_samples[idx]
+  if (!item) return
+  const clone = JSON.parse(JSON.stringify(item))
+  clone.title = `${clone.title || 'ตัวอย่างสายไฟ'} (สำเนา)`
+  form.value.card_features.wire_samples.splice(idx + 1, 0, clone)
+  showToast('คัดลอกรายการสายไฟแล้ว', 'success')
+}
+
+const clearAllWireSamples = async () => {
+  if (!form.value.card_features.wire_samples || form.value.card_features.wire_samples.length === 0) return
+  const ok = await showConfirm({
+    title: 'ล้างรายการสายไฟทั้งหมด',
+    message: 'คุณแน่ใจหรือไม่ว่าต้องการลบรายการตัวอย่างสายไฟทั้งหมดในการ์ดนี้?',
+    confirmText: 'ล้างทั้งหมด',
+    type: 'danger'
+  })
+  if (ok) {
+    form.value.card_features.wire_samples = []
+    showToast('ล้างรายการสายไฟเรียบร้อยแล้ว', 'info')
+  }
+}
+
+const onWireTypeChange = (sample, newType) => {
+  const currentTitle = sample.title ? sample.title.trim() : ''
+  // If title is empty or matches one of default titles, update to new default title
+  const isDefaultOrEmpty = !currentTitle || Object.values(wireDefaultTitles).includes(currentTitle)
+  if (isDefaultOrEmpty && wireDefaultTitles[newType]) {
+    sample.title = wireDefaultTitles[newType]
+  }
+}
+
+const uploadingWireIdx = ref(null)
+
+const handleWireSampleUpload = async (event, sIdx) => {
+  const file = event.target.files?.[0]
+  if (!file) return
+  uploadingWireIdx.value = sIdx
+  try {
+    await uploadFile(file, (url) => {
+      if (form.value.card_features.wire_samples[sIdx]) {
+        form.value.card_features.wire_samples[sIdx].image = url
+        if (form.value.card_features.wire_samples[sIdx].type !== 'custom_image') {
+          form.value.card_features.wire_samples[sIdx].type = 'custom_image'
+        }
+        showToast('อัปโหลดรูปภาพสายไฟสำเร็จ', 'success')
+      }
+    })
+  } catch (err) {
+    console.error('Wire image upload error:', err)
+    showToast('อัปโหลดรูปภาพไม่สำเร็จ', 'error')
+  } finally {
+    uploadingWireIdx.value = null
+    event.target.value = ''
+  }
+}
+
+const removeWireSampleImage = (sIdx) => {
+  if (form.value.card_features.wire_samples[sIdx]) {
+    form.value.card_features.wire_samples[sIdx].image = ''
+    showToast('นำรูปภาพออกแล้ว', 'info')
   }
 }
 
@@ -926,15 +1190,17 @@ const formatDescriptionSEO = async () => {
       body: JSON.stringify({
         productName: form.value.name,
         category: form.value.category,
+        categories: form.value.categories,
+        sku: form.value.sku,
+        size: form.value.size,
         description: form.value.description
       })
     })
 
     const data = await res.json()
-    if (data.success) {
+    if (data.success && data.data) {
       form.value.description = data.data
-      
-      showToast('AI จัดรูปแบบเนื้อหาเรียบร้อยแล้ว', 'success')
+      showToast('AI จัดฟอร์แมตโครงสร้างเนื้อหา SEO สำเร็จแล้ว', 'success')
     } else {
       showToast(data.error || 'เกิดข้อผิดพลาดในการจัดรูปแบบ', 'error')
     }
@@ -1218,151 +1484,6 @@ const saveProduct = async () => {
   }
 }
 
-// AI Auto-fill Basic Info from Description
-const aiAutoFillBasic = ref(false)
-
-const autoFillBasicFromDescription = async () => {
-  // Collect all available text from the form to feed AI
-  const parts = []
-  if (form.value.name) parts.push('ชื่อสินค้า: ' + form.value.name)
-  if (form.value.description) {
-    // Strip HTML tags for cleaner input
-    const plainDesc = form.value.description.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim()
-    if (plainDesc) parts.push('รายละเอียด: ' + plainDesc)
-  }
-  if (form.value.short_description) parts.push('รายละเอียดย่อ: ' + form.value.short_description)
-  if (form.value.remarks) parts.push('หมายเหตุ: ' + form.value.remarks)
-  if (form.value.llm_context) parts.push('ข้อมูลเพิ่มเติม: ' + form.value.llm_context)
-  if (form.value.category) parts.push('หมวดหมู่: ' + form.value.category)
-  if (form.value.size) parts.push('ขนาด: ' + form.value.size)
-  if (form.value.sku) parts.push('SKU: ' + form.value.sku)
-
-  // Also gather existing attributes
-  if (Array.isArray(form.value.attributes)) {
-    const attrText = form.value.attributes
-      .filter(a => a && a.key && a.value)
-      .map(a => `${a.key}: ${a.value}`)
-      .join(', ')
-    if (attrText) parts.push('สเปก: ' + attrText)
-  }
-
-  const rawText = parts.join('\n')
-  if (rawText.length < 20) {
-    showToast('กรุณากรอกรายละเอียดสินค้าในแท็บ "รายละเอียดสินค้า" หรือ "สเปกสินค้า" ก่อน แล้วค่อยใช้ AI ช่วยกรอกข้อมูลอัตโนมัติ', 'warning')
-    return
-  }
-
-  aiAutoFillBasic.value = true
-  try {
-    const res = await apiFetch('/api/ai/extract-product-all', {
-      method: 'POST',
-      body: JSON.stringify({ rawText, knownCategory: form.value.category })
-    })
-
-    const data = await res.json()
-    if (data.success && data.data) {
-      const extracted = data.data
-      let filledCount = 0
-
-      if (extracted.name) { form.value.name = extracted.name; filledCount++ }
-      // Auto-fill image alt with product name for SEO
-      if (extracted.name && !form.value.image_alt) form.value.image_alt = extracted.name
-      if (extracted.sku) { form.value.sku = extracted.sku; filledCount++ }
-      if (extracted.price) { form.value.price = extracted.price; filledCount++ }
-      if (extracted.original_price) { form.value.original_price = extracted.original_price; filledCount++ }
-      if (extracted.slug) { form.value.slug = extracted.slug; filledCount++ }
-      if (extracted.category && extracted.category !== form.value.category) {
-        const catObj = categories.value.find(c => c.name === extracted.category)
-        if (catObj) form.value.category = catObj.name
-        else form.value.category = extracted.category
-        await loadCategoryTemplates(form.value.category)
-        filledCount++
-      } else if (!extracted.category && form.value.category) {
-        // Just ensure templates are loaded if we already have a category
-        if (categoryTemplates.value.length === 0) {
-          await loadCategoryTemplates(form.value.category)
-        }
-      }
-      if (extracted.size) { form.value.size = extracted.size; filledCount++ }
-      if (extracted.weight_kg !== undefined && extracted.weight_kg !== null) { form.value.weight_kg = extracted.weight_kg; filledCount++ }
-      if (extracted.width_cm !== undefined && extracted.width_cm !== null) { form.value.width_cm = extracted.width_cm; filledCount++ }
-      if (extracted.length_cm !== undefined && extracted.length_cm !== null) { form.value.length_cm = extracted.length_cm; filledCount++ }
-      if (extracted.height_cm !== undefined && extracted.height_cm !== null) { form.value.height_cm = extracted.height_cm; filledCount++ }
-      if (extracted.short_description) { form.value.short_description = extracted.short_description; filledCount++ }
-      if (extracted.remarks) { form.value.remarks = extracted.remarks; filledCount++ }
-      if (extracted.description) { form.value.description = extracted.description; filledCount++ }
-      if (extracted.seo_title) { form.value.seo_title = extracted.seo_title; filledCount++ }
-      if (extracted.seo_description) { form.value.seo_description = extracted.seo_description; filledCount++ }
-      if (extracted.seo_keywords) { form.value.seo_keywords = extracted.seo_keywords; filledCount++ }
-      if (extracted.llm_context) { form.value.llm_context = extracted.llm_context; filledCount++ }
-
-      // Badges
-      if (extracted.badge_free_shipping === true) { form.value.badge_free_shipping = true; filledCount++ }
-      if (extracted.free_shipping_bkk === true) { form.value.free_shipping_bkk = true; filledCount++ }
-      if (extracted.requires_foundation === false) { form.value.requires_foundation = false; filledCount++ }
-      if (extracted.badge_warranty === true) { form.value.badge_warranty = true; filledCount++ }
-      if (extracted.badge_installation === true) { form.value.badge_installation = true; filledCount++ }
-      if (extracted.badge_new === true) { form.value.badge_new = true; filledCount++ }
-      if (extracted.badge_bestseller === true) { form.value.badge_bestseller = true; filledCount++ }
-
-      // Images
-      if (extracted.image_url && typeof extracted.image_url === 'string') {
-        form.value.image_url = extracted.image_url
-        if (!allImages.value.includes(extracted.image_url)) {
-          allImages.value.unshift(extracted.image_url)
-        }
-        filledCount++
-      }
-      if (Array.isArray(extracted.images)) {
-        extracted.images.forEach(img => {
-          if (img && typeof img === 'string' && !allImages.value.includes(img)) {
-            allImages.value.push(img)
-          }
-        })
-      }
-
-      // Attributes
-      if (Array.isArray(extracted.attributes) && extracted.attributes.length > 0) {
-        if (form.value.attributes.length === 1 && !form.value.attributes[0].key) {
-          form.value.attributes = extracted.attributes
-        } else {
-          extracted.attributes.forEach(attr => {
-            const attrKey = attr.key ? String(attr.key).trim() : ''
-            const existing = form.value.attributes.find(a => 
-              a.key === attrKey || 
-              a.label === attrKey ||
-              (a.label && attrKey && a.label.includes(attrKey)) ||
-              (a.key && attrKey && attrKey.includes(a.key))
-            )
-            if (existing) existing.value = attr.value
-            else form.value.attributes.push({ key: attrKey, value: attr.value, isTemplate: false })
-          })
-        }
-        filledCount++
-      }
-
-      // FAQ
-      if (Array.isArray(extracted.faq) && extracted.faq.length > 0) {
-        if (form.value.faq.length === 1 && !form.value.faq[0].question) {
-          form.value.faq = extracted.faq
-        } else {
-          form.value.faq.push(...extracted.faq)
-        }
-        filledCount++
-      }
-
-      showToast(`AI วิเคราะห์และกรอกข้อมูลอัตโนมัติสำเร็จ! (${filledCount} ช่อง)`, 'success')
-    } else {
-      showToast(data.error || 'AI ไม่สามารถวิเคราะห์ข้อมูลได้', 'error')
-    }
-  } catch (error) {
-    console.error('AI Auto-fill error:', error)
-    showToast('เกิดข้อผิดพลาดในการเชื่อมต่อ AI', 'error')
-  } finally {
-    aiAutoFillBasic.value = false
-  }
-}
-
 // AI Import Feature
 const showAiImportModal = ref(false)
 const rawAiInput = ref('')
@@ -1398,7 +1519,7 @@ const extractFromRaw = async () => {
     })
 
     const data = await res.json()
-    if (data.success && data.data) {
+    if (res.ok && data.success && data.data) {
       const extracted = data.data
       
       // Merge values into form intelligently
@@ -1508,6 +1629,8 @@ const extractFromRaw = async () => {
 
       showToast('AI ดึงข้อมูลทั้งหมดและเติมลงฟอร์มเรียบร้อยแล้ว', 'success')
       showAiImportModal.value = false
+    } else {
+      showToast(data.error || 'ไม่สามารถให้ AI สกัดข้อมูลได้ กรุณาตรวจสอบ API Key ในตั้งค่า', 'error')
     }
   } catch (error) {
     console.error('AI Extraction error:', error)
@@ -1522,12 +1645,15 @@ const openAiGenerateModal = () => {
   
   let highlightsArr = []
   if (form.value.name) highlightsArr.push(`สินค้า: ${form.value.name}`)
+  if (form.value.sku) highlightsArr.push(`รหัส/รุ่น: ${form.value.sku}`)
   if (form.value.category) highlightsArr.push(`หมวดหมู่: ${form.value.category}`)
+  if (form.value.size) highlightsArr.push(`ขนาด/มิติ: ${form.value.size}`)
+  if (form.value.short_description) highlightsArr.push(`สรุปเบื้องต้น: ${form.value.short_description}`)
   
   if (form.value.attributes && form.value.attributes.length > 0) {
     form.value.attributes.forEach(attr => {
-      if (attr.key && attr.value) {
-        highlightsArr.push(`- ${attr.key}: ${attr.value}`)
+      if (attr && (attr.key || attr.label) && attr.value) {
+        highlightsArr.push(`- ${attr.label || attr.key}: ${attr.value}`)
       }
     })
   }
@@ -1548,87 +1674,41 @@ const generateDescriptionWithAI = async () => {
 
   aiGeneratingDescription.value = true
   try {
-    const systemPrompt = `คุณคือผู้เชี่ยวชาญด้านการเขียนคำโฆษณาขาย (Copywriter) และนักจัดทำ SEO (Search Engine Optimization) ระดับมืออาชีพ
-หน้าที่ของคุณคือเขียนบทความแนะนำสินค้าภาษาไทยที่มีพลังดึงดูดใจ กระตุ้นอารมณ์อยากซื้อ และถูกจัดโครงสร้างให้เหมาะสมสำหรับการเก็บดัชนีของ Search Engine (Google SEO On-Page)
-และส่งคืนผลลัพธ์เป็น JSON object ที่ถูกต้องตามโครงสร้างที่ระบุเท่านั้น โดยไม่มีสัญลักษณ์มาร์กดาวน์ \`\`\`json หรือ \`\`\` ล้อมรอบ และไม่มีคำเกริ่นนำหรือเครื่องหมายคำอธิบายเพิ่มเติมใดๆ ทั้งสิ้น
-
-รูปแบบ JSON ที่ต้องส่งคืน:
-{
-  "description": "คำอธิบายรายละเอียดแบบเต็มในรูปแบบ HTML (ใช้โครงสร้าง <h2>, <h3>, ย่อหน้า <p>, รายการจุดเด่น <ul><li>, และตารางเปรียบเทียบหรือตารางสเปกสินค้า <table> ที่สวยงามและสะอาด)",
-  "seo_title": "หัวข้อ SEO Title ที่มีเสน่ห์ดึงดูดและใส่คีย์เวิร์ด (ความยาวไม่เกิน 60 ตัวอักษร)",
-  "seo_description": "คำโปรย Meta Description สำหรับแสดงบนผลลัพธ์การค้นหา Google เพื่อกระตุ้นยอดคลิก (ความยาว 120-160 ตัวอักษร)",
-  "seo_keywords": "คีย์เวิร์ด SEO คั่นด้วยเครื่องหมายจุลภาค"
-}`
-
-    const promptText = `ช่วยสร้างเนื้อหาแนะนำสินค้าพรีเมียมตามรายละเอียดดังต่อไปนี้:
-ชื่อสินค้า: ${form.value.name}
-หมวดหมู่สินค้า: ${form.value.category || 'ทั่วไป'}
-คีย์เวิร์ด SEO ที่ต้องการเน้น: ${aiModelParams.value.keywords}
-จุดเด่น/ข้อมูลจำเพาะสินค้า:
-${aiModelParams.value.highlights}
-
-ข้อมูลการเขียนที่ต้องการ:
-1. โทนเสียงและสไตล์ภาษา: ${
-      aiModelParams.value.tone === 'luxury' ? 'Luxury & Premium (หรูหรา น่าเชื่อถือ ใช้ภาษาสุภาพ เป็นทางการ)' :
-      aiModelParams.value.tone === 'friendly' ? 'Friendly & Informative (เป็นมิตร อบอุ่น ชวนอ่านสบายๆ)' :
-      'Sales-Driven & Persuasive (เน้นปิดการขาย กระตุ้นอารมณ์ความคุ้มค่า)'
-    }
-2. ระดับความยาวของเนื้อหา: ${
-      aiModelParams.value.length === 'short' ? 'สั้นกระชับ ประมาณ 300 คำ' :
-      aiModelParams.value.length === 'comprehensive' ? 'ลงลึกครอบคลุมทุกประเด็น ประมาณ 1000 คำ' :
-      'มาตรฐาน เหมาะสมสำหรับ SEO ประมาณ 600 คำ'
-    }
-
-ข้อกำหนดเพิ่มเติม:
-- ในฟิลด์ "description" ให้แต่งเนื้อหาเป็นรูปแบบ HTML แท้ๆ โดยจัดหน้าให้น่าอ่าน ใช้หัวข้อ <h2> และ <h3> เพื่อแบ่งหัวข้อ รวมถึงใส่ตารางสเปกสินค้า <table> แบบไม่มี Inline Style
-- ห้ามใช้คำอธิบายนำหน้า JSON ห้ามส่งมาเป็นเครื่องหมายคำพูดรอบนอก ส่งออกมาเป็น JSON ตรงๆ`
-
-    const res = await apiFetch('/api/ai/generate', {
+    const res = await apiFetch('/api/ai/generate-description', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        prompt: promptText,
-        systemPrompt: systemPrompt
+        productName: form.value.name,
+        category: form.value.category,
+        categories: form.value.categories,
+        sku: form.value.sku,
+        size: form.value.size,
+        shortDescription: form.value.short_description || '',
+        attributes: form.value.attributes,
+        keywords: aiModelParams.value.keywords,
+        highlights: aiModelParams.value.highlights,
+        tone: aiModelParams.value.tone,
+        length: aiModelParams.value.length,
+        includeSEO: aiModelParams.value.includeSEO,
+        currentDescription: form.value.description || ''
       })
     })
 
     const data = await res.json()
     if (data.success && data.data) {
-      let rawText = data.data.trim()
-      
-      if (rawText.startsWith('```json')) {
-        rawText = rawText.substring(7)
-      } else if (rawText.startsWith('```')) {
-        rawText = rawText.substring(3)
+      const payload = data.data
+      if (payload.description) {
+        form.value.description = payload.description
       }
-      if (rawText.endsWith('```')) {
-        rawText = rawText.substring(0, rawText.length - 3)
+      if (aiModelParams.value.includeSEO) {
+        if (payload.seo_title) form.value.seo_title = payload.seo_title.substring(0, 60)
+        if (payload.seo_description) form.value.seo_description = payload.seo_description.substring(0, 160)
+        if (payload.seo_keywords) form.value.seo_keywords = payload.seo_keywords
       }
-      rawText = rawText.trim()
-
-      try {
-        const parsed = JSON.parse(rawText)
-        
-        if (parsed.description) {
-          form.value.description = parsed.description
-        }
-        
-        if (aiModelParams.value.includeSEO) {
-          if (parsed.seo_title) form.value.seo_title = parsed.seo_title.substring(0, 60)
-          if (parsed.seo_description) form.value.seo_description = parsed.seo_description.substring(0, 160)
-          if (parsed.seo_keywords) form.value.seo_keywords = parsed.seo_keywords
-        }
-        
-        showToast('AI สร้างและอัปเดตรายละเอียดสินค้าเรียบร้อยแล้ว!', 'success')
-        showAiGenerateModal.value = false
-      } catch (e) {
-        console.error('Failed to parse AI JSON:', rawText, e)
-        form.value.description = rawText
-        showToast('AI สร้างเนื้อหาสำเร็จ แต่ผลลัพธ์ไม่ได้อยู่ในรูปแบบ JSON จึงนำมาใส่ในช่องรายละเอียดแบบเต็มโดยตรง', 'warning')
-        showAiGenerateModal.value = false
-      }
+      showToast('AI เขียนเนื้อหาแนะนำสินค้าและ SEO เรียบร้อยแล้ว!', 'success')
+      showAiGenerateModal.value = false
     } else {
       showToast(data.error || 'AI ไม่สามารถสร้างเนื้อหาได้', 'error')
     }
@@ -1720,29 +1800,6 @@ ${aiModelParams.value.highlights}
       
       <!-- TAB 1: ข้อมูลพื้นฐาน (Basic Info) -->
       <div v-show="activeTab === 'basic'" class="space-y-6 animate-[fadeIn_0.2s_ease-out]">
-        <!-- Top AI Bar -->
-        <div class="bg-gradient-to-r from-violet-50 via-indigo-50 to-purple-50 rounded-xl p-4 border border-violet-100 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div class="flex items-center gap-3">
-            <div class="p-2 bg-white rounded-lg text-violet-600 shadow-xs border border-violet-100 shrink-0">
-              <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-            </div>
-            <div>
-              <h2 class="text-sm font-bold text-slate-800">โอนถ่ายข้อมูลอัตโนมัติด้วย AI</h2>
-              <p class="text-xs text-slate-500">กรอกชื่อ ราคา สต๊อก และขนาดจากข้อความรายละเอียดสินค้าให้อัตโนมัติ</p>
-            </div>
-          </div>
-          <button 
-            type="button" 
-            @click="autoFillBasicFromDescription" 
-            :disabled="aiAutoFillBasic"
-            class="px-4 py-2 text-xs font-bold text-white bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 rounded-lg shadow-xs transition-all disabled:opacity-60 flex items-center justify-center gap-1.5 shrink-0"
-          >
-            <svg v-if="aiAutoFillBasic" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-            <svg v-else class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09l2.846.813-2.846.813a4.5 4.5 0 00-3.09 3.09z"></path></svg>
-            <span>{{ aiAutoFillBasic ? 'กำลังวิเคราะห์...' : 'AI โอนถ่ายข้อมูล' }}</span>
-          </button>
-        </div>
-
         <!-- Section: General Info -->
         <div class="bg-white rounded-xl border border-slate-200/80 p-5 shadow-xs space-y-4">
           <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100 pb-2">1. ข้อมูลหลักสินค้า</h3>
@@ -2232,78 +2289,493 @@ ${aiModelParams.value.highlights}
         </div>
       </div>
 
-      <!-- TAB 7: การ์ดสินค้า (Card UI & Live Preview) -->
+      <!-- TAB 7: การ์ดสินค้า (Industrial Machinery Card UI & Live Preview) -->
       <div v-show="activeTab === 'card_ui'" class="bg-white rounded-xl border border-slate-200/80 p-5 shadow-xs animate-[fadeIn_0.2s_ease-out]">
         <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-5">
           <div>
-            <h2 class="text-sm font-bold text-slate-800">ตั้งค่าการ์ดสินค้าหน้าแรก (Card UI & Highlights)</h2>
-            <p class="text-xs text-slate-500">จัดการจุดเด่น ป้ายกำกับขวา และแถบสเปกด้านล่างบนการ์ดสินค้า</p>
+            <h2 class="text-sm font-bold text-slate-800 flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-[#002855]"></span>
+              <span>ตั้งค่าการ์ดสินค้าตามแบบอุตสาหกรรม (Industrial Machine Card UI)</span>
+            </h2>
+            <p class="text-xs text-slate-500">จัดการข้อมูลที่แสดงบนการ์ดสินค้าทุกส่วนอย่างครบถ้วนตามแบบแคตตาล็อก KODERA / CASTING</p>
           </div>
-          <label class="relative inline-flex items-center cursor-pointer gap-2">
-            <input type="checkbox" v-model="form.card_features.enabled" class="sr-only peer">
-            <div class="w-9 h-5 bg-slate-200 peer-checked:bg-fuchsia-600 rounded-full transition-colors relative after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-transform peer-checked:after:translate-x-4"></div>
-            <span class="text-xs font-bold" :class="form.card_features.enabled ? 'text-fuchsia-700' : 'text-slate-400'">{{ form.card_features.enabled ? 'เปิดแสดงผล' : 'ปิดแสดงผล' }}</span>
-          </label>
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200/60">
+              Live Interactive Card
+            </span>
+          </div>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6" :class="{ 'opacity-50 pointer-events-none': !form.card_features.enabled }">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
           <!-- Left Column: Controls (col-span-7) -->
           <div class="lg:col-span-7 space-y-6">
-            <!-- Left Stack -->
-            <div class="space-y-3">
-              <div class="flex items-center justify-between">
-                <label class="text-xs font-bold text-slate-800 flex items-center gap-2">
-                  <input type="checkbox" v-model="form.card_features.show_stack" class="rounded text-fuchsia-600">
-                  <span>ฟีเจอร์ซ้ายภาพ (Left Stack สูงสุด 3)</span>
-                </label>
-                <button @click.prevent="addCardFeatureStack" :disabled="form.card_features?.stack?.length >= 3 || !form.card_features.show_stack" class="text-xs font-bold text-fuchsia-700 bg-fuchsia-50 hover:bg-fuchsia-100 px-2 py-1 rounded transition-colors disabled:opacity-40">+ เพิ่ม</button>
+            
+            <!-- Section 1: ข้อมูลหัวการ์ด & รหัสรุ่น -->
+            <div class="bg-slate-50/70 p-4 rounded-xl border border-slate-200/80 space-y-3">
+              <h3 class="text-xs font-black uppercase tracking-wider text-[#002855] flex items-center gap-2">
+                <svg class="w-4 h-4 text-[#002855]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" /></svg>
+                1. ป้ายแบรนด์ / หมวดหมู่ & รหัสรุ่น
+              </h3>
+              
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label class="block text-[11px] font-bold text-slate-700 mb-1">
+                    ป้ายหัวการ์ด (Top Left Badge)
+                  </label>
+                  <input 
+                    v-model="form.card_features.top_badge" 
+                    type="text" 
+                    :placeholder="form.category || 'CASTING'" 
+                    class="w-full bg-white border border-slate-200 text-xs rounded-lg px-3 py-2 outline-none focus:border-[#002855] font-bold text-[#002855]"
+                  />
+                  <span class="text-[10px] text-slate-400">เว้นว่างไว้จะใช้ชื่อหมวดหมู่สินค้า</span>
+                </div>
+
+                <div>
+                  <label class="block text-[11px] font-bold text-slate-700 mb-1">
+                    รหัสรุ่นตัวหนา (Model Name)
+                  </label>
+                  <input 
+                    v-model="form.card_features.model_name" 
+                    type="text" 
+                    :placeholder="form.sku || 'C300A'" 
+                    class="w-full bg-white border border-slate-200 text-xs rounded-lg px-3 py-2 outline-none focus:border-[#002855] font-black text-slate-900"
+                  />
+                  <span class="text-[10px] text-slate-400">เว้นว่างไว้จะใช้ SKU ของสินค้า</span>
+                </div>
               </div>
-              <div v-for="(feat, idx) in form.card_features?.stack" :key="'stack'+idx" class="flex gap-2 items-center bg-slate-50 p-2 rounded-lg border border-slate-200">
-                <IconSelect v-model="feat.icon" :options="cardIconOptions" class="w-1/3 text-xs" />
-                <input v-model="feat.text" type="text" placeholder="ข้อความ" class="flex-1 bg-white border border-slate-200 text-xs rounded-md px-2.5 py-1.5 outline-none">
-                <button @click.prevent="removeCardFeatureStack(idx)" class="text-slate-400 hover:text-rose-600 p-1"><svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
+
+              <div>
+                <label class="block text-[11px] font-bold text-slate-700 mb-1">
+                  คำบรรยายประเภทเครื่อง (Subtitle)
+                </label>
+                <input 
+                  v-model="form.card_features.subtitle" 
+                  type="text" 
+                  placeholder="เครื่องตัดปลอกสายไฟ KODERA" 
+                  class="w-full bg-white border border-slate-200 text-xs rounded-lg px-3 py-2 outline-none focus:border-[#002855]"
+                />
               </div>
             </div>
 
-            <!-- Right Badge -->
-            <div class="space-y-3 pt-3 border-t border-slate-100">
-              <label class="text-xs font-bold text-slate-800 flex items-center gap-2">
-                <input type="checkbox" v-model="form.card_features.show_badge" class="rounded text-fuchsia-600">
-                <span>ป้ายไฮไลท์ขวาล่าง (Right Badge)</span>
-              </label>
-              <div class="grid grid-cols-3 gap-2">
-                <IconSelect v-model="form.card_features.badge.icon" :options="[{ value: '', label: 'ไม่มีไอคอน' }, ...cardIconOptions]" class="text-xs" />
-                <input v-model="form.card_features.badge.text1" type="text" placeholder="บรรทัด 1" class="bg-white border border-slate-200 text-xs rounded-md px-2.5 py-1.5 outline-none">
-                <input v-model="form.card_features.badge.text2" type="text" placeholder="บรรทัด 2" class="bg-white border border-slate-200 text-xs rounded-md px-2.5 py-1.5 outline-none">
+            <!-- Section 2: สเปกขนาดสายไฟหลัก (Main Spec Pill) -->
+            <div class="bg-slate-50/70 p-4 rounded-xl border border-slate-200/80 space-y-3">
+              <div class="flex items-center justify-between">
+                <h3 class="text-xs font-black uppercase tracking-wider text-[#002855] flex items-center gap-2">
+                  <svg class="w-4 h-4 text-[#002855]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                  2. สเปกขนาดสายไฟหลัก (Main Spec Pill)
+                </h3>
+                <button 
+                  type="button" 
+                  @click.prevent="autoDetectSpecFromAttributes" 
+                  class="text-[10px] font-bold text-blue-700 bg-blue-50 hover:bg-blue-100 px-2 py-1 rounded transition-colors border border-blue-200/60 flex items-center gap-1"
+                >
+                  <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                  ดึงจาก Attributes
+                </button>
+              </div>
+
+              <div>
+                <input 
+                  v-model="form.card_features.spec_range" 
+                  type="text" 
+                  placeholder="AWG#16 (1.25sq) ~ AWG#36 (0.01sq)" 
+                  class="w-full bg-[#002855] text-white font-bold text-xs rounded-lg px-3.5 py-2.5 outline-none placeholder:text-blue-300 shadow-inner"
+                />
+                <span class="text-[10px] text-slate-400 mt-1 block">ช่วงขนาดสายไฟที่รองรับ แสดงในแถบสีน้ำเงินเข้ม</span>
               </div>
             </div>
 
-            <!-- Bottom Bar -->
-            <div class="space-y-3 pt-3 border-t border-slate-100">
+            <!-- Section 3: ฟังก์ชันการทำงาน (Capabilities Badges) -->
+            <div class="bg-slate-50/70 p-4 rounded-xl border border-slate-200/80 space-y-3">
               <div class="flex items-center justify-between">
-                <label class="text-xs font-bold text-slate-800 flex items-center gap-2">
-                  <input type="checkbox" v-model="form.card_features.show_bottom_bar" class="rounded text-fuchsia-600">
-                  <span>แถบคุณสมบัติด้านล่าง (Bottom Bar สูงสุด 3)</span>
-                </label>
-                <button @click.prevent="addCardFeatureBottom" :disabled="form.card_features?.bottom_bar?.length >= 3 || !form.card_features.show_bottom_bar" class="text-xs font-bold text-fuchsia-700 bg-fuchsia-50 hover:bg-fuchsia-100 px-2 py-1 rounded transition-colors disabled:opacity-40">+ เพิ่ม</button>
+                <h3 class="text-xs font-black uppercase tracking-wider text-[#002855] flex items-center gap-2">
+                  <svg class="w-4 h-4 text-[#002855]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /></svg>
+                  3. ฟังก์ชันการทำงาน (Capabilities)
+                </h3>
+                <button 
+                  type="button" 
+                  @click.prevent="addCustomCapability" 
+                  class="text-[10px] font-bold text-[#002855] bg-blue-50 hover:bg-blue-100 px-2 py-1 rounded transition-colors border border-blue-200"
+                >
+                  + เพิ่มฟังก์ชันกำหนดเอง
+                </button>
               </div>
-              <div v-for="(bar, idx) in form.card_features?.bottom_bar" :key="'bottom'+idx" class="flex gap-2 items-center bg-slate-50 p-2 rounded-lg border border-slate-200">
-                <IconSelect v-model="bar.icon" :options="cardIconOptions" class="w-1/4 text-xs" />
-                <input v-model="bar.title" type="text" placeholder="หัวข้อ" class="w-1/3 bg-white border border-slate-200 text-xs rounded-md px-2.5 py-1.5 outline-none">
-                <input v-model="bar.subtitle" type="text" placeholder="คำบรรยาย" class="flex-1 bg-white border border-slate-200 text-xs rounded-md px-2.5 py-1.5 outline-none">
-                <button @click.prevent="removeCardFeatureBottom(idx)" class="text-slate-400 hover:text-rose-600 p-1"><svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
+
+              <!-- Quick Toggles for Standard Capabilities -->
+              <div class="flex flex-wrap gap-2">
+                <button 
+                  v-for="std in standardCapabilities" 
+                  :key="std.id" 
+                  type="button" 
+                  @click.prevent="toggleCapability(std.id)" 
+                  class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 border"
+                  :class="isCapabilityEnabled(std.id) ? 'bg-[#002855] text-white border-[#002855] shadow-xs' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-100'"
+                >
+                  <span>{{ isCapabilityEnabled(std.id) ? '✓' : '+' }}</span>
+                  <span>{{ std.label }}</span>
+                </button>
+              </div>
+
+              <!-- Detailed list for active capabilities -->
+              <div class="space-y-2 pt-2">
+                <div 
+                  v-for="(cap, idx) in form.card_features?.capabilities" 
+                  :key="'cap-edit-'+idx" 
+                  class="flex items-center gap-2 bg-white p-2 rounded-lg border border-slate-200 text-xs"
+                >
+                  <input type="checkbox" v-model="cap.enabled" class="rounded text-[#002855] shrink-0" />
+                  <input v-model="cap.label" type="text" placeholder="ชื่อฟังก์ชัน" class="flex-1 bg-slate-50 border border-slate-200 rounded px-2 py-1 text-xs outline-none" />
+                  <select v-model="cap.icon" class="bg-slate-50 border border-slate-200 rounded px-2 py-1 text-xs outline-none">
+                    <option value="cut">ตัด (Cut)</option>
+                    <option value="strip_end">ปอกปลาย (Strip End)</option>
+                    <option value="strip_mid">ปอกกลางสาย (Strip Middle)</option>
+                    <option value="twist">ปั่นเกลียว (Twist)</option>
+                    <option value="ribbon">แยกสายแพ (Ribbon Split)</option>
+                  </select>
+                  <button type="button" @click.prevent="removeCapability(idx)" class="text-slate-400 hover:text-rose-600 p-1">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                  </button>
+                </div>
               </div>
             </div>
+
+            <!-- Section 4: ข้อความสรุปจุดเด่นบนการ์ด -->
+            <div class="bg-slate-50/70 p-4 rounded-xl border border-slate-200/80 space-y-3">
+              <div class="flex items-center justify-between">
+                <h3 class="text-xs font-black uppercase tracking-wider text-[#002855] flex items-center gap-2">
+                  <svg class="w-4 h-4 text-[#002855]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                  4. ข้อความสรุปจุดเด่นบนการ์ด (Summary)
+                </h3>
+                <button 
+                  type="button" 
+                  @click.prevent="autoFillSummaryFromDescription" 
+                  class="text-[10px] font-bold text-blue-700 bg-blue-50 hover:bg-blue-100 px-2 py-1 rounded transition-colors border border-blue-200/60 flex items-center gap-1"
+                >
+                  <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+                  คัดลอกจากคำอธิบายย่อ
+                </button>
+              </div>
+
+              <div>
+                <textarea 
+                  v-model="form.card_features.summary" 
+                  rows="3" 
+                  placeholder="เครื่องตัดปลอกสายไฟที่มีขนาดเล็ก และน้ำหนักเบา ซึ่งพัฒนาจากรุ่น C300 สามารถตัดสายไฟได้หลายแบบ" 
+                  class="w-full bg-white border border-slate-200 text-xs text-slate-700 rounded-lg p-3 outline-none focus:border-[#002855] leading-relaxed resize-none"
+                ></textarea>
+                <div class="flex justify-between items-center text-[10px] text-slate-400 mt-1">
+                  <span>ความยาวที่เหมาะสม: 80 - 140 ตัวอักษร</span>
+                  <span>{{ (form.card_features?.summary || '').length }} ตัวอักษร</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Section 5: ตัวอย่างสายไฟที่รองรับ (Supported Wire Samples) -->
+            <div class="bg-slate-50/80 p-4 sm:p-5 rounded-2xl border border-slate-200 shadow-2xs space-y-4">
+              <div class="flex items-center justify-between gap-2 flex-wrap pb-2 border-b border-slate-200/80">
+                <div class="flex items-center gap-2">
+                  <div class="w-7 h-7 rounded-lg bg-[#002855]/10 text-[#002855] flex items-center justify-center font-bold">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" /></svg>
+                  </div>
+                  <div>
+                    <h3 class="text-xs sm:text-sm font-black uppercase tracking-wider text-[#002855] flex items-center gap-1.5">
+                      5. ตัวอย่างสายไฟที่รองรับ (Supported Wire Samples)
+                    </h3>
+                    <p class="text-[11px] text-slate-500 font-normal">จัดการประเภทสายไฟ ตั้งชื่อ ปรับแต่งสไตล์ หรืออัปโหลดรูปภาพสายไฟจริง</p>
+                  </div>
+                </div>
+                <div class="flex items-center gap-1.5 flex-wrap">
+                  <router-link
+                    to="/admin/wires"
+                    target="_blank"
+                    class="px-2.5 py-1 text-xs font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/50 hover:bg-blue-100 dark:hover:bg-blue-900/60 border border-blue-200 dark:border-blue-800 rounded-lg transition-colors flex items-center gap-1 cursor-pointer"
+                    title="เปิดหน้าระบบจัดการข้อมูลสายไฟและพรีเซ็ตในแท็บใหม่"
+                  >
+                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                    <span>จัดการข้อมูลสายไฟ</span>
+                  </router-link>
+                  <span class="px-2 py-0.5 bg-blue-50 text-[#002855] text-[11px] font-bold rounded-md border border-blue-100">
+                    {{ form.card_features?.wire_samples?.length || 0 }} รายการ
+                  </span>
+                  <button 
+                    v-if="form.card_features?.wire_samples?.length > 0"
+                    type="button" 
+                    @click.prevent="clearAllWireSamples" 
+                    class="text-[11px] text-slate-400 hover:text-rose-600 px-2 py-0.5 rounded hover:bg-rose-50 transition-colors font-medium cursor-pointer"
+                    title="ล้างรายการสายไฟทั้งหมด"
+                  >
+                    ล้างทั้งหมด
+                  </button>
+                </div>
+              </div>
+
+              <!-- Presets for fast import -->
+              <div class="bg-white/80 p-3 rounded-xl border border-slate-200/70 space-y-2">
+                <div class="flex items-center justify-between text-[11px] font-bold text-slate-700">
+                  <span class="flex items-center gap-1">
+                    <svg class="w-3.5 h-3.5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
+                    ชุดพรีเซ็ตแนะนำตามรุ่นสินค้า (Preset Templates):
+                  </span>
+                  <span class="text-[10px] text-slate-400">คลิกเพื่อแทนที่ตัวอย่างสายไฟทันที</span>
+                </div>
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
+                  <button 
+                    v-for="(preset, pIdx) in wirePresets" 
+                    :key="'wp-'+pIdx" 
+                    type="button" 
+                    @click.prevent="applyWirePreset(preset)" 
+                    class="px-2.5 py-1.5 bg-slate-50 hover:bg-blue-50 hover:border-blue-300 text-slate-700 hover:text-[#002855] text-xs font-semibold rounded-lg border border-slate-200 text-left transition-colors flex items-center justify-between group cursor-pointer"
+                    :title="preset.name"
+                  >
+                    <span class="truncate">{{ preset.name }}</span>
+                    <span class="text-[10px] text-slate-400 group-hover:text-blue-600 shrink-0 ml-1">({{ preset.samples.length }})</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Quick Add Toolbar -->
+              <div class="bg-slate-100/80 p-3 rounded-xl border border-slate-200 space-y-2">
+                <div class="flex items-center justify-between gap-2 flex-wrap">
+                  <span class="text-[11px] font-bold text-slate-700 flex items-center gap-1">
+                    <svg class="w-3.5 h-3.5 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
+                    เพิ่มรายการสายไฟด่วน (Quick Add):
+                  </span>
+                  <button 
+                    type="button" 
+                    @click.prevent="addCustomImageWireSample" 
+                    class="px-2.5 py-1 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white rounded-lg text-xs font-bold shadow-2xs transition-all flex items-center gap-1 cursor-pointer ml-auto"
+                    title="เพิ่มรายการสายไฟโดยใช้วิธีอัปโหลดรูปภาพ"
+                  >
+                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                    + อัปโหลดรูปภาพสายไฟ
+                  </button>
+                </div>
+
+                <div class="flex flex-wrap items-center gap-1.5">
+                  <!-- สายเดี่ยว & ปอกกลาง -->
+                  <button type="button" @click.prevent="addWireSample('single_black', 'สายเดี่ยวสีดำ ปอก 2 ด้าน')" class="px-2 py-1 bg-white hover:bg-slate-50 text-slate-700 rounded-lg text-[11px] font-semibold border border-slate-200 transition-colors flex items-center gap-1 cursor-pointer">
+                    <span class="w-2 h-2 rounded-full bg-slate-800"></span> + สายเดี่ยว (ดำ)
+                  </button>
+                  <button type="button" @click.prevent="addWireSample('single_blue', 'สายเดี่ยวสีน้ำเงิน ปอก 2 ด้าน')" class="px-2 py-1 bg-white hover:bg-blue-50 text-blue-700 rounded-lg text-[11px] font-semibold border border-blue-200 transition-colors flex items-center gap-1 cursor-pointer">
+                    <span class="w-2 h-2 rounded-full bg-blue-600"></span> + สายเดี่ยว (น้ำเงิน)
+                  </button>
+                  <button type="button" @click.prevent="addWireSample('single_red', 'สายเดี่ยวสีแดง ปอก 2 ด้าน')" class="px-2 py-1 bg-white hover:bg-rose-50 text-rose-700 rounded-lg text-[11px] font-semibold border border-rose-200 transition-colors flex items-center gap-1 cursor-pointer">
+                    <span class="w-2 h-2 rounded-full bg-rose-600"></span> + สายเดี่ยว (แดง)
+                  </button>
+                  <button type="button" @click.prevent="addWireSample('ground_yellow_green', 'สายดินเขียว-เหลือง')" class="px-2 py-1 bg-white hover:bg-emerald-50 text-emerald-700 rounded-lg text-[11px] font-semibold border border-emerald-200 transition-colors flex items-center gap-1 cursor-pointer">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500"></span> + สายดิน
+                  </button>
+                  <button type="button" @click.prevent="addWireSample('mid_strip_multi', 'ปอกกลางสายหลายตำแหน่ง')" class="px-2 py-1 bg-white hover:bg-indigo-50 text-indigo-700 rounded-lg text-[11px] font-semibold border border-indigo-200 transition-colors flex items-center gap-1 cursor-pointer">
+                    🔲 + ปอกกลางสายหลายช่วง
+                  </button>
+
+                  <!-- สายคู่, สายแยก, สายแพ -->
+                  <button type="button" @click.prevent="addWireSample('twocore_sheath_strip', 'สายคู่ 2 คอร์ ปอกเปลือกนอก')" class="px-2 py-1 bg-white hover:bg-slate-50 text-slate-700 rounded-lg text-[11px] font-semibold border border-slate-200 transition-colors flex items-center gap-1 cursor-pointer">
+                    ⚯ + สายคู่ 2 คอร์
+                  </button>
+                  <button type="button" @click.prevent="addWireSample('twocore_split_y', 'สายแยก 2 แฉก (Y-Branch)')" class="px-2 py-1 bg-white hover:bg-amber-50 text-amber-700 rounded-lg text-[11px] font-semibold border border-amber-200 transition-colors flex items-center gap-1 cursor-pointer">
+                    🌿 + สายแยก 2 แฉก
+                  </button>
+                  <button type="button" @click.prevent="addWireSample('flat_ribbon_split', 'สายแพแบนแยกเส้นหลายสาย')" class="px-2 py-1 bg-white hover:bg-slate-50 text-slate-700 rounded-lg text-[11px] font-semibold border border-slate-200 transition-colors flex items-center gap-1 cursor-pointer">
+                    📑 + สายแพแยกเส้น
+                  </button>
+                  <button type="button" @click.prevent="addWireSample('flat_ribbon_grey', 'สายแพแบนสีเทา (ปอกปลาย 2 ด้าน)')" class="px-2 py-1 bg-white hover:bg-slate-50 text-slate-700 rounded-lg text-[11px] font-semibold border border-slate-200 transition-colors flex items-center gap-1 cursor-pointer">
+                    📏 + สายแพสีเทา
+                  </button>
+                  <button type="button" @click.prevent="addWireSample('flat_ribbon_rainbow', 'สายแพแบนสีรุ้ง (ปอกปลาย 2 ด้าน)')" class="px-2 py-1 bg-white hover:bg-amber-50 text-amber-800 rounded-lg text-[11px] font-semibold border border-amber-200 transition-colors flex items-center gap-1 cursor-pointer">
+                    🌈 + สายแพสีรุ้ง
+                  </button>
+                  <button type="button" @click.prevent="addWireSample('corrugated_tube', 'ท่อร้อยสายไฟลูกฟูก (Corrugated Tube)')" class="px-2 py-1 bg-white hover:bg-slate-50 text-slate-700 rounded-lg text-[11px] font-semibold border border-slate-200 transition-colors flex items-center gap-1 cursor-pointer">
+                    🔘 + ท่อลูกฟูก
+                  </button>
+
+                  <!-- สายไฟขนาดใหญ่ & มัลติคอร์ -->
+                  <button type="button" @click.prevent="addWireSample('thick_cable_50sq', 'สายไฟขนาดใหญ่ 50 SQ')" class="px-2 py-1 bg-white hover:bg-purple-50 text-purple-700 rounded-lg text-[11px] font-semibold border border-purple-200 transition-colors flex items-center gap-1 cursor-pointer">
+                    ⚡ + 50 SQ
+                  </button>
+                  <button type="button" @click.prevent="addWireSample('thick_cable_80sq', 'สายไฟขนาดใหญ่ 80 SQ')" class="px-2 py-1 bg-white hover:bg-purple-50 text-purple-700 rounded-lg text-[11px] font-semibold border border-purple-200 transition-colors flex items-center gap-1 cursor-pointer">
+                    ⚡ + 80 SQ
+                  </button>
+                  <button type="button" @click.prevent="addWireSample('multicore_cable', 'สายมัลติคอร์ MULTI CORE')" class="px-2 py-1 bg-white hover:bg-cyan-50 text-cyan-700 rounded-lg text-[11px] font-semibold border border-cyan-200 transition-colors flex items-center gap-1 cursor-pointer">
+                    🌐 + MULTI CORE
+                  </button>
+
+                  <!-- เข้าหัวย้ำเทอร์มินอล, ใส่ซีลยาง & บัดกรี -->
+                  <button type="button" @click.prevent="addWireSample('crimp_double_seal', 'ย้ำหัว 2 ด้าน พร้อมใส่ซีลยาง 2 ด้าน')" class="px-2 py-1 bg-white hover:bg-amber-50 text-amber-800 rounded-lg text-[11px] font-semibold border border-amber-300 transition-colors flex items-center gap-1 cursor-pointer">
+                    🏷️ + ย้ำ 2 ด้าน + ซีลยาง (C558SSA)
+                  </button>
+                  <button type="button" @click.prevent="addWireSample('crimp_double', 'ย้ำหัวเทอร์มินอล 2 ด้าน')" class="px-2 py-1 bg-white hover:bg-amber-50 text-amber-800 rounded-lg text-[11px] font-semibold border border-amber-300 transition-colors flex items-center gap-1 cursor-pointer">
+                    🏷️ + ย้ำหัว 2 ด้าน (C511e)
+                  </button>
+                  <button type="button" @click.prevent="addWireSample('crimp_single_tin_single', 'ย้ำหัว 1 ด้าน + จุ่มตะกั่ว 1 ด้าน')" class="px-2 py-1 bg-white hover:bg-amber-50 text-amber-800 rounded-lg text-[11px] font-semibold border border-amber-300 transition-colors flex items-center gap-1 cursor-pointer">
+                    🏷️ + ย้ำ 1 ด้าน + จุ่มตะกั่ว (C550SZe)
+                  </button>
+                </div>
+              </div>
+
+              <!-- List of active samples -->
+              <div class="space-y-2.5">
+                <div v-if="!form.card_features?.wire_samples || form.card_features.wire_samples.length === 0" class="text-center py-8 bg-white rounded-xl border border-dashed border-slate-300 p-6">
+                  <div class="w-12 h-12 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto mb-2">
+                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                  </div>
+                  <p class="text-xs font-bold text-slate-700">ยังไม่มีรายการตัวอย่างสายไฟในการ์ดนี้</p>
+                  <p class="text-[11px] text-slate-400 mt-0.5">เลือกชุดพรีเซ็ตด้านบน หรือกดปุ่มเพิ่มสายไฟเพื่อเริ่มต้น</p>
+                  <button 
+                    type="button" 
+                    @click.prevent="addWireSample('single_black')" 
+                    class="mt-3 px-3 py-1.5 bg-[#002855] hover:bg-[#003366] text-white text-xs font-bold rounded-lg shadow-2xs inline-flex items-center gap-1 cursor-pointer"
+                  >
+                    + เพิ่มสายไฟรายการแรก
+                  </button>
+                </div>
+
+                <div 
+                  v-for="(sample, sIdx) in form.card_features?.wire_samples" 
+                  :key="'sample-edit-'+sIdx" 
+                  class="bg-white rounded-xl border border-slate-200/90 shadow-2xs hover:border-blue-300 transition-all p-3 space-y-2.5"
+                >
+                  <!-- Top Row: Order, Preview, Type, Title, Actions -->
+                  <div class="flex items-center gap-2 sm:gap-3 flex-wrap sm:flex-nowrap">
+                    <!-- Order Badge & Up/Down -->
+                    <div class="flex items-center gap-0.5 shrink-0 bg-slate-100 px-1 py-0.5 rounded-lg border border-slate-200">
+                      <span class="text-[11px] font-bold text-slate-600 w-4 text-center select-none">{{ sIdx + 1 }}</span>
+                      <div class="flex flex-col">
+                        <button 
+                          type="button" 
+                          @click.prevent="moveWireSample(sIdx, -1)" 
+                          :disabled="sIdx === 0" 
+                          class="text-slate-400 hover:text-[#002855] disabled:opacity-20 disabled:hover:text-slate-400 p-0.5 transition-colors cursor-pointer"
+                          title="เลื่อนขึ้น"
+                        >
+                          <svg class="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7" /></svg>
+                        </button>
+                        <button 
+                          type="button" 
+                          @click.prevent="moveWireSample(sIdx, 1)" 
+                          :disabled="sIdx === form.card_features.wire_samples.length - 1" 
+                          class="text-slate-400 hover:text-[#002855] disabled:opacity-20 disabled:hover:text-slate-400 p-0.5 transition-colors cursor-pointer"
+                          title="เลื่อนลง"
+                        >
+                          <svg class="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" /></svg>
+                        </button>
+                      </div>
+                    </div>
+
+                    <!-- Live Visual Preview Box -->
+                    <div class="w-24 sm:w-28 h-8 rounded-lg bg-slate-900/90 dark:bg-slate-950 p-1 flex items-center justify-center overflow-hidden shrink-0 border border-slate-800 shadow-inner" title="ภาพแสดงผลจริงในการ์ด">
+                      <WireSample :sample="sample" :height="20" />
+                    </div>
+
+                    <!-- Wire Type Dropdown Selector -->
+                    <div class="w-44 sm:w-52 shrink-0">
+                      <select 
+                        v-model="sample.type" 
+                        @change="onWireTypeChange(sample, sample.type)"
+                        class="w-full bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-slate-800 outline-none focus:border-blue-500 focus:bg-white cursor-pointer"
+                      >
+                        <optgroup v-for="(group, gIdx) in wireTypeOptions" :key="'grp-'+gIdx" :label="group.group">
+                          <option v-for="opt in group.options" :key="opt.value" :value="opt.value">
+                            {{ opt.label }}
+                          </option>
+                        </optgroup>
+                      </select>
+                    </div>
+
+                    <!-- Name / Title Input -->
+                    <div class="flex-1 min-w-[160px]">
+                      <input 
+                        v-model="sample.title" 
+                        type="text" 
+                        placeholder="ชื่อ/คำอธิบายสายไฟ เช่น สายเดี่ยวสีดำ 0.5-2.5 mm²" 
+                        class="w-full bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs font-medium text-slate-800 outline-none focus:border-blue-500 focus:bg-white" 
+                      />
+                    </div>
+
+                    <!-- Actions: Duplicate, Delete -->
+                    <div class="flex items-center gap-1 shrink-0 ml-auto">
+                      <button 
+                        type="button" 
+                        @click.prevent="duplicateWireSample(sIdx)" 
+                        class="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer"
+                        title="คัดลอกรายการนี้"
+                      >
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+                      </button>
+                      <button 
+                        type="button" 
+                        @click.prevent="removeWireSample(sIdx)" 
+                        class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
+                        title="ลบรายการนี้"
+                      >
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- Image Upload / Attachment Box (Visible if type is custom_image or image is present) -->
+                  <div 
+                    v-if="sample.type === 'custom_image' || sample.image" 
+                    class="pt-2 border-t border-slate-100 flex items-center gap-3 bg-slate-50/70 p-2 rounded-lg"
+                  >
+                    <!-- Image thumbnail preview -->
+                    <div v-if="sample.image" class="w-14 h-10 bg-white border border-slate-200 rounded-md overflow-hidden flex items-center justify-center shrink-0 p-0.5">
+                      <img :src="sample.image" :alt="sample.title" class="max-h-full max-w-full object-contain" />
+                    </div>
+
+                    <!-- Upload / URL Controls -->
+                    <div class="flex-1 flex items-center gap-2 flex-wrap">
+                      <label class="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-slate-100 text-slate-700 text-xs font-bold rounded-lg border border-slate-300 shadow-2xs transition-colors shrink-0">
+                        <svg v-if="uploadingWireIdx === sIdx" class="w-3.5 h-3.5 animate-spin text-blue-600" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                        <svg v-else class="w-3.5 h-3.5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
+                        <span>{{ uploadingWireIdx === sIdx ? 'กำลังอัปโหลด...' : (sample.image ? 'เปลี่ยนรูปภาพ' : 'เลือกรูปภาพสายไฟ') }}</span>
+                        <input 
+                          type="file" 
+                          accept="image/*" 
+                          class="hidden" 
+                          :disabled="uploadingWireIdx === sIdx"
+                          @change="e => handleWireSampleUpload(e, sIdx)" 
+                        />
+                      </label>
+
+                      <div class="flex-1 min-w-[180px]">
+                        <input 
+                          v-model="sample.image" 
+                          type="text" 
+                          placeholder="หรือวางลิงก์รูปภาพ https://... หรือ /uploads/..." 
+                          class="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1 text-xs outline-none focus:border-blue-500 font-mono text-slate-700" 
+                        />
+                      </div>
+
+                      <button 
+                        v-if="sample.image" 
+                        type="button" 
+                        @click.prevent="removeWireSampleImage(sIdx)" 
+                        class="text-xs text-rose-600 hover:text-rose-700 hover:bg-rose-50 px-2 py-1 rounded-lg transition-colors font-medium cursor-pointer"
+                      >
+                        นำรูปออก
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
           </div>
 
           <!-- Right Column: Live Card Preview (col-span-5) -->
           <div class="lg:col-span-5">
-            <div class="sticky top-20 bg-slate-50/80 rounded-2xl p-6 border border-slate-200 shadow-xs space-y-4">
-              <div class="text-[11px] font-bold uppercase tracking-wider text-amber-600 flex items-center gap-2">
-                <span class="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse"></span>
-                <span>ตัวอย่างการแสดงผลบนการ์ดสินค้าจริง (LIVE CARD PREVIEW)</span>
+            <div class="sticky top-20 bg-slate-100/90 rounded-2xl p-5 border border-slate-200 shadow-sm space-y-3">
+              <div class="flex items-center justify-between">
+                <div class="text-[11px] font-bold uppercase tracking-wider text-[#002855] flex items-center gap-2">
+                  <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                  <span>ตัวอย่างการ์ดสินค้าจริง (LIVE PREVIEW)</span>
+                </div>
+                <span class="text-[10px] text-slate-500 font-medium">ตรงตามหน้าเว็บจริง 100%</span>
               </div>
-              <div class="max-w-[310px] mx-auto pointer-events-none select-none">
+              
+              <div class="max-w-[340px] mx-auto">
                 <ProductCard :product="previewProduct" />
               </div>
             </div>

@@ -1,17 +1,28 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../config/database');
+const cacheService = require('../services/cacheService');
 const jwt = require('jsonwebtoken');
 const { verifyAdmin, JWT_SECRET } = require('./auth');
 
 // GET public settings (No Auth Required) - MUST be before /:key route
 router.get('/public', async (req, res) => {
     try {
+        // Check cache first
+        const cachedSettings = await cacheService.get('settings:public');
+        if (cachedSettings) {
+            res.setHeader('X-Cache', 'HIT');
+            res.setHeader('X-Cache-Engine', cacheService.isRedisReady ? 'Redis' : 'In-Memory');
+            return res.status(200).json({ success: true, data: cachedSettings });
+        }
+
         // Prevent browser caching for settings to ensure admin updates show immediately
         res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
         res.setHeader('Pragma', 'no-cache');
         res.setHeader('Expires', '0');
         res.setHeader('Surrogate-Control', 'no-store');
+        res.setHeader('X-Cache', 'MISS');
+        res.setHeader('X-Cache-Engine', cacheService.isRedisReady ? 'Redis' : 'In-Memory');
 
         const publicKeys = [
             'google_login_enabled', 'google_client_id',
@@ -63,7 +74,8 @@ router.get('/public', async (req, res) => {
             'footer_newsletter_title', 'footer_newsletter_subtitle', 'footer_newsletter_privacy',
             'footer_trust_badges', 'footer_distributor_label', 'footer_distributor_url',
             'footer_sitemap_label', 'footer_sitemap_url',
-            'seo_default_llm_context', 'seo_ai_crawling_enabled'
+            'seo_default_llm_context', 'seo_ai_crawling_enabled',
+            'wire_master_types', 'wire_presets'
         ];
 
         const placeholders = publicKeys.map(() => '?').join(',');
@@ -73,6 +85,9 @@ router.get('/public', async (req, res) => {
         rows.forEach(row => {
             settings[row.setting_key] = row.setting_value;
         });
+
+        // Cache for 10 minutes (600s)
+        await cacheService.set('settings:public', settings, 600);
 
         res.status(200).json({ success: true, data: settings });
     } catch (error) {
@@ -96,13 +111,13 @@ router.get('/seo-preview', async (req, res) => {
         const sMap = {};
         sRows.forEach(r => { sMap[r.setting_key] = r.setting_value; });
 
-        const storeName = sMap['store_name'] || 'บ้านเก็บของ';
+        const storeName = sMap['store_name'] || '';
         const companyLegalName = sMap['company_legal_name'] || storeName;
-        const defaultDesc = sMap['store_description'] || 'จำหน่ายและติดตั้งบ้านเก็บของ โรงเรือน และโกดังสำเร็จรูปคุณภาพสูง';
-        const defaultKeywords = sMap['store_keywords'] || 'บ้านเก็บของ, ตู้เก็บของกลางแจ้ง, โกดังสำเร็จรูป';
-        const defaultOgTitle = sMap['store_og_title'] || `${storeName} - บ้านเก็บของสำเร็จรูประดับพรีเมียม`;
+        const defaultDesc = sMap['store_description'] || '';
+        const defaultKeywords = sMap['store_keywords'] || '';
+        const defaultOgTitle = sMap['store_og_title'] || storeName;
         const defaultOgDesc = sMap['store_og_description'] || defaultDesc;
-        const defaultLlmContext = sMap['seo_default_llm_context'] || 'ผู้เชี่ยวชาญด้านบ้านเก็บของ โกดังสำเร็จรูป และตู้เก็บของกลางแจ้ง ทนแดด ทนฝน พร้อมบริการประกอบและติดตั้งทั่วประเทศ';
+        const defaultLlmContext = sMap['seo_default_llm_context'] || '';
 
         // 2. Fetch list of real products, articles, projects for dropdown selector
         let productsList = [];
@@ -383,6 +398,9 @@ router.post('/', verifyAdmin, async (req, res) => {
         `;
         await db.query(query, [key, value || '', value || '']);
 
+        // Invalidate settings cache
+        await cacheService.delPattern('settings:*');
+
         res.status(200).json({ success: true, message: 'Setting saved successfully' });
     } catch (error) {
         console.error('Save setting error:', error);
@@ -409,6 +427,9 @@ router.post('/batch', verifyAdmin, async (req, res) => {
                 await db.query(query, [item.key, item.value || '', item.value || '']);
             }
         }
+
+        // Invalidate settings cache
+        await cacheService.delPattern('settings:*');
 
         res.status(200).json({ success: true, message: 'Settings saved successfully' });
     } catch (error) {

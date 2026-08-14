@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../config/database');
+const cacheService = require('../services/cacheService');
 const { verifyAdmin } = require('./auth');
 
 // Get all categories
@@ -22,6 +23,15 @@ router.get('/', async (req, res) => {
             }
         }
 
+        if (!isAdmin) {
+            const cachedCats = await cacheService.get('categories:list:public');
+            if (cachedCats) {
+                res.setHeader('X-Cache', 'HIT');
+                res.setHeader('X-Cache-Engine', cacheService.isRedisReady ? 'Redis' : 'In-Memory');
+                return res.status(200).json({ success: true, data: cachedCats });
+            }
+        }
+
         let query = 'SELECT * FROM categories';
         if (!isAdmin) {
             query += ' WHERE is_active = true OR is_active IS NULL';
@@ -29,6 +39,11 @@ router.get('/', async (req, res) => {
         query += ' ORDER BY sort_order ASC, id DESC';
 
         const [rows] = await db.query(query);
+
+        if (!isAdmin) {
+            await cacheService.set('categories:list:public', rows, 600);
+        }
+
         res.status(200).json({ success: true, data: rows });
     } catch (error) {
         console.error('Error fetching categories:', error);
@@ -87,6 +102,8 @@ router.put('/reorder', verifyAdmin, async (req, res) => {
         for (let i = 0; i < orderedIds.length; i++) {
             await db.query('UPDATE categories SET sort_order = ? WHERE id = ?', [i, orderedIds[i]]);
         }
+        await cacheService.delPattern('categories:*');
+        await cacheService.delPattern('products:*');
         res.status(200).json({ success: true, message: 'Categories reordered' });
     } catch (error) {
         console.error('Error reordering categories:', error);
@@ -107,6 +124,8 @@ router.post('/', verifyAdmin, async (req, res) => {
             'INSERT INTO categories (id, name, description, image_url, icon_url, features, is_active) VALUES (?, ?, ?, ?, ?, ?, ?)',
             [id, name, description || null, image_url || null, icon_url || null, featuresJson, isActiveVal]
         );
+        await cacheService.delPattern('categories:*');
+        await cacheService.delPattern('products:*');
         res.status(201).json({ success: true, data: { id, name, description, image_url, icon_url, features, is_active: isActiveVal === 1 } });
     } catch (error) {
         console.error('Error creating category:', error);
@@ -134,6 +153,8 @@ router.put('/:id', verifyAdmin, async (req, res) => {
             'UPDATE categories SET name = ?, description = ?, image_url = ?, icon_url = ?, features = ?, is_active = ? WHERE id = ?',
             [name, description || null, image_url || null, icon_url || null, featuresJson, isActiveVal, id]
         );
+        await cacheService.delPattern('categories:*');
+        await cacheService.delPattern('products:*');
         res.status(200).json({ success: true, data: { id, name, description, image_url, icon_url, features, is_active: isActiveVal === 1 } });
     } catch (error) {
         console.error('Error updating category:', error);
@@ -148,7 +169,14 @@ router.put('/:id', verifyAdmin, async (req, res) => {
 router.delete('/:id', verifyAdmin, async (req, res) => {
     try {
         const { id } = req.params;
+        const [catRows] = await db.query('SELECT name FROM categories WHERE id = ?', [id]);
+        if (catRows.length > 0) {
+            const catName = catRows[0].name;
+            await db.query('DELETE FROM category_attribute_templates WHERE category_name = ?', [catName]);
+        }
         await db.query('DELETE FROM categories WHERE id = ?', [id]);
+        await cacheService.delPattern('categories:*');
+        await cacheService.delPattern('products:*');
         res.status(200).json({ success: true, message: 'Category deleted successfully' });
     } catch (error) {
         console.error('Error deleting category:', error);

@@ -5,42 +5,42 @@ const routes = [
     {
         path: '/',
         component: () => import('../pages/Home.vue'),
-        meta: { title: 'STORAGE HOUSE - บ้านเก็บของและโรงเรือนสำเร็จรูประดับพรีเมียม', description: 'STORAGE HOUSE โดยบริษัท ซีอาร์ ดิสทริบิวชั่น จำกัด จำหน่ายและติดตั้งบ้านเก็บของ โรงเรือน และโกดังสำเร็จรูปคุณภาพสูง รับประกัน 10 ปี' }
+        meta: { title: '' }
     },
     {
         path: '/products',
         component: () => import('../pages/Products.vue'),
-        meta: { title: 'แคตตาล็อกสินค้า - STORAGE HOUSE บ้านเก็บของพรีเมียม', description: 'เลือกชมแคตตาล็อกสินค้ามากกว่า 100 รายการ ทั้งบ้านเก็บของ PP/HDPE, โรงจอดรถ และโรงเรือนเพาะปลูก' }
+        meta: { title: 'แคตตาล็อกสินค้า' }
     },
     {
         path: '/products/category/:category',
         component: () => import('../pages/Products.vue'),
-        meta: { title: 'สินค้าหมวดหมู่ - STORAGE HOUSE', description: 'สินค้าในหมวดหมู่ที่เลือก - STORAGE HOUSE บ้านเก็บของและโรงเรือนพรีเมียม' }
+        meta: { title: 'สินค้าหมวดหมู่' }
     },
     {
         path: '/products/:id',
         component: () => import('../pages/ProductDetail.vue'),
-        meta: { title: 'รายละเอียดสินค้า - STORAGE HOUSE', description: 'ข้อมูลรายละเอียด สเปค และราคาของสินค้า โครงสร้างเหล็กแข็งแรงทนทาน' }
+        meta: { title: 'รายละเอียดสินค้า' }
     },
     {
         path: '/services',
         component: () => import('../pages/Services.vue'),
-        meta: { title: 'บริการของเรา - STORAGE HOUSE ผู้เชี่ยวชาญด้านงานติดตั้ง', description: 'บริการให้คำปรึกษา ประเมินหน้างาน และติดตั้งบ้านเก็บของอย่างมืออาชีพโดยวิศวกรและช่างผู้ชำนาญการ' }
+        meta: { title: 'บริการของเรา' }
     },
     {
         path: '/projects',
         component: () => import('../pages/Projects.vue'),
-        meta: { title: 'แฟ้มผลงาน - STORAGE HOUSE', description: 'ชมผลงานการติดตั้งจริงของ STORAGE HOUSE ทั่วประเทศ สร้างความมั่นใจด้วยมาตรฐานระดับสากล' }
+        meta: { title: 'แฟ้มผลงาน' }
     },
     {
         path: '/projects/:slug',
         component: () => import('../pages/ProjectDetail.vue'),
-        meta: { title: 'รายละเอียดผลงาน - STORAGE HOUSE' }
+        meta: { title: 'รายละเอียดผลงาน' }
     },
     {
         path: '/installation-guide',
         component: () => import('../pages/InstallationGuide.vue'),
-        meta: { title: 'คู่มือการเตรียมพื้นที่และติดตั้ง - STORAGE HOUSE', description: 'คลิปวิดีโอคู่มือและข้อมูลการเตรียมพื้นที่หน้างานก่อนการติดตั้งบ้านเก็บของหรือโรงเรือน' }
+        meta: { title: 'คู่มือการเตรียมพื้นที่และติดตั้ง' }
     },
     {
         path: '/faq',
@@ -49,129 +49,129 @@ const routes = [
     {
         path: '/payment-methods',
         component: () => import('../pages/PaymentGuide.vue'),
-        meta: { title: 'วิธีการสั่งซื้อและชำระเงิน - STORAGE HOUSE', description: 'ขั้นตอนการสั่งซื้อสินค้า ช่องทางการชำระเงิน และนโยบายทางการเงิน' }
+        meta: { title: 'วิธีการสั่งซื้อและชำระเงิน' }
     },
     {
         path: '/about',
         component: () => import('../pages/About.vue'),
-        meta: { title: 'เกี่ยวกับเรา - บริษัท ซีอาร์ ดิสทริบิวชั่น จำกัด', description: 'ทำความรู้จักกับบริษัท ซีอาร์ ดิสทริบิวชั่น ผู้เชี่ยวชาญด้านสินค้านำเข้าอุตสาหกรรมด้วยประสบการณ์กว่า 20 ปี' }
+        meta: { title: 'เกี่ยวกับเรา' }
     },
     {
         path: '/verify-email',
         component: () => import('../pages/VerifyEmail.vue'),
-        meta: { title: 'ยืนยันอีเมลของคุณ - STORAGE HOUSE', description: 'ยืนยันตัวตนเพื่อเข้าถึงสิทธิประโยชน์จาก STORAGE HOUSE แบบเต็มรูปแบบ' }
+        meta: { title: 'ยืนยันอีเมลของคุณ' }
     },
     {
         path: '/auth/line/callback',
         component: () => import('../pages/LineCallback.vue'),
-        meta: { title: 'กำลังเข้าสู่ระบบ - STORAGE HOUSE' }
+        meta: { title: 'กำลังเข้าสู่ระบบ' }
     },
     {
         path: '/forgot-password',
         component: () => import('../pages/ForgotPassword.vue'),
-        meta: { title: 'ลืมรหัสผ่าน - STORAGE HOUSE', description: 'ขอลิงก์รีเซ็ตรหัสผ่านผ่านอีเมล' }
+        meta: { title: 'ลืมรหัสผ่าน' }
     },
     {
         path: '/reset-password',
         component: () => import('../pages/ResetPassword.vue'),
-        meta: { title: 'ตั้งรหัสผ่านใหม่ - STORAGE HOUSE', description: 'ตั้งรหัสผ่านใหม่สำหรับบัญชีของคุณ' }
+        meta: { title: 'ตั้งรหัสผ่านใหม่' }
     },
     {
         path: '/quotation',
         component: () => import('../pages/Quotation.vue'),
-        meta: { title: 'ขอใบเสนอราคา - STORAGE HOUSE', description: 'กรอกแบบฟอร์มเพื่อขอรับใบเสนอราคาบ้านเก็บของ หรือนัดหมายช่างประเมินหน้างาน' }
+        meta: { title: 'ขอใบเสนอราคา' }
     },
     {
         path: '/contact',
         component: () => import('../pages/Contact.vue'),
-        meta: { title: 'ติดต่อเรา - STORAGE HOUSE', description: 'ช่องทางการติดต่อ STORAGE HOUSE ที่อยู่สำนักงาน อีเมล เบอร์โทรศัพท์ และ Line Official' }
+        meta: { title: 'ติดต่อเรา' }
     },
     {
         path: '/profile',
         component: () => import('../pages/Profile.vue'),
-        meta: { title: 'บัญชีของฉัน - STORAGE HOUSE' }
+        meta: { title: 'บัญชีของฉัน' }
     },
     {
         path: '/cart',
         component: () => import('../pages/Cart.vue'),
-        meta: { title: 'ตะกร้าสินค้า - STORAGE HOUSE', description: 'ตรวจสอบรายการสินค้าและดำเนินการสั่งซื้อ STORAGE HOUSE' }
+        meta: { title: 'ตะกร้าสินค้า' }
     },
     {
         path: '/checkout',
         component: () => import('../pages/Checkout.vue'),
-        meta: { title: 'ชำระเงิน - STORAGE HOUSE', description: 'ดำเนินการชำระเงินและกรอกข้อมูลจัดส่ง' }
+        meta: { title: 'ชำระเงิน' }
     },
     {
         path: '/order-success/:id',
         component: () => import('../pages/OrderSuccess.vue'),
-        meta: { title: 'สั่งซื้อสำเร็จ - STORAGE HOUSE' }
+        meta: { title: 'สั่งซื้อสำเร็จ' }
     },
     {
         path: '/recently-viewed',
         component: () => import('../pages/RecentlyViewedPage.vue'),
-        meta: { title: 'ประวัติการดูสินค้า - STORAGE HOUSE', description: 'ประวัติสินค้าที่คุณเคยดู' }
+        meta: { title: 'ประวัติการดูสินค้า' }
     },
     {
         path: '/compare',
         component: () => import('../pages/Compare.vue'),
-        meta: { title: 'เปรียบเทียบสินค้า - STORAGE HOUSE', description: 'เปรียบเทียบคุณสมบัติและราคาของสินค้าแบบ side-by-side' }
+        meta: { title: 'เปรียบเทียบสินค้า' }
     },
     {
         path: '/space-calculator',
         component: () => import('../pages/SpaceCalculator.vue'),
-        meta: { title: 'ประเมินพื้นที่และราคา - STORAGE HOUSE', description: 'เครื่องมือคำนวณขนาดพื้นที่ แนะนำสินค้าที่เหมาะสมพร้อมประเมินราคา' }
+        meta: { title: 'ประเมินพื้นที่และราคา' }
     },
 
     // Legal & Utilities
     {
         path: '/privacy-policy',
         component: () => import('../pages/PrivacyPolicy.vue'),
-        meta: { title: 'นโยบายความเป็นส่วนตัว - STORAGE HOUSE', description: 'รายละเอียดนโยบายความเป็นส่วนตัวและการคุ้มครองข้อมูลส่วนบุคคล (PDPA) ของบริษัท ซีอาร์ ดิสทริบิวชั่น จำกัด' }
+        meta: { title: 'นโยบายความเป็นส่วนตัว' }
     },
     {
         path: '/terms',
         component: () => import('../pages/TermsOfService.vue'),
-        meta: { title: 'เงื่อนไขการให้บริการ - STORAGE HOUSE', description: 'ข้อกำหนดและเงื่อนไขการใช้งานแพลตฟอร์ม STORAGE HOUSE รวมถึงนโยบายการรับประกันสินค้า' }
+        meta: { title: 'เงื่อนไขการให้บริการ' }
     },
     {
         path: '/cookie-policy',
         component: () => import('../pages/CookiePolicy.vue'),
-        meta: { title: 'นโยบายการใช้คุกกี้ - STORAGE HOUSE', description: 'รายละเอียดนโยบายการใช้คุกกี้ (Cookie Policy) ของเว็บไซต์ STORAGE HOUSE' }
+        meta: { title: 'นโยบายการใช้คุกกี้' }
     },
     {
         path: '/warranty',
         component: () => import('../pages/WarrantyPolicy.vue'),
-        meta: { title: 'นโยบายการรับประกัน - STORAGE HOUSE', description: 'เงื่อนไขการรับประกันและข้อยกเว้นสำหรับสินค้าและบริการก่อสร้างโกดังของ STORAGE HOUSE' }
+        meta: { title: 'นโยบายการรับประกัน' }
     },
     {
         path: '/blog',
         component: () => import('../pages/Blog.vue'),
-        meta: { title: 'บทความและความรู้ - STORAGE HOUSE', description: 'บทความให้ความรู้เกี่ยวกับบ้านเก็บของ โรงเรือน การดูแลรักษา และเคล็ดลับจัดพื้นที่' }
+        meta: { title: 'บทความและความรู้' }
     },
     {
         path: '/blog/:slug',
         component: () => import('../pages/BlogDetail.vue'),
-        meta: { title: 'บทความ - STORAGE HOUSE' }
+        meta: { title: 'บทความ' }
     },
     {
         path: '/maintenance',
         component: () => import('../pages/Maintenance.vue'),
-        meta: { title: 'ปิดปรับปรุงระบบชั่วคราว - STORAGE HOUSE', isMaintenancePage: true }
+        meta: { title: 'ปิดปรับปรุงระบบชั่วคราว', isMaintenancePage: true }
     },
     {
         path: '/error',
         component: () => import('../pages/ServerError.vue'),
-        meta: { title: 'เกิดข้อผิดพลาด - STORAGE HOUSE' }
+        meta: { title: 'เกิดข้อผิดพลาด' }
     },
     {
         path: '/:pathMatch(.*)*',
         component: () => import('../pages/NotFound.vue'),
-        meta: { title: '404 ไม่พบหน้าเว็บ - STORAGE HOUSE' }
+        meta: { title: '404 ไม่พบหน้าเว็บ' }
     },
     {
         path: '/admin/login',
         component: () => import('../pages/admin/Login.vue'),
-        meta: { title: 'เข้าสู่ระบบ - STORAGE HOUSE Admin' }
+        meta: { title: 'เข้าสู่ระบบ - Admin' }
     },
     {
         path: '/admin/orders/:id/print/:docType',
@@ -181,7 +181,7 @@ const routes = [
     {
         path: '/admin',
         component: () => import('../pages/admin/AdminLayout.vue'),
-        meta: { title: 'ระบบจัดการส่วนหลังบ้าน - STORAGE HOUSE' },
+        meta: { title: 'ระบบจัดการส่วนหลังบ้าน' },
         children: [
             { path: '', component: () => import('../pages/admin/Dashboard.vue'), meta: { title: 'Dashboard - Admin' } },
             { path: 'analytics', component: () => import('../pages/admin/AnalyticsAdmin.vue'), meta: { title: 'Analytics - Admin' } },
@@ -192,6 +192,7 @@ const routes = [
             { path: 'categories', component: () => import('../pages/admin/CategoriesAdmin.vue'), meta: { title: 'จัดการหมวดหมู่ - Admin' } },
             { path: 'categories/new', component: () => import('../pages/admin/CategoryFormAdmin.vue'), meta: { title: 'เพิ่มหมวดหมู่ - Admin' } },
             { path: 'categories/:id/edit', component: () => import('../pages/admin/CategoryFormAdmin.vue'), meta: { title: 'แก้ไขหมวดหมู่ - Admin' } },
+            { path: 'wires', component: () => import('../pages/admin/WireSamplesAdmin.vue'), meta: { title: 'จัดการข้อมูลสายไฟ - Admin' } },
             { path: 'leads', component: () => import('../pages/admin/LeadsAdmin.vue'), meta: { title: 'ระบบหลังบ้าน Leads - Admin' } },
             { path: 'orders', component: () => import('../pages/admin/OrdersAdmin.vue'), meta: { title: 'จัดการคำสั่งซื้อ - Admin' } },
             { path: 'orders/:id', component: () => import('../pages/admin/OrderDetailAdmin.vue'), meta: { title: 'รายละเอียดคำสั่งซื้อ - Admin' } },
@@ -240,21 +241,22 @@ router.beforeEach((to, from, next) => {
 
     try {
         const settingsStore = useSettingsStore()
-        const sName = settingsStore.storeName || 'บ้านเก็บของ'
+        const sName = settingsStore.storeName || ''
         if (title) {
-            title = title.replace(/STORAGE HOUSE/g, sName)
-            if (!title.includes(sName)) {
+            if (sName && !title.includes(sName)) {
                 title = `${title} | ${sName}`
             }
         } else {
-            title = settingsStore.storeOgTitle || sName
+            title = settingsStore.storeOgTitle || sName || ''
         }
         if (!description && settingsStore.storeDescription) {
             description = settingsStore.storeDescription
         }
     } catch (e) {}
 
-    document.title = title || 'บ้านเก็บของ'
+    if (title) {
+        document.title = title
+    }
 
     // Set Canonical URL
     const currentOrigin = typeof window !== 'undefined' ? window.location.origin : (window.location.origin || '')

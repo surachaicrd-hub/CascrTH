@@ -36,14 +36,19 @@ const { isConfirmOpen, confirmState, confirmAction, cancelAction } = useConfirm(
               :class="{
                 'bg-red-50 text-red-600': confirmState.type === 'danger',
                 'bg-amber-50 text-amber-600': confirmState.type === 'warning',
-                'bg-blue-50 text-blue-600': confirmState.type === 'info'
+                'bg-blue-50 text-blue-600': confirmState.type === 'info',
+                'bg-emerald-50 text-emerald-600': confirmState.type === 'success',
+                'bg-indigo-50 text-indigo-600': confirmState.type === 'primary' || !['danger', 'warning', 'info', 'success'].includes(confirmState.type)
               }"
             >
               <svg 
                 class="h-8 w-8"
                 fill="none" viewBox="0 0 24 24" stroke="currentColor"
               >
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="confirmState.type === 'danger' ? 'M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z' : 'M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z'" />
+                <path v-if="confirmState.type === 'danger' || confirmState.type === 'warning'" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                <path v-else-if="confirmState.type === 'success'" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                <path v-else-if="confirmState.type === 'primary'" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                <path v-else stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
             
@@ -64,11 +69,13 @@ const { isConfirmOpen, confirmState, confirmAction, cancelAction } = useConfirm(
             </button>
             <button 
               type="button" 
-              class="flex-1 inline-flex justify-center items-center rounded-xl border border-transparent px-4 py-2.5 text-sm font-bold text-white shadow-sm focus:outline-none transition-colors"
+              class="flex-1 inline-flex justify-center items-center rounded-xl border border-transparent px-4 py-2.5 text-sm font-bold text-white shadow-sm focus:outline-none transition-all"
               :class="{
                 'bg-red-600 hover:bg-red-700': confirmState.type === 'danger',
                 'bg-amber-600 hover:bg-amber-700': confirmState.type === 'warning',
-                'bg-blue-600 hover:bg-blue-700': confirmState.type === 'info'
+                'bg-blue-600 hover:bg-blue-700': confirmState.type === 'info',
+                'bg-emerald-600 hover:bg-emerald-700': confirmState.type === 'success',
+                'bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700': confirmState.type === 'primary' || !['danger', 'warning', 'info', 'success'].includes(confirmState.type)
               }"
               @click="confirmAction"
             >

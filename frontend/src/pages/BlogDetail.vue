@@ -589,7 +589,7 @@ onUnmounted(() => {
           <router-link v-for="ra in recommendedArticles" :key="ra.id" :to="'/blog/' + (ra.slug || ra.id)" class="group bg-white dark:bg-[#111827] rounded-2xl overflow-hidden border border-gray-100 dark:border-gray-800 hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
             <div class="w-full aspect-[4/3] overflow-hidden bg-gray-100 dark:bg-gray-800 relative">
               <img v-if="ra.cover_image" :src="getOptimizedImageUrl(ra.cover_image, 600)" :alt="ra.title" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" @error="onImageError">
-              <div v-else class="w-full h-full bg-gradient-to-br from-amber-50 to-orange-100 dark:from-amber-900/20 dark:to-orange-900/20 flex items-center justify-center">
+              <div v-else class="w-full h-full bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-900/20 flex items-center justify-center">
                 <svg class="w-10 h-10 text-amber-300 dark:text-amber-700" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"></path></svg>
               </div>
               <div class="absolute top-2 left-2">

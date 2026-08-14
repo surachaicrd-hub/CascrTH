@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const sharp = require('sharp');
 
-const targetWidths = [64, 128, 150, 200, 400, 500, 600, 700, 800, 1200];
+const targetWidths = [64, 128, 150, 200, 400, 500, 600, 700, 800, 1000, 1200, 1400, 1600];
 
 // Throttle helper: pause execution for ms milliseconds
 function sleep(ms) {
@@ -90,9 +90,19 @@ async function generateAllThumbnails() {
                     }
 
                     try {
-                        await sharp(filePath)
-                            .resize({ width: w, withoutEnlargement: true })
-                            .toFile(cachedFilePath);
+                        let transform = sharp(filePath)
+                            .rotate()
+                            .resize({ width: w, withoutEnlargement: true, kernel: 'lanczos3' });
+
+                        if (ext === '.webp') {
+                            transform = transform.webp({ quality: 90, effort: 4, smartSubsample: true });
+                        } else if (ext === '.png') {
+                            transform = transform.png({ compressionLevel: 8, quality: 95 });
+                        } else if (ext === '.jpg' || ext === '.jpeg') {
+                            transform = transform.jpeg({ quality: 90, mozjpeg: true });
+                        }
+
+                        await transform.toFile(cachedFilePath);
                         processedCount++;
                     } catch (err) {
                         console.error(`Error resizing file ${file} to width ${w}:`, err.message);
@@ -137,9 +147,19 @@ async function generateThumbnailsForFile(filePath) {
         
         try {
             if (!fs.existsSync(cachedFilePath)) {
-                await sharp(filePath)
-                    .resize({ width: w, withoutEnlargement: true })
-                    .toFile(cachedFilePath);
+                let transform = sharp(filePath)
+                    .rotate()
+                    .resize({ width: w, withoutEnlargement: true, kernel: 'lanczos3' });
+
+                if (ext === '.webp') {
+                    transform = transform.webp({ quality: 90, effort: 4, smartSubsample: true });
+                } else if (ext === '.png') {
+                    transform = transform.png({ compressionLevel: 8, quality: 95 });
+                } else if (ext === '.jpg' || ext === '.jpeg') {
+                    transform = transform.jpeg({ quality: 90, mozjpeg: true });
+                }
+
+                await transform.toFile(cachedFilePath);
             }
         } catch (err) {
             console.error(`Error generating thumbnail for ${filePath} at width ${w}:`, err.message);

@@ -62,9 +62,9 @@ choice /C 123 /N /T 10 /D 1 /M "Select option [1-3] (Default = 1 in 10s): "
 set RUN_MODE=%ERRORLEVEL%
 echo.
 
-REM ========== Clean Ports 8080 & 8000 ==========
-echo [1/3] Cleaning up ports 8080 and 8000...
-for /f "tokens=5" %%T in ('netstat -a -n -o 2^>nul ^| findstr /C:":8080 " /C:":8000 "') do (
+REM ========== Clean Ports 8200 & 8201 ==========
+echo [1/3] Cleaning up ports 8200 and 8201...
+for /f "tokens=5" %%T in ('netstat -a -n -o 2^>nul ^| findstr /C:":8200 " /C:":8201 "') do (
     if not "%%T"=="0" if not "%%T"=="" taskkill /PID %%T /F >nul 2>&1
 )
 echo Done.
@@ -107,20 +107,20 @@ echo.
 REM ========== Execute Selected Mode ==========
 if "%RUN_MODE%"=="1" (
     echo [3/3] Starting System in Development Mode...
-    echo - Backend API:  http://localhost:8080
-    echo - Frontend Dev: http://localhost:8000
+    echo - Backend API:  http://localhost:8201
+    echo - Frontend Dev: http://localhost:8200
     echo.
     pushd "%~dp0api"
-    start "StorageShed Backend API (Port 8080)" cmd /k "node index.js"
+    start "StorageShed Backend API (Port 8201)" cmd /k "node index.js"
     popd
     timeout /t 2 >nul
 
     pushd "%~dp0frontend"
-    start "StorageShed Frontend Dev (Port 8000)" cmd /k "npm.cmd run dev"
+    start "StorageShed Frontend Dev (Port 8200)" cmd /k "npm.cmd run dev"
     popd
     timeout /t 2 >nul
 
-    start http://localhost:8000
+    start http://localhost:8200
     goto RUNNING_COMPLETE
 )
 
@@ -146,22 +146,22 @@ if "%RUN_MODE%"=="2" (
 
     echo Starting Backend API...
     pushd "%~dp0api"
-    start "StorageShed Backend API (Port 8080)" cmd /k "node index.js"
+    start "StorageShed Backend API (Port 8201)" cmd /k "node index.js"
     popd
     timeout /t 2 >nul
 
-    start http://localhost:8080
+    start http://localhost:8201
     goto RUNNING_COMPLETE
 )
 
 if "%RUN_MODE%"=="3" (
     echo [3/3] Quick Starting System (Using Existing Build)...
     pushd "%~dp0api"
-    start "StorageShed Backend API (Port 8080)" cmd /k "node index.js"
+    start "StorageShed Backend API (Port 8201)" cmd /k "node index.js"
     popd
     timeout /t 2 >nul
 
-    start http://localhost:8080
+    start http://localhost:8201
     goto RUNNING_COMPLETE
 )
 

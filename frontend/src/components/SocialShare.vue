@@ -34,32 +34,35 @@ const share = (platform) => {
 </script>
 
 <template>
-  <div class="flex items-center gap-2 relative">
+  <div class="flex items-center gap-1.5 sm:gap-2 relative">
     <!-- Copy Toast -->
     <Transition name="fade">
-      <div v-if="copyToastVisible" class="absolute -top-10 left-1/2 -translate-x-1/2 px-3 py-1.5 bg-green-600 text-white text-xs font-bold rounded-lg shadow-lg whitespace-nowrap z-50 flex items-center gap-1">
+      <div v-if="copyToastVisible" class="absolute -top-10 left-1/2 -translate-x-1/2 px-3 py-1.5 bg-emerald-600 text-white text-xs font-bold rounded-lg shadow-lg whitespace-nowrap z-50 flex items-center gap-1">
         <span>คัดลอกลิงก์แล้ว</span>
         <svg class="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
           <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
         </svg>
       </div>
     </Transition>
-    <span class="text-xs font-bold text-gray-600 dark:text-gray-400 mr-1">แชร์</span>
+
+    <span class="text-xs sm:text-[13px] font-bold text-slate-500 dark:text-slate-400">แชร์</span>
+    <span class="text-slate-300 dark:text-slate-700 text-xs font-light">|</span>
+
     <!-- Facebook -->
-    <button @click="share('facebook')" class="w-8 h-8 rounded-full bg-[#1877F2]/10 hover:bg-[#1877F2] text-[#1877F2] hover:text-white flex items-center justify-center transition-all duration-300 hover:scale-110" title="Facebook" aria-label="แชร์ไปยัง Facebook">
-      <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+    <button @click="share('facebook')" class="w-7 h-7 rounded-full bg-[#1877F2] text-white flex items-center justify-center transition-all duration-200 hover:scale-108 hover:opacity-90 shadow-2xs" title="Facebook" aria-label="แชร์ไปยัง Facebook">
+      <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
     </button>
     <!-- Line -->
-    <button @click="share('line')" class="w-8 h-8 rounded-full bg-[#06C755]/10 hover:bg-[#06C755] text-[#06C755] hover:text-white flex items-center justify-center transition-all duration-300 hover:scale-110" title="Line" aria-label="แชร์ไปยัง Line">
-      <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M19.365 9.863c.349 0 .63.285.63.631 0 .345-.281.63-.63.63H17.61v1.125h1.755c.349 0 .63.283.63.63 0 .344-.281.629-.63.629h-2.386c-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.627-.63h2.386c.349 0 .63.285.63.63 0 .349-.281.63-.63.63H17.61v1.125h1.755zm-3.855 3.016c0 .27-.174.51-.432.596-.064.021-.133.031-.199.031-.211 0-.391-.09-.51-.25l-2.443-3.317v2.94c0 .344-.279.629-.631.629-.346 0-.626-.285-.626-.629V8.108c0-.27.173-.51.43-.595.06-.023.136-.033.194-.033.195 0 .375.104.495.254l2.462 3.33V8.108c0-.345.282-.63.63-.63.345 0 .63.285.63.63v4.771zm-5.741 0c0 .344-.282.629-.631.629-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.627-.63.349 0 .631.285.631.63v4.771zm-2.466.629H4.917c-.345 0-.63-.285-.63-.629V8.108c0-.345.285-.63.63-.63.348 0 .63.285.63.63v4.141h1.756c.348 0 .629.283.629.63 0 .344-.281.629-.629.629M24 10.314C24 4.943 18.615.572 12 .572S0 4.943 0 10.314c0 4.811 4.27 8.842 10.035 9.608.391.082.923.258 1.058.59.12.301.079.766.038 1.08l-.164 1.02c-.045.301-.24 1.186 1.049.645 1.291-.539 6.916-4.078 9.436-6.975C23.176 14.393 24 12.458 24 10.314"/></svg>
+    <button @click="share('line')" class="w-7 h-7 rounded-full bg-[#06C755] text-white flex items-center justify-center transition-all duration-200 hover:scale-108 hover:opacity-90 shadow-2xs" title="Line" aria-label="แชร์ไปยัง Line">
+      <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M19.365 9.863c.349 0 .63.285.63.631 0 .345-.281.63-.63.63H17.61v1.125h1.755c.349 0 .63.283.63.63 0 .344-.281.629-.63.629h-2.386c-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.627-.63h2.386c.349 0 .63.285.63.63 0 .349-.281.63-.63.63H17.61V9.86h1.755zm-3.855 3.016c0 .27-.174.51-.432.596-.064.021-.133.031-.199.031-.211 0-.391-.09-.51-.25l-2.443-3.317v2.94c0 .344-.279.629-.631.629-.346 0-.626-.285-.626-.629V8.108c0-.27.173-.51.43-.595.06-.023.136-.033.194-.033.195 0 .375.104.495.254l2.462 3.33V8.108c0-.345.282-.63.63-.63.345 0 .63.285.63.63v4.771zm-5.741 0c0 .344-.282.629-.631.629-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.627-.63.349 0 .631.285.631.63v4.771zm-2.466.629H4.917c-.345 0-.63-.285-.63-.629V8.108c0-.345.285-.63.63-.63.348 0 .63.285.63.63v4.141h1.756c.348 0 .629.283.629.63 0 .344-.281.629-.629.629M24 10.314C24 4.943 18.615.572 12 .572S0 4.943 0 10.314c0 4.811 4.27 8.842 10.035 9.608.391.082.923.258 1.058.59.12.301.079.766.038 1.08l-.164 1.02c-.045.301-.24 1.186 1.049.645 1.291-.539 6.916-4.078 9.436-6.975C23.176 14.393 24 12.458 24 10.314"/></svg>
     </button>
     <!-- Twitter/X -->
-    <button @click="share('twitter')" class="w-8 h-8 rounded-full bg-black/5 dark:bg-white/10 hover:bg-black text-gray-700 dark:text-gray-300 hover:text-white flex items-center justify-center transition-all duration-300 hover:scale-110" title="X (Twitter)" aria-label="แชร์ไปยัง X (Twitter)">
-      <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+    <button @click="share('twitter')" class="w-7 h-7 rounded-full bg-slate-100 hover:bg-slate-900 text-slate-800 hover:text-white dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-white dark:hover:text-slate-900 flex items-center justify-center transition-all duration-200 hover:scale-108 shadow-2xs border border-slate-200 dark:border-slate-700" title="X" aria-label="แชร์ไปยัง X">
+      <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
     </button>
     <!-- Copy Link -->
-    <button @click="share('copy')" class="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 hover:bg-emerald-500 text-gray-500 hover:text-white flex items-center justify-center transition-all duration-300 hover:scale-110" title="คัดลอกลิงก์" aria-label="คัดลอกลิงก์สินค้า">
-      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
+    <button @click="share('copy')" class="w-7 h-7 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 flex items-center justify-center transition-all duration-200 hover:scale-108 shadow-2xs border border-slate-200 dark:border-slate-700" title="คัดลอกลิงก์" aria-label="คัดลอกลิงก์สินค้า">
+      <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
     </button>
   </div>
 </template>

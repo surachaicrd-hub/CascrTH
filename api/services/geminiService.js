@@ -52,16 +52,26 @@ async function getDefaultModels() {
  * @returns {Promise<string[]>} Array of API keys
  */
 async function getApiKeys() {
-    const [rows] = await db.query('SELECT setting_value FROM settings WHERE setting_key = ?', ['gemini_api_key']);
-    if (rows.length === 0 || !rows[0].setting_value) {
-        return [];
+    let keys = [];
+    try {
+        const [rows] = await db.query('SELECT setting_value FROM settings WHERE setting_key = ?', ['gemini_api_key']);
+        if (rows.length > 0 && rows[0].setting_value) {
+            keys = rows[0].setting_value
+                .split(',')
+                .map(k => k.trim())
+                .filter(k => k.length > 0);
+        }
+    } catch (e) {
+        console.warn('[GeminiService] Failed to fetch API keys from DB:', e.message);
     }
 
-    // Support comma-separated keys
-    const keys = rows[0].setting_value
-        .split(',')
-        .map(k => k.trim())
-        .filter(k => k.length > 0);
+    if (keys.length === 0 && process.env.GEMINI_API_KEY) {
+        keys = process.env.GEMINI_API_KEY.split(',').map(k => k.trim()).filter(k => k.length > 0);
+    }
+
+    if (keys.length === 0) {
+        return [];
+    }
 
     // Filter out recently failed keys (but keep at least one to try)
     const now = Date.now();
@@ -81,12 +91,15 @@ function markKeyFailed(apiKey, reason = 'unknown') {
 }
 
 /**
- * Check if an error is a quota/rate limit/unavailable error that should trigger key rotation
+ * Check if an error is a quota/rate limit/unavailable/auth error that should trigger key rotation or specific error message
  */
 function getErrorType(error) {
     const msg = (error?.message || error?.toString() || '').toLowerCase();
     const status = error?.status || error?.code || 0;
     
+    if (status === 401 || status === 403 || msg.includes('401') || msg.includes('unauthenticated') || msg.includes('invalid authentication') || msg.includes('access_token_type_unsupported') || msg.includes('api_key_invalid') || msg.includes('invalid api key')) {
+        return 'AUTH_ERROR';
+    }
     if (status === 429 || msg.includes('429') || msg.includes('quota') || msg.includes('rate limit') || msg.includes('too many requests')) {
         return 'QUOTA';
     }
@@ -102,18 +115,23 @@ function getErrorType(error) {
  */
 async function getPreferredModels() {
     const defaults = await getDefaultModels();
+    const ALWAYS_SAFE_FALLBACKS = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash'];
+    
+    let modelList = [];
     try {
         const [rows] = await db.query('SELECT setting_value FROM settings WHERE setting_key = ?', ['gemini_preferred_model']);
         if (rows.length > 0 && rows[0].setting_value) {
             const preferred = rows[0].setting_value.trim();
-            // Build fallback chain: preferred model first, then defaults (excluding preferred to avoid duplication)
-            const fallbacks = defaults.filter(m => m !== preferred);
-            return [preferred, ...fallbacks];
+            if (preferred && preferred !== 'auto' && preferred !== 'ค่าเริ่มต้นจากระบบ (ออโต้)') {
+                modelList.push(preferred);
+            }
         }
     } catch (e) {
-        console.warn('[GeminiService] Failed to read preferred model from DB, using defaults:', e.message);
+        console.warn('[GeminiService] Failed to read preferred model from DB:', e.message);
     }
-    return defaults;
+
+    modelList = [...modelList, ...defaults, ...ALWAYS_SAFE_FALLBACKS];
+    return Array.from(new Set(modelList)).filter(Boolean);
 }
 
 /**
@@ -180,7 +198,9 @@ async function generateContent(options) {
 
     const apiKeys = await getApiKeys();
     if (apiKeys.length === 0) {
-        throw new Error('Gemini API Key ยังไม่ได้ตั้งค่า กรุณาไปที่หน้าตั้งค่าเพื่อเพิ่ม API Key');
+        const err = new Error('Gemini API Key ยังไม่ได้ตั้งค่า กรุณาไปที่ระบบตั้งค่าหลังบ้าน (Settings > Google Gemini AI) เพื่อเพิ่ม API Key');
+        err.statusCode = 400;
+        throw err;
     }
 
     // Build the contents payload
@@ -192,7 +212,9 @@ async function generateContent(options) {
         // Simple prompt mode
         contentPayload = prompt;
     } else {
-        throw new Error('Either prompt or contents must be provided');
+        const err = new Error('Either prompt or contents must be provided');
+        err.statusCode = 400;
+        throw err;
     }
 
     let lastError = null;
@@ -248,6 +270,11 @@ async function generateContent(options) {
                 lastError = error;
 
                 const errType = getErrorType(error);
+                if (errType === 'AUTH_ERROR') {
+                    markKeyFailed(apiKey, error.message?.substring(0, 100) || 'invalid authentication credentials');
+                    // Skip remaining models for this invalid key, try next key
+                    break;
+                }
                 if (errType === 'QUOTA') {
                     markKeyFailed(apiKey, error.message?.substring(0, 100) || 'quota/rate limit');
                     // Skip remaining models for this key, try next key
@@ -265,7 +292,13 @@ async function generateContent(options) {
 
     // All keys and models exhausted
     if (lastError) {
-        if (getErrorType(lastError) === 'QUOTA' || getErrorType(lastError) === 'UNAVAILABLE') {
+        const errType = getErrorType(lastError);
+        if (errType === 'AUTH_ERROR') {
+            const err = new Error('Gemini API Key ไม่ถูกต้อง หรือไม่มีสิทธิ์ใช้งาน กรุณาตรวจสอบและอัปเดต API Key ในระบบตั้งค่าหลังบ้าน (Settings > Google Gemini AI)');
+            err.statusCode = 400;
+            throw err;
+        }
+        if (errType === 'QUOTA' || errType === 'UNAVAILABLE') {
             const err = new Error('API Key ทั้งหมดถูกจำกัดการใช้งาน (Quota/Rate Limit) กรุณารอสักครู่แล้วลองใหม่ หรือเพิ่ม API Key ใหม่ในหน้าตั้งค่า');
             err.statusCode = 429;
             throw err;

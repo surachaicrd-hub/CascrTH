@@ -1,12 +1,21 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../config/database');
+const cacheService = require('../services/cacheService');
 const { verifyAdmin } = require('./auth');
 
 // GET - List all badges (public)
 router.get('/', async (req, res) => {
     try {
+        const cachedBadges = await cacheService.get('badges:list');
+        if (cachedBadges) {
+            res.setHeader('X-Cache', 'HIT');
+            res.setHeader('X-Cache-Engine', cacheService.isRedisReady ? 'Redis' : 'In-Memory');
+            return res.json({ success: true, data: cachedBadges });
+        }
+
         const [rows] = await db.query('SELECT * FROM product_badges ORDER BY sort_order ASC, created_at ASC');
+        await cacheService.set('badges:list', rows, 600);
         res.json({ success: true, data: rows });
     } catch (error) {
         console.error('List badges error:', error);
@@ -31,6 +40,9 @@ router.post('/', verifyAdmin, async (req, res) => {
             [id, name.trim(), icon || 'tag', color || 'gray', sortOrder]
         );
 
+        await cacheService.delPattern('badges:*');
+        await cacheService.delPattern('products:*');
+
         res.status(201).json({ success: true, id });
     } catch (error) {
         console.error('Create badge error:', error);
@@ -54,6 +66,9 @@ router.put('/:id', verifyAdmin, async (req, res) => {
             [name?.trim() || '', icon || 'tag', color || 'gray', id]
         );
 
+        await cacheService.delPattern('badges:*');
+        await cacheService.delPattern('products:*');
+
         res.json({ success: true });
     } catch (error) {
         console.error('Update badge error:', error);
@@ -71,6 +86,10 @@ router.delete('/:id', verifyAdmin, async (req, res) => {
         if (badge[0].is_system) return res.status(403).json({ success: false, error: 'ไม่สามารถลบป้ายกำกับเริ่มต้นได้' });
 
         await db.execute('DELETE FROM product_badges WHERE id = ? AND is_system = false', [id]);
+        
+        await cacheService.delPattern('badges:*');
+        await cacheService.delPattern('products:*');
+
         res.json({ success: true });
     } catch (error) {
         console.error('Delete badge error:', error);

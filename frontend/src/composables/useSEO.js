@@ -1,8 +1,9 @@
-import { onBeforeUnmount } from 'vue';
+import { onBeforeUnmount, watch } from 'vue';
 import { useSettingsStore } from '../stores/settingsStore';
 
 export function useSEO() {
   const settingsStore = useSettingsStore();
+  let lastMetaOptions = null;
 
   const helperSetMetaTag = (selector, attrName, attrValue, content) => {
     let el = document.querySelector(selector);
@@ -40,21 +41,24 @@ export function useSEO() {
    * Set document meta tags dynamically
    */
   const setMeta = (options = {}) => {
+    lastMetaOptions = options;
     const titleVal = typeof options === 'string' ? options : options.title;
-    const descVal = typeof options === 'string' ? arguments[1] : options.description;
-    const imageVal = typeof options === 'string' ? arguments[2] : options.image;
+    const descVal = typeof options === 'string' ? '' : options.description;
+    const imageVal = typeof options === 'string' ? '' : options.image;
     const keywordsVal = options.keywords || settingsStore.storeKeywords || '';
     const llmContextVal = options.llmContext || settingsStore.storeDefaultLlmContext || '';
     const typeVal = options.type || 'website';
-    const canonicalVal = options.canonicalUrl || window.location.href;
+    const canonicalVal = options.canonicalUrl || (typeof window !== 'undefined' ? window.location.href : '');
 
-    const storeName = settingsStore.storeName || 'บ้านเก็บของ';
-    const storeDesc = descVal || settingsStore.storeDescription || 'จำหน่ายและติดตั้งบ้านเก็บของ โรงเรือน และโกดังสำเร็จรูปคุณภาพสูง';
-    const pageTitle = titleVal ? `${titleVal} | ${storeName}` : (settingsStore.storeOgTitle || storeName);
+    const storeName = settingsStore.storeName || '';
+    const storeDesc = descVal || settingsStore.storeDescription || '';
+    const pageTitle = titleVal ? (storeName ? `${titleVal} | ${storeName}` : titleVal) : (settingsStore.storeOgTitle || storeName || '');
     const finalImage = imageVal ? (imageVal.startsWith('http') ? imageVal : `${window.location.origin}${imageVal}`) : `${window.location.origin}/og-image.jpg`;
 
     // 1. Document Title
-    document.title = pageTitle;
+    if (pageTitle) {
+      document.title = pageTitle;
+    }
 
     // 2. Standard Meta
     helperSetMetaTag('meta[name="title"]', 'name', 'title', pageTitle);
@@ -82,6 +86,16 @@ export function useSEO() {
     // 5. Canonical Link
     helperSetLinkTag('canonical', canonicalVal);
   };
+
+  // Reactively re-apply meta when settings load from API
+  const stopWatch = watch(
+    [() => settingsStore.storeName, () => settingsStore.storeDescription, () => settingsStore.storeOgTitle, () => settingsStore.storeKeywords],
+    () => {
+      if (lastMetaOptions) {
+        setMeta(lastMetaOptions);
+      }
+    }
+  );
 
   /**
    * Inject JSON-LD Structured Data

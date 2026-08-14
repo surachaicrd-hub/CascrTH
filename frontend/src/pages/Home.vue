@@ -26,10 +26,10 @@ const heroAiMessages = ref([])
 const isHeroAiTyping = ref(false)
 
 const heroAiSuggestions = [
-  { text: 'แนะนำแบบบ้านเก็บของ', reply: 'สำหรับบ้านเก็บของ เรามี 3 สไตล์หลักครับ:\n1. Modern: ดีไซน์โมเดิร์น ทันสมัย เหมาะกับบ้านยุคใหม่\n2. Classic: ทรงจั่วดั้งเดิม สวยคลาสสิก\n3. Loft: สไตล์ลอฟท์ ดิบเท่\n\nคุณสนใจสไตล์ไหนเป็นพิเศษไหมครับ?' },
-  { text: 'คำนวณราคาเบื้องต้น', reply: 'ราคาเริ่มต้นดังนี้ครับ:\n- Size S (3.5 ตร.ม.): ฿29,900\n- Size M (7.0 ตร.ม.): ฿45,900\n- Size L (11.0 ตร.ม.): ฿65,900\n- Size XL (15.0 ตร.ม.): ฿89,900\n\nราคานี้รวมจัดส่งและประกอบติดตั้งฟรีทั่วประเทศครับ!' },
-  { text: 'เปรียบเทียบสินค้า', reply: 'เปรียบเทียบประเภทสินค้าหลัก:\n- พลาสติก HDPE: สวยลายไม้ธรรมชาติ ไม่เป็นสนิม ทนทานสูง ไม่ต้องบำรุงรักษา\n- โลหะ Galvalume: แข็งแกร่ง ทนลมแรง 120 กม./ชม. ปลอดภัยด้วยระบบล็อกแน่นหนา\n\nต้องการทราบรายละเอียดการทดสอบของวัสดุไหนเพิ่มเติมไหมครับ?' },
-  { text: 'สอบถามการจัดส่ง', reply: 'เรามีบริการจัดส่งและประกอบติดตั้งฟรีโดยทีมช่างผู้เชี่ยวชาญทั่วประเทศครับ โดยสินค้าจะจัดส่งถึงหน้าบ้านและประกอบแล้วเสร็จภายใน 1-2 วันทำการครับ' }
+  { text: 'แนะนำสินค้าที่น่าสนใจ', reply: 'เรามีสินค้าหลากหลายรุ่นที่ตอบโจทย์ทุกการใช้งานและพื้นที่ของคุณ\n\nคุณสนใจสินค้าสไตล์ไหนหรือขนาดใดเป็นพิเศษไหมครับ?' },
+  { text: 'คำนวณราคาเบื้องต้น', reply: 'เรามีโปรแกรมคำนวณพื้นที่และราคาเบื้องต้นให้คุณเลือกขนาดที่เหมาะสมได้ทันที พร้อมบริการจัดส่งและติดตั้งฟรีทั่วประเทศครับ!' },
+  { text: 'เปรียบเทียบประเภทสินค้า', reply: 'เรามีสินค้าหลายเกรดวัสดุคุณภาพสูง ทนทาน ทนแดดทนฝน ผ่านมาตรฐานการทดสอบระดับสากล พร้อมรับประกันคุณภาพ\n\nต้องการทราบรายละเอียดของวัสดุใดเพิ่มเติมไหมครับ?' },
+  { text: 'สอบถามการจัดส่งและติดตั้ง', reply: 'เรามีบริการจัดส่งและประกอบติดตั้งโดยทีมช่างผู้เชี่ยวชาญทั่วประเทศครับ โดยสินค้าจะจัดส่งถึงหน้าบ้านและประกอบตามมาตรฐานอย่างมืออาชีพครับ' }
 ]
 
 const sendHeroAiMessage = (suggestion) => {
@@ -277,104 +277,43 @@ const loadHomepageSettings = async () => {
         slides.value = Array.isArray(parsedSlides) ? parsedSlides : []
       } catch(e) {}
       
-      // Patch: replace external/broken image URLs with local fallbacks and ensure texts are set
+      // Local slide image fallbacks if image is missing
       const localSlideImages = ['/images/home/hero-slide-1.webp', '/images/home/hero-slide-2.webp', '/images/home/hero-slide-3.webp']
-      const fallbackTexts = [
-        {
-          tag: 'ที่สุดแห่งนวัตกรรมพื้นที่จัดเก็บ',
-          titleLine1: 'เนรมิตพื้นที่ว่างเปล่า',
-          titleLine2: 'ด้วยบ้านเก็บของระดับพรีเมียม',
-          desc: 'บอกลาห้องเก็บของแบบเดิมๆ พบดีไซน์ทันสมัยที่ยกระดับภาพลักษณ์และช่วยจัดระเบียบให้บ้านคุณ',
-          ctaText: 'ดูคอลเลกชันทั้งหมด',
-          ctaLink: '/products',
-          ctaAction: 'view_products',
-          ctaText2: 'คำนวณพื้นที่จัดเก็บ',
-          ctaLink2: '/space-calculator',
-          ctaAction2: 'space_calc'
-        },
-        {
-          tag: 'บ้านเก็บของพลาสติก HDPE ลายไม้',
-          titleLine1: 'แข็งแกร่ง ทนทาน ทนแดดฝน',
-          titleLine2: 'สวยงามกลมกลืนกับสวนหลังบ้าน',
-          desc: 'ผลิตจากพลาสติก HDPE หนาสองชั้น ป้องกันรังสี UV 100% ไม่เป็นสนิม ไม่ผุกร่อน ตลอดอายุการใช้งาน',
-          ctaText: 'เลือกดูรุ่นพลาสติก',
-          ctaLink: '/products',
-          ctaAction: 'view_plastic_sheds',
-          ctaText2: 'คำนวณพื้นที่จัดเก็บ',
-          ctaLink2: '/space-calculator',
-          ctaAction2: 'space_calc'
-        },
-        {
-          tag: 'บ้านเก็บของโลหะ Galvalume',
-          titleLine1: 'โครงสร้างเหล็กกล้าแข็งแรง',
-          titleLine2: 'ปลอดภัยด้วยระบบล็อกมาตรฐาน',
-          desc: 'ทนลมแรงสูงสุด 120 กม./ชม. อบสีความร้อน 4 ชั้น กันสนิม พร้อมช่องระบายอากาศป้องกันกลิ่นอับชื้น',
-          ctaText: 'เลือกดูรุ่นโลหะ',
-          ctaLink: '/products',
-          ctaAction: 'view_metal_sheds',
-          ctaText2: 'คำนวณพื้นที่จัดเก็บ',
-          ctaLink2: '/space-calculator',
-          ctaAction2: 'space_calc'
-        }
-      ]
       if (slides.value.length > 0) {
         slides.value = slides.value.map((slide, i) => {
-          const fallback = fallbackTexts[i % fallbackTexts.length]
-          const defaultBadges = [
-            {
-              badgeHighlight: 'เกรดพรีเมียม',
-              badgeHighlightIcon: 'trophy',
-              badgeFeature: 'รับประกัน 10 ปี',
-              badgeFeatureIcon: 'wrench',
-              badgeSpecial: 'ดีไซน์สไตล์โมเดิร์น',
-              badgeSpecialIcon: 'house'
-            },
-            {
-              badgeHighlight: 'ผิวลายไม้ธรรมชาติ',
-              badgeHighlightIcon: 'leaf',
-              badgeFeature: 'กันรังสี UV 100%',
-              badgeFeatureIcon: 'sun',
-              badgeSpecial: 'ทนแดดทนฝน 100%',
-              badgeSpecialIcon: 'rain'
-            },
-            {
-              badgeHighlight: 'เหล็ก Galvalume USA',
-              badgeHighlightIcon: 'shield',
-              badgeFeature: 'ทนลมแรง 120 กม./ชม.',
-              badgeFeatureIcon: 'wind',
-              badgeSpecial: 'ระบบล็อกมาตรฐาน',
-              badgeSpecialIcon: 'lock'
-            }
-          ][i % 3]
-
           if (typeof slide !== 'object' || !slide) {
             return {
               image: localSlideImages[i] || localSlideImages[0],
-              ...fallback,
-              ...defaultBadges
+              tag: '',
+              titleLine1: '',
+              titleLine2: '',
+              desc: '',
+              ctaText: 'ดูสินค้าทั้งหมด',
+              ctaLink: '/products',
+              ctaAction: 'view_products'
             }
           }
-          const safeString = (val, fallbackVal) => (typeof val === 'string' && val.trim() !== '') ? val : fallbackVal;
+          const safeString = (val, fallbackVal = '') => (typeof val === 'string' && val.trim() !== '') ? val : fallbackVal;
           return {
             ...slide,
-            tag: safeString(slide.tag, fallback.tag),
-            titleLine1: safeString(slide.titleLine1, fallback.titleLine1),
-            titleLine2: safeString(slide.titleLine2, fallback.titleLine2),
-            desc: safeString(slide.desc, fallback.desc),
-            ctaText: safeString(slide.ctaText, fallback.ctaText),
-            ctaLink: safeString(slide.ctaLink, fallback.ctaLink),
-            ctaAction: safeString(slide.ctaAction, fallback.ctaAction),
-            ctaText2: safeString(slide.ctaText2, fallback.ctaText2 || 'คำนวณพื้นที่จัดเก็บ'),
-            ctaLink2: safeString(slide.ctaLink2, fallback.ctaLink2 || '/space-calculator'),
-            ctaAction2: safeString(slide.ctaAction2, fallback.ctaAction2 || 'space_calc'),
-            badgeHighlight: safeString(slide.badgeHighlight, defaultBadges.badgeHighlight),
-            badgeHighlightIcon: safeString(slide.badgeHighlightIcon, defaultBadges.badgeHighlightIcon),
+            tag: safeString(slide.tag),
+            titleLine1: safeString(slide.titleLine1),
+            titleLine2: safeString(slide.titleLine2),
+            desc: safeString(slide.desc),
+            ctaText: safeString(slide.ctaText, 'ดูสินค้าทั้งหมด'),
+            ctaLink: safeString(slide.ctaLink, '/products'),
+            ctaAction: safeString(slide.ctaAction, 'view_products'),
+            ctaText2: safeString(slide.ctaText2, 'คำนวณพื้นที่'),
+            ctaLink2: safeString(slide.ctaLink2, '/space-calculator'),
+            ctaAction2: safeString(slide.ctaAction2, 'space_calc'),
+            badgeHighlight: safeString(slide.badgeHighlight),
+            badgeHighlightIcon: safeString(slide.badgeHighlightIcon, 'trophy'),
             badgeHighlightLabel: safeString(slide.badgeHighlightLabel, 'จุดเด่น'),
-            badgeFeature: safeString(slide.badgeFeature, defaultBadges.badgeFeature),
-            badgeFeatureIcon: safeString(slide.badgeFeatureIcon, defaultBadges.badgeFeatureIcon),
+            badgeFeature: safeString(slide.badgeFeature),
+            badgeFeatureIcon: safeString(slide.badgeFeatureIcon, 'wrench'),
             badgeFeatureLabel: safeString(slide.badgeFeatureLabel, 'คุณสมบัติ'),
-            badgeSpecial: safeString(slide.badgeSpecial, defaultBadges.badgeSpecial),
-            badgeSpecialIcon: safeString(slide.badgeSpecialIcon, defaultBadges.badgeSpecialIcon),
+            badgeSpecial: safeString(slide.badgeSpecial),
+            badgeSpecialIcon: safeString(slide.badgeSpecialIcon, 'house'),
             badgeSpecialLabel: safeString(slide.badgeSpecialLabel, 'ความพิเศษ'),
             image: (slide.image && typeof slide.image === 'string' && slide.image.length > 2 && !slide.image.includes('unsplash.com')) ? slide.image : (localSlideImages[i] || localSlideImages[0])
           }
@@ -496,14 +435,14 @@ const loadHomepageSettings = async () => {
       slides.value = [
         {
           image: '/images/home/hero-slide-1.webp',
-          tag: 'ที่สุดแห่งนวัตกรรมพื้นที่จัดเก็บ',
-          titleLine1: 'เนรมิตพื้นที่ว่างเปล่า',
-          titleLine2: 'ด้วยบ้านเก็บของระดับพรีเมียม',
-          desc: 'บอกลาห้องเก็บของแบบเดิมๆ พบดีไซน์ทันสมัยที่ยกระดับภาพลักษณ์และช่วยจัดระเบียบให้บ้านคุณ',
-          ctaText: 'ดูคอลเลกชันทั้งหมด',
+          tag: 'นวัตกรรมพื้นที่ระดับพรีเมียม',
+          titleLine1: 'เนรมิตพื้นที่ของคุณ',
+          titleLine2: 'ด้วยคุณภาพและดีไซน์ระดับพรีเมียม',
+          desc: 'ตอบสนองความต้องการด้านการจัดสรรพื้นที่ ยกระดับภาพลักษณ์และช่วยจัดระเบียบให้พื้นที่ของคุณ',
+          ctaText: 'ดูสินค้าทั้งหมด',
           ctaLink: '/products',
           ctaAction: 'view_products',
-          ctaText2: 'คำนวณพื้นที่จัดเก็บ',
+          ctaText2: 'คำนวณพื้นที่',
           ctaLink2: '/space-calculator',
           ctaAction2: 'space_calc',
           badgeHighlight: 'เกรดพรีเมียม',
@@ -512,44 +451,6 @@ const loadHomepageSettings = async () => {
           badgeFeatureIcon: 'wrench',
           badgeSpecial: 'ดีไซน์สไตล์โมเดิร์น',
           badgeSpecialIcon: 'house'
-        },
-        {
-          image: '/images/home/hero-slide-2.webp',
-          tag: 'บ้านเก็บของพลาสติก HDPE ลายไม้',
-          titleLine1: 'แข็งแกร่ง ทนทาน ทนแดดฝน',
-          titleLine2: 'สวยงามกลมกลืนกับสวนหลังบ้าน',
-          desc: 'ผลิตจากพลาสติก HDPE หนาสองชั้น ป้องกันรังสี UV 100% ไม่เป็นสนิม ไม่ผุกร่อน ตลอดอายุการใช้งาน',
-          ctaText: 'เลือกดูรุ่นพลาสติก',
-          ctaLink: '/products',
-          ctaAction: 'view_plastic_sheds',
-          ctaText2: 'คำนวณพื้นที่จัดเก็บ',
-          ctaLink2: '/space-calculator',
-          ctaAction2: 'space_calc',
-          badgeHighlight: 'ผิวลายไม้ธรรมชาติ',
-          badgeHighlightIcon: 'leaf',
-          badgeFeature: 'กันรังสี UV 100%',
-          badgeFeatureIcon: 'sun',
-          badgeSpecial: 'ทนแดดทนฝน 100%',
-          badgeSpecialIcon: 'rain'
-        },
-        {
-          image: '/images/home/hero-slide-3.webp',
-          tag: 'บ้านเก็บของโลหะ Galvalume',
-          titleLine1: 'โครงสร้างเหล็กกล้าแข็งแรง',
-          titleLine2: 'ปลอดภัยด้วยระบบล็อกมาตรฐาน',
-          desc: 'ทนลมแรงสูงสุด 120 กม./ชม. อบสีความร้อน 4 ชั้น กันสนิม พร้อมช่องระบายอากาศป้องกันกลิ่นอับชื้น',
-          ctaText: 'เลือกดูรุ่นโลหะ',
-          ctaLink: '/products',
-          ctaAction: 'view_metal_sheds',
-          ctaText2: 'คำนวณพื้นที่จัดเก็บ',
-          ctaLink2: '/space-calculator',
-          ctaAction2: 'space_calc',
-          badgeHighlight: 'เหล็ก Galvalume USA',
-          badgeHighlightIcon: 'shield',
-          badgeFeature: 'ทนลมแรง 120 กม./ชม.',
-          badgeFeatureIcon: 'wind',
-          badgeSpecial: 'ระบบล็อกมาตรฐาน',
-          badgeSpecialIcon: 'lock'
         }
       ]
     }
@@ -670,11 +571,11 @@ const addStructuredData = () => {
 
 // FAQ Schema for SEO
 const faqItems = ref([
-  { q: 'บ้านเก็บของทนแดด ทนฝน ไหม?', a: 'ทนทานครับ โครงสร้างผลิตจากเหล็กเคลือบกันสนิม Galvalume พรีเมียมจากอเมริกา ทนแดด ทนฝน ทนลมแรง ผ่านมาตรฐานการทดสอบระดับสากล พร้อมรับประกันโครงสร้าง 10 ปีเต็ม', icon: 'home', color: 'orange', open: false },
-  { q: 'ใช้เวลาติดตั้งนานแค่ไหน?', a: 'ทีมช่างมืออาชีพของเราสามารถติดตั้งให้เสร็จสมบูรณ์ภายใน 1-2 วันทำการ ขึ้นอยู่กับขนาดรุ่นที่เลือก โดยไม่ต้องเทพื้นคอนกรีตล่วงหน้า', icon: 'clock', color: 'blue', open: false },
-  { q: 'ต้องเตรียมพื้นที่อย่างไรก่อนติดตั้ง?', a: 'เพียงมีพื้นที่ราบเรียบ แน่น และมีระยะห่างจากรั้วอย่างน้อย 50 เซนติเมตร ทีมงานจะเข้าสำรวจพื้นที่ฟรีก่อนการติดตั้ง พร้อมให้คำแนะนำเพิ่มเติม', icon: 'measure', color: 'purple', open: false },
-  { q: 'มีบริการจัดส่งและติดตั้งทั่วประเทศไหม?', a: 'มีครับ! เราให้บริการจัดส่งและติดตั้งทั่วประเทศไทย มีทีมช่างประจำภูมิภาคกระจายอยู่ทั่วประเทศ พร้อมรับประกันงานติดตั้ง', open: false },
-  { q: 'สามารถผ่อนชำระได้ไหม?', a: 'ได้ครับ เรามีบริการผ่อนชำระ 0% สูงสุด 10 เดือน ผ่านบัตรเครดิตธนาคารชั้นนำ หรือสามารถชำระเงินสดพร้อมรับส่วนลดพิเศษ', open: false },
+  { q: 'สินค้าทนแดด ทนฝน ไหม?', a: 'ทนทานครับ โครงสร้างผลิตจากวัสดุพรีเมียมคุณภาพสูง ทนแดด ทนฝน ทนลมแรง ผ่านมาตรฐานการทดสอบระดับสากล พร้อมรับประกันคุณภาพ', icon: 'home', color: 'orange', open: false },
+  { q: 'ใช้เวลาติดตั้งนานแค่ไหน?', a: 'ทีมช่างมืออาชีพของเราสามารถติดตั้งให้เสร็จสมบูรณ์ภายใน 1-2 วันทำการ ขึ้นอยู่กับขนาดและรุ่นที่เลือก', icon: 'clock', color: 'blue', open: false },
+  { q: 'ต้องเตรียมพื้นที่อย่างไรก่อนติดตั้ง?', a: 'เพียงมีพื้นที่ราบเรียบ แน่น และมีระยะห่างที่เหมาะสม ทีมงานพร้อมให้คำปรึกษาและคำแนะนำก่อนการติดตั้ง', icon: 'measure', color: 'purple', open: false },
+  { q: 'มีบริการจัดส่งและติดตั้งทั่วประเทศไหม?', a: 'มีครับ! เราให้บริการจัดส่งและติดตั้งทั่วประเทศไทย พร้อมทีมช่างมืออาชีพและรับประกันงานติดตั้ง', open: false },
+  { q: 'สามารถผ่อนชำระได้ไหม?', a: 'ได้ครับ เรามีบริการผ่อนชำระผ่านบัตรเครดิตธนาคารชั้นนำ หรือสามารถชำระผ่านช่องทางต่างๆ ที่สะดวก', open: false },
 ])
 
 
@@ -721,7 +622,7 @@ const getFaqColor = (item, idx) => {
 const getFaqPillColorClass = (item, idx) => {
   const color = getFaqColor(item, idx);
   const classes = {
-    orange: 'bg-gradient-to-br from-orange-400 to-orange-500 shadow-orange-500/10',
+    orange: 'bg-gradient-to-br from-blue-400 to-blue-500 shadow-blue-500/10',
     blue: 'bg-gradient-to-br from-blue-400 to-blue-500 shadow-blue-500/10',
     purple: 'bg-gradient-to-br from-purple-400 to-purple-500 shadow-purple-500/10',
     emerald: 'bg-gradient-to-br from-emerald-400 to-emerald-500 shadow-emerald-500/10',
@@ -735,7 +636,7 @@ const getFaqPillColorClass = (item, idx) => {
 const getFaqCircleBgClass = (item, idx) => {
   const color = getFaqColor(item, idx);
   const classes = {
-    orange: 'bg-[#fff2e8] dark:bg-orange-950/20',
+    orange: 'bg-[#fff2e8] dark:bg-blue-950/20',
     blue: 'bg-[#e6f4ff] dark:bg-blue-950/20',
     purple: 'bg-[#f9f0ff] dark:bg-purple-950/20',
     emerald: 'bg-[#e6fffb] dark:bg-emerald-950/20',
@@ -749,7 +650,7 @@ const getFaqCircleBgClass = (item, idx) => {
 const getFaqIconColorClass = (item, idx) => {
   const color = getFaqColor(item, idx);
   const classes = {
-    orange: 'text-orange-500',
+    orange: 'text-blue-500',
     blue: 'text-blue-500',
     purple: 'text-purple-500',
     emerald: 'text-emerald-500',
@@ -886,7 +787,7 @@ const stopArticlesAutoplay = () => {
 
 const formattedArticlesHeading = computed(() => {
   const heading = sectionTitles.value.articlesHeading || 'อัพเดทข่าวสารน่ารู้'
-  return heading.replace('น่ารู้', '<span class="text-orange-500">น่ารู้</span>')
+  return heading.replace('น่ารู้', '<span class="text-blue-500">น่ารู้</span>')
 } )
 
 
@@ -894,20 +795,20 @@ const formattedArticlesHeading = computed(() => {
 
 const formattedProjectsHeading = computed(() => {
   const heading = sectionTitles.value.projectsHeading || 'ภาพผลงานติดตั้งจริงล่าสุด'
-  return heading.replace('ล่าสุด', '<span class="text-[#c2410c] dark:text-orange-400">ล่าสุด</span>')
+  return heading.replace('ล่าสุด', '<span class="text-[#0220A4] dark:text-blue-400">ล่าสุด</span>')
 })
 
 const formattedTestimonialsHeading = computed(() => {
   const heading = sectionTitles.value.testimonialsHeading || 'ความไว้วางใจจากองค์กรชั้นนำ'
   let formatted = heading
-  formatted = formatted.replace('ตัวจริง', '<span class="text-orange-500 dark:text-orange-400">ตัวจริง</span>')
-  formatted = formatted.replace('องค์กรชั้นนำ', '<span class="text-orange-500 dark:text-orange-400">องค์กรชั้นนำ</span>')
+  formatted = formatted.replace('ตัวจริง', '<span class="text-blue-500 dark:text-blue-400">ตัวจริง</span>')
+  formatted = formatted.replace('องค์กรชั้นนำ', '<span class="text-blue-500 dark:text-blue-400">องค์กรชั้นนำ</span>')
   return formatted
 })
 
 const formattedPartnersHeading = computed(() => {
   const heading = sectionTitles.value.partnersHeading || 'ความไว้วางใจจากองค์กรชั้นนำ'
-  return heading.replace('องค์กรชั้นนำ', '<span class="text-orange-500 dark:text-orange-400">องค์กรชั้นนำ</span>')
+  return heading.replace('องค์กรชั้นนำ', '<span class="text-blue-500 dark:text-blue-400">องค์กรชั้นนำ</span>')
 })
 
 const cleanProjectTitle = (title) => {
@@ -1179,20 +1080,11 @@ const fetchCategories = async () => {
     const res = await fetch('/api/categories')
     const data = await res.json()
     if (data.success) {
-      const priority = [
-        'บ้านเก็บของพลาสติก PP',
-        'บ้านเก็บของพลาสติก HDPE',
-        'บ้านเก็บของโลหะ',
-        'กล่องเก็บของกลางแจ้ง'
-      ];
-      // Sort categories: Priority first (in exact order), then the rest
-      const sorted = data.data.sort((a, b) => {
-        const indexA = priority.indexOf(a.name);
-        const indexB = priority.indexOf(b.name);
-        if (indexA !== -1 && indexB !== -1) return indexA - indexB;
-        if (indexA !== -1) return -1;
-        if (indexB !== -1) return 1;
-        return 0;
+      // Sort categories by sort_order or preserve API order
+      const sorted = (data.data || []).sort((a, b) => {
+        const orderA = a.sort_order ?? 0;
+        const orderB = b.sort_order ?? 0;
+        return orderA - orderB;
       });
       categories.value = sorted;
 
@@ -1482,7 +1374,7 @@ const resolveProductBadge = (badgeId) => {
 const getRibbonColorClass = (color) => {
   const maps = {
     red: 'from-red-600 to-red-500',
-    orange: 'from-orange-600 to-orange-500',
+    orange: 'from-blue-600 to-blue-500',
     amber: 'from-amber-500 to-amber-400',
     emerald: 'from-emerald-600 to-emerald-500',
     teal: 'from-teal-600 to-teal-500',
@@ -1527,38 +1419,49 @@ onMounted(async () => {
   }
 
   // Dynamic Home SEO & GEO Tags
-  setMeta({
-    title: settingsStore.storeOgTitle || settingsStore.storeName || 'บ้านเก็บของและโกดังสำเร็จรูประดับพรีเมียม',
-    description: settingsStore.storeDescription || 'จำหน่ายและติดตั้งบ้านเก็บของ โรงเรือน และโกดังสำเร็จรูปคุณภาพสูง',
-    keywords: settingsStore.storeKeywords || 'บ้านเก็บของ, ตู้เก็บของกลางแจ้ง, โกดังสำเร็จรูป',
-    llmContext: settingsStore.storeDefaultLlmContext || 'ผู้เชี่ยวชาญด้านบ้านเก็บของ โกดังสำเร็จรูป และตู้เก็บของกลางแจ้ง ทนแดด ทนฝน พร้อมบริการประกอบและติดตั้งทั่วประเทศ',
-    canonicalUrl: `${window.location.origin}/`,
-    type: 'website'
-  })
+  const updateHomeSeoAndSchemas = () => {
+    const sName = settingsStore.storeName || '';
+    const sDesc = settingsStore.storeDescription || '';
+    const sLegal = settingsStore.companyLegalName || sName || '';
 
-  // Home Organization & WebSite Schemas
-  setStructuredData([
-    {
-      "@context": "https://schema.org",
-      "@type": "Organization",
-      "name": settingsStore.companyLegalName || settingsStore.storeName || "บริษัท ซีอาร์ ดิสทริบิวชั่น จำกัด",
-      "alternateName": settingsStore.storeName || "บ้านเก็บของ",
-      "url": window.location.origin,
-      "logo": `${window.location.origin}/logo.png`,
-      "description": settingsStore.storeDescription || "จำหน่ายและติดตั้งบ้านเก็บของ โรงเรือน และโกดังสำเร็จรูปคุณภาพสูง"
-    },
-    {
-      "@context": "https://schema.org",
-      "@type": "WebSite",
-      "name": settingsStore.storeName || "บ้านเก็บของ",
-      "url": window.location.origin,
-      "potentialAction": {
-        "@type": "SearchAction",
-        "target": `${window.location.origin}/products?search={search_term_string}`,
-        "query-input": "required name=search_term_string"
+    setMeta({
+      title: settingsStore.storeOgTitle || sName || '',
+      description: sDesc,
+      keywords: settingsStore.storeKeywords || '',
+      llmContext: settingsStore.storeDefaultLlmContext || '',
+      canonicalUrl: `${window.location.origin}/`,
+      type: 'website'
+    })
+
+    // Home Organization & WebSite Schemas
+    setStructuredData([
+      {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": sLegal,
+        "alternateName": sName,
+        "url": window.location.origin,
+        "logo": `${window.location.origin}/logo.png`,
+        "description": sDesc
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": sName,
+        "url": window.location.origin,
+        "potentialAction": {
+          "@type": "SearchAction",
+          "target": `${window.location.origin}/products?search={search_term_string}`,
+          "query-input": "required name=search_term_string"
+        }
       }
-    }
-  ], 'dynamic-structured-data')
+    ], 'dynamic-structured-data')
+  }
+
+  updateHomeSeoAndSchemas()
+  watch([() => settingsStore.storeName, () => settingsStore.storeDescription, () => settingsStore.companyLegalName], () => {
+    updateHomeSeoAndSchemas()
+  })
   
   // Refresh AOS after content loads
   await nextTick()
@@ -1629,18 +1532,18 @@ const formatCTATitle = (text) => {
   if (!text) return '';
   let formatted = text;
   if (settingsStore.storeName) {
-    formatted = formatted.replace(`${settingsStore.storeName}:`, `<span class="text-[#c2410c] dark:text-orange-400">${settingsStore.storeName}:</span>`);
+    formatted = formatted.replace(`${settingsStore.storeName}:`, `<span class="text-[#0220A4] dark:text-blue-400">${settingsStore.storeName}:</span>`);
   }
-  formatted = formatted.replace('พื้นที่พรีเมียม', '<span class="bg-gradient-to-r from-[#c2410c] via-[#ea580c] to-[#c2410c] dark:from-orange-400 dark:to-amber-300 bg-clip-text text-transparent pb-1">พื้นที่พรีเมียม</span>');
+  formatted = formatted.replace('พื้นที่พรีเมียม', '<span class="bg-gradient-to-r from-[#0220A4] via-[#0220A4] to-[#0220A4] dark:from-blue-400 dark:to-amber-300 bg-clip-text text-transparent pb-1">พื้นที่พรีเมียม</span>');
   return formatted;
 }
 
 const formatCTADesc = (text) => {
   if (!text) return '';
   let formatted = text;
-  formatted = formatted.replace('โรงจอดรถ', '<span class="text-[#c2410c] dark:text-orange-400 font-semibold">โรงจอดรถ</span>');
-  formatted = formatted.replace('โกดังเก็บของ', '<span class="text-[#c2410c] dark:text-orange-400 font-semibold">โกดังเก็บของ</span>');
-  formatted = formatted.replace('พื้นที่อเนกประสงค์', '<span class="text-[#c2410c] dark:text-orange-400 font-semibold">พื้นที่อเนกประสงค์</span>');
+  formatted = formatted.replace('โรงจอดรถ', '<span class="text-[#0220A4] dark:text-blue-400 font-semibold">โรงจอดรถ</span>');
+  formatted = formatted.replace('โกดังเก็บของ', '<span class="text-[#0220A4] dark:text-blue-400 font-semibold">โกดังเก็บของ</span>');
+  formatted = formatted.replace('พื้นที่อเนกประสงค์', '<span class="text-[#0220A4] dark:text-blue-400 font-semibold">พื้นที่อเนกประสงค์</span>');
   return formatted;
 }
 
@@ -1663,8 +1566,8 @@ onUnmounted(() => {
     
     <!-- Loading State -->
     <div v-if="settingsLoading" class="min-h-screen flex flex-col items-center justify-center bg-[#FAF9F6] dark:bg-[#0C0E14]">
-      <div class="w-14 h-14 border-4 border-[#ff7a00]/20 border-t-[#ff7a00] rounded-full animate-spin mb-4"></div>
-      <p class="text-[#ff7a00] text-sm font-bold tracking-widest uppercase">กำลังโหลดหน้าเว็บไซต์...</p>
+      <div class="w-14 h-14 border-4 border-[#0220A4]/20 border-t-[#0220A4] rounded-full animate-spin mb-4"></div>
+      <p class="text-[#0220A4] text-sm font-bold tracking-widest uppercase">กำลังโหลดหน้าเว็บไซต์...</p>
     </div>
 
     <!-- Main Content -->
@@ -1675,7 +1578,7 @@ onUnmounted(() => {
         style="background: linear-gradient(135deg, #080A0F, #0C0E14 50%, #121622);"
       >
       <!-- Orange accent line at top -->
-      <div class="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-[#ff7a00] via-[#ff8c2a] to-[#ff7a00] z-30"></div>
+      <div class="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-[#0220A4] via-[#2B4FD4] to-[#0220A4] z-30"></div>
 
       <!-- Full-Bleed Background Slideshow -->
       <div class="absolute inset-0 z-0 overflow-hidden select-none pointer-events-none">
@@ -1710,18 +1613,18 @@ onUnmounted(() => {
           <transition name="hero-stagger" mode="out-in">
             <div :key="currentSlide" class="flex flex-col text-left">
               <!-- Brand Tag -->
-              <div class="hero-stagger-1 inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-[#0c0e14]/65 border border-[#ff7a00]/30 mb-4 w-fit select-none backdrop-blur-md shadow-inner">
+              <div class="hero-stagger-1 inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-[#0c0e14]/65 border border-[#0220A4]/30 mb-4 w-fit select-none backdrop-blur-md shadow-inner">
                 <!-- Gold Star (No circle background, just clean gold star) -->
-                <svg class="w-4 h-4 text-[#ff7a00] shrink-0 fill-current" viewBox="0 0 24 24">
+                <svg class="w-4 h-4 text-[#0220A4] shrink-0 fill-current" viewBox="0 0 24 24">
                   <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
                 </svg>
-                <span class="text-xs font-black tracking-wider text-[#ff7a00] uppercase font-['IBM_Plex_Sans_Thai']">{{ slides[currentSlide]?.tag || 'PREMIUM STORAGE SHED' }}</span>
+                <span class="text-xs font-black tracking-wider text-[#0220A4] uppercase font-['IBM_Plex_Sans_Thai']">{{ slides[currentSlide]?.tag || 'PREMIUM STORAGE SHED' }}</span>
               </div>
               
               <!-- Heading (compact & solid orange) -->
               <h1 class="hero-stagger-2 hero-heading text-[1.85rem] xs:text-[2.2rem] sm:text-[2.6rem] md:text-[3.2rem] lg:text-[3.8rem] font-black text-white tracking-normal leading-[1.15] mb-4 font-['IBM_Plex_Sans_Thai'] break-words">
                 <span class="block tracking-normal" v-html="formatThaiText(slides[currentSlide]?.titleLine1 || 'เปลี่ยนพื้นที่หลังบ้านให้หรูหรา')"></span>
-                <span class="text-[#ff7a00] block mt-1 tracking-normal" v-html="formatThaiText(slides[currentSlide]?.titleLine2 || 'ด้วยห้องเก็บของพรีเมียมสไตล์อเมริกัน')"></span>
+                <span class="text-[#0220A4] block mt-1 tracking-normal" v-html="formatThaiText(slides[currentSlide]?.titleLine2 || 'ด้วยห้องเก็บของพรีเมียมสไตล์อเมริกัน')"></span>
               </h1>
               
               <!-- Description -->
@@ -1731,9 +1634,9 @@ onUnmounted(() => {
               
               <!-- CTA Buttons -->
               <div class="hero-stagger-4 flex flex-row flex-wrap items-center gap-4 mb-6">
-                <!-- Solid Orange CTA Button -->
+                <!-- Solid Blue CTA Button -->
                 <router-link :to="slides[currentSlide]?.ctaLink || '/products'" @click="trackCTA(slides[currentSlide]?.ctaAction || 'view_products')" 
-                  class="group relative inline-flex items-center justify-center px-7 py-3.5 text-sm font-bold tracking-wide text-white transition-all bg-[#ad3f00] hover:bg-[#923400] rounded-full overflow-hidden shadow-lg shadow-[#ad3f00]/30 hover:shadow-xl hover:shadow-[#ad3f00]/50 hover:scale-[1.03] active:scale-95 whitespace-nowrap duration-300"
+                  class="group relative inline-flex items-center justify-center px-7 py-3.5 text-sm font-bold tracking-wide text-white transition-all bg-[#01166F] hover:bg-[#011055] rounded-full overflow-hidden shadow-lg shadow-[#01166F]/30 hover:shadow-xl hover:shadow-[#01166F]/50 hover:scale-[1.03] active:scale-95 whitespace-nowrap duration-300"
                 >
                   <span class="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out"></span>
                   <span class="relative z-10">{{ slides[currentSlide]?.ctaText || 'เลือกชมรุ่นยอดนิยม' }}</span>
@@ -1744,11 +1647,11 @@ onUnmounted(() => {
 
                 <!-- Dark Translucent Secondary Button -->
                 <router-link v-if="slides[currentSlide]?.ctaLink2 && slides[currentSlide]?.ctaLink2 !== '/ai-consultant'" :to="slides[currentSlide]?.ctaLink2" @click="trackCTA(slides[currentSlide]?.ctaAction2 || 'click_secondary')" 
-                  class="group inline-flex items-center justify-center px-6 py-3.5 text-sm font-bold tracking-wide text-white bg-black/45 hover:bg-black/60 border border-white/10 hover:border-[#ff7a00]/40 rounded-full shadow-[0_4px_20px_rgba(0,0,0,0.15)] hover:shadow-[0_4px_25px_rgba(255,122,0,0.15)] hover:scale-[1.03] active:scale-95 gap-2.5 backdrop-blur-md transition-all duration-300 whitespace-nowrap"
+                  class="group inline-flex items-center justify-center px-6 py-3.5 text-sm font-bold tracking-wide text-white bg-black/45 hover:bg-black/60 border border-white/10 hover:border-[#0220A4]/40 rounded-full shadow-[0_4px_20px_rgba(0,0,0,0.15)] hover:shadow-[0_4px_25px_rgba(2,32,164,0.15)] hover:scale-[1.03] active:scale-95 gap-2.5 backdrop-blur-md transition-all duration-300 whitespace-nowrap"
                 >
                   <!-- Calculator / Action Icon -->
-                  <div class="w-5 h-5 rounded-full bg-[#ff7a00]/10 border border-[#ff7a00]/25 flex items-center justify-center shrink-0 p-0.5 group-hover:bg-[#ff7a00]/20 transition-colors">
-                    <svg class="w-full h-full text-[#ff7a00]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <div class="w-5 h-5 rounded-full bg-[#0220A4]/10 border border-[#0220A4]/25 flex items-center justify-center shrink-0 p-0.5 group-hover:bg-[#0220A4]/20 transition-colors">
+                    <svg class="w-full h-full text-[#0220A4]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
                     </svg>
                   </div>
@@ -1763,8 +1666,8 @@ onUnmounted(() => {
                 <div v-for="(badge, index) in heroFeatureBadges.slice(0, 3)" :key="index"
                   class="flex items-center gap-3 p-3 rounded-xl bg-white/[0.04] border border-white/[0.08]"
                 >
-                  <div class="w-8 h-8 rounded-lg bg-[#ff7a00]/10 flex items-center justify-center shrink-0">
-                    <svg class="w-4 h-4 text-[#ff7a00]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <div class="w-8 h-8 rounded-lg bg-[#0220A4]/10 flex items-center justify-center shrink-0">
+                    <svg class="w-4 h-4 text-[#0220A4]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                       <path v-if="badge.icon === 'sun'" stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
                       <path v-else-if="badge.icon === 'wrench'" stroke-linecap="round" stroke-linejoin="round" d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z" />
                       <path v-else-if="badge.icon === 'lock'" stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
@@ -1789,12 +1692,12 @@ onUnmounted(() => {
             <!-- Left Side: Bento Feature Cards -->
             <div v-if="heroFeatureBadges && heroFeatureBadges.length > 0" class="flex items-end gap-3.5">
               <div v-for="(badge, index) in heroFeatureBadges.slice(0, 3)" :key="index"
-                class="w-56 bg-[#12141c]/75 backdrop-blur-xl border border-white/10 rounded-2xl p-4 transition-all duration-500 hover:bg-[#12141c]/90 hover:border-[#ff7a00]/40 hover:-translate-y-1 group/fbadge shadow-[0_-8px_30px_rgba(0,0,0,0.3)]"
+                class="w-56 bg-[#12141c]/75 backdrop-blur-xl border border-white/10 rounded-2xl p-4 transition-all duration-500 hover:bg-[#12141c]/90 hover:border-[#0220A4]/40 hover:-translate-y-1 group/fbadge shadow-[0_-8px_30px_rgba(0,0,0,0.3)]"
               >
                 <div class="flex items-center gap-3">
                   <!-- Icon Box -->
-                  <div class="w-10 h-10 rounded-xl bg-[#ff7a00]/10 border border-[#ff7a00]/20 flex items-center justify-center shrink-0 group-hover/fbadge:bg-[#ff7a00]/20 transition-all duration-300">
-                    <svg class="w-5 h-5 text-[#ff7a00] group-hover/fbadge:scale-110 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <div class="w-10 h-10 rounded-xl bg-[#0220A4]/10 border border-[#0220A4]/20 flex items-center justify-center shrink-0 group-hover/fbadge:bg-[#0220A4]/20 transition-all duration-300">
+                    <svg class="w-5 h-5 text-[#0220A4] group-hover/fbadge:scale-110 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                       <path v-if="badge.icon === 'sun'" stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
                       <path v-else-if="badge.icon === 'wrench'" stroke-linecap="round" stroke-linejoin="round" d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z" />
                       <path v-else-if="badge.icon === 'trophy'" stroke-linecap="round" stroke-linejoin="round" d="M6 9H4.5a2.5 2.5 0 010-5H6M18 9h1.5a2.5 2.5 0 000-5H18M4 22h16M12 2a7 7 0 00-7 7v3.5a1.5 1.5 0 001.5 1.5h11a1.5 1.5 0 001.5-1.5V9a7 7 0 00-7-7z" />
@@ -1818,7 +1721,7 @@ onUnmounted(() => {
             <div class="flex items-center gap-3 select-none mb-1">
               <!-- Prev Button -->
               <button @click="prevSlide" aria-label="สไลด์ก่อนหน้า"
-                class="w-12 h-12 rounded-full flex items-center justify-center bg-white/5 backdrop-blur-md border border-white/10 text-gray-300 hover:bg-[#ff7a00] hover:text-white hover:border-[#ff7a00]/50 hover:scale-105 active:scale-95 transition-all duration-300 cursor-pointer flex-shrink-0"
+                class="w-12 h-12 rounded-full flex items-center justify-center bg-white/5 backdrop-blur-md border border-white/10 text-gray-300 hover:bg-[#0220A4] hover:text-white hover:border-[#0220A4]/50 hover:scale-105 active:scale-95 transition-all duration-300 cursor-pointer flex-shrink-0"
               >
                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
@@ -1837,7 +1740,7 @@ onUnmounted(() => {
                     :class="currentSlide === idx ? 'bg-white/10 w-10 border border-white/10' : 'bg-white/20 w-2 hover:bg-white/40'"
                   >
                     <div v-if="currentSlide === idx" 
-                      class="absolute left-0 top-0 bottom-0 bg-[#c64c00] rounded-full transition-all duration-[30ms] ease-linear"
+                      class="absolute left-0 top-0 bottom-0 bg-[#0220A4] rounded-full transition-all duration-[30ms] ease-linear"
                       :style="{ width: `${slideProgress}%` }"
                     ></div>
                   </div>
@@ -1846,7 +1749,7 @@ onUnmounted(() => {
 
               <!-- Next Button -->
               <button @click="nextSlide" aria-label="สไลด์ถัดไป"
-                class="w-12 h-12 rounded-full flex items-center justify-center bg-white/5 backdrop-blur-md border border-white/10 text-gray-300 hover:bg-[#ff7a00] hover:text-white hover:border-[#ff7a00]/50 hover:scale-105 active:scale-95 transition-all duration-300 cursor-pointer flex-shrink-0"
+                class="w-12 h-12 rounded-full flex items-center justify-center bg-white/5 backdrop-blur-md border border-white/10 text-gray-300 hover:bg-[#0220A4] hover:text-white hover:border-[#0220A4]/50 hover:scale-105 active:scale-95 transition-all duration-300 cursor-pointer flex-shrink-0"
               >
                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
@@ -1860,7 +1763,7 @@ onUnmounted(() => {
       <!-- Mobile fallback for pagination controls -->
       <div class="absolute bottom-5 left-1/2 -translate-x-1/2 z-20 flex items-center gap-3 select-none md:hidden">
         <button @click="prevSlide" aria-label="สไลด์ก่อนหน้า"
-          class="w-12 h-12 rounded-full flex items-center justify-center bg-white/10 backdrop-blur-md border border-white/15 text-gray-300 hover:bg-[#ff7a00] hover:text-white hover:scale-110 active:scale-95 transition-all duration-300 cursor-pointer flex-shrink-0"
+          class="w-12 h-12 rounded-full flex items-center justify-center bg-white/10 backdrop-blur-md border border-white/15 text-gray-300 hover:bg-[#0220A4] hover:text-white hover:scale-110 active:scale-95 transition-all duration-300 cursor-pointer flex-shrink-0"
         >
           <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
             <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
@@ -1877,14 +1780,14 @@ onUnmounted(() => {
               :class="currentSlide === idx ? 'bg-white/10 w-8' : 'bg-white/20 w-1.5 hover:bg-white/40'"
             >
               <div v-if="currentSlide === idx" 
-                class="absolute left-0 top-0 bottom-0 bg-[#c64c00] rounded-full transition-all duration-[30ms] ease-linear"
+                class="absolute left-0 top-0 bottom-0 bg-[#0220A4] rounded-full transition-all duration-[30ms] ease-linear"
                 :style="{ width: `${slideProgress}%` }"
               ></div>
             </div>
           </button>
         </div>
         <button @click="nextSlide" aria-label="สไลด์ถัดไป"
-          class="w-12 h-12 rounded-full flex items-center justify-center bg-white/10 backdrop-blur-md border border-white/15 text-gray-300 hover:bg-[#ff7a00] hover:text-white hover:scale-110 active:scale-95 transition-all duration-300 cursor-pointer flex-shrink-0"
+          class="w-12 h-12 rounded-full flex items-center justify-center bg-white/10 backdrop-blur-md border border-white/15 text-gray-300 hover:bg-[#0220A4] hover:text-white hover:scale-110 active:scale-95 transition-all duration-300 cursor-pointer flex-shrink-0"
         >
           <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
             <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
@@ -1894,29 +1797,62 @@ onUnmounted(() => {
     </section>
     </div>
 
-    <!-- Holiday / Campaign Banner Section -->
-    <section v-if="settingsStore.isHolidayActive" class="relative w-full overflow-hidden bg-gradient-to-r from-orange-600 via-amber-500 to-orange-600 border-b border-orange-700/50 shadow-inner">
-      <div v-if="settingsStore.holidayImage" class="absolute inset-0 bg-cover bg-center opacity-30 mix-blend-overlay" :style="{ backgroundImage: `url(${settingsStore.holidayImage})` }"></div>
-      
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-10 relative z-10 flex flex-col md:flex-row items-center justify-between gap-8 md:gap-12">
-        <!-- Text Content -->
-        <div class="flex-1 text-center md:text-left flex flex-col items-center md:items-start">
-          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/20 backdrop-blur-md border border-white/30 text-white font-black tracking-widest text-xs lg:text-sm uppercase mb-4 shadow-sm">
-            <svg class="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" /></svg>
-            {{ settingsStore.holidayName || 'ประกาศพิเศษ' }}
+    <!-- Holiday / Campaign Banner Section (Sleek, Modern & Compact Announcement Bar) -->
+    <section v-if="settingsStore.isHolidayActive" class="relative w-full overflow-hidden bg-[#070C1E] dark:bg-[#050712] border-y border-amber-500/30 shadow-xl py-3 sm:py-3.5">
+      <!-- Background Ambient Light & Mesh -->
+      <div class="absolute inset-0 pointer-events-none overflow-hidden">
+        <div class="absolute top-1/2 left-1/3 -translate-y-1/2 w-[350px] h-[150px] bg-[#0220A4]/30 blur-[60px] rounded-full"></div>
+        <div class="absolute top-1/2 right-1/3 -translate-y-1/2 w-[300px] h-[150px] bg-[#FF7A00]/20 blur-[50px] rounded-full"></div>
+        <div class="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-[#FF7A00] to-transparent opacity-90"></div>
+      </div>
+
+      <!-- Background Custom Image Overlay if present -->
+      <div v-if="settingsStore.holidayImage" class="absolute inset-0 bg-cover bg-center opacity-10 mix-blend-luminosity pointer-events-none" :style="{ backgroundImage: `url(${settingsStore.holidayImage})` }"></div>
+
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-6 bg-white/[0.04] backdrop-blur-md border border-white/10 rounded-2xl px-4 py-2.5 sm:px-6 sm:py-3 shadow-lg">
+          
+          <!-- Notice Icon/Badge & Text Content -->
+          <div class="flex flex-col sm:flex-row items-center gap-2.5 sm:gap-3.5 text-center sm:text-left flex-1 min-w-0">
+            <!-- Badge Pill -->
+            <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gradient-to-r from-[#FF7A00]/20 to-[#FF9E00]/15 border border-[#FF7A00]/40 text-amber-300 text-xs font-extrabold tracking-wide uppercase shrink-0 shadow-[0_0_12px_rgba(255,122,0,0.2)]">
+              <span class="relative flex h-2 w-2">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
+              </span>
+              <svg class="w-3.5 h-3.5 text-amber-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+              </svg>
+              <span>{{ settingsStore.holidayName || 'ประกาศพิเศษ' }}</span>
+            </div>
+
+            <!-- Message Text -->
+            <p class="text-white text-xs sm:text-sm md:text-base font-semibold leading-normal">
+              {{ settingsStore.holidayMessage || 'สิทธิพิเศษและโปรโมชั่นสุดคุ้มวันนี้' }}
+            </p>
           </div>
-          <h2 class="text-2xl md:text-3xl lg:text-4xl font-black text-white tracking-tight mb-2">
-            {{ settingsStore.holidayTitle || 'โปรโมชั่นต้อนรับเทศกาล' }}
-          </h2>
-          <p class="text-white/90 text-sm md:text-base font-medium max-w-xl">
-            {{ settingsStore.holidayDescription || 'เลือกซื้อสินค้าบ้านเก็บของและโรงเรือนพร้อมส่วนลดพิเศษวันนี้' }}
-          </p>
+
+          <!-- Right Action Button -->
+          <div class="flex items-center gap-3 shrink-0 w-full sm:w-auto justify-center">
+            <!-- Custom Image Thumbnail if present -->
+            <div v-if="settingsStore.holidayImage" class="w-9 h-9 rounded-lg overflow-hidden border border-white/20 shadow shrink-0 hidden md:block">
+              <img :src="settingsStore.holidayImage" alt="Campaign Thumbnail" class="w-full h-full object-cover">
+            </div>
+
+            <router-link :to="settingsStore.holidayBtnLink || '/products'" class="group relative inline-flex items-center justify-center gap-2 px-5 py-2 sm:py-2.5 rounded-full text-xs sm:text-sm font-black tracking-wide text-white bg-gradient-to-r from-[#FF7A00] via-[#FF8C2A] to-[#FF9E00] hover:from-[#E66E00] hover:to-[#FF8C2A] shadow-[0_4px_15px_rgba(255,122,0,0.35)] hover:shadow-[0_6px_20px_rgba(255,122,0,0.5)] hover:scale-[1.03] active:scale-95 transition-all duration-300 overflow-hidden shrink-0 whitespace-nowrap">
+              <span class="absolute inset-0 bg-gradient-to-r from-transparent via-white/25 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out"></span>
+              <span class="relative z-10">{{ settingsStore.holidayBtnText || 'ดูรายละเอียด' }}</span>
+              <svg class="w-3.5 h-3.5 text-white relative z-10 transform group-hover:translate-x-1 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+              </svg>
+            </router-link>
+          </div>
+
         </div>
-        <router-link v-if="settingsStore.holidayBtnText" :to="settingsStore.holidayBtnLink || '/products'" class="px-6 py-3 bg-white text-orange-600 hover:bg-orange-50 font-bold rounded-full shadow-lg transition-all text-sm shrink-0">
-          {{ settingsStore.holidayBtnText }}
-        </router-link>
       </div>
     </section>
+
+
     
     <!-- Highlight Categories Auto-Rotating Showcase -->
     <template v-if="false">
@@ -1957,7 +1893,7 @@ onUnmounted(() => {
                     <div v-else class="flex sm:grid sm:grid-cols-3 gap-6 overflow-x-auto sm:overflow-visible hide-scrollbar pb-6 sm:pb-0 snap-x snap-mandatory">
                         <router-link v-for="(product, pIdx) in highlightCategoryProducts[highlightCatIndex]" :key="product.id"
                             :to="`/products/${product.slug || product.id}`"
-                            class="snap-start flex-shrink-0 w-[240px] sm:w-auto bg-white dark:bg-[#111827] border border-gray-150 dark:border-white/5 rounded-3xl p-3.5 shadow-[0_8px_30px_rgb(0,0,0,0.03)] hover:shadow-[0_20px_40px_rgba(240,113,0,0.08)] hover:-translate-y-1.5 transition-all duration-300 relative overflow-hidden flex flex-col group text-left"
+                            class="snap-start flex-shrink-0 w-[240px] sm:w-auto bg-white dark:bg-[#111827] border border-gray-150 dark:border-white/5 rounded-3xl p-3.5 shadow-[0_8px_30px_rgb(0,0,0,0.03)] hover:shadow-[0_20px_40px_rgba(2,32,164,0.08)] hover:-translate-y-1.5 transition-all duration-300 relative overflow-hidden flex flex-col group text-left"
                         >
                             <!-- Dynamic ribbon configured via admin -->
                             <div v-if="product.badges && product.badges.length > 0 && resolveProductBadge(product.badges[0])" class="absolute top-0 left-0 overflow-hidden w-24 h-24 z-10 pointer-events-none">
@@ -1979,7 +1915,7 @@ onUnmounted(() => {
 
                             <!-- Product Info -->
                             <div class="flex flex-col flex-grow">
-                                <h4 class="font-black text-gray-900 dark:text-white text-[13px] md:text-sm leading-snug mb-2 group-hover:text-[#c2410c] transition-colors font-['IBM_Plex_Sans_Thai']">
+                                <h4 class="font-black text-gray-900 dark:text-white text-[13px] md:text-sm leading-snug mb-2 group-hover:text-[#0220A4] transition-colors font-['IBM_Plex_Sans_Thai']">
                                     {{ product.name }}
                                 </h4>
 
@@ -1989,7 +1925,7 @@ onUnmounted(() => {
                                         <p class="text-[10px] text-gray-400 line-through leading-none mb-1 font-['IBM_Plex_Sans_Thai']" v-if="product.original_price && Number(product.original_price) > Number(product.price)">
                                             ฿{{ Number(product.original_price).toLocaleString() }}
                                         </p>
-                                        <p class="text-[#ff7a00] dark:text-orange-400 font-black text-base md:text-lg leading-none font-['IBM_Plex_Sans_Thai']">
+                                        <p class="text-[#0220A4] dark:text-blue-400 font-black text-base md:text-lg leading-none font-['IBM_Plex_Sans_Thai']">
 
                                             ฿{{ Number(product.price).toLocaleString() }}
                                         </p>
@@ -1998,7 +1934,7 @@ onUnmounted(() => {
                                     <!-- Cart button -->
                                     <button
                                         @click.prevent="handleAddToCart($event, product)"
-                                        class="w-10 h-10 rounded-full bg-gradient-to-br from-[#ff7a00] to-[#ff8c2a] hover:from-orange-600 hover:to-orange-500 flex items-center justify-center transition-colors shadow-md hover:shadow-lg active:scale-95 group/cart cursor-pointer select-none shrink-0"
+                                        class="w-10 h-10 rounded-full bg-gradient-to-br from-[#0220A4] to-[#2B4FD4] hover:from-blue-600 hover:to-blue-500 flex items-center justify-center transition-colors shadow-md hover:shadow-lg active:scale-95 group/cart cursor-pointer select-none shrink-0"
                                         title="เพิ่มลงตะกร้า"
                                         aria-label="เพิ่มลงตะกร้า"
                                     >
@@ -2018,9 +1954,9 @@ onUnmounted(() => {
                       @click="setHighlightCat(i - 1)"
                       :aria-label="`ดูหมวดหมู่ที่ ${i}`"
                       class="group relative h-1.5 rounded-full overflow-hidden transition-all duration-500 cursor-pointer"
-                      :class="highlightCatIndex === (i - 1) ? 'w-16 md:w-20 bg-orange-100 dark:bg-orange-900/50 shadow-sm' : 'w-2.5 bg-gray-200 dark:bg-gray-800 hover:bg-orange-200'"
+                      :class="highlightCatIndex === (i - 1) ? 'w-16 md:w-20 bg-blue-100 dark:bg-blue-900/50 shadow-sm' : 'w-2.5 bg-gray-200 dark:bg-gray-800 hover:bg-blue-200'"
                     >
-                      <div v-if="highlightCatIndex === (i - 1)" class="h-full bg-[#c64c00] rounded-full transition-none" :style="{ width: `${highlightProgress}%` }"></div>
+                      <div v-if="highlightCatIndex === (i - 1)" class="h-full bg-[#0220A4] rounded-full transition-none" :style="{ width: `${highlightProgress}%` }"></div>
                     </button>
                 </div>
             </div>
@@ -2032,7 +1968,7 @@ onUnmounted(() => {
                 <button
                     type="button"
                     @click="prevHighlightCat"
-                    class="absolute -left-5 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white dark:bg-gray-800 border border-gray-150 dark:border-white/5 shadow-lg flex items-center justify-center text-gray-500 hover:text-[#c2410c] hover:scale-105 active:scale-95 transition-all cursor-pointer z-30"
+                    class="absolute -left-5 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white dark:bg-gray-800 border border-gray-150 dark:border-white/5 shadow-lg flex items-center justify-center text-gray-500 hover:text-[#0220A4] hover:scale-105 active:scale-95 transition-all cursor-pointer z-30"
                     aria-label="หมวดหมู่ก่อนหน้า"
                 >
                     <svg class="w-5 h-5 stroke-[2.5]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
@@ -2041,7 +1977,7 @@ onUnmounted(() => {
                 <button
                     type="button"
                     @click="nextHighlightCat"
-                    class="absolute -right-5 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white dark:bg-gray-800 border border-gray-150 dark:border-white/5 shadow-lg flex items-center justify-center text-gray-500 hover:text-[#c2410c] hover:scale-105 active:scale-95 transition-all cursor-pointer z-30"
+                    class="absolute -right-5 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white dark:bg-gray-800 border border-gray-150 dark:border-white/5 shadow-lg flex items-center justify-center text-gray-500 hover:text-[#0220A4] hover:scale-105 active:scale-95 transition-all cursor-pointer z-30"
                     aria-label="หมวดหมู่ถัดไป"
                 >
                     <svg class="w-5 h-5 stroke-[2.5]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
@@ -2082,8 +2018,8 @@ onUnmounted(() => {
                             <!-- Features checklist bullets -->
                             <ul class="space-y-3.5 mb-8">
                                 <li v-for="(bullet, bIdx) in getCategoryHighlightBullets(highlightCategoriesList[highlightCatIndex])" :key="bIdx" class="flex items-center gap-3 text-left">
-                                    <div class="w-5 h-5 rounded-full bg-[#ff7a00]/25 text-[#ff7a00] flex items-center justify-center shrink-0 border border-[#ff7a00]/45 shadow-inner">
-                                        <svg class="w-3.5 h-3.5 text-[#ff7a00] stroke-[3]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <div class="w-5 h-5 rounded-full bg-[#0220A4]/25 text-[#0220A4] flex items-center justify-center shrink-0 border border-[#0220A4]/45 shadow-inner">
+                                        <svg class="w-3.5 h-3.5 text-[#0220A4] stroke-[3]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
                                         </svg>
                                     </div>
@@ -2098,7 +2034,7 @@ onUnmounted(() => {
                         <a v-if="getButtonLink(highlightCategoriesList[highlightCatIndex]).startsWith('http')"
                             :href="getButtonLink(highlightCategoriesList[highlightCatIndex])"
                             target="_blank"
-                            class="inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-white hover:bg-orange-50 text-[#c2410c] hover:text-[#ad3100] font-black rounded-full transition-all shadow-[0_10px_25px_rgba(0,0,0,0.15)] hover:shadow-[0_15px_30px_rgba(240,113,0,0.2)] text-sm md:text-base font-['IBM_Plex_Sans_Thai'] self-start group/btn select-none"
+                            class="inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-white hover:bg-blue-50 text-[#0220A4] hover:text-[#01166F] font-black rounded-full transition-all shadow-[0_10px_25px_rgba(0,0,0,0.15)] hover:shadow-[0_15px_30px_rgba(2,32,164,0.2)] text-sm md:text-base font-['IBM_Plex_Sans_Thai'] self-start group/btn select-none"
                         >
                             <span>{{ highlightCategoriesList[highlightCatIndex].buttonText || 'ดูรายละเอียดสินค้า' }}</span>
                             <svg class="w-4 h-4 transform group-hover/btn:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
@@ -2107,7 +2043,7 @@ onUnmounted(() => {
                         </a>
                         <router-link v-else
                             :to="getButtonLink(highlightCategoriesList[highlightCatIndex])"
-                            class="inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-white hover:bg-orange-50 text-[#c2410c] hover:text-[#ad3100] font-black rounded-full transition-all shadow-[0_10px_25px_rgba(0,0,0,0.15)] hover:shadow-[0_15px_30px_rgba(240,113,0,0.2)] text-sm md:text-base font-['IBM_Plex_Sans_Thai'] self-start group/btn select-none"
+                            class="inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-white hover:bg-blue-50 text-[#0220A4] hover:text-[#01166F] font-black rounded-full transition-all shadow-[0_10px_25px_rgba(0,0,0,0.15)] hover:shadow-[0_15px_30px_rgba(2,32,164,0.2)] text-sm md:text-base font-['IBM_Plex_Sans_Thai'] self-start group/btn select-none"
                         >
                             <span>{{ highlightCategoriesList[highlightCatIndex].buttonText || 'ดูรายละเอียดสินค้า' }}</span>
                             <svg class="w-4 h-4 transform group-hover/btn:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
@@ -2136,7 +2072,7 @@ onUnmounted(() => {
     <!-- Luxury Features Section (Removed) -->
     <template v-if="false">
       <!-- Soft ambient backdrop glow blobs for depth -->
-      <div class="absolute top-1/4 left-0 w-[350px] h-[350px] bg-orange-500/5 dark:bg-orange-500/10 rounded-full blur-[100px] pointer-events-none z-0"></div>
+      <div class="absolute top-1/4 left-0 w-[350px] h-[350px] bg-blue-500/5 dark:bg-blue-500/10 rounded-full blur-[100px] pointer-events-none z-0"></div>
       <div class="absolute bottom-1/4 right-0 w-[400px] h-[400px] bg-amber-500/5 dark:bg-amber-500/8 rounded-full blur-[120px] pointer-events-none z-0"></div>
 
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
@@ -2148,16 +2084,16 @@ onUnmounted(() => {
           <div class="lg:col-span-6 text-left p-6 sm:p-10 lg:p-14 lg:pr-10 z-20 flex flex-col justify-center">
             
             <!-- Elegant capsule tag -->
-            <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-orange-50/90 dark:bg-orange-950/20 border border-orange-100/50 dark:border-orange-900/30 mb-4 shadow-sm select-none self-start group transition-all duration-300 hover:bg-orange-100/50 dark:hover:bg-orange-950/40">
-              <span class="w-2 h-2 rounded-full bg-[#ff7a00] animate-pulse"></span>
-              <span class="text-[10px] sm:text-xs font-black tracking-[0.15em] text-[#ff7a00] uppercase font-sans">{{ featuresHeading || 'REIMAGINE YOUR LIVING' }}</span>
+            <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-blue-50/90 dark:bg-blue-950/20 border border-blue-100/50 dark:border-blue-900/30 mb-4 shadow-sm select-none self-start group transition-all duration-300 hover:bg-blue-100/50 dark:hover:bg-blue-950/40">
+              <span class="w-2 h-2 rounded-full bg-[#0220A4] animate-pulse"></span>
+              <span class="text-[10px] sm:text-xs font-black tracking-[0.15em] text-[#0220A4] uppercase font-sans">{{ featuresHeading || 'REIMAGINE YOUR LIVING' }}</span>
             </div>
             
-            <!-- Headline with orange brand coloring gradient -->
+            <!-- Headline with Deep Blue brand coloring gradient -->
             <h3 v-html="featuresTitle" class="text-2xl sm:text-3xl md:text-[38px] font-black tracking-tight text-gray-900 dark:text-white leading-[1.2] mb-4 font-['IBM_Plex_Sans_Thai']"></h3>
             
             <!-- Elegant gradient line -->
-            <div class="w-16 h-1 bg-gradient-to-r from-[#ff7a00] via-[#ff8824] to-transparent rounded-full mb-4"></div>
+            <div class="w-16 h-1 bg-gradient-to-r from-[#0220A4] via-[#2B4FD4] to-transparent rounded-full mb-4"></div>
             
             <p class="text-slate-500 dark:text-slate-400 text-xs sm:text-sm font-medium leading-relaxed mb-6 max-w-xl font-['IBM_Plex_Sans_Thai']">
               {{ featuresDesc }}
@@ -2168,13 +2104,13 @@ onUnmounted(() => {
               <!-- Dynamic Item Loops -->
               <div v-for="(item, idx) in featuresItems" :key="idx"
                 @click="activeFeatureIndex = activeFeatureIndex === idx ? -1 : idx"
-                class="rounded-2xl pl-5 pr-5 flex items-center justify-between shadow-[0_4px_15px_rgba(0,0,0,0.01)] hover:shadow-[0_15px_30px_rgba(240,113,0,0.04)] hover:-translate-y-0.5 transition-all duration-300 group select-none cursor-pointer border"
-                :class="activeFeatureIndex === idx ? 'bg-white/95 dark:bg-[#0f172a]/75 border-orange-300 dark:border-orange-900/50 p-4 shadow-[0_10px_25px_rgba(240,113,0,0.03)]' : 'bg-white/50 dark:bg-[#0f172a]/30 border-slate-100/60 dark:border-white/5 py-2.5 shadow-none'"
+                class="rounded-2xl pl-5 pr-5 flex items-center justify-between shadow-[0_4px_15px_rgba(0,0,0,0.01)] hover:shadow-[0_15px_30px_rgba(2,32,164,0.04)] hover:-translate-y-0.5 transition-all duration-300 group select-none cursor-pointer border"
+                :class="activeFeatureIndex === idx ? 'bg-white/95 dark:bg-[#0f172a]/75 border-blue-300 dark:border-blue-900/50 p-4 shadow-[0_10px_25px_rgba(2,32,164,0.03)]' : 'bg-white/50 dark:bg-[#0f172a]/30 border-slate-100/60 dark:border-white/5 py-2.5 shadow-none'"
               >
                 <div class="flex gap-3 sm:gap-4 items-center flex-1">
                   <!-- Icon Circle Badge -->
-                  <div class="rounded-full flex items-center justify-center text-white shrink-0 shadow-md shadow-orange-500/10 border-2 transition-all duration-300"
-                    :class="activeFeatureIndex === idx ? 'w-11 h-11 bg-gradient-to-br from-[#ff7a00] to-[#ff8c2a] border-orange-100 dark:border-orange-950/45 scale-105' : 'w-9 h-9 bg-gradient-to-br from-orange-400 to-[#ff7a00] border-orange-50/50 dark:border-orange-950/20'"
+                  <div class="rounded-full flex items-center justify-center text-white shrink-0 shadow-md shadow-blue-500/10 border-2 transition-all duration-300"
+                    :class="activeFeatureIndex === idx ? 'w-11 h-11 bg-gradient-to-br from-[#0220A4] to-[#2B4FD4] border-blue-100 dark:border-blue-950/45 scale-105' : 'w-9 h-9 bg-gradient-to-br from-blue-400 to-[#0220A4] border-blue-50/50 dark:border-blue-950/20'"
                   >
                     <!-- Render Icon SVG dynamically based on configuration -->
                     <svg v-if="item.icon === 'shield' || !item.icon" :class="activeFeatureIndex === idx ? 'w-5 h-5' : 'w-4 h-4'" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
@@ -2203,7 +2139,7 @@ onUnmounted(() => {
                   <!-- Texts -->
                   <div class="text-left leading-normal flex-1">
                     <div class="flex items-center gap-2">
-                      <span class="text-xs font-black text-[#ff7a00] font-sans tracking-wide">0{{ idx + 1 }}</span>
+                      <span class="text-xs font-black text-[#0220A4] font-sans tracking-wide">0{{ idx + 1 }}</span>
                       <h4 class="text-xs sm:text-sm font-black text-slate-800 dark:text-white font-['IBM_Plex_Sans_Thai'] tracking-wide">
                         {{ item.title }}
                       </h4>
@@ -2219,7 +2155,7 @@ onUnmounted(() => {
                 </div>
                 <!-- Chevron trigger -->
                 <div class="rounded-full border flex items-center justify-center transition-all duration-300 shrink-0"
-                  :class="activeFeatureIndex === idx ? 'w-7 h-7 bg-[#ff7a00] border-[#ff7a00] text-white rotate-90 scale-105' : 'w-6.5 h-6.5 border-slate-100/80 dark:border-white/10 text-orange-400 bg-slate-50/50 dark:bg-slate-800/20 rotate-0'"
+                  :class="activeFeatureIndex === idx ? 'w-7 h-7 bg-[#0220A4] border-[#0220A4] text-white rotate-90 scale-105' : 'w-6.5 h-6.5 border-slate-100/80 dark:border-white/10 text-blue-400 bg-slate-50/50 dark:bg-slate-800/20 rotate-0'"
                 >
                   <svg class="w-3.5 h-3.5 stroke-[3]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
@@ -2244,8 +2180,8 @@ onUnmounted(() => {
             <svg class="hidden lg:block absolute inset-0 w-full h-full text-[#fdfcf9] dark:text-[#0b0f19] fill-current z-10 pointer-events-none" viewBox="0 0 1200 600" preserveAspectRatio="none">
               <defs>
                 <linearGradient id="scurve-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stop-color="#ff7a00" />
-                  <stop offset="50%" stop-color="#ff8c2a" />
+                  <stop offset="0%" stop-color="#0220A4" />
+                  <stop offset="50%" stop-color="#2B4FD4" />
                   <stop offset="100%" stop-color="#d35a00" />
                 </linearGradient>
                 <filter id="scurve-shadow" x="-20%" y="-20%" width="140%" height="140%">
@@ -2260,12 +2196,12 @@ onUnmounted(() => {
             <!-- Overlapping Checklist Card (Space-saving dynamic tag layout) -->
             <div class="absolute right-4 bottom-4 lg:right-6 lg:bottom-6 z-20 select-none group/card w-fit max-w-[calc(100%-2rem)] lg:max-w-[80%] ml-auto">
               <!-- Luxury Black Checklist Card with Glassmorphic tags -->
-              <div class="relative bg-gradient-to-br from-[#13151a]/95 via-[#0e1013]/95 to-[#07080a]/95 rounded-2xl p-4 sm:p-4.5 text-slate-100 text-left shadow-[0_20px_40px_rgba(0,0,0,0.6)] border border-white/10 z-10 transition-all duration-500 overflow-hidden hover:border-[#ff7a00]/30 hover:shadow-[0_20px_40px_rgba(240,113,0,0.15)]">
+              <div class="relative bg-gradient-to-br from-[#13151a]/95 via-[#0e1013]/95 to-[#07080a]/95 rounded-2xl p-4 sm:p-4.5 text-slate-100 text-left shadow-[0_20px_40px_rgba(0,0,0,0.6)] border border-white/10 z-10 transition-all duration-500 overflow-hidden hover:border-[#0220A4]/30 hover:shadow-[0_20px_40px_rgba(2,32,164,0.15)]">
                 
                 <div class="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover/card:animate-shine z-0 pointer-events-none"></div>
 
                 <h4 class="text-xs sm:text-sm font-black leading-tight mb-2.5 tracking-wide font-['IBM_Plex_Sans_Thai'] relative z-10 text-white flex items-center gap-1.5">
-                  <span class="inline-block w-1.5 h-3.5 bg-gradient-to-b from-[#ff7a00] to-[#ff8c2a] rounded-full"></span>
+                  <span class="inline-block w-1.5 h-3.5 bg-gradient-to-b from-[#0220A4] to-[#2B4FD4] rounded-full"></span>
                   {{ featuresBadgeTitle || 'เหมาะสำหรับทุกการใช้งาน' }}
                 </h4>
                 
@@ -2274,9 +2210,9 @@ onUnmounted(() => {
                   <span 
                     v-for="(item, idx) in checklistItems" 
                     :key="idx" 
-                    class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white/[0.04] dark:bg-white/[0.06] border border-white/10 hover:border-[#ff7a00]/30 hover:bg-[#ff7a00]/10 text-slate-200 hover:text-white text-[11px] font-bold font-['IBM_Plex_Sans_Thai'] transition-all duration-200 group/item cursor-default"
+                    class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white/[0.04] dark:bg-white/[0.06] border border-white/10 hover:border-[#0220A4]/30 hover:bg-[#0220A4]/10 text-slate-200 hover:text-white text-[11px] font-bold font-['IBM_Plex_Sans_Thai'] transition-all duration-200 group/item cursor-default"
                   >
-                    <span class="w-3.5 h-3.5 rounded-full bg-[#ff7a00]/20 text-[#ff7a00] group-hover/item:bg-[#ff7a00] group-hover/item:text-white flex items-center justify-center shrink-0 transition-colors duration-200">
+                    <span class="w-3.5 h-3.5 rounded-full bg-[#0220A4]/20 text-[#0220A4] group-hover/item:bg-[#0220A4] group-hover/item:text-white flex items-center justify-center shrink-0 transition-colors duration-200">
                       <svg class="w-2 h-2 stroke-[3.5]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
                       </svg>
@@ -2291,7 +2227,7 @@ onUnmounted(() => {
           
         </div>
         <!-- FOOTER: Custom Design Premium Contact Banner Bar -->
-        <div class="bg-gradient-to-r from-[#bf4700] via-[#ab3f00] to-[#8f3200] text-white rounded-3xl p-5 md:p-6 lg:p-7 mt-10 shadow-[0_20px_50px_rgba(255,122,0,0.25)] select-none relative z-10 group/banner border border-white/15 overflow-hidden">
+        <div class="bg-gradient-to-r from-[#0220A4] via-[#01166F] to-[#011055] text-white rounded-3xl p-5 md:p-6 lg:p-7 mt-10 shadow-[0_20px_50px_rgba(2,32,164,0.25)] select-none relative z-10 group/banner border border-white/15 overflow-hidden">
           
           <!-- Decorative corner glows -->
           <div class="absolute -right-16 -top-16 w-40 h-40 bg-white rounded-full blur-[70px] opacity-15 pointer-events-none group-hover/banner:opacity-25 transition-opacity duration-500"></div>
@@ -2302,11 +2238,11 @@ onUnmounted(() => {
             <!-- Section 1: Left Title & Info -->
             <div class="flex items-center gap-4 text-left w-full xl:w-1/4 flex-shrink-0 justify-center xl:justify-start">
               <div class="w-12 h-12 flex-shrink-0 flex items-center justify-center relative">
-                <!-- Hexagon Outline + Solid White Hexagon + Orange Check SVG -->
+                <!-- Hexagon Outline + Solid White Hexagon + Blue Check SVG -->
                 <svg class="w-12 h-12" viewBox="0 0 24 24" fill="none">
                   <path d="M12 2l8.66 5v10L12 22l-8.66-5V7Z" stroke="#FBBF24" stroke-width="1.5" stroke-linejoin="round" />
                   <path d="M12 4.5l6.5 3.75v7.5L12 19.5l-6.5-3.75v-7.5Z" fill="white" stroke="#FBBF24" stroke-width="0.5" stroke-linejoin="round" />
-                  <path d="M9.5 12l1.8 1.8 3.5-3.5" stroke="#c2410c" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+                  <path d="M9.5 12l1.8 1.8 3.5-3.5" stroke="#0220A4" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
                 </svg>
               </div>
               <div class="leading-tight">
@@ -2327,15 +2263,15 @@ onUnmounted(() => {
               
               <!-- Phone Contact Card -->
               <a :href="bannerPhoneLink" class="group/item flex items-center gap-3.5 p-3 px-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white/15 hover:border-white/35 hover:scale-[1.02] transition-all duration-300 text-left">
-                <span class="w-9 h-9 bg-white text-[#c2410c] rounded-xl flex items-center justify-center flex-shrink-0 group-hover/item:rotate-12 transition-transform">
+                <span class="w-9 h-9 bg-white text-[#0220A4] rounded-xl flex items-center justify-center flex-shrink-0 group-hover/item:rotate-12 transition-transform">
                   <svg class="w-4.5 h-4.5 fill-current" viewBox="0 0 24 24">
                     <path d="M20.01 15.38c-1.23 0-2.42-.2-3.53-.56a.977.977 0 00-1.01.24l-2.2 2.2a15.045 15.045 0 01-6.59-6.59l2.2-2.21a.96.96 0 00.25-1A11.36 11.36 0 018.5 4c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1 0 9.39 7.61 17 17 17 .55 0 1-.45 1-1v-3.58c0-.56-.45-1.04-1-1.04z" />
                   </svg>
                 </span>
                 <div class="leading-none min-w-0">
-                  <span class="text-[9px] font-bold text-orange-50 uppercase tracking-widest block mb-1">สอบถามโทรเลย</span>
+                  <span class="text-[9px] font-bold text-blue-50 uppercase tracking-widest block mb-1">สอบถามโทรเลย</span>
                   <span class="text-[15px] font-black tracking-wide font-sans text-white block truncate">{{ bannerPhone }}</span>
-                  <span class="text-[10px] text-orange-50 block mt-1 font-semibold font-['IBM_Plex_Sans_Thai'] truncate">{{ bannerWorkingHours }}</span>
+                  <span class="text-[10px] text-blue-50 block mt-1 font-semibold font-['IBM_Plex_Sans_Thai'] truncate">{{ bannerWorkingHours }}</span>
                 </div>
               </a>
 
@@ -2348,23 +2284,23 @@ onUnmounted(() => {
                   </svg>
                 </span>
                 <div class="leading-none min-w-0">
-                  <span class="text-[9px] font-bold text-orange-50 uppercase tracking-widest block mb-1">ไลน์แอดอย่างเป็นทางการ</span>
+                  <span class="text-[9px] font-bold text-blue-50 uppercase tracking-widest block mb-1">ไลน์แอดอย่างเป็นทางการ</span>
                   <span class="text-[15px] font-black tracking-wide font-sans text-white block truncate">{{ bannerLineId }}</span>
-                  <span class="text-[10px] text-orange-50 block mt-1 font-semibold font-['IBM_Plex_Sans_Thai'] truncate">ตอบกลับไว แนะนำฟรี!</span>
+                  <span class="text-[10px] text-blue-50 block mt-1 font-semibold font-['IBM_Plex_Sans_Thai'] truncate">ตอบกลับไว แนะนำฟรี!</span>
                 </div>
               </a>
 
               <!-- Address/Company Contact Card -->
               <div class="group/item flex items-center gap-3.5 p-3 px-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white/15 hover:border-white/35 hover:scale-[1.02] transition-all duration-300 text-left">
-                <span class="w-9 h-9 bg-white text-[#c2410c] rounded-xl flex items-center justify-center flex-shrink-0 group-hover/item:scale-110 transition-transform">
+                <span class="w-9 h-9 bg-white text-[#0220A4] rounded-xl flex items-center justify-center flex-shrink-0 group-hover/item:scale-110 transition-transform">
                   <svg class="w-4.5 h-4.5 fill-current" viewBox="0 0 24 24">
                     <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
                   </svg>
                 </span>
                 <div class="leading-none min-w-0">
-                  <span class="text-[9px] font-bold text-orange-50 uppercase tracking-widest block mb-1">สำนักงานใหญ่</span>
+                  <span class="text-[9px] font-bold text-blue-50 uppercase tracking-widest block mb-1">สำนักงานใหญ่</span>
                   <span class="text-[13px] font-black tracking-wide text-white block truncate font-['IBM_Plex_Sans_Thai']">{{ bannerCompanyName }}</span>
-                  <span class="text-[10px] text-orange-50 block mt-1 font-semibold font-['IBM_Plex_Sans_Thai'] truncate">{{ bannerCompanyLocation }}</span>
+                  <span class="text-[10px] text-blue-50 block mt-1 font-semibold font-['IBM_Plex_Sans_Thai'] truncate">{{ bannerCompanyLocation }}</span>
                 </div>
               </div>
 
@@ -2374,7 +2310,7 @@ onUnmounted(() => {
             <div class="w-full xl:w-auto flex-shrink-0 flex justify-center xl:justify-end">
               <router-link 
                 to="/quotation" 
-                class="group/cta flex flex-col items-center justify-center p-3 px-6 bg-white hover:bg-orange-50 active:scale-95 transition-all rounded-2xl shadow-lg hover:shadow-xl w-full xl:w-auto select-none border border-orange-100/50"
+                class="group/cta flex flex-col items-center justify-center p-3 px-6 bg-white hover:bg-blue-50 active:scale-95 transition-all rounded-2xl shadow-lg hover:shadow-xl w-full xl:w-auto select-none border border-blue-100/50"
               >
                 <div class="flex items-center gap-1.5 font-['IBM_Plex_Sans_Thai'] leading-none">
                   <span class="text-[14px] font-black text-[#9a3412] tracking-wide">ขอรับคำปรึกษาฟรี</span>
@@ -2419,8 +2355,8 @@ onUnmounted(() => {
             </router-link>
           </div>
 
-          <!-- Showcase Products Grid -->
-          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 md:gap-8 mt-12">
+          <!-- Showcase Products Grid (3 items per row on desktop) -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 mt-12">
             <ProductCard 
               v-for="product in showcase.products" 
               :key="product.id" 
@@ -2443,7 +2379,7 @@ onUnmounted(() => {
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-12 md:mb-16 gap-6">
           <div class="text-left">
             <!-- Pill badge -->
-            <div class="inline-flex items-center gap-1.5 bg-orange-50 dark:bg-orange-950/20 text-[#c2410c] dark:text-orange-400 text-xs font-bold px-3 py-1.5 rounded-full border border-orange-100/50 dark:border-orange-900/30 uppercase tracking-widest mb-4">
+            <div class="inline-flex items-center gap-1.5 bg-blue-50 dark:bg-blue-950/20 text-[#0220A4] dark:text-blue-400 text-xs font-bold px-3 py-1.5 rounded-full border border-blue-100/50 dark:border-blue-900/30 uppercase tracking-widest mb-4">
               <!-- Document icon -->
               <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -2458,8 +2394,8 @@ onUnmounted(() => {
           </div>
           
           <!-- View All Button -->
-          <router-link to="/projects" class="inline-flex text-sm font-bold text-[#c2410c] hover:text-[#ad3100] items-center justify-center gap-2.5 px-6 py-3 rounded-full border border-[#c2410c]/30 hover:border-[#c2410c] hover:bg-orange-50/50 transition-all duration-300 whitespace-nowrap">
-            <svg class="w-4.5 h-4.5 text-[#c2410c]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <router-link to="/projects" class="inline-flex text-sm font-bold text-[#0220A4] hover:text-[#01166F] items-center justify-center gap-2.5 px-6 py-3 rounded-full border border-[#0220A4]/30 hover:border-[#0220A4] hover:bg-blue-50/50 transition-all duration-300 whitespace-nowrap">
+            <svg class="w-4.5 h-4.5 text-[#0220A4]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
             <span>ดูผลงานทั้งหมด</span>
@@ -2475,7 +2411,7 @@ onUnmounted(() => {
             v-for="project in recentProjects" 
             :key="project.id"
             :to="'/projects/' + (project.slug || project.id)" 
-            class="group relative block rounded-3xl overflow-hidden shadow-md hover:shadow-2xl hover:shadow-orange-500/10 transition-all duration-500 h-[350px] hover:-translate-y-1.5"
+            class="group relative block rounded-3xl overflow-hidden shadow-md hover:shadow-2xl hover:shadow-blue-500/10 transition-all duration-500 h-[350px] hover:-translate-y-1.5"
           >
             <!-- Image -->
             <img :src="getOptimizedImageUrl(project.cover_image, 700)" :alt="project.title" class="absolute inset-0 w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-[1200ms] ease-out" @error="onImageError">
@@ -2488,7 +2424,7 @@ onUnmounted(() => {
             <div v-if="project.badge_size" class="absolute top-4 left-4 z-10">
               <span class="inline-flex items-center gap-1.5 bg-[#f5efe6]/95 backdrop-blur-sm text-gray-800 text-[11px] font-bold px-3.5 py-1.5 rounded-full border border-white/20 shadow-sm">
                 <!-- Ruler / Tape icon -->
-                <svg class="w-3.5 h-3.5 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg class="w-3.5 h-3.5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12.83 2.18a2 2 0 00-2.83 0L2.18 10.01a2 2 0 000 2.83l7.82 7.82a2 2 0 002.83 0l7.82-7.82a2 2 0 000-2.83l-7.82-7.82z" />
                 </svg>
                 {{ project.badge_size }}
@@ -2497,7 +2433,7 @@ onUnmounted(() => {
 
             <!-- Tag badge on top-right (dynamic) -->
             <div v-if="project.badge_tag" class="absolute top-4 right-4 z-10">
-              <span class="inline-flex items-center gap-1 bg-gradient-to-r from-orange-500 to-orange-600 text-white text-[10px] font-black uppercase px-3 py-1.5 rounded-full shadow-md">
+              <span class="inline-flex items-center gap-1 bg-gradient-to-r from-blue-500 to-blue-600 text-white text-[10px] font-black uppercase px-3 py-1.5 rounded-full shadow-md">
                 {{ project.badge_tag }}
               </span>
             </div>
@@ -2509,14 +2445,14 @@ onUnmounted(() => {
               </h4>
               <div class="flex flex-wrap items-center gap-x-4 gap-y-2 text-white/80">
                 <p class="flex items-center gap-1.5 text-xs font-semibold">
-                  <svg class="w-3.5 h-3.5 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg class="w-3.5 h-3.5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
                   </svg>
                   {{ project.location || 'ประเทศไทย' }}
                 </p>
                 <p v-if="project.service_date" class="flex items-center gap-1.5 text-xs font-semibold">
-                  <svg class="w-3.5 h-3.5 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg class="w-3.5 h-3.5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                   </svg>
                   {{ new Date(project.service_date).toLocaleDateString('th-TH', { year: 'numeric', month: 'short' }) }}
@@ -2526,24 +2462,24 @@ onUnmounted(() => {
           </router-link>
 
           <!-- Redesigned Service CTA Card (6th Card) -->
-          <div v-if="homeProjectsCta.show" class="group relative rounded-3xl overflow-hidden bg-gradient-to-br from-[#bf4700] via-[#ab3f00] to-[#8f3200] p-6 flex flex-col justify-between shadow-md hover:shadow-2xl hover:shadow-orange-500/20 transition-all duration-500 h-[350px] hover:-translate-y-1.5">
+          <div v-if="homeProjectsCta.show" class="group relative rounded-3xl overflow-hidden bg-gradient-to-br from-[#0220A4] via-[#01166F] to-[#011055] p-6 flex flex-col justify-between shadow-md hover:shadow-2xl hover:shadow-blue-500/20 transition-all duration-500 h-[350px] hover:-translate-y-1.5">
             <!-- Header -->
             <div class="flex items-start gap-3">
               <div class="w-12 h-12 bg-white rounded-2xl flex items-center justify-center flex-shrink-0 shadow-md">
-                <svg class="w-6 h-6 text-[#c2410c]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg class="w-6 h-6 text-[#0220A4]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
                 </svg>
               </div>
               <div class="text-left text-white">
                 <h4 class="text-lg font-black leading-tight tracking-tight">{{ homeProjectsCta.title }}</h4>
-                <p class="text-[11px] text-orange-100/90 font-medium mt-1 leading-snug">{{ homeProjectsCta.description }}</p>
+                <p class="text-[11px] text-blue-100/90 font-medium mt-1 leading-snug">{{ homeProjectsCta.description }}</p>
               </div>
             </div>
 
             <!-- Middle Pill Badges -->
             <div class="space-y-2.5 my-3">
               <div v-for="(bullet, index) in homeProjectsCta.bullets" :key="index" class="flex items-center gap-2.5 bg-white/95 backdrop-blur-sm rounded-full py-1.5 px-3.5 shadow-sm text-left">
-                <span class="w-6 h-6 rounded-full bg-orange-50 flex items-center justify-center flex-shrink-0 text-[#c2410c]">
+                <span class="w-6 h-6 rounded-full bg-blue-50 flex items-center justify-center flex-shrink-0 text-[#0220A4]">
                   <svg v-if="index === 0" class="w-3.5 h-3.5 stroke-[2.5]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                   </svg>
@@ -2564,7 +2500,7 @@ onUnmounted(() => {
             <!-- Action Button -->
             <router-link 
               to="/quotation" 
-              class="flex items-center justify-center w-full bg-white hover:bg-orange-50 active:scale-95 transition-all py-3 rounded-2xl shadow-md text-[#9a3412] font-black text-sm gap-2 mt-auto"
+              class="flex items-center justify-center w-full bg-white hover:bg-blue-50 active:scale-95 transition-all py-3 rounded-2xl shadow-md text-[#9a3412] font-black text-sm gap-2 mt-auto"
             >
               <span>ขอใบเสนอราคา</span>
               <svg class="w-4 h-4 stroke-[3.5]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -2578,7 +2514,7 @@ onUnmounted(() => {
         <div class="max-w-7xl mx-auto mt-12 bg-white dark:bg-[#0f172a] rounded-[24px] border border-gray-100 dark:border-gray-800/80 shadow-md p-5 flex flex-col md:flex-row justify-between items-center gap-6 md:gap-4">
           <!-- Item 1 -->
           <div class="flex items-center gap-4 w-full md:w-auto px-4 py-1.5 justify-center md:justify-start">
-            <span class="w-10 h-10 rounded-full bg-orange-50 dark:bg-orange-950/20 flex items-center justify-center flex-shrink-0 text-orange-500">
+            <span class="w-10 h-10 rounded-full bg-blue-50 dark:bg-blue-950/20 flex items-center justify-center flex-shrink-0 text-blue-500">
               <svg class="w-5.5 h-5.5 stroke-[2.5]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
               </svg>
@@ -2593,7 +2529,7 @@ onUnmounted(() => {
 
           <!-- Item 2 -->
           <div class="flex items-center gap-4 w-full md:w-auto px-4 py-1.5 justify-center md:justify-start">
-            <span class="w-10 h-10 rounded-full bg-orange-50 dark:bg-orange-950/20 flex items-center justify-center flex-shrink-0 text-orange-500">
+            <span class="w-10 h-10 rounded-full bg-blue-50 dark:bg-blue-950/20 flex items-center justify-center flex-shrink-0 text-blue-500">
               <svg class="w-5.5 h-5.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v5l-2.5-1.5L7 20v-5M12 15v5l2.5-1.5 2.5 1.5v-5M12 13a5 5 0 100-10 5 5 0 000 10z" />
               </svg>
@@ -2608,7 +2544,7 @@ onUnmounted(() => {
 
           <!-- Item 3 -->
           <div class="flex items-center gap-4 w-full md:w-auto px-4 py-1.5 justify-center md:justify-start">
-            <span class="w-10 h-10 rounded-full bg-orange-50 dark:bg-orange-950/20 flex items-center justify-center flex-shrink-0 text-orange-500">
+            <span class="w-10 h-10 rounded-full bg-blue-50 dark:bg-blue-950/20 flex items-center justify-center flex-shrink-0 text-blue-500">
               <svg class="w-5.5 h-5.5 stroke-[2]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
                 <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -2624,7 +2560,7 @@ onUnmounted(() => {
 
           <!-- Item 4 -->
           <div class="flex items-center gap-4 w-full md:w-auto px-4 py-1.5 justify-center md:justify-start">
-            <span class="w-10 h-10 rounded-full bg-orange-50 dark:bg-orange-950/20 flex items-center justify-center flex-shrink-0 text-orange-500">
+            <span class="w-10 h-10 rounded-full bg-blue-50 dark:bg-blue-950/20 flex items-center justify-center flex-shrink-0 text-blue-500">
               <svg class="w-5.5 h-5.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
               </svg>
@@ -2643,19 +2579,19 @@ onUnmounted(() => {
     <section v-if="homeShowTestimonials" class="py-20 md:py-28 bg-gradient-to-b from-[#fff8f2] via-white to-white dark:from-[#1a1208] dark:via-[#0a0f16] dark:to-[#0a0f16] relative overflow-hidden">
       <!-- Subtle background decorations -->
       <div class="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
-        <div class="absolute top-20 right-[-8%] w-80 h-80 bg-orange-400/5 blur-[100px] rounded-full"></div>
-        <div class="absolute bottom-20 left-[-5%] w-72 h-72 bg-orange-300/5 blur-[100px] rounded-full"></div>
+        <div class="absolute top-20 right-[-8%] w-80 h-80 bg-blue-400/5 blur-[100px] rounded-full"></div>
+        <div class="absolute bottom-20 left-[-5%] w-72 h-72 bg-blue-300/5 blur-[100px] rounded-full"></div>
       </div>
 
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <!-- Section Header -->
         <div class="text-center mb-14">
           <!-- Badge -->
-          <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-orange-50 dark:bg-orange-950/30 border border-orange-200 dark:border-orange-800/50 mb-5">
-            <svg class="w-4 h-4 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
-            <span class="text-xs font-bold text-orange-600 dark:text-orange-400 tracking-wide">{{ sectionTitles.testimonialsTitle }}</span>
+          <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800/50 mb-5">
+            <svg class="w-4 h-4 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
+            <span class="text-xs font-bold text-blue-600 dark:text-blue-400 tracking-wide">{{ sectionTitles.testimonialsTitle }}</span>
           </div>
-          <!-- Main heading with orange highlight -->
+          <!-- Main heading with Deep Blue highlight -->
           <h3 class="text-3xl md:text-4xl lg:text-5xl font-black tracking-tight text-gray-900 dark:text-white mb-4" v-html="formattedTestimonialsHeading"></h3>
           <!-- Subtitle -->
           <p class="max-w-2xl mx-auto text-sm md:text-base text-gray-500 dark:text-gray-400 leading-relaxed whitespace-pre-line">
@@ -2666,7 +2602,7 @@ onUnmounted(() => {
         <!-- Testimonial Cards Grid -->
         <div v-if="testimonials.length > 0" class="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 text-left mb-14">
           <div v-for="(review, index) in testimonials" :key="index"
-            class="relative bg-white dark:bg-[#141c2b] rounded-2xl border border-gray-100 dark:border-white/5 shadow-[0_4px_24px_rgba(0,0,0,0.04)] dark:shadow-none transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_12px_40px_rgba(240,113,0,0.08)] group overflow-hidden flex flex-col"
+            class="relative bg-white dark:bg-[#141c2b] rounded-2xl border border-gray-100 dark:border-white/5 shadow-[0_4px_24px_rgba(0,0,0,0.04)] dark:shadow-none transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_12px_40px_rgba(2,32,164,0.08)] group overflow-hidden flex flex-col"
           >
 
             <!-- Top bar: Stars + Score + Quote icon -->
@@ -2674,13 +2610,13 @@ onUnmounted(() => {
               <div class="flex items-center gap-2.5">
                 <!-- Stars -->
                 <div class="flex gap-0.5">
-                  <svg v-for="i in Number(review.stars || 5)" :key="'s'+i" class="w-4 h-4 text-orange-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                  <svg v-for="i in Number(review.stars || 5)" :key="'s'+i" class="w-4 h-4 text-blue-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
                 </div>
                 <!-- Numeric score -->
                 <span class="text-sm font-extrabold text-gray-800 dark:text-white">{{ (Number(review.stars) || 5).toFixed(1) }}</span>
               </div>
               <!-- Quote icon -->
-              <svg class="w-10 h-10 text-orange-500/80" fill="currentColor" viewBox="0 0 24 24"><path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10H14.017zM0 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151C7.546 6.068 5.983 8.789 5.983 11h4v10H0z"/></svg>
+              <svg class="w-10 h-10 text-blue-500/80" fill="currentColor" viewBox="0 0 24 24"><path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10H14.017zM0 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151C7.546 6.068 5.983 8.789 5.983 11h4v10H0z"/></svg>
             </div>
 
             <!-- Review text -->
@@ -2694,10 +2630,10 @@ onUnmounted(() => {
             <div class="px-6 pb-4">
               <div class="flex items-center gap-3">
                 <!-- Avatar -->
-                <div v-if="review.avatar" class="w-11 h-11 rounded-full overflow-hidden flex-shrink-0 ring-2 ring-orange-200 dark:ring-orange-800/50">
+                <div v-if="review.avatar" class="w-11 h-11 rounded-full overflow-hidden flex-shrink-0 ring-2 ring-blue-200 dark:ring-blue-800/50">
                   <img :src="review.avatar" :alt="review.name" class="w-full h-full object-cover" @error="review.avatar = ''">
                 </div>
-                <div v-else :class="['w-11 h-11 rounded-full flex items-center justify-center font-bold text-base flex-shrink-0 ring-2 ring-orange-200 dark:ring-orange-800/50', index % 3 === 0 ? 'bg-orange-100 text-orange-700 dark:bg-orange-900/50 dark:text-orange-400' : index % 3 === 1 ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-400' : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-400']">{{ (review.name || 'A').charAt(0) }}</div>
+                <div v-else :class="['w-11 h-11 rounded-full flex items-center justify-center font-bold text-base flex-shrink-0 ring-2 ring-blue-200 dark:ring-blue-800/50', index % 3 === 0 ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-400' : index % 3 === 1 ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-400' : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-400']">{{ (review.name || 'A').charAt(0) }}</div>
                 <div>
                   <h4 class="text-sm font-bold text-gray-900 dark:text-white">{{ review.name }}</h4>
                   <p class="text-xs text-gray-500 dark:text-gray-400">{{ review.role }}</p>
@@ -2709,17 +2645,17 @@ onUnmounted(() => {
             <div v-if="review.product || review.location || review.date" class="px-6 pb-5">
               <div class="bg-gray-50 dark:bg-white/5 rounded-xl p-3.5 space-y-2 border border-gray-100 dark:border-white/5">
                 <div v-if="review.product" class="flex items-center gap-2.5 text-xs">
-                  <svg class="w-4 h-4 text-orange-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                  <svg class="w-4 h-4 text-blue-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                   <span class="text-gray-500 dark:text-gray-400 flex-shrink-0 w-[72px]">สินค้า/บริการ</span>
                   <span class="font-semibold text-gray-700 dark:text-gray-200">{{ review.product }}</span>
                 </div>
                 <div v-if="review.location" class="flex items-center gap-2.5 text-xs">
-                  <svg class="w-4 h-4 text-orange-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                  <svg class="w-4 h-4 text-blue-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                   <span class="text-gray-500 dark:text-gray-400 flex-shrink-0 w-[72px]">พื้นที่ติดตั้ง</span>
                   <span class="font-semibold text-gray-700 dark:text-gray-200">{{ review.location }}</span>
                 </div>
                 <div v-if="review.date" class="flex items-center gap-2.5 text-xs">
-                  <svg class="w-4 h-4 text-orange-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                  <svg class="w-4 h-4 text-blue-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                   <span class="text-gray-500 dark:text-gray-400 flex-shrink-0 w-[72px]">วันที่ติดตั้ง</span>
                   <span class="font-semibold text-gray-700 dark:text-gray-200">{{ review.date }}</span>
                 </div>
@@ -2741,13 +2677,13 @@ onUnmounted(() => {
     <section class="py-20 md:py-28 bg-[#f9fafb] dark:bg-[#0a0f16] relative overflow-hidden border-t border-gray-100 dark:border-white/5">
       <!-- Background decoration -->
       <div class="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
-        <div class="absolute top-1/4 left-[-10%] w-96 h-96 bg-orange-500/5 blur-[120px] rounded-full"></div>
+        <div class="absolute top-1/4 left-[-10%] w-96 h-96 bg-blue-500/5 blur-[120px] rounded-full"></div>
       </div>
 
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <!-- Header -->
         <div class="text-center mb-14">
-          <div class="inline-flex items-center justify-center gap-1.5 text-xs font-bold text-orange-500 tracking-wide uppercase mb-3">
+          <div class="inline-flex items-center justify-center gap-1.5 text-xs font-bold text-blue-500 tracking-wide uppercase mb-3">
             <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
             <span>รีวิวจากลูกค้าจริง</span>
             <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
@@ -2764,7 +2700,7 @@ onUnmounted(() => {
           <!-- Left Arrow Navigation -->
           <button 
             @click="prevPartnerSlide" 
-            class="absolute left-[-12px] md:left-0 xl:hidden top-1/2 -translate-y-1/2 z-20 w-11 h-11 rounded-full bg-white dark:bg-gray-800 shadow-md hover:shadow-lg border border-gray-100 dark:border-gray-700 flex items-center justify-center text-orange-500 hover:text-orange-600 transition-all duration-300"
+            class="absolute left-[-12px] md:left-0 xl:hidden top-1/2 -translate-y-1/2 z-20 w-11 h-11 rounded-full bg-white dark:bg-gray-800 shadow-md hover:shadow-lg border border-gray-100 dark:border-gray-700 flex items-center justify-center text-blue-500 hover:text-blue-600 transition-all duration-300"
             aria-label="Previous slide"
           >
             <svg class="w-5 h-5 stroke-[3]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -2792,7 +2728,7 @@ onUnmounted(() => {
                   class="w-full h-full object-cover grayscale brightness-95"
                 />
                 <!-- Quote badge absolute top-left -->
-                <div class="absolute top-4 left-4 w-9 h-9 bg-orange-500 rounded-xl flex items-center justify-center text-white shadow-md">
+                <div class="absolute top-4 left-4 w-9 h-9 bg-blue-500 rounded-xl flex items-center justify-center text-white shadow-md">
                   <!-- Quote Icon SVG -->
                   <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10H14.017zM0 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151C7.546 6.068 5.983 8.789 5.983 11h4v10H0z"/>
@@ -2853,7 +2789,7 @@ onUnmounted(() => {
                     </div>
 
                     <!-- Star Ratings -->
-                    <div class="flex gap-0.5 text-orange-500">
+                    <div class="flex gap-0.5 text-blue-500">
                       <svg v-for="i in review.rating" :key="i" class="w-3.5 h-3.5 fill-current" viewBox="0 0 20 20">
                         <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
                       </svg>
@@ -2871,7 +2807,7 @@ onUnmounted(() => {
                   <span 
                     :class="[
                       'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold border transition-colors shadow-sm',
-                      review.badgeColor === 'orange' ? 'bg-orange-50 border-orange-100 text-orange-500 dark:bg-orange-950/20 dark:border-orange-900/30 dark:text-orange-400' : '',
+                      review.badgeColor === 'orange' ? 'bg-blue-50 border-blue-100 text-blue-500 dark:bg-blue-950/20 dark:border-blue-900/30 dark:text-blue-400' : '',
                       review.badgeColor === 'blue' ? 'bg-blue-50 border-blue-100 text-blue-500 dark:bg-blue-950/20 dark:border-blue-900/30 dark:text-blue-400' : '',
                       review.badgeColor === 'green' ? 'bg-emerald-50 border-emerald-100 text-emerald-600 dark:bg-emerald-950/20 dark:border-emerald-900/30 dark:text-emerald-400' : '',
                       review.badgeColor === 'purple' ? 'bg-purple-50 border-purple-100 text-purple-600 dark:bg-purple-950/20 dark:border-purple-900/30 dark:text-purple-400' : '',
@@ -2905,7 +2841,7 @@ onUnmounted(() => {
           <!-- Right Arrow Navigation -->
           <button 
             @click="nextPartnerSlide" 
-            class="absolute right-[-12px] md:right-0 xl:hidden top-1/2 -translate-y-1/2 z-20 w-11 h-11 rounded-full bg-white dark:bg-gray-800 shadow-md hover:shadow-lg border border-gray-100 dark:border-gray-700 flex items-center justify-center text-orange-500 hover:text-orange-600 transition-all duration-300"
+            class="absolute right-[-12px] md:right-0 xl:hidden top-1/2 -translate-y-1/2 z-20 w-11 h-11 rounded-full bg-white dark:bg-gray-800 shadow-md hover:shadow-lg border border-gray-100 dark:border-gray-700 flex items-center justify-center text-blue-500 hover:text-blue-600 transition-all duration-300"
             aria-label="Next slide"
           >
             <svg class="w-5 h-5 stroke-[3]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -2926,7 +2862,7 @@ onUnmounted(() => {
             <span
               :class="[
                 'h-2.5 rounded-full transition-all duration-300 block',
-                partnersActiveIndex === index ? 'bg-orange-600 w-5' : 'bg-gray-300 dark:bg-gray-700 w-2.5'
+                partnersActiveIndex === index ? 'bg-blue-600 w-5' : 'bg-gray-300 dark:bg-gray-700 w-2.5'
               ]"
             ></span>
           </button>
@@ -2946,15 +2882,15 @@ onUnmounted(() => {
     >
       <!-- Decor -->
       <div class="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
-        <div class="absolute top-40 right-[-10%] w-96 h-96 bg-orange-500/5 blur-[100px] rounded-full"></div>
+        <div class="absolute top-40 right-[-10%] w-96 h-96 bg-blue-500/5 blur-[100px] rounded-full"></div>
         <div class="absolute bottom-10 left-[-5%] w-80 h-80 bg-amber-500/5 blur-[100px] rounded-full"></div>
       </div>
 
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-16 gap-6">
           <div>
-            <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-orange-50 dark:bg-orange-950/20 text-[#c2410c] dark:text-orange-400 text-xs font-bold tracking-wider uppercase mb-4 border border-orange-100 dark:border-orange-900/30">
-              <svg class="w-4 h-4 text-[#c2410c] dark:text-orange-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 dark:bg-blue-950/20 text-[#0220A4] dark:text-blue-400 text-xs font-bold tracking-wider uppercase mb-4 border border-blue-100 dark:border-blue-900/30">
+              <svg class="w-4 h-4 text-[#0220A4] dark:text-blue-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" />
               </svg>
               {{ sectionTitles.articlesTitle }}
@@ -2962,7 +2898,7 @@ onUnmounted(() => {
             <h3 class="text-3xl md:text-5xl font-black tracking-tight text-gray-900 dark:text-white" v-html="formattedArticlesHeading"></h3>
             <p class="mt-2 text-sm md:text-base text-gray-500 dark:text-gray-400 font-light">บทความและข่าวสารที่คัดสรรมาเพื่อคุณ</p>
           </div>
-          <router-link to="/blog" class="group inline-flex items-center gap-2.5 px-6 py-3 border border-[#c2410c]/30 dark:border-orange-500/20 hover:border-[#c2410c] dark:hover:border-orange-500 rounded-full text-sm font-bold text-[#c2410c] dark:text-orange-400 bg-white dark:bg-gray-800 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_4px_12px_rgba(249,115,22,0.1)]">
+          <router-link to="/blog" class="group inline-flex items-center gap-2.5 px-6 py-3 border border-[#0220A4]/30 dark:border-blue-500/20 hover:border-[#0220A4] dark:hover:border-blue-500 rounded-full text-sm font-bold text-[#0220A4] dark:text-blue-400 bg-white dark:bg-gray-800 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_4px_12px_rgba(2,32,164,0.1)]">
             อ่านบทความทั้งหมด 
             <svg class="w-4 h-4 transform group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3" />
@@ -2976,7 +2912,7 @@ onUnmounted(() => {
           <button 
             v-if="recentArticles.length > 1"
             @click="prevArticleSlide" 
-            :class="['absolute top-1/2 -translate-y-1/2 left-0 w-12 h-12 rounded-full border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800 flex items-center justify-center text-gray-700 dark:text-gray-300 hover:border-orange-500 hover:text-orange-500 dark:hover:border-orange-500 transition-all duration-300 shadow-sm z-20', recentArticles.length <= 4 ? 'xl:hidden' : '']"
+            :class="['absolute top-1/2 -translate-y-1/2 left-0 w-12 h-12 rounded-full border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800 flex items-center justify-center text-gray-700 dark:text-gray-300 hover:border-blue-500 hover:text-blue-500 dark:hover:border-blue-500 transition-all duration-300 shadow-sm z-20', recentArticles.length <= 4 ? 'xl:hidden' : '']"
             aria-label="Previous slide"
           >
             <svg class="w-5 h-5 stroke-[3]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -2995,13 +2931,13 @@ onUnmounted(() => {
               v-for="(article, idx) in recentArticles" 
               :key="article.id"
               :to="'/blog/' + (article.slug || article.id)"
-              class="w-full sm:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)] snap-start shrink-0 flex flex-col bg-white dark:bg-[#1a2333] rounded-[2rem] overflow-hidden shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] hover:shadow-[0_8px_30px_rgb(249,115,22,0.12)] transition-all duration-500 border border-gray-100 dark:border-white/5 hover:-translate-y-2 hover:border-orange-200 dark:hover:border-orange-500/30"
+              class="w-full sm:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)] snap-start shrink-0 flex flex-col bg-white dark:bg-[#1a2333] rounded-[2rem] overflow-hidden shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] hover:shadow-[0_8px_30px_rgb(249,115,22,0.12)] transition-all duration-500 border border-gray-100 dark:border-white/5 hover:-translate-y-2 hover:border-blue-200 dark:hover:border-blue-500/30"
             >
               <!-- Cover Image -->
               <div class="w-full aspect-[4/3] overflow-hidden bg-gray-100 dark:bg-gray-800 relative">
                 <img v-if="article.cover_image" :src="getOptimizedImageUrl(article.cover_image, 700)" :alt="article.title" class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-[1.5s] ease-out" @error="onImageError">
-                <div v-else class="w-full h-full flex items-center justify-center bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-900/10 dark:to-amber-900/10">
-                  <svg class="w-12 h-12 text-orange-200 dark:text-orange-800/50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <div v-else class="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-50 to-blue-50 dark:from-blue-900/10 dark:to-blue-900/10">
+                  <svg class="w-12 h-12 text-blue-200 dark:text-blue-800/50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7" />
                   </svg>
                 </div>
@@ -3009,14 +2945,14 @@ onUnmounted(() => {
 
                 <!-- Floating Badges -->
                 <div class="absolute top-5 left-5 flex flex-col gap-2">
-                  <div v-if="article.is_featured" class="bg-gradient-to-r from-amber-400 to-orange-500 text-white px-3 py-1 text-[10px] font-black rounded-full uppercase tracking-wider shadow-sm flex items-center gap-1 w-fit">
+                  <div v-if="article.is_featured" class="bg-gradient-to-r from-amber-400 to-blue-500 text-white px-3 py-1 text-[10px] font-black rounded-full uppercase tracking-wider shadow-sm flex items-center gap-1 w-fit">
                     <svg class="w-3 h-3" viewBox="0 0 20 20" fill="currentColor">
                       <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                     </svg>
                     แนะนำ
                   </div>
                   <div class="bg-white/90 dark:bg-gray-900/90 backdrop-blur-md px-3.5 py-1.5 rounded-full shadow-sm border border-white/20 w-fit">
-                    <p class="text-[10px] font-bold tracking-wider text-orange-600 dark:text-orange-400 uppercase flex items-center gap-1.5">
+                    <p class="text-[10px] font-bold tracking-wider text-blue-600 dark:text-blue-400 uppercase flex items-center gap-1.5">
                       <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                       </svg>
@@ -3027,7 +2963,7 @@ onUnmounted(() => {
 
                 <!-- Read more button floating -->
                 <div class="absolute bottom-5 right-5 translate-y-8 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500 ease-out delay-100">
-                  <div class="w-12 h-12 bg-orange-500 text-white rounded-full flex items-center justify-center shadow-lg shadow-orange-500/40">
+                  <div class="w-12 h-12 bg-blue-500 text-white rounded-full flex items-center justify-center shadow-lg shadow-blue-500/40">
                     <svg class="w-5 h-5 -rotate-45 group-hover:rotate-0 transition-transform duration-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
                     </svg>
@@ -3041,10 +2977,10 @@ onUnmounted(() => {
                   <div class="mb-4">
                     <span class="text-[10px] font-bold text-gray-600 dark:text-gray-400 uppercase tracking-widest">{{ article.category || 'บทความทั่วไป' }}</span>
                   </div>
-                  <h4 class="font-bold text-gray-900 dark:text-white text-xl md:text-2xl mb-3 line-clamp-2 leading-tight group-hover:text-orange-600 transition-colors">{{ article.title }}</h4>
+                  <h4 class="font-bold text-gray-900 dark:text-white text-xl md:text-2xl mb-3 line-clamp-2 leading-tight group-hover:text-blue-600 transition-colors">{{ article.title }}</h4>
                   <p class="text-sm text-gray-500 dark:text-gray-400 font-light line-clamp-3 leading-relaxed mb-6 flex-grow">{{ article.excerpt || article.seo_description || 'อ่านรายละเอียดเชิงลึกและเทคนิคต่างๆ เพิ่มเติมได้ภายในบทความนี้...' }}</p>
                 </div>
-                <div class="mt-auto pt-5 border-t border-gray-100 dark:border-white/5 flex items-center justify-between text-sm font-bold text-gray-900 dark:text-white group-hover:text-orange-600 transition-colors">
+                <div class="mt-auto pt-5 border-t border-gray-100 dark:border-white/5 flex items-center justify-between text-sm font-bold text-gray-900 dark:text-white group-hover:text-blue-600 transition-colors">
                   <span class="flex items-center gap-1.5 text-gray-600 dark:text-gray-400 font-medium text-xs">
                     <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -3052,7 +2988,7 @@ onUnmounted(() => {
                     </svg>
                     {{ article.view_count || 0 }} ยอดเข้าชม
                   </span>
-                  <div class="w-8 h-8 rounded-full bg-gray-50 dark:bg-gray-800 flex items-center justify-center group-hover:bg-orange-50 dark:group-hover:bg-orange-950/30 transition-colors">
+                  <div class="w-8 h-8 rounded-full bg-gray-50 dark:bg-gray-800 flex items-center justify-center group-hover:bg-blue-50 dark:group-hover:bg-blue-950/30 transition-colors">
                     <svg class="w-4 h-4 transform group-hover:translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3" />
                     </svg>
@@ -3066,7 +3002,7 @@ onUnmounted(() => {
           <button 
             v-if="recentArticles.length > 1"
             @click="nextArticleSlide" 
-            :class="['absolute top-1/2 -translate-y-1/2 right-0 w-12 h-12 rounded-full border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800 flex items-center justify-center text-gray-700 dark:text-gray-300 hover:border-orange-500 hover:text-orange-500 dark:hover:border-orange-500 transition-all duration-300 shadow-sm z-20', recentArticles.length <= 4 ? 'xl:hidden' : '']"
+            :class="['absolute top-1/2 -translate-y-1/2 right-0 w-12 h-12 rounded-full border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800 flex items-center justify-center text-gray-700 dark:text-gray-300 hover:border-blue-500 hover:text-blue-500 dark:hover:border-blue-500 transition-all duration-300 shadow-sm z-20', recentArticles.length <= 4 ? 'xl:hidden' : '']"
             aria-label="Next slide"
           >
             <svg class="w-5 h-5 stroke-[3]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -3087,7 +3023,7 @@ onUnmounted(() => {
             <span
               :class="[
                 'h-2.5 rounded-full transition-all duration-300 block',
-                currentArticlePage === (pageIdx - 1) ? 'bg-orange-600 w-6' : 'bg-gray-300 dark:bg-gray-700 w-2.5'
+                currentArticlePage === (pageIdx - 1) ? 'bg-blue-600 w-6' : 'bg-gray-300 dark:bg-gray-700 w-2.5'
               ]"
             ></span>
           </button>
@@ -3105,7 +3041,7 @@ onUnmounted(() => {
 
       
       <!-- Decorative blurred orbs -->
-      <div class="absolute top-20 right-[-5%] w-80 h-80 bg-orange-300/10 blur-[120px] rounded-full pointer-events-none"></div>
+      <div class="absolute top-20 right-[-5%] w-80 h-80 bg-blue-300/10 blur-[120px] rounded-full pointer-events-none"></div>
       <div class="absolute bottom-10 left-[-5%] w-72 h-72 bg-blue-200/10 blur-[100px] rounded-full pointer-events-none"></div>
 
       <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
@@ -3113,8 +3049,8 @@ onUnmounted(() => {
         <!-- Header: Badge + Heading + Decorative 3D question mark -->
         <div class="relative text-center mb-14">
           <!-- Pill Badge (Outlined) -->
-          <div class="inline-flex items-center gap-2 px-5 py-1.5 rounded-full bg-[#fff4eb] border border-[#ffcca8] text-[#e65f00] text-xs font-bold uppercase mb-4 shadow-sm shadow-orange-500/5">
-            <svg class="w-4 h-4 text-[#e65f00]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <div class="inline-flex items-center gap-2 px-5 py-1.5 rounded-full bg-[#e8edff] border border-[#b3c3ff] text-[#0220A4] text-xs font-bold uppercase mb-4 shadow-sm shadow-blue-500/5">
+            <svg class="w-4 h-4 text-[#0220A4]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
             </svg>
             {{ sectionTitles.faqTitle }}
@@ -3131,10 +3067,10 @@ onUnmounted(() => {
           </h3>
           <p class="text-gray-500 dark:text-gray-400 max-w-xl mx-auto font-light text-sm md:text-base mb-4">{{ sectionTitles.faqDesc }}</p>
           
-          <!-- Orange subtitle capsule separator -->
+          <!-- Blue subtitle capsule separator -->
           <div class="flex justify-center items-center gap-1.5 mt-2 mb-6">
-            <span class="w-1.5 h-1.5 rounded-full bg-orange-500"></span>
-            <span class="w-8 h-1.5 rounded-full bg-orange-500"></span>
+            <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
+            <span class="w-8 h-1.5 rounded-full bg-blue-500"></span>
           </div>
 
 
@@ -3147,8 +3083,8 @@ onUnmounted(() => {
             :key="idx"
             class="faq-card-redesign rounded-3xl overflow-hidden transition-all duration-500"
             :class="item.open 
-              ? 'bg-white dark:bg-[#1e2738] border-2 border-orange-200 dark:border-orange-500/30 shadow-[0_12px_40px_-8px_rgba(249,115,22,0.1)]' 
-              : 'bg-white dark:bg-[#1a2333]/90 border border-gray-200/80 dark:border-white/5 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.03)] hover:border-orange-200'"
+              ? 'bg-white dark:bg-[#1e2738] border-2 border-blue-200 dark:border-blue-500/30 shadow-[0_12px_40px_-8px_rgba(2,32,164,0.1)]' 
+              : 'bg-white dark:bg-[#1a2333]/90 border border-gray-200/80 dark:border-white/5 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.03)] hover:border-blue-200'"
           >
             <div class="flex-1">
               <button 
@@ -3212,7 +3148,7 @@ onUnmounted(() => {
                   :class="[
                     'w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 transition-all duration-300 border',
                     item.open 
-                      ? 'bg-[#fff5ec] dark:bg-orange-950/20 border-[#ffe0cc] dark:border-orange-500/30 text-[#e65f00]' 
+                      ? 'bg-[#e8edff] dark:bg-blue-950/20 border-[#c3d0ff] dark:border-blue-500/30 text-[#0220A4]' 
                       : 'bg-[#f4f7fb] dark:bg-white/5 border-gray-200 dark:border-white/10 text-gray-700 dark:text-gray-300'
                   ]"
                 >
@@ -3237,21 +3173,21 @@ onUnmounted(() => {
                     <div v-if="idx === 0" class="flex items-center gap-3 w-full md:w-auto shrink-0 justify-start md:justify-end mt-2 md:mt-0">
                       <!-- Card 1 -->
                       <div class="flex flex-col items-center justify-center w-[72px] h-[78px] bg-white dark:bg-[#1a2333] border border-gray-200/80 dark:border-white/5 rounded-2xl shadow-sm">
-                        <svg class="w-6 h-6 text-orange-500 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg class="w-6 h-6 text-blue-500 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
                         </svg>
                         <span class="text-[10px] font-bold text-gray-700 dark:text-gray-300">ทนแดด</span>
                       </div>
                       <!-- Card 2 -->
                       <div class="flex flex-col items-center justify-center w-[72px] h-[78px] bg-white dark:bg-[#1a2333] border border-gray-200/80 dark:border-white/5 rounded-2xl shadow-sm">
-                        <svg class="w-6 h-6 text-orange-500 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg class="w-6 h-6 text-blue-500 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" />
                         </svg>
                         <span class="text-[10px] font-bold text-gray-700 dark:text-gray-300">ทนฝน</span>
                       </div>
                       <!-- Card 3 -->
                       <div class="flex flex-col items-center justify-center w-[72px] h-[78px] bg-white dark:bg-[#1a2333] border border-gray-200/80 dark:border-white/5 rounded-2xl shadow-sm">
-                        <svg class="w-6 h-6 text-orange-500 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg class="w-6 h-6 text-blue-500 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                         </svg>
                         <span class="text-[10px] font-bold text-gray-700 dark:text-gray-300">ไม่เป็นสนิม</span>
@@ -3371,9 +3307,9 @@ onUnmounted(() => {
   text-shadow: 0 2px 20px rgba(27, 34, 45, 0.08);
   letter-spacing: normal;
 }
-.hero-heading-orange {
-  text-shadow: 0 4px 25px rgba(240, 113, 0, 0.15);
-  filter: drop-shadow(0 2px 8px rgba(240, 113, 0, 0.1));
+.hero-heading-brand {
+  text-shadow: 0 4px 25px rgba(2, 32, 164, 0.15);
+  filter: drop-shadow(0 2px 8px rgba(2, 32, 164, 0.1));
 }
 
 .slide-fade-enter-active {
@@ -3663,14 +3599,14 @@ onUnmounted(() => {
   position: absolute;
   inset: -6px;
   border-radius: 50%;
-  border: 2px solid rgba(240, 113, 0, 0.4);
+  border: 2px solid rgba(2, 32, 164, 0.4);
   animation: play-pulse 2.2s infinite;
   pointer-events: none;
 }
 
 /* Glassmorphic floating badges */
 .premium-glass-badge {
-  @apply backdrop-blur-xl bg-white/70 dark:bg-[#121826]/75 border border-white/40 dark:border-white/10 shadow-[0_12px_32px_-4px_rgba(0,0,0,0.06)] dark:shadow-[0_12px_32px_-4px_rgba(0,0,0,0.25)] rounded-2xl py-2.5 px-4 flex items-center gap-2.5 hover:bg-white/80 dark:hover:bg-[#121826]/90 hover:scale-105 hover:shadow-[0_16px_36px_-4px_rgba(240,113,0,0.12)] transition-all duration-300;
+  @apply backdrop-blur-xl bg-white/70 dark:bg-[#121826]/75 border border-white/40 dark:border-white/10 shadow-[0_12px_32px_-4px_rgba(0,0,0,0.06)] dark:shadow-[0_12px_32px_-4px_rgba(0,0,0,0.25)] rounded-2xl py-2.5 px-4 flex items-center gap-2.5 hover:bg-white/80 dark:hover:bg-[#121826]/90 hover:scale-105 hover:shadow-[0_16px_36px_-4px_rgba(2,32,164,0.12)] transition-all duration-300;
 }
 
 

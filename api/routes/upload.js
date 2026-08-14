@@ -18,7 +18,7 @@ if (!fs.existsSync(uploadDir)) {
 const storage = multer.memoryStorage();
 const upload = multer({
     storage: storage,
-    limits: { fileSize: 5 * 1024 * 1024 } // 5MB limit
+    limits: { fileSize: 25 * 1024 * 1024 } // 25MB limit for high-resolution images
 });
 
 // Helper: SVG placeholder generator for missing images
@@ -56,7 +56,7 @@ router.get('/resize', async (req, res) => {
         const subfolder = match[1] || ''; // e.g. 'categories' or ''
         const baseName = match[2]; // e.g. 'image-xxx'
         const targetWidth = parseInt(match[3]) || 600;
-        const ext = match[4]; // e.g. 'webp'
+        const ext = match[4].toLowerCase(); // e.g. 'webp' or 'png'
 
         const originalFilename = `${baseName}.${ext}`;
         const cachedFilename = `${baseName}-${targetWidth}.${ext}`;
@@ -93,11 +93,20 @@ router.get('/resize', async (req, res) => {
             fs.mkdirSync(cachedFileDir, { recursive: true });
         }
 
-        // Generate dynamically using sharp
-        await sharp(originalFilePath)
-            .resize({ width: targetWidth, withoutEnlargement: true })
-            .toFile(cachedFilePath);
+        // Generate dynamically using sharp with high fidelity Lanczos3
+        let sharpTransform = sharp(originalFilePath)
+            .rotate()
+            .resize({ width: targetWidth, withoutEnlargement: true, kernel: 'lanczos3' });
 
+        if (ext === 'webp') {
+            sharpTransform = sharpTransform.webp({ quality: 90, effort: 4, smartSubsample: true });
+        } else if (ext === 'png') {
+            sharpTransform = sharpTransform.png({ compressionLevel: 8, quality: 95 });
+        } else if (ext === 'jpg' || ext === 'jpeg') {
+            sharpTransform = sharpTransform.jpeg({ quality: 90, mozjpeg: true });
+        }
+
+        await sharpTransform.toFile(cachedFilePath);
         return res.sendFile(cachedFilePath);
     } catch (err) {
         console.error('On-the-fly resizing error:', err);
@@ -107,7 +116,7 @@ router.get('/resize', async (req, res) => {
     }
 });
 
-// Single image upload endpoint (auto convert to webp)
+// Single image upload endpoint (auto convert to webp with high quality)
 router.post('/', verifyAdmin, (req, res, next) => {
     upload.single('image')(req, res, function (err) {
         if (err instanceof multer.MulterError) {
@@ -129,10 +138,11 @@ router.post('/', verifyAdmin, (req, res, next) => {
         const filename = 'image-' + uniqueSuffix + '.webp';
         const filepath = path.join(uploadDir, filename);
 
-        // Convert the image to webp and resize to max 2000px using sharp
+        // Convert image to WebP with max 2560px, respect EXIF orientation and high quality (92%)
         await sharp(req.file.buffer)
-            .resize({ width: 2000, height: 2000, fit: 'inside', withoutEnlargement: true })
-            .webp({ quality: 80 })
+            .rotate()
+            .resize({ width: 2560, height: 2560, fit: 'inside', withoutEnlargement: true, kernel: 'lanczos3' })
+            .webp({ quality: 92, effort: 5, smartSubsample: true })
             .toFile(filepath);
 
         // Pre-generate responsive thumbnails in cache
@@ -168,10 +178,11 @@ router.post('/ckeditor', verifyAdmin, (req, res, next) => {
         const filename = 'ck-image-' + uniqueSuffix + '.webp';
         const filepath = path.join(uploadDir, filename);
 
-        // Convert the image to webp and resize to max 2000px
+        // Convert the image to webp with max 2560px and high quality
         await sharp(req.file.buffer)
-            .resize({ width: 2000, height: 2000, fit: 'inside', withoutEnlargement: true })
-            .webp({ quality: 80 })
+            .rotate()
+            .resize({ width: 2560, height: 2560, fit: 'inside', withoutEnlargement: true, kernel: 'lanczos3' })
+            .webp({ quality: 92, effort: 5, smartSubsample: true })
             .toFile(filepath);
 
         // Pre-generate responsive thumbnails in cache

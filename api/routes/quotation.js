@@ -226,29 +226,10 @@ router.post('/', async (req, res) => {
     }
 });
 
-// DELETE a quotation (admin only, requires password confirmation)
+// DELETE a quotation (admin only)
 router.delete('/:id', verifyAdmin, async (req, res) => {
     try {
         const { id } = req.params;
-        const { password } = req.body;
-
-        if (!password) {
-            return res.status(400).json({ success: false, error: 'Password required' });
-        }
-
-        // Verify admin password securely using bcrypt
-        const [rows] = await db.query(
-            'SELECT * FROM admins WHERE username = ?',
-            [req.admin.username]
-        );
-        if (rows.length === 0) {
-            return res.status(403).json({ success: false, error: 'ไม่พบข้อมูลแอดมิน' });
-        }
-
-        const passwordValid = await require('bcryptjs').compare(password, rows[0].password);
-        if (!passwordValid) {
-            return res.status(403).json({ success: false, error: 'รหัสผ่านไม่ถูกต้อง' });
-        }
 
         // Check quotation exists
         const [existing] = await db.query(

@@ -409,7 +409,7 @@ onMounted(() => {
 
       <!-- Loading State -->
       <div v-if="loading" class="bg-white p-12 rounded-2xl shadow-sm text-center">
-        <div class="animate-spin w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full mx-auto mb-4"></div>
+        <div class="animate-spin w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full mx-auto mb-4"></div>
         <p class="text-gray-500 font-medium">กำลังโหลดข้อมูลการตั้งค่าหน้าแรก...</p>
       </div>
 
@@ -425,7 +425,7 @@ onMounted(() => {
             :class="[
               'flex items-center gap-2 px-5 py-3 rounded-xl font-bold text-sm transition-all',
               activeTab === tab.key
-                ? 'bg-orange-500 text-white shadow-md shadow-orange-500/20'
+                ? 'bg-blue-500 text-white shadow-md shadow-blue-500/20'
                 : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
             ]"
           >
@@ -446,12 +446,12 @@ onMounted(() => {
               <div class="p-6 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
                 <div>
                   <h2 class="text-lg font-bold text-gray-900 flex items-center gap-2">
-                    <svg class="w-5 h-5 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                    <svg class="w-5 h-5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                     รายการแบนเนอร์สไลด์ (Hero Slider Banners)
                   </h2>
                   <p class="text-xs text-gray-500 mt-0.5">ลากเพื่อสลับลำดับการแสดงผลแบนเนอร์สไลด์บนหน้าแรก</p>
                 </div>
-                <button type="button" @click="addSlide" class="bg-orange-500 text-white px-4 py-2 rounded-xl text-sm font-bold hover:bg-orange-600 transition flex items-center gap-2 shadow-sm">
+                <button type="button" @click="addSlide" class="bg-blue-500 text-white px-4 py-2 rounded-xl text-sm font-bold hover:bg-blue-600 transition flex items-center gap-2 shadow-sm">
                   <span>+ เพิ่มสไลด์ใหม่</span>
                 </button>
               </div>
@@ -473,7 +473,7 @@ onMounted(() => {
                           </span>
                           <span class="font-bold text-gray-800 text-sm flex items-center gap-2">
                             <span>สไลด์ที่ {{ index + 1 }}</span>
-                            <span v-if="slide.tag" class="text-xs px-2 py-0.5 bg-orange-100 text-orange-700 font-bold rounded-md">
+                            <span v-if="slide.tag" class="text-xs px-2 py-0.5 bg-blue-100 text-blue-700 font-bold rounded-md">
                               {{ slide.tag }}
                             </span>
                           </span>
@@ -489,14 +489,14 @@ onMounted(() => {
                         <!-- Tag Badge -->
                         <div>
                           <label class="block text-xs font-bold text-gray-700 mb-1">แท็กป้ายกำกับด้านบน (Tag Badge)</label>
-                          <input type="text" v-model="slide.tag" placeholder="เช่น ★ บ้านเก็บของ PP" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-orange-500 font-medium">
+                          <input type="text" v-model="slide.tag" placeholder="เช่น ★ บ้านเก็บของ PP" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 font-medium">
                         </div>
 
                         <!-- Image Input & Upload -->
                         <div>
                           <label class="block text-xs font-bold text-gray-700 mb-1">รูปภาพแบนเนอร์สไลด์ (Slide Image)</label>
                           <div class="flex items-center gap-2">
-                            <input type="text" v-model="slide.image" placeholder="/images/home/hero-slide-1.webp" class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-orange-500">
+                            <input type="text" v-model="slide.image" placeholder="/images/home/hero-slide-1.webp" class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500">
                             <label class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-3 py-2 rounded-lg text-xs font-bold cursor-pointer border border-gray-300 shrink-0">
                               อัพโหลดรูป...
                               <input type="file" accept="image/*" class="hidden" @change="(e) => handleImageUpload(e, (url) => slide.image = url)">
@@ -507,24 +507,24 @@ onMounted(() => {
                         <!-- Title Line 1 -->
                         <div>
                           <label class="block text-xs font-bold text-gray-700 mb-1">หัวข้อหลัก บรรทัดที่ 1 (Title Line 1)</label>
-                          <input type="text" v-model="slide.titleLine1" placeholder="เช่น บ้านเก็บของ.com" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-orange-500 font-bold">
+                          <input type="text" v-model="slide.titleLine1" placeholder="เช่น บ้านเก็บของ.com" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 font-bold">
                         </div>
 
                         <!-- Title Line 2 -->
                         <div>
                           <label class="block text-xs font-bold text-gray-700 mb-1">หัวข้อหลัก บรรทัดที่ 2 (Title Line 2)</label>
-                          <input type="text" v-model="slide.titleLine2" placeholder="เช่น บ้านเก็บของพลาสติก PP ทนแดด ทนฝน" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-orange-500 font-bold text-orange-600">
+                          <input type="text" v-model="slide.titleLine2" placeholder="เช่น บ้านเก็บของพลาสติก PP ทนแดด ทนฝน" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 font-bold text-blue-600">
                         </div>
 
                         <!-- Description -->
                         <div class="md:col-span-2">
                           <label class="block text-xs font-bold text-gray-700 mb-1">คำอธิบายรายละเอียด (Description)</label>
-                          <textarea v-model="slide.desc" rows="2" placeholder="ผลิตด้วยพลาสติก PP (Polypropylene) แข็งแรง ทนแดด" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-orange-500"></textarea>
+                          <textarea v-model="slide.desc" rows="2" placeholder="ผลิตด้วยพลาสติก PP (Polypropylene) แข็งแรง ทนแดด" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500"></textarea>
                         </div>
 
                         <!-- Button 1 (Primary CTA) -->
                         <div class="p-3 bg-white rounded-xl border border-gray-200 space-y-2">
-                          <span class="text-xs font-bold text-orange-600 block">ปุ่มกดหลัก (Primary Button)</span>
+                          <span class="text-xs font-bold text-blue-600 block">ปุ่มกดหลัก (Primary Button)</span>
                           <div class="grid grid-cols-2 gap-2">
                             <div>
                               <label class="block text-[10px] font-bold text-gray-500 mb-1">ข้อความบนปุ่ม</label>
@@ -592,7 +592,7 @@ onMounted(() => {
             <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
               <div class="p-6 border-b border-gray-100 bg-gray-50">
                 <h2 class="text-lg font-bold text-gray-900 flex items-center gap-2">
-                  <svg class="w-5 h-5 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                  <svg class="w-5 h-5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
                   การ์ดจุดเด่นมุมซ้ายล่างสไลด์ (Hero Feature Badges 3 การ์ด)
                 </h2>
                 <p class="text-xs text-gray-500 mt-0.5">การ์ดแสดง 3 ไอคอนจุดเด่นที่ซ้อนอยู่มุมซ้ายล่างของแบนเนอร์สไลด์</p>
@@ -602,7 +602,7 @@ onMounted(() => {
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div v-for="(badge, idx) in heroFeatureBadges" :key="idx" class="p-4 bg-gray-50 rounded-xl border border-gray-200 space-y-3">
                     <div class="flex items-center justify-between">
-                      <span class="text-xs font-bold text-orange-600">การ์ดที่ {{ idx + 1 }}</span>
+                      <span class="text-xs font-bold text-blue-600">การ์ดที่ {{ idx + 1 }}</span>
                     </div>
                     
                     <div>
@@ -635,7 +635,7 @@ onMounted(() => {
             <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
               <div class="p-6 border-b border-gray-100 bg-gray-50">
                 <h2 class="text-lg font-bold text-gray-900 flex items-center gap-2">
-                  <svg class="w-5 h-5 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"></path></svg>
+                  <svg class="w-5 h-5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"></path></svg>
                   แบนเนอร์แนะนำสินค้าหลัก (Top Featured Showcase Banner)
                 </h2>
                 <p class="text-xs text-gray-500 mt-0.5">แบนเนอร์กว้างด้านขวาในส่วนสินค้าลดราคา/สินค้าแนะนำ</p>
@@ -645,12 +645,12 @@ onMounted(() => {
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label class="block text-xs font-bold text-gray-700 mb-1">แท็กป้ายกำกับ (Tagline)</label>
-                    <input type="text" v-model="bannerTag" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-orange-500 font-bold">
+                    <input type="text" v-model="bannerTag" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 font-bold">
                   </div>
                   <div>
                     <label class="block text-xs font-bold text-gray-700 mb-1">รูปภาพแบนเนอร์ (Banner Photo)</label>
                     <div class="flex items-center gap-2">
-                      <input type="text" v-model="bannerImage" class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-orange-500">
+                      <input type="text" v-model="bannerImage" class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500">
                       <label class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-3 py-2 rounded-lg text-xs font-bold cursor-pointer border border-gray-300 shrink-0">
                         อัพโหลด...
                         <input type="file" accept="image/*" class="hidden" @change="(e) => handleImageUpload(e, (url) => bannerImage = url)">
@@ -659,19 +659,19 @@ onMounted(() => {
                   </div>
                   <div>
                     <label class="block text-xs font-bold text-gray-700 mb-1">หัวข้อหลัก (Banner Title)</label>
-                    <input type="text" v-model="bannerTitle" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-orange-500 font-bold">
+                    <input type="text" v-model="bannerTitle" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 font-bold">
                   </div>
                   <div>
                     <label class="block text-xs font-bold text-gray-700 mb-1">หัวข้อย่อย (Banner Subtitle)</label>
-                    <input type="text" v-model="bannerSubtitle" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-orange-500 text-orange-600 font-bold">
+                    <input type="text" v-model="bannerSubtitle" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 text-blue-600 font-bold">
                   </div>
                   <div>
                     <label class="block text-xs font-bold text-gray-700 mb-1">ข้อความในป้ายวงกลมส้ม (Badge Main Text)</label>
-                    <input type="text" v-model="bannerBadgeText" placeholder="เช่น สินค้าขายดี" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-orange-500">
+                    <input type="text" v-model="bannerBadgeText" placeholder="เช่น สินค้าขายดี" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500">
                   </div>
                   <div>
                     <label class="block text-xs font-bold text-gray-700 mb-1">ข้อความบรรทัดล่างป้ายวงกลม (Badge Sub Text)</label>
-                    <input type="text" v-model="bannerBadgeSub" placeholder="เช่น อันดับ 1" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-orange-500 font-bold">
+                    <input type="text" v-model="bannerBadgeSub" placeholder="เช่น อันดับ 1" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 font-bold">
                   </div>
                 </div>
 
@@ -679,7 +679,7 @@ onMounted(() => {
                 <div class="p-4 bg-gray-50 rounded-xl border border-gray-200 space-y-3">
                   <div class="flex justify-between items-center">
                     <span class="text-xs font-bold text-gray-700">จุดเด่นย่อยบนแบนเนอร์ (Bullets List)</span>
-                    <button type="button" @click="addBannerBullet" class="text-xs bg-orange-100 text-orange-700 font-bold px-2.5 py-1 rounded-md hover:bg-orange-200 transition">
+                    <button type="button" @click="addBannerBullet" class="text-xs bg-blue-100 text-blue-700 font-bold px-2.5 py-1 rounded-md hover:bg-blue-200 transition">
                       + เพิ่มจุดเด่น
                     </button>
                   </div>
@@ -699,7 +699,7 @@ onMounted(() => {
             <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
               <div class="p-6 border-b border-gray-100 bg-gray-50">
                 <h2 class="text-lg font-bold text-gray-900 flex items-center gap-2">
-                  <svg class="w-5 h-5 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                  <svg class="w-5 h-5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
                   การ์ดโปรโมชั่นไซด์บาร์ (Side Promo Card)
                 </h2>
                 <p class="text-xs text-gray-500 mt-0.5">การ์ดโซลูชันจัดเก็บโปรโมชั่นในแถบซ้าย</p>
@@ -748,7 +748,7 @@ onMounted(() => {
                   <h2 class="text-lg font-bold text-gray-900">การ์ดจุดเด่น "ทำไมต้องเลือกเรา?" (Why Choose Us)</h2>
                   <p class="text-xs text-gray-500 mt-0.5">จุดเด่นเช็กลิสต์ด้านขวาของส่วนสินค้าแนะนำ</p>
                 </div>
-                <button type="button" @click="addWhyBullet" class="bg-orange-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-orange-600 transition">
+                <button type="button" @click="addWhyBullet" class="bg-blue-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-blue-600 transition">
                   + เพิ่มข้อความ
                 </button>
               </div>
@@ -761,7 +761,7 @@ onMounted(() => {
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <div v-for="(bullet, idx) in whyChooseUsBullets" :key="idx" class="flex items-center gap-2">
-                    <span class="w-6 h-6 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center text-xs font-bold shrink-0">✓</span>
+                    <span class="w-6 h-6 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-xs font-bold shrink-0">✓</span>
                     <input type="text" v-model="whyChooseUsBullets[idx]" class="flex-1 border border-gray-300 rounded-lg px-3 py-1.5 text-xs font-medium">
                     <button type="button" @click="removeWhyBullet(idx)" class="text-red-500 hover:text-red-700 text-xs px-2 py-1 font-bold bg-red-50 rounded">
                       ✕
@@ -780,12 +780,12 @@ onMounted(() => {
               <div class="p-6 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
                 <div>
                   <h2 class="text-lg font-bold text-gray-900 flex items-center gap-2">
-                    <svg class="w-5 h-5 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                    <svg class="w-5 h-5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
                     บล็อกหมวดหมู่สินค้าไฮไลต์บนหน้าแรก (Category Showcase Blocks)
                   </h2>
                   <p class="text-xs text-gray-500 mt-0.5">เลือกหมวดหมู่และกำหนดสินค้าเฉพาะที่จะนำมาแสดงเป็นบล็อกตารางบนหน้าแรก</p>
                 </div>
-                <button type="button" @click="addCategoryShowcase" class="bg-orange-500 text-white px-4 py-2 rounded-xl text-sm font-bold hover:bg-orange-600 transition shadow-sm">
+                <button type="button" @click="addCategoryShowcase" class="bg-blue-500 text-white px-4 py-2 rounded-xl text-sm font-bold hover:bg-blue-600 transition shadow-sm">
                   + เพิ่มหมวดหมู่ไฮไลต์
                 </button>
               </div>
@@ -826,7 +826,7 @@ onMounted(() => {
                       <div class="bg-white p-4 rounded-xl border border-gray-200 space-y-3">
                         <div class="flex justify-between items-center">
                           <span class="text-xs font-bold text-gray-700">เลือกลิสต์สินค้าเฉพาะในหมวดหมู่นี้ (เลือกได้หลายชิ้น หรือไม่เลือกเพื่อดึง 4 สินค้าล่าสุดอัตโนมัติ)</span>
-                          <span class="text-[10px] font-bold text-orange-600">เลือกแล้ว {{ (showcase.productIds || []).length }} ชิ้น</span>
+                          <span class="text-[10px] font-bold text-blue-600">เลือกแล้ว {{ (showcase.productIds || []).length }} ชิ้น</span>
                         </div>
 
                         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5 max-h-56 overflow-y-auto p-2 border border-gray-150 rounded-lg bg-gray-50/50">
@@ -837,14 +837,14 @@ onMounted(() => {
                             :class="[
                               'flex items-center gap-2.5 p-2 rounded-lg border text-xs font-medium cursor-pointer transition-all',
                               (showcase.productIds || []).includes(product.id)
-                                ? 'bg-orange-50 border-orange-400 text-orange-900 font-bold shadow-xs'
+                                ? 'bg-blue-50 border-blue-400 text-blue-900 font-bold shadow-xs'
                                 : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-100'
                             ]"
                           >
                             <input
                               type="checkbox"
                               :checked="(showcase.productIds || []).includes(product.id)"
-                              class="rounded text-orange-500 focus:ring-orange-500 pointer-events-none"
+                              class="rounded text-blue-500 focus:ring-blue-500 pointer-events-none"
                             />
                             <img :src="product.image_url || product.image || '/images/placeholder.png'" class="w-8 h-8 object-cover rounded border shrink-0">
                             <span class="truncate">{{ product.name }}</span>
@@ -866,7 +866,7 @@ onMounted(() => {
             <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
               <div class="p-6 border-b border-gray-100 bg-gray-50">
                 <h2 class="text-lg font-bold text-gray-900 flex items-center gap-2">
-                  <svg class="w-5 h-5 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                  <svg class="w-5 h-5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
                   ควบคุมการเปิด / ปิด การแสดงผล Section หน้าหลัก
                 </h2>
                 <p class="text-xs text-gray-500 mt-0.5">เปิดหรือปิดส่วนประกอบต่างๆ ของหน้าแรกได้อย่างอิสระ</p>
@@ -883,7 +883,7 @@ onMounted(() => {
                   </div>
                   <label class="relative inline-flex items-center cursor-pointer">
                     <input type="checkbox" v-model="homeShowFeatures" class="sr-only peer">
-                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-orange-500"></div>
+                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-500"></div>
                   </label>
                 </div>
 
@@ -894,7 +894,7 @@ onMounted(() => {
                   </div>
                   <label class="relative inline-flex items-center cursor-pointer">
                     <input type="checkbox" v-model="homeShowTestimonials" class="sr-only peer">
-                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-orange-500"></div>
+                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-500"></div>
                   </label>
                 </div>
 
@@ -905,7 +905,7 @@ onMounted(() => {
                   </div>
                   <label class="relative inline-flex items-center cursor-pointer">
                     <input type="checkbox" v-model="homeShowPartners" class="sr-only peer">
-                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-orange-500"></div>
+                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-500"></div>
                   </label>
                 </div>
 
@@ -916,7 +916,7 @@ onMounted(() => {
                   </div>
                   <label class="relative inline-flex items-center cursor-pointer">
                     <input type="checkbox" v-model="homeShowFaq" class="sr-only peer">
-                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-orange-500"></div>
+                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-500"></div>
                   </label>
                 </div>
 
@@ -927,7 +927,7 @@ onMounted(() => {
 
           <!-- Bottom Save Floating Bar -->
           <div class="fixed bottom-0 right-0 left-64 bg-white border-t border-gray-200 p-4 flex justify-end gap-3 z-40 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
-            <button type="submit" :disabled="saving || uploadingImage" class="bg-orange-500 text-white px-8 py-2.5 rounded-xl font-bold hover:bg-orange-600 transition disabled:opacity-50 flex items-center gap-2 shadow-lg shadow-orange-500/20">
+            <button type="submit" :disabled="saving || uploadingImage" class="bg-blue-500 text-white px-8 py-2.5 rounded-xl font-bold hover:bg-blue-600 transition disabled:opacity-50 flex items-center gap-2 shadow-lg shadow-blue-500/20">
               <svg v-if="saving" class="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/></svg>
               <svg v-else class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
               {{ saving ? 'กำลังบันทึก...' : uploadingImage ? 'กำลังอัพโหลดรูป...' : 'บันทึกการตั้งค่าทั้งหมด' }}

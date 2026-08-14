@@ -132,7 +132,7 @@ const loadSettings = async () => {
 onMounted(() => {
   setMeta({
     title: 'เกี่ยวกับเรา (About Us)',
-    description: 'ทำความรู้จัก Morespace ผู้เชี่ยวชาญด้านการออกแบบ จำหน่าย และติดตั้งบ้านเก็บของสำเร็จรูประดับพรีเมียม',
+    description: settingsStore.storeDescription || 'ทำความรู้จักกับเรา ผู้เชี่ยวชาญด้านการออกแบบ จำหน่าย และติดตั้งระดับพรีเมียม',
     canonicalUrl: window.location.href,
     type: 'website'
   })
@@ -477,33 +477,33 @@ onUnmounted(() => {
 /* ─── CTA Card Custom Styling ─── */
 .cta-card {
   background: linear-gradient(135deg, rgba(77, 21, 0, 0.2) 0%, rgba(15, 23, 42, 0.95) 50%, rgba(15, 23, 42, 0.98) 100%);
-  border-color: rgba(240, 113, 0, 0.15);
+  border-color: rgba(2, 32, 164, 0.15);
 }
 
 .cta-primary-btn {
-  background-color: #f07100;
-  box-shadow: 0 8px 24px -4px rgba(240, 113, 0, 0.35);
+  background-color: #0220A4;
+  box-shadow: 0 8px 24px -4px rgba(2, 32, 164, 0.35);
   transition: all 0.3s ease;
 }
 .cta-primary-btn:hover {
-  background-color: #ff8a24;
-  box-shadow: 0 12px 28px -4px rgba(240, 113, 0, 0.45);
+  background-color: #01166F;
+  box-shadow: 0 12px 28px -4px rgba(2, 32, 164, 0.45);
 }
 
 /* ─── Rich Content Styles ─── */
-.about-rich-content :deep(h2), .about-rich-content :deep(h3), .about-rich-content :deep(h4) { color: #f07100; font-weight: 800; margin-top: 2rem; margin-bottom: 0.75rem; }
+.about-rich-content :deep(h2), .about-rich-content :deep(h3), .about-rich-content :deep(h4) { color: #0220A4; font-weight: 800; margin-top: 2rem; margin-bottom: 0.75rem; }
 .about-rich-content :deep(p) { color: #cbd5e1; line-height: 1.9; margin-bottom: 1rem; }
-.about-rich-content :deep(strong) { color: #ff8a24; }
+.about-rich-content :deep(strong) { color: #5B7CFF; }
 .about-rich-content :deep(ul), .about-rich-content :deep(ol) { padding-left: 1.5rem; margin-bottom: 1rem; }
 .about-rich-content :deep(li) { margin-bottom: 0.5rem; line-height: 1.8; color: #cbd5e1; }
-.about-rich-content :deep(li::marker) { color: #f07100; }
-.about-rich-content :deep(a) { color: #ff8a24; text-decoration: underline; }
-.about-rich-content :deep(table) { width: 100% !important; border-collapse: separate !important; border-spacing: 0 !important; border-radius: 16px; overflow: hidden; border: 1px solid rgba(240, 113, 0, 0.15) !important; margin: 2rem auto; }
-.about-rich-content :deep(table thead) { background: linear-gradient(135deg, #d95f00, #f07100); }
+.about-rich-content :deep(li::marker) { color: #0220A4; }
+.about-rich-content :deep(a) { color: #5B7CFF; text-decoration: underline; }
+.about-rich-content :deep(table) { width: 100% !important; border-collapse: separate !important; border-spacing: 0 !important; border-radius: 16px; overflow: hidden; border: 1px solid rgba(2, 32, 164, 0.15) !important; margin: 2rem auto; }
+.about-rich-content :deep(table thead) { background: linear-gradient(135deg, #01166F, #0220A4); }
 .about-rich-content :deep(table thead th) { color: white; font-weight: 700; padding: 14px 20px; }
-.about-rich-content :deep(table tbody tr:nth-child(even)) { background-color: #4d150015; }
-.about-rich-content :deep(table tbody tr:hover) { background-color: #4d150025; }
-.about-rich-content :deep(table tbody td) { padding: 12px 20px; border-bottom: 1px solid rgba(240, 113, 0, 0.05); color: #cbd5e1; }
+.about-rich-content :deep(table tbody tr:nth-child(even)) { background-color: rgba(2, 32, 164, 0.1); }
+.about-rich-content :deep(table tbody tr:hover) { background-color: rgba(2, 32, 164, 0.2); }
+.about-rich-content :deep(table tbody td) { padding: 12px 20px; border-bottom: 1px solid rgba(2, 32, 164, 0.05); color: #cbd5e1; }
 .about-rich-content :deep(figure.table) { display: flex; justify-content: center; margin: 2rem auto; width: 100%; }
 </style>
 
@@ -513,7 +513,7 @@ onUnmounted(() => {
    ══════════════════════════════════════════════ */
 
 html:not(.dark) .about-page {
-  background-color: #faf9f6;
+  background-color: #F8F9FC;
   color: #1e293b;
 }
 
@@ -528,16 +528,16 @@ html:not(.dark) .about-page .prose {
 /* Rich Content light mode */
 html:not(.dark) .about-rich-content :deep(h2), 
 html:not(.dark) .about-rich-content :deep(h3), 
-html:not(.dark) .about-rich-content :deep(h4) { color: #d95f00; }
+html:not(.dark) .about-rich-content :deep(h4) { color: #01166F; }
 html:not(.dark) .about-rich-content :deep(p) { color: #475569; }
-html:not(.dark) .about-rich-content :deep(strong) { color: #c14c00; }
+html:not(.dark) .about-rich-content :deep(strong) { color: #0220A4; }
 html:not(.dark) .about-rich-content :deep(li) { color: #475569; }
-html:not(.dark) .about-rich-content :deep(li::marker) { color: #d95f00; }
-html:not(.dark) .about-rich-content :deep(a) { color: #d95f00; }
-html:not(.dark) .about-rich-content :deep(table) { border-color: rgba(240, 113, 0, 0.15) !important; }
-html:not(.dark) .about-rich-content :deep(table tbody tr:nth-child(even)) { background-color: #fff5eb; }
-html:not(.dark) .about-rich-content :deep(table tbody tr:hover) { background-color: #ffdcb840; }
-html:not(.dark) .about-rich-content :deep(table tbody td) { border-bottom-color: rgba(240, 113, 0, 0.05); color: #475569; }
+html:not(.dark) .about-rich-content :deep(li::marker) { color: #01166F; }
+html:not(.dark) .about-rich-content :deep(a) { color: #0220A4; }
+html:not(.dark) .about-rich-content :deep(table) { border-color: rgba(2, 32, 164, 0.15) !important; }
+html:not(.dark) .about-rich-content :deep(table tbody tr:nth-child(even)) { background-color: #F3F5FF; }
+html:not(.dark) .about-rich-content :deep(table tbody tr:hover) { background-color: #E8EDFF; }
+html:not(.dark) .about-rich-content :deep(table tbody td) { border-bottom-color: rgba(2, 32, 164, 0.05); color: #475569; }
 
 /* CTA Card Light Mode */
 html:not(.dark) .about-page .cta-card {

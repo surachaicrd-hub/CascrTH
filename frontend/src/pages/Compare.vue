@@ -254,7 +254,7 @@ onMounted(() => {
                 <td class="p-4 text-sm font-bold text-gray-500 dark:text-gray-400 bg-white dark:bg-[#111827] border border-gray-100 dark:border-gray-800">สถานะ</td>
                 <td v-for="product in fullProducts" :key="'stock-' + product.id" class="p-4 bg-white dark:bg-[#111827] border border-gray-100 dark:border-gray-800">
                   <span v-if="!product.is_out_of_stock" class="text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 px-3 py-1 rounded-full">มีสินค้า</span>
-                  <span v-else class="text-xs font-bold text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-900/20 px-3 py-1 rounded-full">สินค้าหมด</span>
+                  <span v-else class="text-xs font-bold text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 px-3 py-1 rounded-full">สินค้าหมด</span>
                 </td>
               </tr>
 

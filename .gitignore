@@ -1,20 +1,32 @@
-.env
-.env.*
-!.env.example
-
+# Dependencies
 node_modules/
+*/node_modules/
+
+# Environment Variables
+.env
+.env*.local
+*.env
+!.env.example
+!api/.env.example
+
+# Build & Logs
+dist/
+dist-ssr/
+build/
 logs/
 *.log
-
-dist/
-build/
-.next/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
 coverage/
 
-*.sql
-*.db
-*.sqlite
-*.sqlite3
+# Uploads cache
+public/uploads/cache/
+public/uploads/slips/cache/
 
+# Editor / OS
 .vscode/
 .idea/
+.DS_Store
+Thumbs.db

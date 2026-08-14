@@ -120,7 +120,7 @@ onMounted(() => {
         <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
           <div class="p-6 border-b border-gray-100 dark:border-gray-700">
             <h2 class="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
-              <svg class="w-5 h-5 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <svg class="w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
               </svg>
               ส่วนสมัครรับข่าวสาร (Newsletter Section)
@@ -130,16 +130,16 @@ onMounted(() => {
             <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div>
                 <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">หัวข้อสมัครข่าวสาร (Title)</label>
-                <input v-model="form.footer_newsletter_title" type="text" placeholder="เช่น ไม่พลาดโปรโมชั่นและไอเดียแต่งบ้าน" class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors">
+                <input v-model="form.footer_newsletter_title" type="text" placeholder="เช่น ไม่พลาดโปรโมชั่นและไอเดียแต่งบ้าน" class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
               </div>
               <div>
                 <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">ข้อความย่อย/คำโปรย (Subtitle)</label>
-                <input v-model="form.footer_newsletter_subtitle" type="text" placeholder="เช่น สมัครฟรี รับสิทธิ์ก่อนใคร" class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors">
+                <input v-model="form.footer_newsletter_subtitle" type="text" placeholder="เช่น สมัครฟรี รับสิทธิ์ก่อนใคร" class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
               </div>
             </div>
             <div>
               <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">นโยบายความเป็นส่วนตัว / การแจ้งเตือน (Privacy Note)</label>
-              <input v-model="form.footer_newsletter_privacy" type="text" placeholder="เช่น ข้อมูลปลอดภัย ยกเลิกได้ทุกเมื่อ" class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors">
+              <input v-model="form.footer_newsletter_privacy" type="text" placeholder="เช่น ข้อมูลปลอดภัย ยกเลิกได้ทุกเมื่อ" class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
             </div>
           </div>
         </div>

@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../config/database');
+const cacheService = require('../services/cacheService');
 const { verifyAdmin } = require('./auth');
 const Joi = require('joi');
 
@@ -90,19 +91,53 @@ const validateProduct = (req, res, next) => {
 router.get('/', async (req, res) => {
     try {
         const { category, admin, search } = req.query;
+
+        // Check cache for public requests (non-admin)
+        const isPublic = admin !== 'true' && !req.headers.authorization;
+        const cacheKey = `products:list:${category || 'all'}:${search || 'all'}`;
+        if (isPublic) {
+            const cachedData = await cacheService.get(cacheKey);
+            if (cachedData) {
+                res.setHeader('X-Cache', 'HIT');
+                res.setHeader('X-Cache-Engine', cacheService.isRedisReady ? 'Redis' : 'In-Memory');
+                return res.status(200).json({ success: true, data: cachedData });
+            }
+        }
+
         let query = 'SELECT id, name, sku, category, categories, price, original_price, size, image_url, images, is_active, is_out_of_stock, slug, rating, review_count, sort_order, stock_quantity, sale_end_date, created_at, card_features, has_installation_fee, free_install_bkk, free_shipping_bkk, installation_fee, requires_foundation, compare_enabled, badge_bestseller, badge_free_shipping, badge_warranty, badge_installation, badge_new, badge_recommended, badges FROM products';
         let params = [];
         let isAdminVerified = false;
         let conditions = [];
 
+        // Build category lookup map for ID <-> Name resolution
+        const [allCategories] = await db.query('SELECT id, name FROM categories');
+        const catMapById = {};
+        allCategories.forEach(c => { catMapById[c.id] = c.name; });
+
         if (category && category !== 'all') {
-            conditions.push('(category = ? OR JSON_CONTAINS(categories, ?))');
-            params.push(category, `"${category}"`);
+            const matchedCats = allCategories.filter(c => c.name === category || c.id === category);
+            const searchKeys = new Set([category]);
+            matchedCats.forEach(c => {
+                searchKeys.add(c.id);
+                searchKeys.add(c.name);
+            });
+
+            const catSubConditions = [];
+            searchKeys.forEach(key => {
+                catSubConditions.push('category = ?');
+                params.push(key);
+                catSubConditions.push('JSON_CONTAINS(categories, ?)');
+                params.push(`"${key}"`);
+            });
+            if (catSubConditions.length > 0) {
+                conditions.push(`(${catSubConditions.join(' OR ')})`);
+            }
         }
 
         if (search && search.trim()) {
-            conditions.push('name LIKE ?');
-            params.push(`%${search.trim()}%`);
+            conditions.push('(name LIKE ? OR sku LIKE ?)');
+            const s = `%${search.trim()}%`;
+            params.push(s, s);
         }
 
         // Hide inactive products from public users
@@ -123,7 +158,7 @@ router.get('/', async (req, res) => {
             conditions.push(`NOT EXISTS (
                 SELECT 1 FROM categories c 
                 WHERE c.is_active = false 
-                  AND (products.category = c.name OR (products.categories IS NOT NULL AND JSON_CONTAINS(products.categories, JSON_QUOTE(c.name))))
+                  AND (products.category = c.name OR products.category = c.id OR (products.categories IS NOT NULL AND (JSON_CONTAINS(products.categories, JSON_QUOTE(c.name)) OR JSON_CONTAINS(products.categories, JSON_QUOTE(c.id)))))
             )`);
         }
 
@@ -136,26 +171,48 @@ router.get('/', async (req, res) => {
 
         const [rows] = await db.query(query, params);
 
-        // MySQL DECIMAL columns return as strings — parse to proper numbers
-        const parsed = rows.map(r => ({
-            ...r,
-            price: r.price != null ? Number(r.price) : 0,
-            original_price: r.original_price != null ? Number(r.original_price) : null,
-            rating: r.rating != null ? Number(r.rating) : 5.0,
-            review_count: r.review_count != null ? Number(r.review_count) : 0,
-            stock_quantity: r.stock_quantity != null ? Number(r.stock_quantity) : null,
-            installation_fee: r.installation_fee != null ? Number(r.installation_fee) : null,
-            card_features: (() => { try { return typeof r.card_features === 'string' ? JSON.parse(r.card_features) : r.card_features; } catch { return null; } })(),
-            categories: (() => { try { return typeof r.categories === 'string' ? JSON.parse(r.categories) : (r.categories || []); } catch { return []; } })(),
-            compare_enabled: r.compare_enabled !== 0 && r.compare_enabled !== false,
-            badge_bestseller: r.badge_bestseller === 1 || r.badge_bestseller === true || r.badge_bestseller === 'true',
-            badge_free_shipping: r.badge_free_shipping === 1 || r.badge_free_shipping === true || r.badge_free_shipping === 'true',
-            badge_warranty: r.badge_warranty === 1 || r.badge_warranty === true || r.badge_warranty === 'true',
-            badge_installation: r.badge_installation === 1 || r.badge_installation === true || r.badge_installation === 'true',
-            badge_new: r.badge_new === 1 || r.badge_new === true || r.badge_new === 'true',
-            badge_recommended: r.badge_recommended === 1 || r.badge_recommended === true || r.badge_recommended === 'true',
-            badges: (() => { try { return typeof r.badges === 'string' ? JSON.parse(r.badges) : (r.badges || []); } catch { return []; } })()
-        }));
+        // MySQL DECIMAL columns return as strings — parse to proper numbers & resolve category names
+        const parsed = rows.map(r => {
+            let rawCats = [];
+            try {
+                rawCats = typeof r.categories === 'string' ? JSON.parse(r.categories) : (r.categories || []);
+            } catch (e) { rawCats = []; }
+            if (!Array.isArray(rawCats)) rawCats = [];
+
+            const categoryName = catMapById[r.category] || r.category || 'ไม่มีหมวดหมู่';
+            const categoryId = catMapById[r.category] ? r.category : (Object.keys(catMapById).find(k => catMapById[k] === r.category) || null);
+            const resolvedCategories = rawCats.map(c => catMapById[c] || c);
+            if (resolvedCategories.length === 0 && categoryName) {
+                resolvedCategories.push(categoryName);
+            }
+
+            return {
+                ...r,
+                category_id: categoryId,
+                category: categoryName,
+                categories: resolvedCategories,
+                price: r.price != null ? Number(r.price) : 0,
+                original_price: r.original_price != null ? Number(r.original_price) : null,
+                rating: r.rating != null ? Number(r.rating) : 5.0,
+                review_count: r.review_count != null ? Number(r.review_count) : 0,
+                stock_quantity: r.stock_quantity != null ? Number(r.stock_quantity) : null,
+                installation_fee: r.installation_fee != null ? Number(r.installation_fee) : null,
+                card_features: (() => { try { return typeof r.card_features === 'string' ? JSON.parse(r.card_features) : r.card_features; } catch { return null; } })(),
+                compare_enabled: r.compare_enabled !== 0 && r.compare_enabled !== false,
+                badge_bestseller: r.badge_bestseller === 1 || r.badge_bestseller === true || r.badge_bestseller === 'true',
+                badge_free_shipping: r.badge_free_shipping === 1 || r.badge_free_shipping === true || r.badge_free_shipping === 'true',
+                badge_warranty: r.badge_warranty === 1 || r.badge_warranty === true || r.badge_warranty === 'true',
+                badge_installation: r.badge_installation === 1 || r.badge_installation === true || r.badge_installation === 'true',
+                badge_new: r.badge_new === 1 || r.badge_new === true || r.badge_new === 'true',
+                badge_recommended: r.badge_recommended === 1 || r.badge_recommended === true || r.badge_recommended === 'true',
+                badges: (() => { try { return typeof r.badges === 'string' ? JSON.parse(r.badges) : (r.badges || []); } catch { return []; } })()
+            };
+        });
+
+        // Cache public product list for 5 minutes (300s)
+        if (isPublic) {
+            await cacheService.set(cacheKey, parsed, 300);
+        }
 
         res.status(200).json({ success: true, data: parsed });
     } catch (error) {
@@ -178,6 +235,16 @@ router.get('/:id', async (req, res) => {
             } catch (e) { /* invalid token, treat as public */ }
         }
 
+        const cacheKey = `products:detail:${id}`;
+        if (!isAdminVerified) {
+            const cachedProduct = await cacheService.get(cacheKey);
+            if (cachedProduct) {
+                res.setHeader('X-Cache', 'HIT');
+                res.setHeader('X-Cache-Engine', cacheService.isRedisReady ? 'Redis' : 'In-Memory');
+                return res.status(200).json({ success: true, data: cachedProduct });
+            }
+        }
+
         let rows;
         if (isAdminVerified) {
             [rows] = await db.query('SELECT * FROM products WHERE id = ? OR slug = ?', [id, id]);
@@ -189,7 +256,7 @@ router.get('/:id', async (req, res) => {
                   AND NOT EXISTS (
                       SELECT 1 FROM categories c
                       WHERE c.is_active = false
-                        AND (p.category = c.name OR (p.categories IS NOT NULL AND JSON_CONTAINS(p.categories, JSON_QUOTE(c.name))))
+                        AND (p.category = c.name OR p.category = c.id OR (p.categories IS NOT NULL AND (JSON_CONTAINS(p.categories, JSON_QUOTE(c.name)) OR JSON_CONTAINS(p.categories, JSON_QUOTE(c.id)))))
                   )
             `, [id, id]);
         }
@@ -198,7 +265,11 @@ router.get('/:id', async (req, res) => {
             return res.status(404).json({ success: false, error: 'Product not found' });
         }
 
-        // MySQL DECIMAL columns return as strings — parse to proper numbers
+        // MySQL DECIMAL columns return as strings — parse to proper numbers & resolve category names
+        const [allCategories] = await db.query('SELECT id, name FROM categories');
+        const catMapById = {};
+        allCategories.forEach(c => { catMapById[c.id] = c.name; });
+
         const product = { ...rows[0] };
         product.price = product.price != null ? Number(product.price) : 0;
         product.original_price = product.original_price != null ? Number(product.original_price) : null;
@@ -210,13 +281,23 @@ router.get('/:id', async (req, res) => {
         product.width_cm = product.width_cm != null ? Number(product.width_cm) : null;
         product.length_cm = product.length_cm != null ? Number(product.length_cm) : null;
         product.height_cm = product.height_cm != null ? Number(product.height_cm) : null;
+
+        const resolvedCategoryName = catMapById[product.category] || product.category || '';
+        product.category_id = catMapById[product.category] ? product.category : (Object.keys(catMapById).find(k => catMapById[k] === product.category) || null);
+        product.category = resolvedCategoryName;
+
         if (typeof product.card_features === 'string') {
             try { product.card_features = JSON.parse(product.card_features); } catch (e) { product.card_features = null; }
         }
+        let rawCats = [];
         if (typeof product.categories === 'string') {
-            try { product.categories = JSON.parse(product.categories); } catch (e) { product.categories = []; }
-        } else if (!product.categories) {
-            product.categories = [];
+            try { rawCats = JSON.parse(product.categories); } catch (e) { rawCats = []; }
+        } else if (Array.isArray(product.categories)) {
+            rawCats = product.categories;
+        }
+        product.categories = rawCats.map(c => catMapById[c] || c);
+        if (product.categories.length === 0 && resolvedCategoryName) {
+            product.categories = [resolvedCategoryName];
         }
         if (typeof product.badges === 'string') {
             try { product.badges = JSON.parse(product.badges); } catch (e) { product.badges = []; }
@@ -263,6 +344,14 @@ router.get('/:id', async (req, res) => {
                 }
             } catch (e) {
                 console.error('Error fetching related products data:', e);
+            }
+        }
+
+        // Cache product detail for 5 minutes (300s) if public
+        if (!isAdminVerified) {
+            await cacheService.set(cacheKey, product, 300);
+            if (product.slug && product.slug !== id) {
+                await cacheService.set(`products:detail:${product.slug}`, product, 300);
             }
         }
 
@@ -327,9 +416,19 @@ router.post('/', verifyAdmin, validateProduct, async (req, res) => {
         }
 
         const query = `
-            INSERT INTO products
-            (id, name, sku, category, categories, price, original_price, size, image_url, description, images, is_active, is_out_of_stock, seo_title, seo_description, seo_keywords, shopee_link, lazada_link, tiktok_link, llm_context, short_description, remarks, slug, image_alt, attributes, faq, related_products,
-             badge_free_shipping, badge_warranty, badge_installation, badge_new, badge_bestseller, badge_recommended, badges, limit_one_per_order, rating, review_count, stock_quantity, sale_end_date, weight_kg, width_cm, length_cm, height_cm, card_features, has_installation_fee, free_install_bkk, free_shipping_bkk, installation_fee, requires_foundation, compare_enabled)
+            INSERT INTO products (
+                id, name, sku, category, categories, price, original_price, size, image_url, 
+                description, images, is_active, is_out_of_stock, 
+                seo_title, seo_description, seo_keywords, 
+                shopee_link, lazada_link, tiktok_link, llm_context,
+                short_description, remarks,
+                slug, image_alt, attributes, faq, related_products,
+                badge_free_shipping, badge_warranty, badge_installation,
+                badge_new, badge_bestseller, badge_recommended,
+                badges, limit_one_per_order, rating, review_count,
+                stock_quantity, sale_end_date, weight_kg, width_cm, length_cm, height_cm, card_features,
+                has_installation_fee, free_install_bkk, free_shipping_bkk, installation_fee, requires_foundation, compare_enabled
+            ) 
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `;
         
@@ -370,6 +469,10 @@ router.post('/', verifyAdmin, validateProduct, async (req, res) => {
 
 
         const [result] = await db.query(query, params);
+
+        // Invalidate products cache
+        await cacheService.delPattern('products:*');
+
         res.status(201).json({ success: true, id: id });
     } catch (error) {
         console.error('Create product error:', error);
@@ -389,6 +492,9 @@ router.put('/reorder', verifyAdmin, async (req, res) => {
             const id = orderedIds[i];
             await db.query('UPDATE products SET sort_order = ? WHERE id = ?', [i, id]);
         }
+
+        // Invalidate products cache
+        await cacheService.delPattern('products:*');
 
         res.status(200).json({ success: true });
     } catch (error) {
@@ -500,6 +606,10 @@ router.put('/:id', verifyAdmin, validateProduct, async (req, res) => {
         if (result.affectedRows === 0) {
             return res.status(404).json({ success: false, error: 'Product not found' });
         }
+
+        // Invalidate products cache
+        await cacheService.delPattern('products:*');
+
         res.status(200).json({ success: true });
     } catch (error) {
         console.error('Update product error:', error);
@@ -515,6 +625,10 @@ router.delete('/:id', verifyAdmin, async (req, res) => {
         if (result.affectedRows === 0) {
             return res.status(404).json({ success: false, error: 'Product not found' });
         }
+
+        // Invalidate products cache
+        await cacheService.delPattern('products:*');
+
         res.status(200).json({ success: true });
     } catch (error) {
         console.error('Delete product error:', error);

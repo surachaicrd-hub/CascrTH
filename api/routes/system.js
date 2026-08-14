@@ -608,5 +608,47 @@ router.all('/cron/pulse', verifyCronKey, async (req, res) => {
   }
 });
 
+// GET /api/system/cache-status
+router.get('/cache-status', verifyAdmin, (req, res) => {
+  try {
+    const cacheService = require('../services/cacheService');
+    res.json({
+      success: true,
+      data: cacheService.getStatus()
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// POST /api/system/cache-flush
+router.post('/cache-flush', verifyAdmin, async (req, res) => {
+  try {
+    const cacheService = require('../services/cacheService');
+    await cacheService.flush();
+    res.json({
+      success: true,
+      message: 'ล้างแคชระบบทั้งหมดเรียบร้อยแล้ว (Cache Flushed)'
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// GET /api/system/migrations
+router.get('/migrations', verifyAdmin, async (req, res) => {
+  try {
+    const migrationService = require('../services/migrationService');
+    const status = await migrationService.getMigrationStatus();
+    res.json({
+      success: true,
+      data: status
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 module.exports = router;
+
 

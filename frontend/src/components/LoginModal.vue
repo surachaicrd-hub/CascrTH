@@ -222,7 +222,7 @@ const handleLineLogin = () => {
     <div class="relative bg-white dark:bg-[#111827] rounded-3xl shadow-2xl w-full max-w-md overflow-hidden transform transition-all max-h-[90vh] overflow-y-auto" style="scrollbar-width: none; -ms-overflow-style: none;">
       
       <!-- Header Background -->
-      <div class="h-28 bg-[#f07100] relative flex items-center justify-center overflow-hidden">
+      <div class="h-28 bg-[#0220A4] relative flex items-center justify-center overflow-hidden">
         <div class="absolute inset-0 opacity-20">
           <svg class="h-full w-full" xmlns="http://www.w3.org/2000/svg"><defs><pattern id="modal-pattern" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M0 40L40 0H20L0 20M40 40V20L20 40" stroke="currentColor" stroke-width="2" fill="none"/></pattern></defs><rect width="100%" height="100%" fill="url(#modal-pattern)"/></svg>
         </div>
@@ -231,7 +231,7 @@ const handleLineLogin = () => {
             <img :src="settingsStore.storeLogo" alt="Store Logo" class="h-10 w-auto max-w-[120px] object-contain bg-white rounded-xl p-1.5 shadow-lg" />
           </template>
           <template v-else>
-            <div class="w-10 h-10 bg-white text-[#f07100] rounded-xl flex items-center justify-center shadow-lg">
+            <div class="w-10 h-10 bg-white text-[#0220A4] rounded-xl flex items-center justify-center shadow-lg">
               <span class="font-black text-xl">{{ (settingsStore.storeName || 'M')[0].toUpperCase() }}</span>
             </div>
           </template>
@@ -248,18 +248,18 @@ const handleLineLogin = () => {
         <button 
           @click="switchTab(true)" 
           class="flex-1 py-4 text-center font-bold text-sm transition-colors relative"
-          :class="isLoginTab ? 'text-[#f07100] dark:text-orange-400' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'"
+          :class="isLoginTab ? 'text-[#0220A4] dark:text-[#5B7CFF]' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'"
         >
           เข้าสู่ระบบ
-          <div v-if="isLoginTab" class="absolute bottom-0 left-0 w-full h-0.5 bg-[#f07100] dark:bg-orange-400"></div>
+          <div v-if="isLoginTab" class="absolute bottom-0 left-0 w-full h-0.5 bg-[#0220A4] dark:bg-[#5B7CFF]"></div>
         </button>
         <button 
           @click="switchTab(false)" 
           class="flex-1 py-4 text-center font-bold text-sm transition-colors relative"
-          :class="!isLoginTab ? 'text-[#f07100] dark:text-orange-400' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'"
+          :class="!isLoginTab ? 'text-[#0220A4] dark:text-[#5B7CFF]' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'"
         >
           สมัครสมาชิกใหม่
-          <div v-if="!isLoginTab" class="absolute bottom-0 left-0 w-full h-0.5 bg-[#f07100] dark:bg-orange-400"></div>
+          <div v-if="!isLoginTab" class="absolute bottom-0 left-0 w-full h-0.5 bg-[#0220A4] dark:bg-[#5B7CFF]"></div>
         </button>
       </div>
 
@@ -279,18 +279,18 @@ const handleLineLogin = () => {
           <div v-if="!isLoginTab" class="grid grid-cols-2 gap-4">
             <div>
               <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">ชื่อ <span class="text-red-500">*</span></label>
-              <input v-model="form.first_name" type="text" required class="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition-colors dark:text-white sm:text-sm">
+              <input v-model="form.first_name" type="text" required class="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-[#0220A4] focus:border-[#0220A4] outline-none transition-colors dark:text-white sm:text-sm">
             </div>
             <div>
               <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">นามสกุล</label>
-              <input v-model="form.last_name" type="text" class="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition-colors dark:text-white sm:text-sm">
+              <input v-model="form.last_name" type="text" class="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-[#0220A4] focus:border-[#0220A4] outline-none transition-colors dark:text-white sm:text-sm">
             </div>
           </div>
 
           <!-- Email -->
           <div>
             <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">อีเมล</label>
-            <input v-model="form.email" type="email" required class="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800 border rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition-colors dark:text-white sm:text-sm" :class="form.email && !isEmailValid ? 'border-red-400 dark:border-red-500' : 'border-gray-200 dark:border-gray-700'" placeholder="your@email.com">
+            <input v-model="form.email" type="email" required class="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800 border rounded-xl focus:ring-2 focus:ring-[#0220A4] focus:border-[#0220A4] outline-none transition-colors dark:text-white sm:text-sm" :class="form.email && !isEmailValid ? 'border-red-400 dark:border-red-500' : 'border-gray-200 dark:border-gray-700'" placeholder="your@email.com">
             <p v-if="form.email && !isEmailValid" class="mt-1 text-xs text-red-500">กรุณากรอกอีเมลให้ถูกรูปแบบ</p>
           </div>
 
@@ -298,16 +298,16 @@ const handleLineLogin = () => {
           <div>
             <div class="flex items-center justify-between mb-1">
               <label class="block text-xs font-bold text-gray-700 dark:text-gray-300">รหัสผ่าน</label>
-              <button type="button" v-if="isLoginTab" @click.prevent="closeModal(); router.push('/forgot-password')" class="text-xs text-[#f07100] dark:text-orange-400 hover:underline cursor-pointer">ลืมรหัสผ่าน?</button>
+              <button type="button" v-if="isLoginTab" @click.prevent="closeModal(); router.push('/forgot-password')" class="text-xs text-[#0220A4] dark:text-[#5B7CFF] hover:underline cursor-pointer">ลืมรหัสผ่าน?</button>
             </div>
             <div class="relative">
-              <input v-model="form.password" :type="showPassword ? 'text' : 'password'" required minlength="6" class="w-full pl-4 pr-11 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition-colors dark:text-white sm:text-sm" placeholder="••••••••">
+              <input v-model="form.password" :type="showPassword ? 'text' : 'password'" required minlength="6" class="w-full pl-4 pr-11 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-[#0220A4] focus:border-[#0220A4] outline-none transition-colors dark:text-white sm:text-sm" placeholder="••••••••">
               <button type="button" @click="showPassword = !showPassword" class="absolute inset-y-0 right-0 flex items-center pr-3 z-10 focus:outline-none">
-                <svg v-if="showPassword" class="w-5 h-5 text-gray-400 dark:text-gray-500 hover:text-[#f07100] dark:hover:text-orange-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg v-if="showPassword" class="w-5 h-5 text-gray-400 dark:text-gray-500 hover:text-[#0220A4] dark:hover:text-[#5B7CFF] transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                 </svg>
-                <svg v-else class="w-5 h-5 text-gray-400 dark:text-gray-500 hover:text-[#f07100] dark:hover:text-orange-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg v-else class="w-5 h-5 text-gray-400 dark:text-gray-500 hover:text-[#0220A4] dark:hover:text-[#5B7CFF] transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 9c-4.478 0-8.268-2.943-9.542-7a10.024 10.024 0 014.13-5.24m5.94-2.285a9.35 9.35 0 013.468 1.058M21 12a10.024 10.024 0 01-4.13 5.24M3 3l18 18" />
                 </svg>
               </button>
@@ -329,13 +329,13 @@ const handleLineLogin = () => {
           <div v-if="!isLoginTab">
             <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">ยืนยันรหัสผ่าน <span class="text-red-500">*</span></label>
             <div class="relative">
-              <input v-model="form.confirmPassword" :type="showConfirmPassword ? 'text' : 'password'" required class="w-full pl-4 pr-11 py-2.5 bg-gray-50 dark:bg-gray-800 border rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition-colors dark:text-white sm:text-sm" :class="form.confirmPassword && !passwordsMatch ? 'border-red-400 dark:border-red-500' : 'border-gray-200 dark:border-gray-700'" placeholder="••••••••">
+              <input v-model="form.confirmPassword" :type="showConfirmPassword ? 'text' : 'password'" required class="w-full pl-4 pr-11 py-2.5 bg-gray-50 dark:bg-gray-800 border rounded-xl focus:ring-2 focus:ring-[#0220A4] focus:border-[#0220A4] outline-none transition-colors dark:text-white sm:text-sm" :class="form.confirmPassword && !passwordsMatch ? 'border-red-400 dark:border-red-500' : 'border-gray-200 dark:border-gray-700'" placeholder="••••••••">
               <button type="button" @click="showConfirmPassword = !showConfirmPassword" class="absolute inset-y-0 right-0 flex items-center pr-3 z-10 focus:outline-none">
-                <svg v-if="showConfirmPassword" class="w-5 h-5 text-gray-400 dark:text-gray-500 hover:text-[#f07100] dark:hover:text-orange-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg v-if="showConfirmPassword" class="w-5 h-5 text-gray-400 dark:text-gray-500 hover:text-[#0220A4] dark:hover:text-[#5B7CFF] transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                 </svg>
-                <svg v-else class="w-5 h-5 text-gray-400 dark:text-gray-500 hover:text-[#f07100] dark:hover:text-orange-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg v-else class="w-5 h-5 text-gray-400 dark:text-gray-500 hover:text-[#0220A4] dark:hover:text-[#5B7CFF] transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a10.024 10.024 0 014.13-5.24m5.94-2.285a9.35 9.35 0 013.468 1.058M21 12a10.024 10.024 0 01-4.13 5.24M3 3l18 18" />
                 </svg>
               </button>
@@ -345,15 +345,15 @@ const handleLineLogin = () => {
 
           <!-- Bot Protection (Register only) -->
           <div v-if="!isLoginTab" class="rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
-            <div class="flex items-center gap-2 px-4 py-2.5 bg-orange-50 dark:bg-orange-950/20 border-b border-gray-200 dark:border-gray-700">
-              <svg class="w-4 h-4 text-[#f07100] dark:text-orange-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
-              <span class="text-xs font-bold text-orange-700 dark:text-orange-400">ตรวจสอบความเป็นคน <span class="text-red-500">*</span></span>
+            <div class="flex items-center gap-2 px-4 py-2.5 bg-[#F3F5FF] dark:bg-blue-950/20 border-b border-gray-200 dark:border-gray-700">
+              <svg class="w-4 h-4 text-[#0220A4] dark:text-[#5B7CFF]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+              <span class="text-xs font-bold text-[#0220A4] dark:text-[#5B7CFF]">ตรวจสอบความเป็นคน <span class="text-red-500">*</span></span>
             </div>
             <div class="px-4 py-3 bg-gray-50 dark:bg-gray-800/50">
               <p class="text-[11px] text-gray-500 dark:text-gray-400 mb-3">เลือกผลลัพธ์ที่ถูกต้องเพื่อปลดล็อคการสมัครสมาชิก</p>
               <div class="flex items-center gap-3">
                 <span class="text-lg font-bold font-mono text-gray-800 dark:text-gray-200 tracking-wider">
-                  {{ botNum1 }} <span class="text-[#f07100]">+</span> {{ botNum2 }} <span class="text-[#f07100]">=</span>
+                  {{ botNum1 }} <span class="text-[#0220A4]">+</span> {{ botNum2 }} <span class="text-[#0220A4]">=</span>
                 </span>
                 <div class="flex gap-2">
                   <button 
@@ -363,8 +363,8 @@ const handleLineLogin = () => {
                     @click="botSelected = choice"
                     class="w-11 h-11 rounded-xl text-sm font-bold transition-all duration-200 border-2"
                     :class="botSelected === choice 
-                      ? 'bg-[#f07100] text-white border-[#f07100] shadow-lg shadow-orange-500/30 scale-105' 
-                      : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 border-gray-200 dark:border-gray-600 hover:border-orange-400 hover:text-[#f07100]'"
+                      ? 'bg-[#0220A4] text-white border-[#0220A4] shadow-lg shadow-blue-900/30 scale-105' 
+                      : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 border-gray-200 dark:border-gray-600 hover:border-blue-400 hover:text-[#0220A4]'"
                   >
                     {{ choice }}
                   </button>
@@ -376,7 +376,7 @@ const handleLineLogin = () => {
           <button 
             type="submit" 
             :disabled="isLoading || successMessage || (!isLoginTab && (!isEmailValid || !passwordsMatch || botSelected === null))"
-            class="w-full mt-2 bg-[#f07100] hover:bg-[#e06600] text-white font-bold py-3 px-4 rounded-xl transition-all shadow-lg shadow-orange-500/30 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+            class="w-full mt-2 bg-[#0220A4] hover:bg-[#01166F] text-white font-bold py-3 px-4 rounded-xl transition-all shadow-lg shadow-blue-900/30 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
           >
             <svg v-if="isLoading" class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
             {{ isLoginTab ? 'เข้าสู่ระบบ' : 'สมัครสมาชิก' }}

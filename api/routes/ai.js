@@ -5,20 +5,50 @@ const { GoogleGenAI } = require('@google/genai');
 const gemini = require('../services/geminiService');
 const { verifyAdmin } = require('./auth');
 
-// Safe JSON parser for AI responses - extracts JSON even if wrapped in extra text
+// Safe JSON parser for AI responses - extracts and parses JSON even if wrapped in extra text or markdown
 function safeJsonParse(text) {
+    if (!text || typeof text !== 'string') return null;
+    let cleaned = text.replace(/```json\s*|```\s*/gi, '').trim();
     try {
-        return JSON.parse(text);
+        return JSON.parse(cleaned);
     } catch (e) {
-        // Try to extract JSON object from the text
-        const match = text.match(/\{[\s\S]*\}/);
-        if (match) {
-            try { return JSON.parse(match[0]); } catch (e2) { /* ignore */ }
+        // Try extracting object
+        const firstBrace = cleaned.indexOf('{');
+        const lastBrace = cleaned.lastIndexOf('}');
+        if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+            const jsonSubstring = cleaned.substring(firstBrace, lastBrace + 1);
+            try {
+                return JSON.parse(jsonSubstring);
+            } catch (e2) {
+                try {
+                    const sanitized = jsonSubstring.replace(/[\u0000-\u001F]+/g, (m) => {
+                        if (m.includes('\n')) return '\\n';
+                        if (m.includes('\r')) return '';
+                        if (m.includes('\t')) return '\\t';
+                        return ' ';
+                    });
+                    return JSON.parse(sanitized);
+                } catch (e3) {}
+            }
         }
-        // Try to extract JSON array
-        const arrayMatch = text.match(/\[[\s\S]*\]/);
-        if (arrayMatch) {
-            try { return JSON.parse(arrayMatch[0]); } catch (e3) { /* ignore */ }
+        // Try extracting array
+        const firstBracket = cleaned.indexOf('[');
+        const lastBracket = cleaned.lastIndexOf(']');
+        if (firstBracket !== -1 && lastBracket !== -1 && lastBracket > firstBracket) {
+            const jsonSubstring = cleaned.substring(firstBracket, lastBracket + 1);
+            try {
+                return JSON.parse(jsonSubstring);
+            } catch (e4) {
+                try {
+                    const sanitized = jsonSubstring.replace(/[\u0000-\u001F]+/g, (m) => {
+                        if (m.includes('\n')) return '\\n';
+                        if (m.includes('\r')) return '';
+                        if (m.includes('\t')) return '\\t';
+                        return ' ';
+                    });
+                    return JSON.parse(sanitized);
+                } catch (e5) {}
+            }
         }
         throw new Error('Failed to parse AI response as JSON: ' + text.substring(0, 200));
     }
@@ -74,7 +104,8 @@ Return the response strictly as a JSON object with the following keys and no mar
         res.status(200).json({ success: true, data: result });
     } catch (error) {
         console.error('AI SEO Generation error:', error);
-        res.status(500).json({ success: false, error: 'Failed to generate SEO content: ' + error.message });
+        const statusCode = error.statusCode || 400;
+        res.status(statusCode).json({ success: false, error: error.message || 'Failed to generate SEO content' });
     }
 });
 
@@ -108,19 +139,17 @@ Product Input:
 - Price: ${price || 'N/A'}
 - Description Context: ${description || ''}
 
-Generate a comprehensive 12-Layer SEO & GEO Payload strictly as a valid JSON object (no markdown wrappers) containing:
+Generate a comprehensive SEO & GEO Payload strictly as a valid JSON object (no markdown wrappers) containing:
 1. "seo_title": SEO title (under 60 characters, captivating with key terms & brand).
 2. "seo_description": Meta description (under 160 characters, with key specs & call-to-action).
 3. "seo_keywords": High-intent keywords list in Thai & English separated by commas.
 4. "llm_context": Data-rich factual narrative (in Thai) specifically formatted for LLMs (ChatGPT/Perplexity) explaining product entities, materials, resistance, warranty, supplier (${companyLegalName}), and usage scenarios.
 5. "image_alt": Optimized image alt text describing the product appearance, material, and function.
-6. "attributes": Array of key-value objects [{ "name": "...", "value": "..." }] mapping specs (materials, durability, usage, UV protection, suitable for, warranty).
-7. "faq": Array of 3 to 4 Question-Answer objects [{ "q": "...", "a": "..." }] addressing primary search intent (material/durability, delivery/installation in Thailand, warranty/care).
-8. "search_intent": A string summarizing primary intent (e.g. "Transactional / Commercial Investigation").
-9. "information_gain_tips": Array of 2-3 specific optimization suggestions to outperform competitors on Google/AI.
+6. "search_intent": A string summarizing primary intent (e.g. "Transactional / Commercial Investigation").
+7. "information_gain_tips": Array of 2-3 specific optimization suggestions to outperform competitors on Google/AI.
 
 Strict Output Format:
-Return ONLY the JSON object. Do not include markdown code block syntax (\`\`\`json).
+Return ONLY the JSON object without markdown code block wrappers.
 `;
 
         const response = await gemini.generateContent({
@@ -134,38 +163,56 @@ Return ONLY the JSON object. Do not include markdown code block syntax (\`\`\`js
         res.status(200).json({ success: true, data: result });
     } catch (error) {
         console.error('AI Full SEO GEO Generation error:', error);
-        res.status(500).json({ success: false, error: 'Failed to generate 12-Layer SEO/GEO payload: ' + error.message });
+        const statusCode = error.statusCode || 400;
+        res.status(statusCode).json({ success: false, error: error.message || 'Failed to generate 12-Layer SEO/GEO payload' });
     }
 });
 
 router.post('/format-description', verifyAdmin, async (req, res) => {
     try {
-        const { productName, category, description } = req.body;
+        const { productName, category, categories, sku, size, description } = req.body;
 
         if (!description) {
             return res.status(400).json({ success: false, error: 'Description is required to format' });
         }
 
-        const prompt = `
-You are an expert SEO specialist and web copywriter in Thailand.
-I will provide you with a product's raw description, name, and category.
-Your task is to rewrite, organize, and format this description to be comprehensive, highly organized, engaging, and SEO-optimized.
-Critically, you must present the information in distinct, well-spaced sections so it is very easy and comfortable to read.
+        let storeName = 'CAS-CR';
+        let companyLegalName = 'บริษัท แคส-ซีอาร์ จำกัด';
+        try {
+            const [settingsRows] = await db.query("SELECT setting_key, setting_value FROM settings WHERE setting_key IN ('store_name', 'company_legal_name', 'contact_company_name')");
+            const sMap = {};
+            settingsRows.forEach(r => { sMap[r.setting_key] = r.setting_value; });
+            storeName = sMap['store_name'] || sMap['contact_company_name'] || 'CAS-CR';
+            companyLegalName = sMap['company_legal_name'] || storeName;
+        } catch (e) {}
 
-Key Formatting Rules:
-1. Return ONLY valid HTML that can be rendered inside a rich text editor (CKEditor). No markdown block wrappers like \`\`\`html.
-2. Structure the content beautifully into logical sections using <h2> and <h3> tags.
-3. If there is technical data, dimensions, or specifications, you MUST organize them into a clean <table> instead of plain text. Keep the table simple (<th> for headers, <td> for data).
-4. Use <ul> and <li> for lists of features, benefits, or included items.
-5. Use <strong> to highlight key selling points.
-6. Provide good spacing by wrapping paragraphs in <p> tags and avoid creating massive blocks of text. Give enough breathing room between sections for visual comfort.
-7. Tone should be professional, persuasive, and targeted at a Thai audience.
-8. Do NOT include <html>, <head>, or <body> tags.
+        const categoryName = category || (Array.isArray(categories) && categories.length > 0 ? categories.join(', ') : 'ทั่วไป');
 
-Product Name: ${productName || 'Unknown'}
-Category: ${category || 'Unknown'}
-Raw Description: ${description}
-        `;
+        const prompt = `You are an elite Technical Copywriter and SEO Specialist in Thailand representing ${storeName} (${companyLegalName}).
+Your task is to re-organize, format, and elevate the provided product description into a world-class, clean, beautiful, and SEO-optimized HTML article ready for CKEditor.
+
+Product Info:
+- Name: ${productName || 'สินค้า'}
+- Category: ${categoryName}
+- SKU / Model: ${sku || ''}
+- Size / Dimensions: ${size || ''}
+
+Raw / Current Content to Format:
+${description}
+
+Formatting & Quality Rules:
+1. **Semantic HTML Only**: Return ONLY clean HTML structure using <h2>, <h3>, <p>, <strong>, <ul><li>, and <table> inside <figure class="table">.
+   - Do NOT wrap in \`\`\`html or markdown ticks.
+   - Do NOT include <html>, <head>, or <body> tags.
+2. **Standard Document Layout**:
+   - **Headline (<h2>)**: Catchy, professional title featuring product name & core industrial/commercial benefit.
+   - **Overview Paragraphs (<p>)**: Engaging, factual overview of core capabilities, precision, and value proposition.
+   - **Key Features / จุดเด่น (<h3> & <ul><li>)**: Bullet points highlighting key advantages with <strong> bold lead-ins.
+   - **Performance & Functions (<h3> & <p>)**: Deep-dive into technical features, durability, materials, and mechanisms.
+   - **Technical Specifications Table (<h3> & <table>)**: Organize all specs, numbers, tolerances, and dimensions into a clean HTML table (<figure class="table"><table><thead><tr><th>รายการ</th><th>รายละเอียด</th></tr></thead><tbody>...</tbody></table></figure>).
+   - **Target Applications (<h3> & <p>)**: Best suited use-cases, industries, workshops, or user scenarios.
+3. **Data Integrity**: PRESERVE all factual data, tolerances (e.g. ±(0.1 + 0.0005 × L) มม.), units, numbers, wire gauges (AWG), models, electrical parameters, and materials from the original text with 100% accuracy.
+4. **Readability & Spacing**: Avoid giant walls of text. Wrap every paragraph in <p>...</p> tags with proper breathing room.`;
 
         const response = await gemini.generateContent({
             prompt,
@@ -174,73 +221,209 @@ Raw Description: ${description}
         });
 
         let htmlResponse = response.text;
-        // Clean up markdown ticks if Gemini accidentally added them
         htmlResponse = htmlResponse.replace(/```html\n?|```\n?/g, '').trim();
-        // Remove literal \n output generated by Gemini
         htmlResponse = htmlResponse.replace(/\\n/g, '<br/>');
-        // If it failed to output HTML paragraphs entirely, convert newlines to <br/>
-        if (!htmlResponse.match(/<p>|<div>|<ul>|<li>|<h2>|<h3>/i)) {
+        if (!htmlResponse.match(/<p>|<div>|<ul>|<li>|<h2>|<h3>|<table/i)) {
             htmlResponse = htmlResponse.replace(/\n/g, '<br/>');
         }
 
         res.status(200).json({ success: true, data: htmlResponse });
     } catch (error) {
         console.error('AI Formatting error:', error);
-        res.status(500).json({ success: false, error: 'Failed to format description: ' + error.message });
+        const statusCode = error.statusCode || 400;
+        res.status(statusCode).json({ success: false, error: error.message || 'Failed to format description' });
+    }
+});
+
+router.post('/generate-description', verifyAdmin, async (req, res) => {
+    try {
+        const {
+            productName,
+            category,
+            categories,
+            sku,
+            size,
+            shortDescription,
+            attributes,
+            keywords,
+            highlights,
+            tone = 'luxury',
+            length = 'standard',
+            includeSEO = true,
+            currentDescription = ''
+        } = req.body;
+
+        if (!productName) {
+            return res.status(400).json({ success: false, error: 'Product name is required' });
+        }
+
+        let storeName = 'CAS-CR';
+        let companyLegalName = 'บริษัท แคส-ซีอาร์ จำกัด';
+        try {
+            const [settingsRows] = await db.query("SELECT setting_key, setting_value FROM settings WHERE setting_key IN ('store_name', 'company_legal_name', 'contact_company_name')");
+            const sMap = {};
+            settingsRows.forEach(r => { sMap[r.setting_key] = r.setting_value; });
+            storeName = sMap['store_name'] || sMap['contact_company_name'] || 'CAS-CR';
+            companyLegalName = sMap['company_legal_name'] || storeName;
+        } catch (e) {}
+
+        const categoryName = category || (Array.isArray(categories) && categories.length > 0 ? categories.join(', ') : 'ทั่วไป');
+
+        const toneGuide = tone === 'luxury'
+            ? 'Professional, authoritative, premium, and trustworthy (ภาษาสุภาพ เป็นทางการ น่าเชื่อถือ)'
+            : tone === 'friendly'
+            ? 'Friendly, warm, and highly informative (เป็นมิตร อบอุ่น อ่านง่ายและให้ข้อมูลครบถ้วน)'
+            : 'Sales-driven, persuasive, value-focused (เน้นชูความคุ้มค่า ปิดการขาย กระตุ้นการตัดสินใจ)';
+
+        const lengthGuide = length === 'short'
+            ? 'Concise (approx 300 words)'
+            : length === 'comprehensive'
+            ? 'In-depth and comprehensive (approx 900-1200 words)'
+            : 'Standard balanced SEO length (approx 600-800 words)';
+
+        const attrText = Array.isArray(attributes)
+            ? attributes.filter(a => a && (a.key || a.label) && a.value).map(a => `- ${a.label || a.key}: ${a.value}`).join('\n')
+            : '';
+
+        const prompt = `You are a Master Technical Copywriter and E-commerce SEO Specialist in Thailand representing ${storeName} (${companyLegalName}).
+Write a complete, highly persuasive, technically accurate, and SEO-optimized product presentation article in Thai for:
+
+Product Details:
+- Product Name: ${productName}
+- Category: ${categoryName}
+- SKU / Model: ${sku || 'N/A'}
+- Dimensions / Size: ${size || 'N/A'}
+- Target SEO Keywords: ${keywords || 'สินค้าคุณภาพ, สเปกมาตรฐาน'}
+- Key Highlights & Notes:
+${highlights || ''}
+${shortDescription ? `Short Summary: ${shortDescription}` : ''}
+${attrText ? `Specifications List:\n${attrText}` : ''}
+${currentDescription ? `Existing Context:\n${currentDescription}` : ''}
+
+Writing Requirements:
+- Tone: ${toneGuide}
+- Length: ${lengthGuide}
+- Structure:
+  1. <h2> Main Title: Compelling headline with Product Name and key benefit.
+  2. <p> Introduction: Overview emphasizing industrial reliability, utility, and superior build quality.
+  3. <h3> จุดเด่นและคุณสมบัติพิเศษ: Bullet points (<ul><li>) with <strong> bold key terms.
+  4. <h3> ประสิทธิภาพและการใช้งาน: Detailed paragraphs explaining technical capabilities, operation, and advantages.
+  5. <h3> ข้อมูลจำเพาะทางเทคนิค: Clean HTML table (<figure class="table"><table><thead><tr><th>รายการ</th><th>รายละเอียด</th></tr></thead><tbody>...</tbody></table></figure>) containing all specs, numbers, models, and dimensions.
+  6. <h3> เหมาะสำหรับกลุ่มงานและอุตสาหกรรม: Application scenarios and closing statement.
+
+Strict Output Format:
+Return ONLY a valid JSON object with the following keys and NO markdown wrappers (\`\`\`json):
+{
+  "description": "Full HTML description string without markdown wrappers",
+  "seo_title": "SEO Title under 60 characters with primary keyword and brand",
+  "seo_description": "Meta description under 160 characters summarizing specs & call to action",
+  "seo_keywords": "Comma-separated SEO keywords in Thai and English"
+}`;
+
+        const response = await gemini.generateContent({
+            prompt,
+            responseMimeType: 'application/json',
+            label: 'Generate Description'
+        });
+
+        const result = safeJsonParse(response.text);
+
+        res.status(200).json({ success: true, data: result });
+    } catch (error) {
+        console.error('AI Description Generation error:', error);
+        const statusCode = error.statusCode || 400;
+        res.status(statusCode).json({ success: false, error: error.message || 'Failed to generate product description' });
     }
 });
 
 router.post('/generate-attributes', verifyAdmin, async (req, res) => {
     try {
-        const { productName, category, description } = req.body;
+        const { productName, category, categories, shortDescription, description, sku, size, price, remarks } = req.body;
 
-        if (!description && !productName) {
+        if (!description && !shortDescription && !productName) {
             return res.status(400).json({ success: false, error: 'Product Name or Description is required' });
         }
 
-        let templateInstruction = '';
-        if (category) {
-            const [templates] = await db.query('SELECT * FROM category_attribute_templates WHERE category_name = ? ORDER BY sort_order ASC', [category]);
-            if (templates.length > 0) {
-                const keysList = templates.map(t => `- "${t.attribute_key}" (ความหมาย: ${t.attribute_label})`).join('\n');
-                templateInstruction = `
-CRITICAL RULES: The category '${category}' has these EXACT predefined attribute keys:
-${keysList}
-
-1. You MUST copy these key strings EXACTLY into the "key" field. Do NOT paraphrase, translate, abbreviate, or create synonyms.
-2. Even if the template key is in English (e.g. "external_dimensions"), you MUST use the exact string (e.g. "external_dimensions") as the key.
-3. Extract data for ALL template keys based on their meaning. If no data found, set value to "".
-4. You may add extra custom keys ONLY for data that truly doesn't fit ANY template key. These EXTRA custom keys MUST be in Thai language (e.g. "รุ่นสินค้า" not "model", "อุปกรณ์เสริม" not "accessories").`;
-            }
+        let categoryList = [];
+        if (Array.isArray(categories) && categories.length > 0) {
+            categoryList = categories.filter(Boolean);
+        } else if (category) {
+            categoryList = [category];
         }
 
-        const prompt = `
-You are an expert product data analyst in Thailand.
-Please extract a clean, structured list of technical specifications or key attributes from the following product information.
-If the description is short, infer the most common important attributes for this category of product.
+        let templates = [];
+        if (categoryList.length > 0) {
+            const [rows] = await db.query(
+                'SELECT * FROM category_attribute_templates WHERE category_name IN (?) ORDER BY sort_order ASC',
+                [categoryList]
+            );
+            templates = rows || [];
+        }
+
+        let templateInstruction = '';
+        if (templates.length > 0) {
+            const keysList = templates.map(t => `- Key: "${t.attribute_key}" | ความหมายภาษาไทย: "${t.attribute_label}"`).join('\n');
+            templateInstruction = `
+CRITICAL CATEGORY TEMPLATE MATCHING RULES:
+This product category has predefined attribute keys:
+${keysList}
+
+1. For information that matches any predefined template key above, you MUST use the exact "attribute_key" string as the "key" (e.g., "${templates[0]?.attribute_key || 'external_dimensions'}").
+2. Extract accurate values for all matching template keys. If a template key has no data found in the text, you may omit it or leave value as "".
+3. For all OTHER technical specifications, measurements, features, and electrical/mechanical parameters found in the product text that do NOT match any predefined template key:
+   - Extract them as extra custom attributes.
+   - For these extra custom attributes, the "key" MUST be a clear, professional Thai technical title (e.g. "รุ่นสินค้า", "ขนาดสายไฟที่รองรับ", "ความยาวในการตัด", "ระบบขับเคลื่อน", "วัสดุใบมีด", "แหล่งจ่ายไฟ", "กำลังไฟฟ้า").`;
+        } else {
+            templateInstruction = `
+SPECIFICATION NAMING RULES:
+1. Every attribute "key" MUST be in formal, standard Thai technical language (e.g., "รุ่นสินค้า", "ขนาดสายไฟที่รองรับ", "เส้นผ่านศูนย์กลางสายไฟสูงสุด", "ความยาวในการตัด", "ความยาวปอกสายไฟด้านหน้า", "ความยาวปอกสายไฟด้านหลัง", "ค่าความคลาดเคลื่อนในการตัด", "ระบบขับเคลื่อน", "วัสดุใบมีด", "แหล่งจ่ายไฟ", "กำลังไฟฟ้า", "ขนาดตัวเครื่อง (กxลxส)", "น้ำหนักตัวเครื่อง", "ชนิดสายไฟที่รองรับ", "ความเร็วการป้อนสาย").
+2. DO NOT use raw untranslated English keys like "model", "weight", "size", "material", "power" unless they are standard acronyms (e.g. "SKU", "IP Rating").`;
+        }
+
+        const prompt = `You are a Senior Industrial & Commercial Product Data Analyst and Technical Specification Specialist in Thailand.
+Your mission is to extract an accurate, highly thorough, and perfectly structured list of technical specifications (Product Attributes) from the provided product information.
+
+Product Input:
+- Product Name: ${productName || ''}
+- Category: ${categoryList.join(', ') || category || ''}
+- SKU / Model: ${sku || ''}
+- Size / Dimensions: ${size || ''}
+- Short Summary: ${shortDescription || ''}
+- Price / Other Notes: ${price || ''} ${remarks || ''}
+- Full Description (HTML/Text): ${description || ''}
+
+Extraction Guidelines:
+1. **Thorough Spec Extraction**: Parse all HTML elements (tables <table>, lists <ul>/<ol>/<li>, headers <h3>/<h4>, bold text <strong>, paragraphs) carefully. Extract EVERY technical parameter, specification, capacity, dimension, and performance metric present in the data.
+2. **Values Precision**:
+   - Keep complete units, symbols, ranges, and technical formats intact (e.g. "0.1–99,999 มม.", "AWG#7 (10 sq) ถึง AWG#28 (0.08 sq)", "AC100–240V, 1 เฟส, 50/60Hz", "±(0.1 + 0.0005 × L) มม.", "W430 × D420 × H270 มม.", "27 กก.").
+   - Do NOT abbreviate or truncate important values.
+   - Clean up any raw HTML tags inside values (e.g., convert "<strong>C371G</strong>" to "C371G").
+3. **Deduplication & Logical Organization**:
+   - Merge duplicate or redundant rows into a single, comprehensive specification.
+   - Order the attributes logically: Model/Series -> Core Technical Capabilities (Size/Capacity/Speed/Length) -> Mechanical/Drive/Blade Specs -> Electrical/Power Specs -> Dimensions & Weight -> Supported Materials/Types -> Standards/Certifications/Origin.
 ${templateInstruction}
 
-Product Name: ${productName || 'Unknown'}
-Category: ${category || 'Unknown'}
-Raw Description: ${description || ''}
-
-Return the response STRICTLY as a JSON array of objects with exactly two keys: "key" and "value". No markdown formatting or extra text.
-Use the EXACT predefined template keys listed above.
-IMPORTANT: For any custom attributes you create that are NOT in the predefined template keys, you MUST use Thai language for the keys. Do NOT use English keys like "model", "accessories", "material", etc. Use Thai equivalents like "รุ่นสินค้า", "อุปกรณ์เสริม", "วัสดุ" instead. But for predefined template keys, keep them exactly as listed (even if they are English).
-        `;
+Strict Output Format:
+Return the response STRICTLY as a valid JSON array of objects with exactly two keys: "key" and "value". No markdown formatting, code block wrappers (\`\`\`json), or conversational text.
+Example format:
+[
+  { "key": "รุ่นสินค้า", "value": "..." },
+  { "key": "ขนาดสายไฟที่รองรับ", "value": "..." }
+]`;
 
         const response = await gemini.generateContent({
             prompt,
-            label: 'AI Request'
+            label: 'Generate Product Attributes Request'
         });
 
         const cleanedText = response.text.replace(/```json\n?|```\n?/g, '').trim();
         const result = safeJsonParse(cleanedText);
 
-        res.status(200).json({ success: true, data: result });
+        res.status(200).json({ success: true, data: Array.isArray(result) ? result : [] });
     } catch (error) {
         console.error('AI Attributes Generation error:', error);
-        res.status(500).json({ success: false, error: 'Failed to generate attributes: ' + error.message });
+        const statusCode = error.statusCode || 400;
+        res.status(statusCode).json({ success: false, error: error.message || 'Failed to generate attributes' });
     }
 });
 
@@ -276,7 +459,8 @@ Example: [{"question": "ทนแดดทนฝนไหม?", "answer": "ท�
         res.status(200).json({ success: true, data: result });
     } catch (error) {
         console.error('AI FAQ Generation error:', error);
-        res.status(500).json({ success: false, error: 'Failed to generate FAQ: ' + error.message });
+        const statusCode = error.statusCode || 400;
+        res.status(statusCode).json({ success: false, error: error.message || 'Failed to generate FAQ' });
     }
 });
 
@@ -369,7 +553,8 @@ No markdown formatting (like \`\`\`json) outside the JSON block. Just pure JSON.
         res.status(200).json({ success: true, data: result });
     } catch (error) {
         console.error('AI About Generation error:', error);
-        res.status(500).json({ success: false, error: 'Failed to generate About Us content: ' + error.message });
+        const statusCode = error.statusCode || 400;
+        res.status(statusCode).json({ success: false, error: error.message || 'Failed to generate About Us content' });
     }
 });
 
@@ -430,7 +615,8 @@ No markdown formatting (like \`\`\`json) outside the JSON block. Just pure JSON.
         res.status(200).json({ success: true, data: result });
     } catch (error) {
         console.error('AI Services Generation error:', error);
-        res.status(500).json({ success: false, error: 'Failed to generate Services content: ' + error.message });
+        const statusCode = error.statusCode || 400;
+        res.status(statusCode).json({ success: false, error: error.message || 'Failed to generate Services content' });
     }
 });
 
@@ -507,7 +693,8 @@ No markdown formatting (like \`\`\`json) outside the JSON block. Just pure JSON.
         res.status(200).json({ success: true, data: result });
     } catch (error) {
         console.error('AI Project Generation error:', error);
-        res.status(500).json({ success: false, error: 'Failed to generate Project content: ' + error.message });
+        const statusCode = error.statusCode || 400;
+        res.status(statusCode).json({ success: false, error: error.message || 'Failed to generate Project content' });
     }
 });
 
@@ -535,7 +722,8 @@ router.post('/generate', verifyAdmin, async (req, res) => {
         res.status(200).json({ success: true, data: textResponse });
     } catch (error) {
         console.error('AI Generate Policy error:', error);
-        res.status(500).json({ success: false, error: 'Failed to generate policy: ' + error.message });
+        const statusCode = error.statusCode || 400;
+        res.status(statusCode).json({ success: false, error: error.message || 'Failed to generate policy' });
     }
 });
 
@@ -547,10 +735,19 @@ router.post('/extract-product-all', verifyAdmin, async (req, res) => {
             return res.status(400).json({ success: false, error: 'Raw text is required' });
         }
 
-        // Strip HTML tags and truncate to prevent Gemini token overflow
-        rawText = rawText.replace(/<[^>]*>/g, ' ').replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ').trim();
-        if (rawText.length > 15000) {
-            rawText = rawText.substring(0, 15000) + '... (ตัดข้อความที่เหลือ)';
+        let storeName = 'CAS-CR';
+        let companyLegalName = 'บริษัท แคส-ซีอาร์ จำกัด';
+        try {
+            const [settingsRows] = await db.query("SELECT setting_key, setting_value FROM settings WHERE setting_key IN ('store_name', 'company_legal_name', 'contact_company_name')");
+            const sMap = {};
+            settingsRows.forEach(r => { sMap[r.setting_key] = r.setting_value; });
+            storeName = sMap['store_name'] || sMap['contact_company_name'] || 'CAS-CR';
+            companyLegalName = sMap['company_legal_name'] || storeName;
+        } catch (e) {}
+
+        // Truncate if exceptionally huge to prevent token exhaustion, but keep HTML tables and structure
+        if (rawText.length > 25000) {
+            rawText = rawText.substring(0, 25000) + '... (ตัดข้อความที่เหลือ)';
         }
 
         const [categoryRows] = await db.query('SELECT name FROM categories');
@@ -558,23 +755,19 @@ router.post('/extract-product-all', verifyAdmin, async (req, res) => {
 
         let templateInstruction = '';
         if (knownCategory) {
-            // Known category: load only that category's templates
             const [templates] = await db.query('SELECT * FROM category_attribute_templates WHERE category_name = ? ORDER BY sort_order ASC', [knownCategory]);
             if (templates.length > 0) {
                 const keysList = templates.map(t => `- "${t.attribute_key}" (ความหมาย: ${t.attribute_label})`).join('\n');
                 templateInstruction = `
 CRITICAL RULES FOR "attributes" FIELD:
-The category '${knownCategory}' has these EXACT predefined attribute keys:
+The category '${knownCategory}' has these predefined attribute keys:
 ${keysList}
 
-You MUST follow these rules strictly:
-1. Copy these key strings EXACTLY into the "key" field of each attribute object. Do NOT paraphrase, translate, abbreviate, or create synonyms.
-2. Even if the template key is in English (e.g. "external_dimensions"), you MUST use the exact string "external_dimensions" as the key.
-3. If data in the raw text matches a template key's meaning, fill in its value. If no matching data exists, set value to empty string "".
-4. You may add extra custom keys ONLY for data that truly doesn't fit ANY of the template keys above. These EXTRA custom keys MUST be in Thai language (e.g. "รุ่นสินค้า" not "model", "อุปกรณ์เสริม" not "accessories").`;
+1. For specifications that match any predefined template key above, copy the exact "attribute_key" string into the "key" field.
+2. Extract accurate values for matching template keys.
+3. For all other specifications found in the raw text, add them as custom attributes with clear Thai keys (e.g. "รุ่นสินค้า", "ขนาดสายไฟที่รองรับ", "ความยาวในการตัด", "ระบบขับเคลื่อน", "วัสดุใบมีด", "แหล่งจ่ายไฟ", "กำลังไฟฟ้า").`;
             }
         } else {
-            // No category selected: load ALL category templates so AI can pick the right one
             const [allTemplates] = await db.query('SELECT category_name, attribute_key, attribute_label FROM category_attribute_templates ORDER BY category_name, sort_order ASC');
             if (allTemplates.length > 0) {
                 const grouped = {};
@@ -587,116 +780,82 @@ You MUST follow these rules strictly:
                     .join('\n\n');
                 templateInstruction = `
 CRITICAL RULES FOR "attributes" FIELD:
-After you determine the product category, you MUST use the EXACT predefined attribute keys for that category from this list:
-
+After you determine the product category, use matching predefined attribute keys from this list:
 ${allKeysList}
-
-You MUST follow these rules strictly:
-1. Copy the key strings EXACTLY as listed above. Do NOT paraphrase, translate, abbreviate, or create synonyms.
-2. Even if the template key is in English, you MUST use the exact string as the key.
-3. If data matches a template key's meaning, fill in its value. If no matching data exists, set value to empty string.
-4. You may add extra custom keys ONLY for data that truly doesn't fit ANY template key. These EXTRA custom keys MUST be in Thai language (e.g. "รุ่นสินค้า" not "model").`;
+For all other technical parameters, extract them with formal Thai keys.`;
             }
         }
 
-        const prompt = `
-You are an expert product data analyst, SEO (Search Engine Optimization), and GEO (Generative Engine Optimization) specialist in Thailand.
-The user has provided raw, unformatted text copied from a website or catalog.
-${templateInstruction}
-Your task is to analyze this raw text and extract/format all relevant product data into a strict JSON structure.
+        const prompt = `You are an elite Product Data Analyst, SEO, and Technical Specification Specialist in Thailand representing ${storeName} (${companyLegalName}).
+Your task is to analyze the provided raw product text/HTML and extract all details into a structured, highly accurate JSON object.
 
-Raw Text:
+Raw Product Text / HTML:
 """
 ${rawText}
 """
 
-Requirements:
-1. The extracted text MUST be in Thai language (translate naturally if the source is English, but keep model names or technical terms intact).
-2. "category": You MUST select ONE exact category from the following list that best matches the product: [${validCategories}]. If none matches perfectly, pick the closest one verbatim.
-3. Infer missing information intelligently if it makes sense, but do not invent fake numbers for dimensions or prices.
-4. Keep the output strictly as a JSON object (no markdown block wrappers).
-5. "description": This MUST be high-quality, professional, persuasive, and highly factual copy in Thai.
-   GEO Rules for description:
-   - Organize beautifully into HTML using <h2>, <p> (with good line breaks), <ul>, and <table> for technical specs.
-   - Do NOT use plain sentences for specs; always organize them in a clean <table>.
-   - Include specific references to materials (e.g. โครงสร้างเหล็กกัลวาไนซ์กันสนิมหนา 0.5 มม.), wind resistance, rainwater drainage, and durability certifications.
-   - Maintain a highly professional, trustworthy, and authoritative tone (do not use generic marketing hyperbole like "มหัศจรรย์", "สุดยอด").
-   - Explicitly mention the brand "${storeName}" and manufacturer/operator "${companyLegalName}" to bind local authority entities.
-6. "attributes": You MUST use the predefined template keys listed above (copy them EXACTLY as written). Map extracted data into them. Only add NEW custom keys for data that doesn't fit any template key. ALL custom keys MUST be in Thai language — do NOT use English keys like "model", "accessories", "material", etc. For predefined template keys, keep them exactly as listed (even if they are English).
+${templateInstruction}
 
-Return the response STRICTLY as a valid JSON object with the following keys exactly:
+Requirements:
+1. All extracted text MUST be in standard Thai language (keep exact brand names, models, tolerances, and technical codes intact).
+2. "category": Select ONE exact category from this list that best matches: [${validCategories}]. If none matches, pick the closest one verbatim.
+3. "description": Must be high-quality, professional, beautifully organized HTML (using <h2>, <h3>, <p>, <ul><li>, and <table> inside <figure class="table">) describing the product thoroughly.
+4. "attributes": Extract a comprehensive list of technical specifications. Ensure EVERY measurement, unit, tolerance (e.g. ±(0.1 + 0.0005 × L) มม.), wire size (AWG), dimension, voltage, and material is fully preserved.
+5. "faq": Generate 3 to 5 realistic, high-value FAQs with accurate answers answering customer search intent.
+6. Do NOT invent fake numbers for specifications or prices if not present in the raw text.
+
+Strict Output Format:
+Return ONLY a valid JSON object with the following keys and NO markdown code block wrappers:
 {
-  "name": "Extracted product name or your best creative title",
-  "sku": "Extracted SKU or model number, leave empty string if completely none",
-  "price": number (the discounted or main selling price, e.g. 27900),
-  "original_price": number (the original crossed-out price, e.g. 59000. If none, put null),
-  "category": "Extracted category EXACTLY from the list provided",
-  "seo_title": "A catchy, search-optimized title (max 60 characters)",
-  "seo_description": "A compelling SEO meta description (max 160 characters)",
-  "seo_keywords": "Comma-separated highly searched SEO keywords in Thai and English",
-  "slug": "url-friendly-slug-in-english-or-thai-with-dashes",
-  "llm_context": "Deep, factual, data-dense context in Thai for AI search engines (Perplexity, ChatGPT, Gemini). GEO-optimized: objective/factual tone, explicit structural specifications (size, thickness, lock mechanism, wind capacity), brand/company relationship mapping, and clear target use-cases. Avoid fluff or subjective marketing adjectives.",
-  "description": "Premium, structured, and factual HTML content (no markdown ticks) using <h2>, <p>, <ul>, and <table> for specs. Relate brand '${storeName}' and '${companyLegalName}' with product details.",
-  "short_description": "A very compelling short summary/subtitle (1-2 sentences)",
-  "remarks": "Any special notes, conditions, or warnings mentioned in the text (if none, leave blank)",
+  "name": "Product name in Thai with model",
+  "sku": "SKU or model number",
+  "price": number (selling price, or 0 / null if not mentioned),
+  "original_price": number (original price if discounted, or null),
+  "category": "Extracted category from list",
+  "seo_title": "Optimized SEO title under 60 chars",
+  "seo_description": "Compelling meta description under 160 chars",
+  "seo_keywords": "Comma-separated Thai and English keywords",
+  "slug": "url-friendly-slug-with-dashes",
+  "llm_context": "Deep factual context in Thai for AI Search Engines (Perplexity, ChatGPT)",
+  "description": "Structured HTML description for CKEditor",
+  "short_description": "Short compelling summary (1-2 sentences)",
+  "remarks": "Special conditions or notes (or empty string)",
   "attributes": [
-    // USE EXACT template keys from the predefined list above!
-    {"key": "(exact template key)", "value": "extracted value"}
+    {"key": "ชื่อสเปกภาษาไทย หรือ template key", "value": "ค่าสเปกที่ครบถ้วน"}
   ],
   "faq": [
-    // Generate 3-5 persuasive and highly factual FAQs directly answering voice and AI search queries (e.g., 'จัดส่งอย่างไร', 'ทนแดดทนฝนไหม', 'ต้องเตรียมพื้นอย่างไร')
-    {"question": "คำถามที่พบบ่อย (เช่น มีบริการติดตั้งไหม?)", "answer": "คำตอบเชิงลึกและตรงประเด็น"}
+    {"question": "คำถาม", "answer": "คำตอบ"}
   ],
-  "size": "Extracted dimensions string (e.g. W240 x L246 x H240)",
-  "weight_kg": number (extract if present, otherwise null),
-  "width_cm": number (extract if present, otherwise null. If W240, put 240),
-  "length_cm": number (extract if present, otherwise null. If L240, put 240),
-  "height_cm": number (extract if present, otherwise null. If H240, put 240),
-  "image_url": "Primary image URL if found in the text, otherwise empty",
-  "images": ["Array of any other image URLs found in the text"],
-  "badge_free_shipping": boolean (true if raw text mentions free shipping / ส่งฟรี),
-  "badge_warranty": boolean (true if raw text mentions warranty / รับประกัน),
-  "badge_installation": boolean (true if raw text mentions installation / ติดตั้งฟรี หรือบริการติดตั้ง),
-  "badge_new": boolean (true if raw text mentions new / ใหม่),
-  "badge_bestseller": boolean (true if raw text mentions best seller / ขายดี / ขายไปแล้วเยอะ)
-}
-        `;
+  "size": "Dimensions string (e.g. W430 x D420 x H270 mm)",
+  "weight_kg": number (or null),
+  "width_cm": number (or null),
+  "length_cm": number (or null),
+  "height_cm": number (or null),
+  "image_url": "Image URL if found, else empty string",
+  "images": [],
+  "badge_free_shipping": boolean,
+  "badge_warranty": boolean,
+  "badge_installation": boolean,
+  "badge_new": boolean,
+  "badge_bestseller": boolean
+}`;
 
         const response = await gemini.generateContent({
             prompt,
+            responseMimeType: 'application/json',
             label: 'Extract Product All'
         });
 
-        let result;
-        try {
-            result = gemini.parseJsonResponse(response.text);
-            
-            // Fix literal newlines in description and context fields that might break CKEditor
-            const cleanText = (text) => {
-                if (!text || typeof text !== 'string') return text;
-                // Remove leading or trailing literal quotes if Gemini added them by mistake
-                let fixed = text.replace(/^"|"$/g, '').trim();
-                fixed = fixed.replace(/\\n/g, '<br/>');
-                // If there are no HTML tags, convert regular newlines to <br/>
-                if (!fixed.match(/<p>|<div>|<ul>|<li>|<h2>|<h3>/i)) {
-                    fixed = fixed.replace(/\n/g, '<br/>');
-                }
-                return fixed;
-            };
+        const result = safeJsonParse(response.text);
 
-            if (result.description) result.description = cleanText(result.description);
-            if (result.short_description) result.short_description = cleanText(result.short_description);
-            if (result.llm_context) result.llm_context = cleanText(result.llm_context);
-
-        } catch (parseError) {
-            console.error('AI JSON parse error:', parseError, 'Raw:', response.text.substring(0, 500));
-            return res.status(500).json({ success: false, error: 'AI ส่งข้อมูลกลับมาในรูปแบบที่ไม่ถูกต้อง กรุณาลองใหม่' });
+        if (!result) {
+            return res.status(500).json({ success: false, error: 'AI ส่งข้อมูลกลับมาในรูปแบบที่ไม่ถูกต้อง กรุณาลองใหม่อีกครั้ง' });
         }
 
         res.status(200).json({ success: true, data: result });
     } catch (error) {
         console.error('AI Extract Product error:', error);
-        const statusCode = error.statusCode || 500;
+        const statusCode = error.statusCode || 400;
         res.status(statusCode).json({ success: false, error: error.message || 'ไม่สามารถดึงข้อมูลสินค้าได้' });
     }
 });

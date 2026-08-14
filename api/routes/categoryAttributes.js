@@ -19,6 +19,106 @@ router.get('/:categoryName', async (req, res) => {
     }
 });
 
+// AI Auto-Generate Attribute Templates for Category
+router.post('/ai-generate-template', verifyAdmin, async (req, res) => {
+    try {
+        const { category_name, custom_text } = req.body;
+        if (!category_name) {
+            return res.status(400).json({ success: false, error: 'Category name is required' });
+        }
+
+        // Fetch category info and sample products
+        const [catRows] = await db.query('SELECT * FROM categories WHERE name = ?', [category_name]);
+        const cat = catRows[0] || {};
+
+        const [products] = await db.query(
+            'SELECT name, description, attributes, sku FROM products WHERE category = ? OR JSON_CONTAINS(categories, ?) LIMIT 5',
+            [category_name, JSON.stringify(category_name)]
+        );
+
+        let productContext = '';
+        if (products.length > 0) {
+            productContext = `\nSample Products in this Category:\n` + products.map(p => `- ${p.name} (SKU: ${p.sku || 'N/A'}) | Existing Specs: ${p.attributes || ''}`).join('\n');
+        }
+
+        let customInfoSection = '';
+        if (custom_text && custom_text.trim()) {
+            customInfoSection = `\nUser Provided Product Catalog / Brochure / Raw Specifications (PRIMARY SOURCE TO EXTRACT SPECS FROM):\n"""\n${custom_text.trim()}\n"""\n`;
+        }
+
+        const prompt = `You are an elite Industrial Equipment Specification Engineer and E-Commerce Data Architect in Thailand.
+Your task is to generate a comprehensive, highly accurate, and standardized set of Product Specification Attribute Templates for the category "${category_name}".
+
+Category Details:
+- Name: ${category_name}
+- Description: ${cat.description || ''}
+${productContext}
+${customInfoSection}
+
+Requirements:
+1. Generate between 6 to 16 essential, realistic, and highly practical technical specification templates for this category.
+2. If User Provided Product Catalog / Raw Specifications is given above, you MUST prioritize extracting all technical specification headers and parameters directly from it.
+3. DO NOT make up fake, generic, or non-technical specifications. They must reflect true industrial parameters (e.g. wire size, cutting length, strip length, crimping force, blade material, speed, dimensions, weight, power supply, air pressure).
+4. Each item MUST have:
+   - "attribute_key": English snake_case string (e.g. "model", "wire_size_range", "cutting_length", "power_supply", "machine_dimensions", "machine_weight").
+   - "attribute_label": Professional Thai label with units in parentheses where applicable (e.g. "รุ่นสินค้า", "ขนาดสายไฟที่รองรับ (sq mm / AWG)", "ความยาวในการตัด (มม.)", "แหล่งจ่ายไฟ (Power Supply)", "ขนาดตัวเครื่อง (กว้าง x ลึก x สูง มม.)", "น้ำหนักตัวเครื่อง (กก.)").
+   - "attribute_type": "text", "number", or "select".
+   - "is_required": true/false (true for core specs like model or capacity).
+
+Strict Output Format:
+Return a valid JSON array of objects with keys: "attribute_key", "attribute_label", "attribute_type", "is_required".
+No markdown wrappers.`;
+
+        const response = await gemini.generateContent({
+            prompt,
+            responseMimeType: 'application/json',
+            label: 'AI Category Attribute Generator'
+        });
+
+        let generatedList;
+        try {
+            const cleaned = response.text.replace(/```json\s*|```\s*/gi, '').trim();
+            generatedList = JSON.parse(cleaned);
+        } catch (parseErr) {
+            console.error('Failed to parse AI attributes template:', response.text);
+            return res.status(500).json({ success: false, error: 'AI ส่งข้อมูลกลับมาในรูปแบบที่ไม่ถูกต้อง' });
+        }
+
+        if (!Array.isArray(generatedList) || generatedList.length === 0) {
+            return res.status(500).json({ success: false, error: 'AI ไม่สามารถสร้างรายการคุณสมบัติได้' });
+        }
+
+        // Save generated templates into database
+        await db.query('DELETE FROM category_attribute_templates WHERE category_name = ?', [category_name]);
+
+        for (let i = 0; i < generatedList.length; i++) {
+            const item = generatedList[i];
+            const key = item.attribute_key ? String(item.attribute_key).trim().toLowerCase().replace(/\s+/g, '_') : `attr_${i + 1}`;
+            const label = item.attribute_label ? String(item.attribute_label).trim() : key;
+            const type = ['text', 'number', 'select'].includes(item.attribute_type) ? item.attribute_type : 'text';
+            const isReq = item.is_required === true || item.is_required === 1;
+
+            await db.query(
+                `INSERT INTO category_attribute_templates 
+                 (category_name, attribute_key, attribute_label, sort_order, is_required, attribute_type) 
+                 VALUES (?, ?, ?, ?, ?, ?)`,
+                [category_name, key, label, i, isReq, type]
+            );
+        }
+
+        const [savedRows] = await db.query(
+            'SELECT * FROM category_attribute_templates WHERE category_name = ? ORDER BY sort_order ASC',
+            [category_name]
+        );
+
+        res.status(200).json({ success: true, data: savedRows });
+    } catch (error) {
+        console.error('AI Category Attribute Generator Error:', error);
+        const statusCode = error.statusCode || 400;
+        res.status(statusCode).json({ success: false, error: error.message || 'Failed to generate category attribute templates' });
+    }
+});
+
 // Reorder templates
 router.put('/reorder', verifyAdmin, async (req, res) => {
     try {

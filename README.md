@@ -122,8 +122,8 @@ npm install
 DB_HOST=localhost
 DB_USER=your_mysql_username
 DB_PASSWORD=your_mysql_password
-DB_NAME=storageshed_db
-PORT=8080
+DB_NAME=cascr_th
+PORT=8200
 JWT_SECRET=your_super_secret_jwt_key_at_least_32_characters
 GOOGLE_CLIENT_ID=your_google_sign_in_client_id
 ```
@@ -144,14 +144,14 @@ VITE_GOOGLE_CLIENT_ID="your_google_sign_in_client_id"
 ```bash
 npm start
 ```
-*ระบบจะเปิดทำงานที่พอร์ต `http://localhost:8080`*
+*ระบบจะเปิดทำงานที่พอร์ต `http://localhost:8200`*
 
 ### 2. รันหน้าบ้าน (Frontend Vite Server)
 ในโฟลเดอร์ `frontend` รันคำสั่ง:
 ```bash
 npm run dev
 ```
-*ระบบจะเปิดทำงานในโหมด Hot Reload ที่ `http://localhost:8000` โดยจะมีการทำ Proxy ลิงก์ปลายทางไปยัง API ที่พอร์ต `8080` เสมอ*
+*ระบบจะเปิดทำงานในโหมด Hot Reload ที่ `http://localhost:8000` โดยจะมีการทำ Proxy ลิงก์ปลายทางไปยัง API ที่พอร์ต `8200` เสมอ*
 
 ### ⚡ ทางเลือกพิเศษ (ระบบ Windows เท่านั้น)
 คุณสามารถรันไฟล์สคริปต์ในโฟลเดอร์หลักเพื่อเปิดการใช้งานพร้อมกันได้ทันที:

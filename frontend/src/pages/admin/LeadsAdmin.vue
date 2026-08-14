@@ -27,9 +27,7 @@ const stats = ref({ total: 0, new: 0, contacted: 0, closed: 0 })
 
 // Delete state
 const deleteTarget = ref(null)
-const confirmPassword = ref('')
 const deleteLoading = ref(false)
-const passwordError = ref('')
 
 const API_BASE = import.meta.env.VITE_API_BASE || ''
 const statusOptions = ['ใหม่', 'ติดต่อแล้ว', 'ปิดการขาย']
@@ -150,38 +148,31 @@ function closeDetail() {
 
 function openDeleteConfirm(lead) {
   deleteTarget.value = lead
-  confirmPassword.value = ''
-  passwordError.value = ''
 }
 function cancelDelete() {
   deleteTarget.value = null
-  confirmPassword.value = ''
-  passwordError.value = ''
 }
 
 async function confirmDelete() {
-  if (!confirmPassword.value) { passwordError.value = 'กรุณาระบุรหัสผ่าน'; return }
+  if (!deleteTarget.value) return
   deleteLoading.value = true
-  passwordError.value = ''
   try {
     const res = await apiFetch(`${API_BASE}/api/quotation-submit/${deleteTarget.value.id}`, {
-      method: 'DELETE',
-      body: JSON.stringify({ password: confirmPassword.value })
+      method: 'DELETE'
     })
     const data = await res.json()
     if (data.success) {
       if (selectedLead.value?.id === deleteTarget.value.id) selectedLead.value = null
       showToast('ลบรายการเรียบร้อยแล้ว', 'success')
       cancelDelete()
-      // Reset search to prevent browser autofill contamination
       searchQuery.value = ''
       currentPage.value = 1
       fetchLeads()
     } else {
-      passwordError.value = data.error || 'ไม่สามารถลบได้'
+      showToast(data.error || 'ไม่สามารถลบได้', 'error')
     }
   } catch (e) {
-    passwordError.value = 'เกิดข้อผิดพลาดในการเชื่อมต่อ'
+    showToast('เกิดข้อผิดพลาดในการเชื่อมต่อ', 'error')
   } finally {
     deleteLoading.value = false
   }
@@ -636,15 +627,7 @@ onMounted(fetchLeads)
                   <p class="text-xs text-gray-400 mt-0.5">รายการของ <span class="font-semibold text-gray-600">{{ deleteTarget.customer_name }}</span></p>
                 </div>
               </div>
-              <p class="text-sm text-gray-500 leading-relaxed mb-5">การดำเนินการนี้<span class="font-semibold text-gray-700">ไม่สามารถย้อนกลับได้</span> กรุณาระบุรหัสผ่านแอดมินเพื่อยืนยันการลบ</p>
-              <label class="block text-xs font-bold text-gray-600 mb-1.5 uppercase tracking-wider">รหัสผ่านแอดมิน</label>
-              <input v-model="confirmPassword" type="password" placeholder="••••••••" @keyup.enter="confirmDelete" autofocus autocomplete="new-password" name="delete-confirm-pw" class="w-full text-sm px-4 py-3 rounded-xl border focus:outline-none focus:ring-2 transition-all" :class="passwordError ? 'border-red-400 focus:ring-red-300 bg-red-50' : 'border-gray-200 focus:ring-emerald-300 bg-gray-50'" />
-              <Transition name="fade">
-                <p v-if="passwordError" class="text-xs text-red-600 mt-2 flex items-center gap-1">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
-                  {{ passwordError }}
-                </p>
-              </Transition>
+              <p class="text-sm text-gray-500 leading-relaxed mb-5">คุณแน่ใจหรือไม่ว่าต้องการลบรายการนี้? <span class="font-semibold text-red-500">การดำเนินการนี้ไม่สามารถย้อนกลับได้</span></p>
               <div class="flex gap-2.5 mt-5">
                 <button @click="cancelDelete" class="flex-1 text-sm font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200 py-3 rounded-xl transition-colors">ยกเลิก</button>
                 <button @click="confirmDelete" :disabled="deleteLoading" class="flex-1 text-sm font-bold text-white bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 disabled:opacity-60 py-3 rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-red-200">

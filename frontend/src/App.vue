@@ -78,11 +78,11 @@ const navCategories = ref([])
 
 const categoryThemes = {
   "บ้านเก็บของพลาสติก HDPE": {
-    hexBorderGradient: "from-orange-500 to-amber-400",
-    bgClass: "bg-white hover:bg-orange-50/10 dark:bg-[#111827] dark:hover:bg-orange-950/10 border-gray-100 hover:border-orange-200 dark:border-gray-800 dark:hover:border-orange-900/30",
-    shadowClass: "hover:shadow-[0_15px_30px_-5px_rgba(249,115,22,0.08)]",
-    arrowClass: "text-orange-500 border border-orange-100 dark:border-orange-950 bg-orange-50/50 dark:bg-orange-950/20 group-hover:bg-orange-500 group-hover:text-white group-hover:border-orange-500",
-    accentText: "group-hover:text-orange-500 dark:group-hover:text-orange-400",
+    hexBorderGradient: "from-blue-500 to-blue-400",
+    bgClass: "bg-white hover:bg-blue-50/10 dark:bg-[#111827] dark:hover:bg-blue-950/10 border-gray-100 hover:border-blue-200 dark:border-gray-800 dark:hover:border-blue-900/30",
+    shadowClass: "hover:shadow-[0_15px_30px_-5px_rgba(2,32,164,0.08)]",
+    arrowClass: "text-blue-500 border border-blue-100 dark:border-blue-950 bg-blue-50/50 dark:bg-blue-950/20 group-hover:bg-blue-500 group-hover:text-white group-hover:border-blue-500",
+    accentText: "group-hover:text-blue-500 dark:group-hover:text-blue-400",
   },
   "บ้านเก็บของพลาสติก PP": {
     hexBorderGradient: "from-green-500 to-emerald-400",
@@ -450,7 +450,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="min-h-screen flex flex-col font-sans transition-colors duration-500 bg-[#FAF9F6] dark:bg-[#0C0E14] text-gray-900 dark:text-gray-100 selection:bg-emerald-200 dark:selection:bg-emerald-800/50">
+  <div class="min-h-screen flex flex-col font-sans transition-colors duration-500 bg-[#F8F9FC] dark:bg-[#0C0E14] text-gray-900 dark:text-gray-100 selection:bg-emerald-200 dark:selection:bg-emerald-800/50">
     
     <!-- Maintenance Mode -->
     <Maintenance v-if="settingsStore.maintenanceModeEnabled && !isAdminRoute" />
@@ -463,7 +463,7 @@ onUnmounted(() => {
       :class="[
         'z-50 transition-all duration-500 ease-in-out',
         isScrolled 
-          ? 'fixed top-0 left-0 w-full bg-[#FAF9F6]/90 dark:bg-[#0C0E14]/90 backdrop-blur-xl shadow-[0_10px_30px_-10px_rgba(0,0,0,0.04)] dark:shadow-none border-b border-gray-100/80 dark:border-white/5 py-0' 
+          ? 'fixed top-0 left-0 w-full bg-[#F8F9FC]/90 dark:bg-[#0C0E14]/90 backdrop-blur-xl shadow-[0_10px_30px_-10px_rgba(0,0,0,0.04)] dark:shadow-none border-b border-gray-100/80 dark:border-white/5 py-0' 
           : 'absolute top-0 left-0 w-full bg-transparent border-transparent py-3'
       ]"
     >
@@ -475,12 +475,12 @@ onUnmounted(() => {
       >
         
         <!-- Logo -->
-        <router-link to="/" aria-label="Morespace - หน้าแรก" class="group flex items-center gap-2 md:gap-2.5 z-50 transition-all duration-300 active:scale-95 shrink-0">
+        <router-link to="/" :aria-label="settingsStore.storeName ? `${settingsStore.storeName} - หน้าแรก` : 'หน้าแรก'" class="group flex items-center gap-2 md:gap-2.5 z-50 transition-all duration-300 active:scale-95 shrink-0">
           <template v-if="settingsStore.storeLogo">
             <img :src="getOptimizedImageUrl(settingsStore.storeLogo, 300)" alt="Store Logo" class="h-8 md:h-10 w-auto max-w-[130px] sm:max-w-[160px] md:max-w-[200px] object-contain transition-all duration-300" @error="onImageError" />
           </template>
           <template v-else>
-            <div class="w-8 h-8 md:w-10 md:h-10 border border-[#f07100]/80 bg-white dark:bg-gray-900 text-[#f07100] rounded-lg md:rounded-xl flex items-center justify-center shadow-sm group-hover:shadow-lg group-hover:shadow-orange-500/10 group-hover:border-[#f07100] transition-all duration-300 transform group-hover:-translate-y-0.5 overflow-hidden shrink-0">
+            <div class="w-8 h-8 md:w-10 md:h-10 border border-[#0220A4]/80 bg-white dark:bg-gray-900 text-[#0220A4] rounded-lg md:rounded-xl flex items-center justify-center shadow-sm group-hover:shadow-lg group-hover:shadow-blue-500/10 group-hover:border-[#0220A4] transition-all duration-300 transform group-hover:-translate-y-0.5 overflow-hidden shrink-0">
               <!-- House Icon with Chimney -->
               <svg class="w-4 h-4 md:w-5 md:h-5 transition-transform duration-300 group-hover:scale-110" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l9-9 9 9M5 10v10a1 1 0 001 1h12a1 1 0 001-1V10" />
@@ -489,10 +489,10 @@ onUnmounted(() => {
               </svg>
             </div>
             <div class="flex flex-col leading-none">
-              <span :class="['text-lg md:text-xl font-black tracking-wider uppercase transition-colors duration-300 group-hover:text-[#f07100]', isDarkHeader ? 'text-white' : 'text-[#1b222d] dark:text-white']">
+              <span :class="['text-lg md:text-xl font-black tracking-wider uppercase transition-colors duration-300 group-hover:text-[#0220A4]', isDarkHeader ? 'text-white' : 'text-[#111827] dark:text-white']">
                 {{ (settingsStore.storeName || 'STORAGE').split(' ')[0] }}
               </span>
-              <span v-if="(settingsStore.storeName || 'STORAGE HOUSE').split(' ').slice(1).join(' ')" :class="['text-[10px] md:text-xs font-black tracking-[0.2em] uppercase transition-colors duration-300', isDarkHeader ? 'text-orange-400' : 'text-[#f07100] dark:text-orange-400']">
+              <span v-if="(settingsStore.storeName || 'STORAGE HOUSE').split(' ').slice(1).join(' ')" :class="['text-[10px] md:text-xs font-black tracking-[0.2em] uppercase transition-colors duration-300', isDarkHeader ? 'text-[#5B7CFF]' : 'text-[#0220A4] dark:text-[#5B7CFF]']">
                 {{ (settingsStore.storeName || 'STORAGE HOUSE').split(' ').slice(1).join(' ') }}
               </span>
             </div>
@@ -501,17 +501,17 @@ onUnmounted(() => {
         
         <!-- Desktop Nav -->
         <nav class="hidden lg:flex flex-1 justify-center items-center gap-4 xl:gap-6 mx-2 xl:mx-4">
-          <router-link to="/" :class="['text-sm font-semibold tracking-wide transition-colors duration-300 relative group', isActiveRoute('/') ? 'text-[#9a3412] dark:text-orange-400' : isDarkHeader ? 'text-gray-300 hover:text-orange-400' : 'text-gray-700 dark:text-gray-300 hover:text-[#9a3412] dark:hover:text-orange-400']">
+          <router-link to="/" :class="['text-sm font-semibold tracking-wide transition-colors duration-300 relative group', isActiveRoute('/') ? 'text-[#0220A4] dark:text-[#5B7CFF]' : isDarkHeader ? 'text-gray-300 hover:text-[#5B7CFF]' : 'text-gray-700 dark:text-gray-300 hover:text-[#0220A4] dark:hover:text-[#5B7CFF]']">
             หน้าแรก
-            <span :class="['absolute bottom-[-8px] left-1/2 -translate-x-1/2 h-[2.5px] bg-[#9a3412] dark:bg-orange-400 rounded-full transition-all duration-300', isActiveRoute('/') ? 'w-5' : 'w-0 group-hover:w-5']"></span>
+            <span :class="['absolute bottom-[-8px] left-1/2 -translate-x-1/2 h-[2.5px] bg-[#0220A4] dark:bg-[#5B7CFF] rounded-full transition-all duration-300', isActiveRoute('/') ? 'w-5' : 'w-0 group-hover:w-5']"></span>
           </router-link>
 
           <!-- Products with Dropdown -->
           <div class="relative" @mouseenter="openProductsDropdown" @mouseleave="closeProductsDropdown">
-            <router-link to="/products" :class="['text-sm font-semibold tracking-wide transition-colors duration-300 relative group inline-flex items-center gap-1', isActiveRoute('/products') ? 'text-[#9a3412] dark:text-orange-400' : isDarkHeader ? 'text-gray-300 hover:text-orange-400' : 'text-gray-700 dark:text-gray-300 hover:text-[#9a3412] dark:hover:text-orange-400']">
+            <router-link to="/products" :class="['text-sm font-semibold tracking-wide transition-colors duration-300 relative group inline-flex items-center gap-1', isActiveRoute('/products') ? 'text-[#0220A4] dark:text-[#5B7CFF]' : isDarkHeader ? 'text-gray-300 hover:text-[#5B7CFF]' : 'text-gray-700 dark:text-gray-300 hover:text-[#0220A4] dark:hover:text-[#5B7CFF]']">
               สินค้า
               <svg class="w-3 h-3 transition-transform duration-200" :class="isProductsDropdownOpen ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7"/></svg>
-              <span :class="['absolute bottom-[-8px] left-1/2 -translate-x-1/2 h-[2.5px] bg-[#9a3412] dark:bg-orange-400 rounded-full transition-all duration-300', isActiveRoute('/products') ? 'w-5' : 'w-0 group-hover:w-5']"></span>
+              <span :class="['absolute bottom-[-8px] left-1/2 -translate-x-1/2 h-[2.5px] bg-[#0220A4] dark:bg-[#5B7CFF] rounded-full transition-all duration-300', isActiveRoute('/products') ? 'w-5' : 'w-0 group-hover:w-5']"></span>
             </router-link>
             <!-- Dropdown (Premium Mega Menu) -->
             <transition name="dropdown">
@@ -521,7 +521,7 @@ onUnmounted(() => {
                   <!-- View All Banner -->
                   <router-link to="/products" class="group relative flex items-center justify-between px-5 py-3.5 rounded-2xl bg-gradient-to-r from-slate-50/80 via-gray-50/50 to-blue-50/30 dark:from-gray-900/60 dark:via-gray-900/40 dark:to-blue-950/20 border border-gray-100/50 dark:border-gray-800 hover:shadow-inner transition-all duration-300 mb-3 overflow-hidden">
                     <!-- Subtle contour map lines SVG -->
-                    <svg class="absolute bottom-0 right-0 h-full w-[60%] text-orange-500/10 pointer-events-none" viewBox="0 0 400 120" fill="none">
+                    <svg class="absolute bottom-0 right-0 h-full w-[60%] text-blue-500/10 pointer-events-none" viewBox="0 0 400 120" fill="none">
                       <path d="M 0 120 C 100 80, 200 100, 400 30" stroke="currentColor" stroke-width="1.5"/>
                       <path d="M 0 120 C 120 70, 240 90, 400 20" stroke="currentColor" stroke-width="1.5"/>
                       <path d="M 0 120 C 140 60, 280 80, 400 10" stroke="currentColor" stroke-width="1.5"/>
@@ -531,7 +531,7 @@ onUnmounted(() => {
                     <img src="/images/home/catalog_banner.webp" class="absolute right-[10%] -bottom-1 h-[130%] w-auto object-contain pointer-events-none select-none z-0 mix-blend-multiply dark:mix-blend-normal transition-transform duration-500 group-hover:scale-105" />
 
                     <div class="relative flex items-center gap-4 z-10">
-                      <div class="w-11 h-11 rounded-full bg-[#f07100] text-white flex items-center justify-center shadow-lg shadow-orange-500/20 transform group-hover:scale-105 transition-all duration-300">
+                      <div class="w-11 h-11 rounded-full bg-[#0220A4] text-white flex items-center justify-center shadow-lg shadow-blue-900/20 transform group-hover:scale-105 transition-all duration-300">
                         <svg class="w-5 h-5 sm:w-[22px] sm:h-[22px]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
                         </svg>
@@ -542,7 +542,7 @@ onUnmounted(() => {
                       </div>
                     </div>
                     
-                    <div class="relative z-10 w-9 h-9 rounded-full bg-white dark:bg-gray-800 text-[#f07100] dark:text-orange-400 flex items-center justify-center shadow-md border border-gray-100/50 dark:border-gray-700/50 group-hover:scale-110 group-hover:shadow-lg group-hover:border-orange-200 transition-all duration-300">
+                    <div class="relative z-10 w-9 h-9 rounded-full bg-white dark:bg-gray-800 text-[#0220A4] dark:text-[#5B7CFF] flex items-center justify-center shadow-md border border-gray-100/50 dark:border-gray-700/50 group-hover:scale-110 group-hover:shadow-lg group-hover:border-blue-200 transition-all duration-300">
                       <svg class="w-4 h-4 group-hover:translate-x-0.5 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
                       </svg>
@@ -604,7 +604,7 @@ onUnmounted(() => {
                   <div class="mt-2.5 pt-2.5 border-t border-gray-100 dark:border-gray-800/60 grid grid-cols-2 sm:grid-cols-4 gap-y-2 gap-x-1">
                     <!-- Badge 1 -->
                     <div class="flex items-center gap-3 justify-center sm:justify-start sm:border-r last:border-r-0 border-gray-100/80 dark:border-gray-800/60 sm:pr-3">
-                      <div class="w-8 h-8 rounded-xl bg-orange-50 dark:bg-orange-950/20 flex items-center justify-center text-[#f07100] flex-shrink-0">
+                      <div class="w-8 h-8 rounded-xl bg-[#F3F5FF] dark:bg-blue-950/20 flex items-center justify-center text-[#0220A4] flex-shrink-0">
                         <svg class="w-4.5 h-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                           <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                         </svg>
@@ -617,7 +617,7 @@ onUnmounted(() => {
 
                     <!-- Badge 2 -->
                     <div class="flex items-center gap-3 justify-center sm:justify-start sm:border-r last:border-r-0 border-gray-100/80 dark:border-gray-800/60 sm:px-3">
-                      <div class="w-8 h-8 rounded-xl bg-orange-50 dark:bg-orange-950/20 flex items-center justify-center text-[#f07100] flex-shrink-0">
+                      <div class="w-8 h-8 rounded-xl bg-[#F3F5FF] dark:bg-blue-950/20 flex items-center justify-center text-[#0220A4] flex-shrink-0">
                         <svg class="w-4.5 h-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                           <path stroke-linecap="round" stroke-linejoin="round" d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
                         </svg>
@@ -630,7 +630,7 @@ onUnmounted(() => {
 
                     <!-- Badge 3 -->
                     <div class="flex items-center gap-3 justify-center sm:justify-start sm:border-r last:border-r-0 border-gray-100/80 dark:border-gray-800/60 sm:px-3">
-                      <div class="w-8 h-8 rounded-xl bg-orange-50 dark:bg-orange-950/20 flex items-center justify-center text-[#f07100] flex-shrink-0">
+                      <div class="w-8 h-8 rounded-xl bg-[#F3F5FF] dark:bg-blue-950/20 flex items-center justify-center text-[#0220A4] flex-shrink-0">
                         <svg class="w-4.5 h-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                           <path d="M20 16.58A5 5 0 0 0 18 7h-1.26A8 8 0 1 0 4 15.25" />
                           <path d="M8 16v4" />
@@ -646,7 +646,7 @@ onUnmounted(() => {
 
                     <!-- Badge 4 -->
                     <div class="flex items-center gap-3 justify-center sm:justify-start sm:pl-3">
-                      <div class="w-8 h-8 rounded-xl bg-orange-50 dark:bg-orange-950/20 flex items-center justify-center text-[#f07100] flex-shrink-0">
+                      <div class="w-8 h-8 rounded-xl bg-[#F3F5FF] dark:bg-blue-950/20 flex items-center justify-center text-[#0220A4] flex-shrink-0">
                         <svg class="w-4.5 h-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                           <circle cx="12" cy="12" r="10" />
                           <polygon points="12 8 13.09 11.36 16.64 11.36 13.73 13.45 14.82 16.82 12 14.73 9.18 16.82 10.27 13.45 7.36 11.36 10.91 11.36" />
@@ -664,55 +664,55 @@ onUnmounted(() => {
             </transition>
           </div>
 
-          <router-link to="/projects" :class="['text-sm font-semibold tracking-wide transition-colors duration-300 relative group', isActiveRoute('/projects') ? 'text-[#9a3412] dark:text-orange-400' : isDarkHeader ? 'text-gray-300 hover:text-orange-400' : 'text-gray-700 dark:text-gray-300 hover:text-[#9a3412] dark:hover:text-orange-400']">
+          <router-link to="/projects" :class="['text-sm font-semibold tracking-wide transition-colors duration-300 relative group', isActiveRoute('/projects') ? 'text-[#0220A4] dark:text-[#5B7CFF]' : isDarkHeader ? 'text-gray-300 hover:text-[#5B7CFF]' : 'text-gray-700 dark:text-gray-300 hover:text-[#0220A4] dark:hover:text-[#5B7CFF]']">
             ผลงาน
-            <span :class="['absolute bottom-[-8px] left-1/2 -translate-x-1/2 h-[2.5px] bg-[#9a3412] dark:bg-orange-400 rounded-full transition-all duration-300', isActiveRoute('/projects') ? 'w-5' : 'w-0 group-hover:w-5']"></span>
+            <span :class="['absolute bottom-[-8px] left-1/2 -translate-x-1/2 h-[2.5px] bg-[#0220A4] dark:bg-[#5B7CFF] rounded-full transition-all duration-300', isActiveRoute('/projects') ? 'w-5' : 'w-0 group-hover:w-5']"></span>
           </router-link>
 
-          <router-link to="/blog" :class="['text-sm font-semibold tracking-wide transition-colors duration-300 relative group', isActiveRoute('/blog') ? 'text-[#9a3412] dark:text-orange-400' : isDarkHeader ? 'text-gray-300 hover:text-orange-400' : 'text-gray-700 dark:text-gray-300 hover:text-[#9a3412] dark:hover:text-orange-400']">
+          <router-link to="/blog" :class="['text-sm font-semibold tracking-wide transition-colors duration-300 relative group', isActiveRoute('/blog') ? 'text-[#0220A4] dark:text-[#5B7CFF]' : isDarkHeader ? 'text-gray-300 hover:text-[#5B7CFF]' : 'text-gray-700 dark:text-gray-300 hover:text-[#0220A4] dark:hover:text-[#5B7CFF]']">
             บทความ
-            <span :class="['absolute bottom-[-8px] left-1/2 -translate-x-1/2 h-[2.5px] bg-[#9a3412] dark:bg-orange-400 rounded-full transition-all duration-300', isActiveRoute('/blog') ? 'w-5' : 'w-0 group-hover:w-5']"></span>
+            <span :class="['absolute bottom-[-8px] left-1/2 -translate-x-1/2 h-[2.5px] bg-[#0220A4] dark:bg-[#5B7CFF] rounded-full transition-all duration-300', isActiveRoute('/blog') ? 'w-5' : 'w-0 group-hover:w-5']"></span>
           </router-link>
 
-          <router-link to="/services" :class="['text-sm font-semibold tracking-wide transition-colors duration-300 relative group', isActiveRoute('/services') ? 'text-[#9a3412] dark:text-orange-400' : isDarkHeader ? 'text-gray-300 hover:text-orange-400' : 'text-gray-700 dark:text-gray-300 hover:text-[#9a3412] dark:hover:text-orange-400']">
+          <router-link to="/services" :class="['text-sm font-semibold tracking-wide transition-colors duration-300 relative group', isActiveRoute('/services') ? 'text-[#0220A4] dark:text-[#5B7CFF]' : isDarkHeader ? 'text-gray-300 hover:text-[#5B7CFF]' : 'text-gray-700 dark:text-gray-300 hover:text-[#0220A4] dark:hover:text-[#5B7CFF]']">
             บริการ
-            <span :class="['absolute bottom-[-8px] left-1/2 -translate-x-1/2 h-[2.5px] bg-[#9a3412] dark:bg-orange-400 rounded-full transition-all duration-300', isActiveRoute('/services') ? 'w-5' : 'w-0 group-hover:w-5']"></span>
+            <span :class="['absolute bottom-[-8px] left-1/2 -translate-x-1/2 h-[2.5px] bg-[#0220A4] dark:bg-[#5B7CFF] rounded-full transition-all duration-300', isActiveRoute('/services') ? 'w-5' : 'w-0 group-hover:w-5']"></span>
           </router-link>
 
-          <router-link to="/about" :class="['text-sm font-semibold tracking-wide transition-colors duration-300 relative group', isActiveRoute('/about') ? 'text-[#9a3412] dark:text-orange-400' : isDarkHeader ? 'text-gray-300 hover:text-orange-400' : 'text-gray-700 dark:text-gray-300 hover:text-[#9a3412] dark:hover:text-orange-400']">
+          <router-link to="/about" :class="['text-sm font-semibold tracking-wide transition-colors duration-300 relative group', isActiveRoute('/about') ? 'text-[#0220A4] dark:text-[#5B7CFF]' : isDarkHeader ? 'text-gray-300 hover:text-[#5B7CFF]' : 'text-gray-700 dark:text-gray-300 hover:text-[#0220A4] dark:hover:text-[#5B7CFF]']">
             เกี่ยวกับเรา
-            <span :class="['absolute bottom-[-8px] left-1/2 -translate-x-1/2 h-[2.5px] bg-[#9a3412] dark:bg-orange-400 rounded-full transition-all duration-300', isActiveRoute('/about') ? 'w-5' : 'w-0 group-hover:w-5']"></span>
+            <span :class="['absolute bottom-[-8px] left-1/2 -translate-x-1/2 h-[2.5px] bg-[#0220A4] dark:bg-[#5B7CFF] rounded-full transition-all duration-300', isActiveRoute('/about') ? 'w-5' : 'w-0 group-hover:w-5']"></span>
           </router-link>
 
-          <router-link to="/contact" :class="['text-sm font-semibold tracking-wide transition-colors duration-300 relative group', isActiveRoute('/contact') ? 'text-[#9a3412] dark:text-orange-400' : isDarkHeader ? 'text-gray-300 hover:text-orange-400' : 'text-gray-700 dark:text-gray-300 hover:text-[#9a3412] dark:hover:text-orange-400']">
+          <router-link to="/contact" :class="['text-sm font-semibold tracking-wide transition-colors duration-300 relative group', isActiveRoute('/contact') ? 'text-[#0220A4] dark:text-[#5B7CFF]' : isDarkHeader ? 'text-gray-300 hover:text-[#5B7CFF]' : 'text-gray-700 dark:text-gray-300 hover:text-[#0220A4] dark:hover:text-[#5B7CFF]']">
             ติดต่อเรา
-            <span :class="['absolute bottom-[-8px] left-1/2 -translate-x-1/2 h-[2.5px] bg-[#9a3412] dark:bg-orange-400 rounded-full transition-all duration-300', isActiveRoute('/contact') ? 'w-5' : 'w-0 group-hover:w-5']"></span>
+            <span :class="['absolute bottom-[-8px] left-1/2 -translate-x-1/2 h-[2.5px] bg-[#0220A4] dark:bg-[#5B7CFF] rounded-full transition-all duration-300', isActiveRoute('/contact') ? 'w-5' : 'w-0 group-hover:w-5']"></span>
           </router-link>
         </nav>
         <!-- Desktop Actions -->
         <div class="hidden lg:flex items-center gap-1.5 xl:gap-2.5 z-10 shrink-0 relative">
-          <button @click="isSearchOpen = true" aria-label="ค้นหาสินค้า" :class="['transition-all w-12 h-12 flex items-center justify-center rounded-full duration-300 hover:scale-105 hover:bg-[#f07100]/10 dark:hover:bg-white/5 hover:text-[#f07100] dark:hover:text-orange-400 flex-shrink-0', isDarkHeader ? 'text-gray-300' : 'text-gray-600 dark:text-gray-300']">
+          <button @click="isSearchOpen = true" aria-label="ค้นหาสินค้า" :class="['transition-all w-12 h-12 flex items-center justify-center rounded-full duration-300 hover:scale-105 hover:bg-[#0220A4]/10 dark:hover:bg-white/5 hover:text-[#0220A4] dark:hover:text-[#5B7CFF] flex-shrink-0', isDarkHeader ? 'text-gray-300' : 'text-gray-600 dark:text-gray-300']">
             <svg class="w-[20px] h-[20px] xl:w-[22px] xl:h-[22px]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
           </button>
-          <router-link v-if="settingsStore.isOnlineShoppingEnabled" to="/cart" aria-label="ตะกร้าสินค้า" :class="['relative transition-all w-12 h-12 flex items-center justify-center rounded-full duration-300 hover:scale-105 hover:bg-[#f07100]/10 dark:hover:bg-white/5 hover:text-[#f07100] dark:hover:text-orange-400 flex-shrink-0', isDarkHeader ? 'text-gray-300' : 'text-gray-600 dark:text-gray-300']">
+          <router-link v-if="settingsStore.isOnlineShoppingEnabled" to="/cart" aria-label="ตะกร้าสินค้า" :class="['relative transition-all w-12 h-12 flex items-center justify-center rounded-full duration-300 hover:scale-105 hover:bg-[#0220A4]/10 dark:hover:bg-white/5 hover:text-[#0220A4] dark:hover:text-[#5B7CFF] flex-shrink-0', isDarkHeader ? 'text-gray-300' : 'text-gray-600 dark:text-gray-300']">
             <svg class="w-[20px] h-[20px] xl:w-[22px] xl:h-[22px]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
             </svg>
-            <span v-if="cartStore.cartTotal > 0" class="absolute top-1.5 right-1.5 bg-gradient-to-r from-[#f07100] to-[#ff8a24] text-white text-[9px] xl:text-[10px] font-black min-w-[18px] h-[18px] px-1 rounded-full flex items-center justify-center border-2 border-white dark:border-[#0C0E14] shadow-md animate-pulse leading-none">
+            <span v-if="cartStore.cartTotal > 0" class="absolute top-1.5 right-1.5 bg-gradient-to-r from-[#0220A4] to-[#4169E1] text-white text-[9px] xl:text-[10px] font-black min-w-[18px] h-[18px] px-1 rounded-full flex items-center justify-center border-2 border-white dark:border-[#0C0E14] shadow-md animate-pulse leading-none">
               {{ cartStore.cartTotal > 99 ? '99+' : cartStore.cartTotal }}
             </span>
           </router-link>
           
-          <button @click="toggleDarkMode" aria-label="สลับโหมดมืด" :class="['transition-all w-12 h-12 flex items-center justify-center rounded-full duration-300 hover:scale-105 hover:bg-[#f07100]/10 dark:hover:bg-white/5 hover:text-[#f07100] dark:hover:text-orange-400 flex-shrink-0', isDarkHeader ? 'text-gray-300' : 'text-gray-600 dark:text-gray-300']">
+          <button @click="toggleDarkMode" aria-label="สลับโหมดมืด" :class="['transition-all w-12 h-12 flex items-center justify-center rounded-full duration-300 hover:scale-105 hover:bg-[#0220A4]/10 dark:hover:bg-white/5 hover:text-[#0220A4] dark:hover:text-[#5B7CFF] flex-shrink-0', isDarkHeader ? 'text-gray-300' : 'text-gray-600 dark:text-gray-300']">
             <svg v-if="!isDark" class="w-[20px] h-[20px] xl:w-[22px] xl:h-[22px]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
             <svg v-else class="w-[20px] h-[20px] xl:w-[22px] xl:h-[22px]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
           </button>
           
           <!-- Auth / Profile -->
           <div v-if="settingsStore.isOnlineShoppingEnabled && authStore.isAuthenticated" class="relative group">
-             <button aria-label="เมนูบัญชีผู้ใช้" class="flex items-center justify-center p-0.5 rounded-full border border-gray-200/80 dark:border-gray-800 hover:border-[#f07100] dark:hover:border-orange-400 bg-white dark:bg-gray-900 shadow-sm transition-all duration-300 hover:scale-105">
+             <button aria-label="เมนูบัญชีผู้ใช้" class="flex items-center justify-center p-0.5 rounded-full border border-gray-200/80 dark:border-gray-800 hover:border-[#0220A4] dark:hover:border-[#5B7CFF] bg-white dark:bg-gray-900 shadow-sm transition-all duration-300 hover:scale-105">
                 <img v-if="authStore.currentUser?.avatar_url && !desktopAvatarError" :src="authStore.currentUser?.avatar_url" @error="desktopAvatarError = true" class="w-8 h-8 rounded-full object-cover">
-                <div v-else class="w-8 h-8 rounded-full bg-[#f07100] flex items-center justify-center text-white text-xs font-black">
+                <div v-else class="w-8 h-8 rounded-full bg-[#0220A4] flex items-center justify-center text-white text-xs font-black">
                   {{ authStore.currentUser?.first_name?.charAt(0)?.toUpperCase() || authStore.currentUser?.username?.charAt(0)?.toUpperCase() || 'U' }}
                 </div>
              </button>
@@ -722,13 +722,13 @@ onUnmounted(() => {
                    <p class="text-sm font-bold text-gray-900 dark:text-white truncate">{{ authStore.currentUser?.first_name }} {{ authStore.currentUser?.last_name }}</p>
                    <p class="text-xs text-gray-500 dark:text-gray-400 truncate mt-0.5">{{ authStore.currentUser?.email }}</p>
                  </div>
-                 <router-link to="/profile" class="w-full text-left px-5 py-2.5 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-[#f07100] dark:hover:text-[#f07100] hover:bg-[#fff5eb] dark:hover:bg-emerald-900/10 transition-colors flex items-center gap-2">
+                 <router-link to="/profile" class="w-full text-left px-5 py-2.5 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-[#0220A4] dark:hover:text-[#0220A4] hover:bg-[#F3F5FF] dark:hover:bg-blue-900/10 transition-colors flex items-center gap-2">
                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg> บัญชีของฉัน
                  </router-link>
-                 <router-link to="/profile?tab=orders" class="w-full text-left px-5 py-2.5 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-[#f07100] dark:hover:text-[#f07100] hover:bg-[#fff5eb] dark:hover:bg-emerald-900/10 transition-colors flex items-center gap-2">
+                 <router-link to="/profile?tab=orders" class="w-full text-left px-5 py-2.5 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-[#0220A4] dark:hover:text-[#0220A4] hover:bg-[#F3F5FF] dark:hover:bg-blue-900/10 transition-colors flex items-center gap-2">
                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg> การสั่งซื้อของฉัน
                  </router-link>
-                 <router-link v-if="settingsStore.isWishlistEnabled" to="/profile?tab=wishlist" class="w-full text-left px-5 py-2.5 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-[#f07100] dark:hover:text-[#f07100] hover:bg-[#fff5eb] dark:hover:bg-emerald-900/10 transition-colors flex items-center gap-2">
+                 <router-link v-if="settingsStore.isWishlistEnabled" to="/profile?tab=wishlist" class="w-full text-left px-5 py-2.5 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-[#0220A4] dark:hover:text-[#0220A4] hover:bg-[#F3F5FF] dark:hover:bg-blue-900/10 transition-colors flex items-center gap-2">
                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M11.645 20.91l-.007-.003-.022-.012a15.247 15.247 0 01-.383-.218 25.18 25.18 0 01-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0112 5.052 5.5 5.5 0 0116.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 01-4.244 3.17 15.247 15.247 0 01-.383.219l-.022.012-.007.004-.003.001a.752.752 0 01-.704 0l-.003-.001z"/></svg> รายการโปรด
                  </router-link>
                  <div class="my-2 border-t border-gray-100 dark:border-gray-800"></div>
@@ -738,11 +738,11 @@ onUnmounted(() => {
                </div>
              </div>
           </div>
-          <button @click="isLoginModalOpen = true" v-else-if="settingsStore.isOnlineShoppingEnabled" aria-label="เข้าสู่ระบบ" :class="['transition-all p-2.5 rounded-full duration-300 hover:scale-105 hover:bg-[#f07100]/10 dark:hover:bg-white/5 hover:text-[#f07100] dark:hover:text-[#f07100]', isDarkHeader ? 'text-gray-300' : 'text-gray-600 dark:text-gray-300']" title="เข้าสู่ระบบ">
+          <button @click="isLoginModalOpen = true" v-else-if="settingsStore.isOnlineShoppingEnabled" aria-label="เข้าสู่ระบบ" :class="['transition-all p-2.5 rounded-full duration-300 hover:scale-105 hover:bg-[#0220A4]/10 dark:hover:bg-white/5 hover:text-[#0220A4] dark:hover:text-[#0220A4]', isDarkHeader ? 'text-gray-300' : 'text-gray-600 dark:text-gray-300']" title="เข้าสู่ระบบ">
             <svg class="w-[20px] h-[20px] xl:w-[22px] xl:h-[22px]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
           </button>
  
-          <router-link to="/quotation" class="px-6 py-2.5 rounded-full text-xs xl:text-sm font-black tracking-wider text-white bg-gradient-to-r from-[#f07100] to-[#ff851b] hover:from-[#d95f00] hover:to-[#f07100] hover:shadow-lg hover:shadow-orange-500/20 active:scale-95 transition-all duration-300 transform hover:-translate-y-0.5 whitespace-nowrap ml-2">
+          <router-link to="/quotation" class="px-6 py-2.5 rounded-full text-xs xl:text-sm font-black tracking-wider text-white bg-gradient-to-r from-[#0220A4] to-[#4169E1] hover:from-[#01166F] hover:to-[#0220A4] hover:shadow-lg hover:shadow-blue-900/20 active:scale-95 transition-all duration-300 transform hover:-translate-y-0.5 whitespace-nowrap ml-2">
             ขอใบเสนอราคา
           </router-link>
         </div>
@@ -756,7 +756,7 @@ onUnmounted(() => {
             <svg class="w-5 h-5 sm:w-[22px] sm:h-[22px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
             </svg>
-            <span v-if="cartStore.cartTotal > 0" class="absolute top-0.5 right-0.5 bg-gradient-to-r from-[#f07100] to-[#ff8a24] text-white text-[9px] font-bold min-w-[16px] h-[16px] px-1 rounded-full flex items-center justify-center border-2 border-white dark:border-[#0C0E14] shadow-sm animate-pulse leading-none">
+            <span v-if="cartStore.cartTotal > 0" class="absolute top-0.5 right-0.5 bg-gradient-to-r from-[#0220A4] to-[#4169E1] text-white text-[9px] font-bold min-w-[16px] h-[16px] px-1 rounded-full flex items-center justify-center border-2 border-white dark:border-[#0C0E14] shadow-sm animate-pulse leading-none">
               {{ cartStore.cartTotal > 99 ? '99+' : cartStore.cartTotal }}
             </span>
           </router-link>
@@ -917,24 +917,24 @@ onUnmounted(() => {
     <footer v-if="!isAdminRoute" class="relative z-0 bg-gradient-to-tr from-[#FFF7ED] via-[#FFFBF9] to-white dark:from-[#110c08] dark:via-[#0c0a08] dark:to-[#050505] border-t border-gray-100 dark:border-white/5 pt-24 pb-0 overflow-hidden">
       <!-- Glow -->
       <div class="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-7xl pointer-events-none -z-10">
-        <div class="absolute top-[-20%] left-[-10%] w-[500px] h-[500px] bg-orange-500/5 dark:bg-orange-500/5 blur-[120px] rounded-full"></div>
-        <div class="absolute bottom-[-20%] right-[-10%] w-[500px] h-[500px] bg-amber-500/5 dark:bg-amber-500/5 blur-[120px] rounded-full"></div>
+        <div class="absolute top-[-20%] left-[-10%] w-[500px] h-[500px] bg-blue-500/5 dark:bg-blue-500/5 blur-[120px] rounded-full"></div>
+        <div class="absolute bottom-[-20%] right-[-10%] w-[500px] h-[500px] bg-indigo-500/5 dark:bg-indigo-500/5 blur-[120px] rounded-full"></div>
       </div>
 
-      <!-- Autumn Leaves & Decor -->
+      <!-- Background Decor -->
       <div class="absolute top-0 right-0 w-64 h-64 pointer-events-none overflow-hidden select-none z-0">
-        <svg class="absolute -top-12 -right-12 w-48 h-48 text-[#F07100]/15 dark:text-[#F07100]/10 transform -rotate-12" viewBox="0 0 24 24" fill="currentColor">
+        <svg class="absolute -top-12 -right-12 w-48 h-48 text-[#0220A4]/15 dark:text-[#0220A4]/10 transform -rotate-12" viewBox="0 0 24 24" fill="currentColor">
           <path d="M21 2c-3.87 0-7.74 1.46-10.61 4.39C7.53 9.27 6.07 13.14 6.07 17.01H2c0 2.76 2.24 5 5 5h10.01c3.87 0 7.74-1.46 10.61-4.39 2.86-2.88 4.32-6.75 4.32-10.62L21 2zm-3.99 15.01H8.08c.55-3.03 1.74-5.91 3.51-8.48 1.76 2.57 2.95 5.45 3.51 8.48z" />
         </svg>
       </div>
 
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <!-- Newsletter Banner: Compact horizontal strip -->
-        <div class="relative rounded-3xl overflow-hidden mb-12 border border-orange-100/60 dark:border-white/5 bg-gradient-to-r from-[#FFF8F2] via-white to-[#F0FBF9] dark:from-[#1a0f06] dark:via-[#0f0f0f] dark:to-[#051a16]">
+        <div class="relative rounded-3xl overflow-hidden mb-12 border border-blue-100/60 dark:border-white/5 bg-gradient-to-r from-[#F3F5FF] via-white to-[#E8EDFF] dark:from-[#080D1A] dark:via-[#0f0f0f] dark:to-[#051a16]">
           <!-- Subtle glow blobs -->
           <div class="absolute inset-0 pointer-events-none">
-            <div class="absolute -top-12 -left-12 w-48 h-48 bg-[#f07100]/8 dark:bg-[#f07100]/5 blur-3xl rounded-full"></div>
-            <div class="absolute -bottom-12 -right-12 w-48 h-48 bg-[#00A78E]/8 dark:bg-[#00A78E]/5 blur-3xl rounded-full"></div>
+            <div class="absolute -top-12 -left-12 w-48 h-48 bg-[#0220A4]/8 dark:bg-[#0220A4]/5 blur-3xl rounded-full"></div>
+            <div class="absolute -bottom-12 -right-12 w-48 h-48 bg-[#4169E1]/8 dark:bg-[#4169E1]/5 blur-3xl rounded-full"></div>
           </div>
 
           <div class="relative z-10 flex flex-col lg:flex-row items-center gap-6 px-8 py-7">
@@ -942,16 +942,16 @@ onUnmounted(() => {
             <!-- Left: Icon + Text -->
             <div class="flex items-center gap-4 flex-shrink-0">
               <!-- Icon circle -->
-              <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#f07100] to-[#e05a00] shadow-lg shadow-orange-500/20 flex items-center justify-center flex-shrink-0">
+              <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#0220A4] to-[#01166F] shadow-lg shadow-blue-900/20 flex items-center justify-center flex-shrink-0">
                 <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                 </svg>
               </div>
               <div>
-                <p class="text-[11px] font-bold text-[#f07100] dark:text-orange-400 uppercase tracking-widest mb-0.5">ติดตามข่าวสาร</p>
+                <p class="text-[11px] font-bold text-[#0220A4] dark:text-[#5B7CFF] uppercase tracking-widest mb-0.5">ติดตามข่าวสาร</p>
                 <h2 class="text-[17px] font-black text-gray-900 dark:text-white leading-tight">
                   {{ settingsStore.footerNewsletterTitle }}
-                  <svg class="inline w-4 h-4 text-amber-400 animate-pulse ml-1 -mt-0.5" fill="currentColor" viewBox="0 0 24 24">
+                  <svg class="inline w-4 h-4 text-blue-400 animate-pulse ml-1 -mt-0.5" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M12 2l2.4 7.2L22 11.6l-7.6 2.4L12 22l-2.4-7.2L2 11.6l7.6-2.4L12 2z" />
                   </svg>
                 </h2>
@@ -968,14 +968,14 @@ onUnmounted(() => {
                 <input type="text" name="b_name" tabindex="-1" v-model="newsletterHoneypot" class="hidden">
 
                 <template v-if="newsletterSuccess">
-                  <div class="w-full bg-[#EAF8F6] dark:bg-[#072F29]/20 border border-[#CEEFEA] dark:border-[#084D41]/30 rounded-full py-3 px-6 flex items-center justify-center gap-2.5">
-                    <svg class="w-5 h-5 text-[#00A78E]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                    <span class="text-sm font-bold text-[#008F7A] dark:text-[#00cfae]">ขอบคุณที่ติดตามข่าวสาร!</span>
+                  <div class="w-full bg-[#E8EDFF] dark:bg-[#080D1A]/40 border border-[#C7D4FF] dark:border-blue-900/30 rounded-full py-3 px-6 flex items-center justify-center gap-2.5">
+                    <svg class="w-5 h-5 text-[#0220A4]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                    <span class="text-sm font-bold text-[#0220A4] dark:text-[#5B7CFF]">ขอบคุณที่ติดตามข่าวสาร!</span>
                   </div>
                 </template>
 
                 <template v-else>
-                  <div class="flex items-center bg-white dark:bg-gray-900 border-2 border-[#f07100]/70 rounded-full overflow-hidden pl-4 focus-within:ring-4 focus-within:ring-[#f07100]/10 transition-all duration-300 shadow-sm">
+                  <div class="flex items-center bg-white dark:bg-gray-900 border-2 border-[#0220A4]/70 rounded-full overflow-hidden pl-4 focus-within:ring-4 focus-within:ring-[#0220A4]/10 transition-all duration-300 shadow-sm">
                     <svg class="w-4 h-4 text-gray-400 flex-shrink-0 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                       <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                     </svg>
@@ -988,7 +988,7 @@ onUnmounted(() => {
                     <button
                       type="submit"
                       :disabled="newsletterLoading"
-                      class="m-1 px-5 py-2.5 bg-[#111827] dark:bg-white text-white dark:text-gray-900 hover:bg-[#f07100] dark:hover:bg-[#f07100] dark:hover:text-white text-xs font-black tracking-wide rounded-full transition-all duration-300 flex items-center gap-1.5 whitespace-nowrap disabled:opacity-60 flex-shrink-0"
+                      class="m-1 px-5 py-2.5 bg-[#0220A4] text-white hover:bg-[#01166F] text-xs font-black tracking-wide rounded-full transition-all duration-300 flex items-center gap-1.5 whitespace-nowrap disabled:opacity-60 flex-shrink-0 shadow-md"
                     >
                       <svg v-if="newsletterLoading" class="animate-spin w-3.5 h-3.5" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
                       <template v-else>
@@ -1004,7 +1004,7 @@ onUnmounted(() => {
 
             <!-- Privacy note -->
             <div class="hidden xl:flex items-center gap-1.5 text-[11px] text-gray-400 dark:text-gray-500 flex-shrink-0">
-              <svg class="w-3.5 h-3.5 text-[#00A78E] flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+              <svg class="w-3.5 h-3.5 text-[#0220A4] flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
               </svg>
               <span class="whitespace-pre-line">{{ settingsStore.footerNewsletterPrivacy }}</span>
@@ -1020,12 +1020,12 @@ onUnmounted(() => {
           
           <!-- Column 1: Brand & Address -->
           <div class="lg:col-span-3 flex flex-col items-start">
-            <router-link to="/" aria-label="Morespace - หน้าแรก" class="group inline-flex items-center gap-4 mb-6 shrink-0">
+            <router-link to="/" :aria-label="settingsStore.storeName ? `${settingsStore.storeName} - หน้าแรก` : 'หน้าแรก'" class="group inline-flex items-center gap-4 mb-6 shrink-0">
               <template v-if="settingsStore.storeLogo">
                  <img :src="getOptimizedImageUrl(settingsStore.storeLogo, 300)" alt="Store Logo" class="h-8 md:h-10 w-auto max-w-[130px] sm:max-w-[160px] md:max-w-[200px] object-contain grayscale opacity-80 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-300" @error="onImageError" />
               </template>
               <template v-else>
-                <span class="text-2xl font-black tracking-tighter text-gray-900 dark:text-white">{{ settingsStore.storeName || 'STORAGE HOUSE' }}</span>
+                <span class="text-2xl font-black tracking-tighter text-gray-900 dark:text-white">{{ settingsStore.storeName || '' }}</span>
               </template>
             </router-link>
             
@@ -1035,14 +1035,14 @@ onUnmounted(() => {
 
             <div v-if="settingsStore.storeAddress || settingsStore.storeTaxId" class="space-y-3.5 mb-6 text-gray-600 dark:text-gray-400 text-[14px] text-left">
               <div v-if="settingsStore.storeAddress" class="flex items-start gap-3">
-                <svg class="w-5 h-5 text-[#f07100] flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <svg class="w-5 h-5 text-[#0220A4] flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                   <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
                 <span class="leading-relaxed">{{ settingsStore.storeAddress }}</span>
               </div>
               <div v-if="settingsStore.storeTaxId" class="flex items-center gap-3">
-                <svg class="w-5 h-5 text-[#f07100] flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <svg class="w-5 h-5 text-[#0220A4] flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
                 <span>เลขประจำตัวผู้เสียภาษี: {{ settingsStore.storeTaxId }}</span>
@@ -1051,13 +1051,13 @@ onUnmounted(() => {
 
             <!-- Social Media Buttons -->
             <div class="flex items-center gap-3 mb-6 lg:mb-0">
-              <a v-if="contactFacebookUrl" :href="contactFacebookUrl" target="_blank" aria-label="Facebook" class="w-9 h-9 rounded-full border border-[#f07100]/30 hover:border-[#f07100] flex items-center justify-center text-gray-500 hover:text-white hover:bg-[#f07100] dark:text-gray-400 dark:hover:text-white dark:hover:bg-[#f07100] transition-all duration-300">
+              <a v-if="contactFacebookUrl" :href="contactFacebookUrl" target="_blank" aria-label="Facebook" class="w-9 h-9 rounded-full border border-[#0220A4]/30 hover:border-[#0220A4] flex items-center justify-center text-gray-500 hover:text-white hover:bg-[#0220A4] dark:text-gray-400 dark:hover:text-white dark:hover:bg-[#0220A4] transition-all duration-300">
                 <svg class="w-4.5 h-4.5" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.469h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.469h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
               </a>
-              <a v-if="contactTiktokUrl" :href="contactTiktokUrl" target="_blank" aria-label="TikTok" class="w-9 h-9 rounded-full border border-[#f07100]/30 hover:border-[#f07100] flex items-center justify-center text-gray-500 hover:text-white hover:bg-black dark:hover:bg-white dark:hover:text-black dark:text-gray-400 transition-all duration-300">
+              <a v-if="contactTiktokUrl" :href="contactTiktokUrl" target="_blank" aria-label="TikTok" class="w-9 h-9 rounded-full border border-[#0220A4]/30 hover:border-[#0220A4] flex items-center justify-center text-gray-500 hover:text-white hover:bg-black dark:hover:bg-white dark:hover:text-black dark:text-gray-400 transition-all duration-300">
                 <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.76-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.16-3.44-3.37-3.46-5.7-.02-1.29.3-2.58.95-3.71A5.98 5.98 0 015.65 10.7a6.002 6.002 0 015.54-2.12v4.11c-.57-.02-1.14.07-1.68.25-.92.32-1.74 1.02-2.13 1.91-.32.74-.35 1.56-.16 2.33.15.63.47 1.25.93 1.7.9.89 2.3 1.21 3.52.8.93-.31 1.74-1.09 2.05-2.02.16-.48.26-1.01.24-1.52.01-4.71.01-9.42.01-14.13z"/></svg>
               </a>
-              <a v-if="contactYoutubeUrl" :href="contactYoutubeUrl" target="_blank" aria-label="YouTube" class="w-9 h-9 rounded-full border border-[#f07100]/30 hover:border-[#f07100] flex items-center justify-center text-gray-500 hover:text-white hover:bg-red-600 hover:border-red-600 hover:text-white dark:text-gray-400 dark:hover:text-white dark:hover:bg-red-600 transition-all duration-300">
+              <a v-if="contactYoutubeUrl" :href="contactYoutubeUrl" target="_blank" aria-label="YouTube" class="w-9 h-9 rounded-full border border-[#0220A4]/30 hover:border-[#0220A4] flex items-center justify-center text-gray-500 hover:text-white hover:bg-red-600 hover:border-red-600 hover:text-white dark:text-gray-400 dark:hover:text-white dark:hover:bg-red-600 transition-all duration-300">
                 <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
               </a>
             </div>
@@ -1067,14 +1067,14 @@ onUnmounted(() => {
           <div class="lg:col-span-2 flex flex-col items-start text-left">
             <div class="mb-6 relative pb-2">
               <h3 class="text-[17px] font-black text-gray-900 dark:text-white">เมนูหลัก</h3>
-              <span class="absolute bottom-0 left-0 w-8 h-1 bg-[#f07100] rounded-full"></span>
+              <span class="absolute bottom-0 left-0 w-8 h-1 bg-[#0220A4] rounded-full"></span>
             </div>
             <ul class="flex flex-col gap-3.5 w-full">
-              <li><router-link to="/" class="text-[14px] font-semibold text-gray-600 dark:text-gray-400 hover:text-[#f07100] dark:hover:text-[#f07100] transition-colors flex items-center gap-1.5 group"><span class="text-[#f07100] font-black transform group-hover:translate-x-1 transition-transform">&gt;</span> หน้าแรก</router-link></li>
-              <li><router-link to="/products" class="text-[14px] font-semibold text-gray-600 dark:text-gray-400 hover:text-[#f07100] dark:hover:text-[#f07100] transition-colors flex items-center gap-1.5 group"><span class="text-[#f07100] font-black transform group-hover:translate-x-1 transition-transform">&gt;</span> สินค้าทั้งหมด</router-link></li>
-              <li><router-link to="/services" class="text-[14px] font-semibold text-gray-600 dark:text-gray-400 hover:text-[#f07100] dark:hover:text-[#f07100] transition-colors flex items-center gap-1.5 group"><span class="text-[#f07100] font-black transform group-hover:translate-x-1 transition-transform">&gt;</span> บริการของเรา</router-link></li>
-              <li><router-link to="/space-calculator" class="text-[14px] font-semibold text-gray-600 dark:text-gray-400 hover:text-[#f07100] dark:hover:text-[#f07100] transition-colors flex items-center gap-1.5 group"><span class="text-[#f07100] font-black transform group-hover:translate-x-1 transition-transform">&gt;</span> คำนวณพื้นที่</router-link></li>
-              <li><router-link to="/projects" class="text-[14px] font-semibold text-gray-600 dark:text-gray-400 hover:text-[#f07100] dark:hover:text-[#f07100] transition-colors flex items-center gap-1.5 group"><span class="text-[#f07100] font-black transform group-hover:translate-x-1 transition-transform">&gt;</span> ผลงาน</router-link></li>
+              <li><router-link to="/" class="text-[14px] font-semibold text-gray-600 dark:text-gray-400 hover:text-[#0220A4] dark:hover:text-[#0220A4] transition-colors flex items-center gap-1.5 group"><span class="text-[#0220A4] font-black transform group-hover:translate-x-1 transition-transform">&gt;</span> หน้าแรก</router-link></li>
+              <li><router-link to="/products" class="text-[14px] font-semibold text-gray-600 dark:text-gray-400 hover:text-[#0220A4] dark:hover:text-[#0220A4] transition-colors flex items-center gap-1.5 group"><span class="text-[#0220A4] font-black transform group-hover:translate-x-1 transition-transform">&gt;</span> สินค้าทั้งหมด</router-link></li>
+              <li><router-link to="/services" class="text-[14px] font-semibold text-gray-600 dark:text-gray-400 hover:text-[#0220A4] dark:hover:text-[#0220A4] transition-colors flex items-center gap-1.5 group"><span class="text-[#0220A4] font-black transform group-hover:translate-x-1 transition-transform">&gt;</span> บริการของเรา</router-link></li>
+              <li><router-link to="/space-calculator" class="text-[14px] font-semibold text-gray-600 dark:text-gray-400 hover:text-[#0220A4] dark:hover:text-[#0220A4] transition-colors flex items-center gap-1.5 group"><span class="text-[#0220A4] font-black transform group-hover:translate-x-1 transition-transform">&gt;</span> คำนวณพื้นที่</router-link></li>
+              <li><router-link to="/projects" class="text-[14px] font-semibold text-gray-600 dark:text-gray-400 hover:text-[#0220A4] dark:hover:text-[#0220A4] transition-colors flex items-center gap-1.5 group"><span class="text-[#0220A4] font-black transform group-hover:translate-x-1 transition-transform">&gt;</span> ผลงาน</router-link></li>
             </ul>
           </div>
 
@@ -1082,14 +1082,14 @@ onUnmounted(() => {
           <div class="lg:col-span-2 flex flex-col items-start text-left">
             <div class="mb-6 relative pb-2">
               <h3 class="text-[17px] font-black text-gray-900 dark:text-white">ข้อมูลช่วยเหลือ</h3>
-              <span class="absolute bottom-0 left-0 w-8 h-1 bg-[#f07100] rounded-full"></span>
+              <span class="absolute bottom-0 left-0 w-8 h-1 bg-[#0220A4] rounded-full"></span>
             </div>
             <ul class="flex flex-col gap-3.5 w-full">
-              <li><router-link to="/about" class="text-[14px] font-semibold text-gray-600 dark:text-gray-400 hover:text-[#f07100] dark:hover:text-[#f07100] transition-colors flex items-center gap-1.5 group"><span class="text-[#f07100] font-black transform group-hover:translate-x-1 transition-transform">&gt;</span> เกี่ยวกับเรา</router-link></li>
-              <li><router-link to="/contact" class="text-[14px] font-semibold text-gray-600 dark:text-gray-400 hover:text-[#f07100] dark:hover:text-[#f07100] transition-colors flex items-center gap-1.5 group"><span class="text-[#f07100] font-black transform group-hover:translate-x-1 transition-transform">&gt;</span> ติดต่อเรา</router-link></li>
-              <li v-if="settingsStore.footerDistributorUrl && settingsStore.footerDistributorUrl !== '/ai-consultant'"><router-link :to="settingsStore.footerDistributorUrl" class="text-[14px] font-semibold text-gray-600 dark:text-gray-400 hover:text-[#f07100] dark:hover:text-[#f07100] transition-colors flex items-center gap-1.5 group" :aria-label="footerDistributorText"><span class="text-[#f07100] font-black transform group-hover:translate-x-1 transition-transform">&gt;</span> {{ footerDistributorText }}</router-link></li>
-              <li><router-link to="/privacy-policy" class="text-[14px] font-semibold text-gray-600 dark:text-gray-400 hover:text-[#f07100] dark:hover:text-[#f07100] transition-colors flex items-center gap-1.5 group"><span class="text-[#f07100] font-black transform group-hover:translate-x-1 transition-transform">&gt;</span> นโยบายความเป็นส่วนตัว</router-link></li>
-              <li><router-link to="/terms-of-service" class="text-[14px] font-semibold text-gray-600 dark:text-gray-400 hover:text-[#f07100] dark:hover:text-[#f07100] transition-colors flex items-center gap-1.5 group"><span class="text-[#f07100] font-black transform group-hover:translate-x-1 transition-transform">&gt;</span> เงื่อนไขการใช้งาน</router-link></li>
+              <li><router-link to="/about" class="text-[14px] font-semibold text-gray-600 dark:text-gray-400 hover:text-[#0220A4] dark:hover:text-[#0220A4] transition-colors flex items-center gap-1.5 group"><span class="text-[#0220A4] font-black transform group-hover:translate-x-1 transition-transform">&gt;</span> เกี่ยวกับเรา</router-link></li>
+              <li><router-link to="/contact" class="text-[14px] font-semibold text-gray-600 dark:text-gray-400 hover:text-[#0220A4] dark:hover:text-[#0220A4] transition-colors flex items-center gap-1.5 group"><span class="text-[#0220A4] font-black transform group-hover:translate-x-1 transition-transform">&gt;</span> ติดต่อเรา</router-link></li>
+              <li v-if="settingsStore.footerDistributorUrl && settingsStore.footerDistributorUrl !== '/ai-consultant'"><router-link :to="settingsStore.footerDistributorUrl" class="text-[14px] font-semibold text-gray-600 dark:text-gray-400 hover:text-[#0220A4] dark:hover:text-[#0220A4] transition-colors flex items-center gap-1.5 group" :aria-label="footerDistributorText"><span class="text-[#0220A4] font-black transform group-hover:translate-x-1 transition-transform">&gt;</span> {{ footerDistributorText }}</router-link></li>
+              <li><router-link to="/privacy-policy" class="text-[14px] font-semibold text-gray-600 dark:text-gray-400 hover:text-[#0220A4] dark:hover:text-[#0220A4] transition-colors flex items-center gap-1.5 group"><span class="text-[#0220A4] font-black transform group-hover:translate-x-1 transition-transform">&gt;</span> นโยบายความเป็นส่วนตัว</router-link></li>
+              <li><router-link to="/terms-of-service" class="text-[14px] font-semibold text-gray-600 dark:text-gray-400 hover:text-[#0220A4] dark:hover:text-[#0220A4] transition-colors flex items-center gap-1.5 group"><span class="text-[#0220A4] font-black transform group-hover:translate-x-1 transition-transform">&gt;</span> เงื่อนไขการใช้งาน</router-link></li>
             </ul>
           </div>
 
@@ -1097,19 +1097,19 @@ onUnmounted(() => {
           <div class="lg:col-span-2 flex flex-col items-start text-left">
             <div class="mb-6 relative pb-2">
               <h3 class="text-[17px] font-black text-gray-900 dark:text-white">ติดต่อเรา</h3>
-              <span class="absolute bottom-0 left-0 w-8 h-1 bg-[#f07100] rounded-full"></span>
+              <span class="absolute bottom-0 left-0 w-8 h-1 bg-[#0220A4] rounded-full"></span>
             </div>
             <div class="flex flex-col gap-4 text-[14px] w-full">
               <div v-if="contactPhones.length > 0 || settingsStore.storePhone" class="flex flex-col gap-2">
                 <p class="font-bold text-gray-500 dark:text-gray-400 flex items-center gap-2">
-                  <svg class="w-4 h-4 text-[#f07100] flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path></svg>
+                  <svg class="w-4 h-4 text-[#0220A4] flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path></svg>
                   เบอร์โทรศัพท์:
                 </p>
                 <div class="flex flex-col gap-1.5 pl-6">
-                  <a v-for="(phone, i) in contactPhones" :key="i" :href="'tel:' + phone.value.replace(/[^0-9+]/g, '')" class="font-bold text-gray-900 dark:text-white hover:text-[#f07100] transition-colors">
+                  <a v-for="(phone, i) in contactPhones" :key="i" :href="'tel:' + phone.value.replace(/[^0-9+]/g, '')" class="font-bold text-gray-900 dark:text-white hover:text-[#0220A4] transition-colors">
                     {{ phone.value }} <span v-if="phone.name" class="text-[12px] font-normal text-gray-500 ml-1">({{ phone.name }})</span>
                   </a>
-                  <a v-if="!contactPhones.length && settingsStore.storePhone" :href="'tel:' + settingsStore.storePhone.replace(/[^0-9+]/g, '')" class="font-bold text-gray-900 dark:text-white hover:text-[#f07100] transition-colors">
+                  <a v-if="!contactPhones.length && settingsStore.storePhone" :href="'tel:' + settingsStore.storePhone.replace(/[^0-9+]/g, '')" class="font-bold text-gray-900 dark:text-white hover:text-[#0220A4] transition-colors">
                     {{ settingsStore.storePhone }}
                   </a>
                 </div>
@@ -1117,11 +1117,11 @@ onUnmounted(() => {
 
               <div v-if="contactEmails.length > 0" class="flex flex-col gap-2">
                 <p class="font-bold text-gray-500 dark:text-gray-400 flex items-center gap-2">
-                  <svg class="w-4 h-4 text-[#f07100] flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                  <svg class="w-4 h-4 text-[#0220A4] flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
                   อีเมลติดต่อ:
                 </p>
                 <div class="flex flex-col gap-1 pl-6">
-                  <a v-for="(email, i) in contactEmails" :key="i" :href="'mailto:' + email.value" class="font-bold text-gray-900 dark:text-white hover:text-[#f07100] transition-colors break-all">
+                  <a v-for="(email, i) in contactEmails" :key="i" :href="'mailto:' + email.value" class="font-bold text-gray-900 dark:text-white hover:text-[#0220A4] transition-colors break-all">
                     {{ email.value }}
                   </a>
                 </div>
@@ -1157,7 +1157,7 @@ onUnmounted(() => {
                 v-if="contactLines.length > 0"
                 :href="contactLines[0].url || 'https://line.me/ti/p/~' + contactLines[0].value.replace(/^@/, '')" 
                 target="_blank" 
-                class="w-full py-2.5 px-4 border-2 border-[#c2410c] dark:border-orange-500 text-[#c2410c] dark:text-orange-400 hover:bg-[#c2410c] hover:text-white dark:hover:bg-orange-500 text-sm font-black rounded-full transition-all duration-300 flex items-center justify-center gap-2 group-hover:scale-105"
+                class="w-full py-2.5 px-4 border-2 border-[#0220A4] dark:border-blue-500 text-[#0220A4] dark:text-[#5B7CFF] hover:bg-[#0220A4] hover:text-white dark:hover:bg-blue-500 text-sm font-black rounded-full transition-all duration-300 flex items-center justify-center gap-2 group-hover:scale-105"
               >
                 <span>เพิ่มเพื่อน</span>
                 <svg class="w-4 h-4 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2.5">
@@ -1176,15 +1176,15 @@ onUnmounted(() => {
             <!-- Dynamic Cards -->
             <div v-for="(badge, idx) in settingsStore.footerTrustBadges" :key="idx" class="flex items-center gap-4 group">
               <div class="relative flex-shrink-0">
-                <div class="absolute -inset-1 rounded-full bg-gradient-to-r from-[#f07100] to-amber-500 opacity-20 group-hover:opacity-45 blur transition-all duration-300"></div>
-                <div class="relative w-11 h-11 rounded-full bg-white dark:bg-gray-800 border-2 border-[#f07100] flex items-center justify-center text-[#f07100] shadow-md shadow-[#f07100]/10 group-hover:scale-110 transition-all duration-300">
+                <div class="absolute -inset-1 rounded-full bg-gradient-to-r from-[#0220A4] to-blue-500 opacity-20 group-hover:opacity-45 blur transition-all duration-300"></div>
+                <div class="relative w-11 h-11 rounded-full bg-white dark:bg-gray-800 border-2 border-[#0220A4] flex items-center justify-center text-[#0220A4] shadow-md shadow-[#0220A4]/10 group-hover:scale-110 transition-all duration-300">
                   <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" :stroke-width="getTrustBadgeIconStrokeWidth(badge.icon)">
                     <path stroke-linecap="round" stroke-linejoin="round" :d="getTrustBadgeIconPath(badge.icon)" />
                   </svg>
                 </div>
               </div>
               <div class="text-left">
-                <h4 class="text-[15px] font-black text-gray-900 dark:text-white mb-0.5 group-hover:text-[#f07100] transition-colors">{{ badge.title }}</h4>
+                <h4 class="text-[15px] font-black text-gray-900 dark:text-white mb-0.5 group-hover:text-[#0220A4] transition-colors">{{ badge.title }}</h4>
                 <p class="text-[12px] text-gray-500 dark:text-gray-400 leading-snug">{{ badge.desc }}</p>
               </div>
             </div>
@@ -1195,25 +1195,25 @@ onUnmounted(() => {
       </div>
 
       <!-- Bottom Copyright Bar -->
-      <div class="w-full bg-[#964000] py-5 mt-4 relative z-10">
+      <div class="w-full bg-[#00105A] py-5 mt-4 relative z-10">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row justify-between items-center gap-4 text-white">
           <p class="text-xs md:text-sm font-medium">
             &copy; {{ new Date().getFullYear() }} <span class="font-black">{{ settingsStore.storeName || 'STORAGE HOUSE' }}</span>. สงวนลิขสิทธิ์
           </p>
           
           <div class="flex flex-wrap items-center gap-x-4 md:gap-x-6 gap-y-2 text-xs font-bold">
-            <router-link to="/privacy-policy" class="hover:text-amber-100 transition-colors">นโยบายความเป็นส่วนตัว</router-link>
+            <router-link to="/privacy-policy" class="hover:text-blue-100 transition-colors">นโยบายความเป็นส่วนตัว</router-link>
             <span class="opacity-50">|</span>
-            <router-link to="/terms-of-service" class="hover:text-amber-100 transition-colors">เงื่อนไขการใช้งาน</router-link>
+            <router-link to="/terms-of-service" class="hover:text-blue-100 transition-colors">เงื่อนไขการใช้งาน</router-link>
             <span class="opacity-50">|</span>
-            <router-link :to="settingsStore.footerSitemapUrl || '/'" class="hover:text-amber-100 transition-colors" :aria-label="footerSitemapText">{{ footerSitemapText }}</router-link>
+            <router-link :to="settingsStore.footerSitemapUrl || '/'" class="hover:text-blue-100 transition-colors" :aria-label="footerSitemapText">{{ footerSitemapText }}</router-link>
           </div>
 
           <button 
             type="button" 
             @click="scrollToTop" 
             aria-label="Back to top" 
-            class="w-9 h-9 rounded-full bg-white text-[#f07100] flex items-center justify-center hover:bg-amber-50 hover:scale-105 active:scale-95 shadow-md transition-all duration-300"
+            class="w-9 h-9 rounded-full bg-white text-[#0220A4] flex items-center justify-center hover:bg-blue-50 hover:scale-105 active:scale-95 shadow-md transition-all duration-300"
           >
             <svg class="w-4.5 h-4.5 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="3">
               <path stroke-linecap="round" stroke-linejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" />

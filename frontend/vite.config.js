@@ -6,16 +6,16 @@ export default defineConfig({
   plugins: [vue()],
   server: {
     host: 'localhost',
-    port: 8000,
+    port: 8200,
     strictPort: true,
 
     proxy: {
       '/api': {
-        target: 'http://127.0.0.1:8080',
+        target: 'http://127.0.0.1:8201',
         timeout: 120000,
         proxyTimeout: 120000,
       },
-      '/uploads': 'http://127.0.0.1:8080',
+      '/uploads': 'http://127.0.0.1:8201',
     }
   },
   build: {

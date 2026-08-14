@@ -245,7 +245,7 @@ export const useSettingsStore = defineStore('settings', () => {
     }
 
     const applySeoToDOM = () => {
-        const name = storeName.value || 'บ้านเก็บของ';
+        const name = storeName.value || '';
         const desc = storeDescription.value || '';
         const keywords = storeKeywords.value || '';
         const ogTitle = storeOgTitle.value || name;

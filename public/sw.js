@@ -1,4 +1,4 @@
-const CACHE_NAME = 'morespace-v4';
+const CACHE_NAME = 'storage-v1';
 const ASSETS_TO_CACHE = [
     '/',
     '/index.html',
@@ -43,7 +43,7 @@ self.addEventListener('fetch', (event) => {
     if (event.request.url.includes('localhost:') || event.request.url.includes('127.0.0.1:')) return;
 
     // Network-First for HTML (Navigation) requests to always get the latest version
-    if (event.request.mode === 'navigate' || event.request.headers.get('accept').includes('text/html')) {
+    if (event.request.mode === 'navigate' || (event.request.headers.get('accept') && event.request.headers.get('accept').includes('text/html'))) {
         event.respondWith(
             fetch(event.request)
                 .then((networkResponse) => {
@@ -80,7 +80,6 @@ self.addEventListener('fetch', (event) => {
 
                     return networkResponse;
                 }).catch(() => {
-                    // Network failed and no cache available — return a simple offline response
                     return new Response('', { status: 408, statusText: 'Offline' });
                 });
             })

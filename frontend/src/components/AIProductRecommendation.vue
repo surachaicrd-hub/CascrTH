@@ -75,6 +75,7 @@ const fetchRecommendation = async () => {
 
                 return {
                     id: p.id,
+                    sku: p.sku || '',
                     slug: p.slug,
                     title: p.name,
                     price: Number(p.price) || 0,
@@ -222,7 +223,8 @@ watch(isVisible, (val) => {
                   {{ formatPrice(currentProduct.originalPrice) }}
                 </span>
               </div>
-              <span v-if="currentProduct.category" class="ai-category">{{ currentProduct.category }}</span>
+              <span v-if="currentProduct.sku" class="ai-sku">SKU: {{ currentProduct.sku }}</span>
+              <span v-else-if="currentProduct.category && !/^[0-9a-fA-F-]{20,}$/.test(currentProduct.category)" class="ai-category">{{ currentProduct.category }}</span>
             </div>
           </router-link>
         </div>
@@ -256,25 +258,25 @@ watch(isVisible, (val) => {
   width: 20rem;
   background: white;
   border-radius: 1.25rem;
-  box-shadow: 0 20px 40px rgba(234, 88, 12, 0.12), 0 0 0 1px rgba(234, 88, 12, 0.08);
+  box-shadow: 0 20px 40px rgba(2, 32, 164, 0.12), 0 0 0 1px rgba(2, 32, 164, 0.08);
   overflow: hidden;
-  border: 1px solid rgba(234, 88, 12, 0.15);
+  border: 1px solid rgba(2, 32, 164, 0.15);
   transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease, border-color 0.3s ease;
 }
 
 .ai-widget:hover {
   transform: translateY(-6px);
-  box-shadow: 0 24px 50px rgba(234, 88, 12, 0.18), 0 0 0 1px rgba(234, 88, 12, 0.15);
+  box-shadow: 0 24px 50px rgba(2, 32, 164, 0.18), 0 0 0 1px rgba(2, 32, 164, 0.15);
 }
 
 :global(.dark) .ai-widget {
   background: #111827;
-  border-color: rgba(249, 115, 22, 0.3);
-  box-shadow: 0 20px 45px rgba(0,0,0,0.5), 0 0 0 1px rgba(249, 115, 22, 0.2);
+  border-color: rgba(91, 124, 255, 0.3);
+  box-shadow: 0 20px 45px rgba(0,0,0,0.5), 0 0 0 1px rgba(91, 124, 255, 0.2);
 }
 
 :global(.dark) .ai-widget:hover {
-  box-shadow: 0 24px 50px rgba(249, 115, 22, 0.15), 0 0 0 1px rgba(249, 115, 22, 0.35);
+  box-shadow: 0 24px 50px rgba(91, 124, 255, 0.15), 0 0 0 1px rgba(91, 124, 255, 0.35);
 }
 
 /* Close Button */
@@ -302,7 +304,7 @@ watch(isVisible, (val) => {
 }
 
 .ai-close-btn:hover {
-  color: #ff5e36;
+  color: #0220A4;
   background: white;
 }
 
@@ -313,7 +315,7 @@ watch(isVisible, (val) => {
 
 /* Badge */
 .ai-badge {
-  background: linear-gradient(135deg, #ff5e36, #ff9500);
+  background: linear-gradient(135deg, #0220A4, #4169E1);
   color: white;
   font-size: 0.625rem;
   font-weight: 800;
@@ -384,8 +386,8 @@ watch(isVisible, (val) => {
 }
 
 .ai-card-link:hover .ai-thumb {
-  border-color: #ff5e36;
-  box-shadow: 0 0 10px rgba(255, 94, 54, 0.15);
+  border-color: #0220A4;
+  box-shadow: 0 0 10px rgba(2, 32, 164, 0.15);
   transform: scale(1.03);
 }
 
@@ -419,11 +421,11 @@ watch(isVisible, (val) => {
 }
 
 .ai-card-link:hover .ai-product-name {
-  color: #ea580c;
+  color: #0220A4;
 }
 
 :global(.dark) .ai-card-link:hover .ai-product-name {
-  color: #ff9500;
+  color: #5B7CFF;
 }
 
 .ai-price-row {
@@ -436,11 +438,11 @@ watch(isVisible, (val) => {
 .ai-price {
   font-size: 0.8rem;
   font-weight: 900;
-  color: #ea580c;
+  color: #0220A4;
 }
 
 :global(.dark) .ai-price {
-  color: #ff9500;
+  color: #5B7CFF;
 }
 
 .ai-original-price {
@@ -449,6 +451,7 @@ watch(isVisible, (val) => {
   text-decoration: line-through;
 }
 
+.ai-sku,
 .ai-category {
   font-size: 0.6rem;
   font-weight: 700;
@@ -457,8 +460,9 @@ watch(isVisible, (val) => {
   letter-spacing: 0.08em;
 }
 
+:global(.dark) .ai-sku,
 :global(.dark) .ai-category {
-  color: #6b7280;
+  color: #9ca3af;
 }
 
 /* Navigation */
@@ -491,8 +495,8 @@ watch(isVisible, (val) => {
 }
 
 .ai-nav-btn:hover {
-  border-color: #ff5e36;
-  color: #ff5e36;
+  border-color: #0220A4;
+  color: #0220A4;
 }
 
 .ai-nav-icon {
@@ -515,26 +519,26 @@ watch(isVisible, (val) => {
   padding: 0.75rem;
   font-size: 0.75rem;
   font-weight: 800;
-  color: #ea580c;
-  background: #fff7ed;
-  border-top: 1px solid #ffedd5;
+  color: #0220A4;
+  background: #F3F5FF;
+  border-top: 1px solid #E8EDFF;
   text-decoration: none;
   transition: all 0.2s;
 }
 
 :global(.dark) .ai-action-btn {
-  background: rgba(255, 94, 54, 0.05);
+  background: rgba(2, 32, 164, 0.05);
   border-top-color: #1f2937;
-  color: #ff9500;
+  color: #5B7CFF;
 }
 
 .ai-action-btn:hover {
-  background: #ffedd5;
-  color: #c2410c;
+  background: #E8EDFF;
+  color: #01166F;
 }
 
 :global(.dark) .ai-action-btn:hover {
-  background: rgba(255, 94, 54, 0.1);
+  background: rgba(2, 32, 164, 0.1);
 }
 
 /* Transitions */

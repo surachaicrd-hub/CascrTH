@@ -433,7 +433,7 @@ onMounted(() => {
         <div v-if="activeTab === 'profile'" class="space-y-6">
           
           <!-- Warning Banner for LINE users without email -->
-          <div v-if="!authStore.user?.email && authStore.user?.line_id" class="p-5 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950/20 dark:to-orange-950/20 border border-amber-200 dark:border-amber-900/30 rounded-3xl flex flex-col sm:flex-row items-start sm:items-center gap-4 shadow-sm relative overflow-hidden group">
+          <div v-if="!authStore.user?.email && authStore.user?.line_id" class="p-5 bg-gradient-to-r from-blue-50 to-blue-50 dark:from-blue-950/20 dark:to-blue-950/20 border border-amber-200 dark:border-amber-900/30 rounded-3xl flex flex-col sm:flex-row items-start sm:items-center gap-4 shadow-sm relative overflow-hidden group">
             <div class="absolute top-0 right-0 w-24 h-24 bg-amber-500/5 rounded-full -mr-8 -mt-8 transition-transform group-hover:scale-110 duration-500"></div>
             <div class="w-12 h-12 bg-amber-500/10 text-amber-600 dark:text-amber-400 rounded-2xl flex items-center justify-center shrink-0 shadow-inner">
               <svg class="w-6 h-6 animate-bounce" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">

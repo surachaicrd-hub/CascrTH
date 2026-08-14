@@ -33,10 +33,10 @@ onMounted(() => {
         
         <!-- Decorative Background Elements -->
         <div class="absolute inset-x-0 -top-40 -z-10 transform-gpu overflow-hidden blur-3xl sm:-top-80">
-            <div class="relative left-[calc(50%-11rem)] aspect-[1155/678] w-[36.125rem] -translate-x-1/2 rotate-[30deg] bg-gradient-to-tr from-amber-100 to-orange-100 dark:from-amber-900/30 dark:to-orange-900/30 opacity-60 sm:left-[calc(50%-30rem)] sm:w-[72.1875rem]"></div>
+            <div class="relative left-[calc(50%-11rem)] aspect-[1155/678] w-[36.125rem] -translate-x-1/2 rotate-[30deg] bg-gradient-to-tr from-blue-100 to-blue-100 dark:from-blue-900/30 dark:to-blue-900/30 opacity-60 sm:left-[calc(50%-30rem)] sm:w-[72.1875rem]"></div>
         </div>
         <div class="absolute inset-x-0 top-[calc(100%-13rem)] -z-10 transform-gpu overflow-hidden blur-3xl sm:top-[calc(100%-30rem)]">
-            <div class="relative left-[calc(50%+3rem)] aspect-[1155/678] w-[36.125rem] -translate-x-1/2 bg-gradient-to-tr from-amber-100 to-orange-100 dark:from-amber-900/20 dark:to-orange-900/20 opacity-40 sm:left-[calc(50%+36rem)] sm:w-[72.1875rem]"></div>
+            <div class="relative left-[calc(50%+3rem)] aspect-[1155/678] w-[36.125rem] -translate-x-1/2 bg-gradient-to-tr from-blue-100 to-blue-100 dark:from-blue-900/20 dark:to-blue-900/20 opacity-40 sm:left-[calc(50%+36rem)] sm:w-[72.1875rem]"></div>
         </div>
 
         <div class="max-w-4xl mx-auto px-6 relative z-10">
@@ -53,7 +53,7 @@ onMounted(() => {
                 </div>
                 <h1 class="text-4xl md:text-5xl font-black text-gray-900 dark:text-white mb-6 tracking-tight">นโยบายการใช้คุกกี้</h1>
                 <p class="text-lg text-amber-600 dark:text-amber-400 font-medium tracking-widest uppercase">Cookie Policy</p>
-                <div class="w-24 h-1.5 bg-gradient-to-r from-amber-400 to-orange-500 rounded-full mx-auto mt-8 opacity-70"></div>
+                <div class="w-24 h-1.5 bg-gradient-to-r from-blue-400 to-blue-500 rounded-full mx-auto mt-8 opacity-70"></div>
             </div>
 
             <!-- Content Card -->
@@ -65,7 +65,7 @@ onMounted(() => {
                 <div v-if="isLoading" class="flex flex-col items-center justify-center py-24">
                     <div class="relative w-16 h-16">
                         <div class="absolute inset-0 rounded-full border-t-2 border-amber-500 animate-spin"></div>
-                        <div class="absolute inset-2 rounded-full border-t-2 border-orange-400 animate-spin opacity-50" style="animation-direction: reverse; animation-duration: 1.5s;"></div>
+                        <div class="absolute inset-2 rounded-full border-t-2 border-blue-400 animate-spin opacity-50" style="animation-direction: reverse; animation-duration: 1.5s;"></div>
                     </div>
                     <p class="mt-6 text-sm font-medium text-amber-600 dark:text-amber-400 animate-pulse">กำลังโหลดข้อมูล...</p>
                 </div>

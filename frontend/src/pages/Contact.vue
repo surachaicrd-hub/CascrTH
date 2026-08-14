@@ -5,8 +5,11 @@ import { isValidThaiPhone, isValidEmail } from '../composables/useValidation'
 import { useTrackingStore } from '../stores/tracking'
 import { useSEO } from '../composables/useSEO'
 
+import { useSettingsStore } from '../stores/settingsStore'
+
 const { showToast } = useToast()
 const trackingStore = useTrackingStore()
+const settingsStore = useSettingsStore()
 const { setMeta, setStructuredData } = useSEO()
 
 const form = ref({
@@ -59,27 +62,28 @@ const resetForm = () => {
   generateCaptcha()
 }
 
-// Dynamic contact info from API
+// Dynamic contact info from Admin / API Settings
 const contact = ref({
-  contact_company_name: 'บริษัท ซีอาร์ ดิสทริบิวชั่น จำกัด',
-  contact_address: '75/110 หมู่ 11 ตำบลคลองหนึ่ง อำเภอคลองหลวง จังหวัดปทุมธานี 12120',
+  contact_company_name: settingsStore.contactCompanyName || settingsStore.companyLegalName || settingsStore.storeName || '',
+  contact_address: settingsStore.contactAddress || settingsStore.storeAddress || '',
   contact_map_embed: '',
-  contact_working_hours: ''
+  contact_working_hours: settingsStore.contactWorkingHours || ''
 })
 
 // Multi-entry contact lists
-const phones = ref([])
-const emails = ref([])
-const lines = ref([])
-const socialFacebook = ref('')
-const socialTiktok = ref('')
-const socialYoutube = ref('')
+const phones = ref(settingsStore.contactPhones?.length > 0 ? settingsStore.contactPhones : [])
+const emails = ref(settingsStore.contactEmails?.length > 0 ? settingsStore.contactEmails : [])
+const lines = ref(settingsStore.contactLines?.length > 0 ? settingsStore.contactLines : [])
+const socialFacebook = ref(settingsStore.contactFacebookUrl || '')
+const socialTiktok = ref(settingsStore.contactTiktokUrl || '')
+const socialYoutube = ref(settingsStore.contactYoutubeUrl || '')
 
 const loadContact = async () => {
   try {
     const res = await fetch('/api/settings')
     const data = await res.json()
     if (data.success) {
+      settingsStore.initializeSettings(data.data)
       for (const key of Object.keys(contact.value)) {
         if (data.data[key] !== undefined && data.data[key] !== '') {
           contact.value[key] = data.data[key]
@@ -88,20 +92,20 @@ const loadContact = async () => {
       // Parse JSON arrays
       if (data.data.contact_phones) {
         try {
-          const parsed = JSON.parse(data.data.contact_phones)
-          if (parsed.length > 0) phones.value = parsed
+          const parsed = typeof data.data.contact_phones === 'string' ? JSON.parse(data.data.contact_phones) : data.data.contact_phones
+          if (Array.isArray(parsed) && parsed.length > 0) phones.value = parsed
         } catch (e) { /* keep default */ }
       }
       if (data.data.contact_emails) {
         try {
-          const parsed = JSON.parse(data.data.contact_emails)
-          if (parsed.length > 0) emails.value = parsed
+          const parsed = typeof data.data.contact_emails === 'string' ? JSON.parse(data.data.contact_emails) : data.data.contact_emails
+          if (Array.isArray(parsed) && parsed.length > 0) emails.value = parsed
         } catch (e) { /* keep default */ }
       }
       if (data.data.contact_lines) {
         try {
-          const parsed = JSON.parse(data.data.contact_lines)
-          if (parsed.length > 0) lines.value = parsed
+          const parsed = typeof data.data.contact_lines === 'string' ? JSON.parse(data.data.contact_lines) : data.data.contact_lines
+          if (Array.isArray(parsed) && parsed.length > 0) lines.value = parsed
         } catch (e) { /* keep default */ }
       }
       if (data.data.contact_facebook_url) socialFacebook.value = data.data.contact_facebook_url
@@ -109,7 +113,6 @@ const loadContact = async () => {
       if (data.data.contact_youtube_url) socialYoutube.value = data.data.contact_youtube_url
     }
   } catch (error) {
-    // Silently fail — use defaults
     console.error('Failed to load contact settings:', error)
   }
 }
@@ -180,7 +183,7 @@ const submitContact = async () => {
 const addStructuredData = () => {
   setMeta({
     title: 'ติดต่อเรา (Contact Us)',
-    description: 'ช่องทางการติดต่อ Morespace เบอร์โทรศัพท์ LINE อีเมล และที่อยู่โชว์รูม/คลังสินค้า',
+    description: settingsStore.storeDescription || 'ช่องทางการติดต่อ เบอร์โทรศัพท์ LINE อีเมล และที่อยู่โชว์รูม/คลังสินค้า',
     canonicalUrl: window.location.href,
     type: 'website'
   })
@@ -189,7 +192,7 @@ const addStructuredData = () => {
     "@context": "https://schema.org",
     "@type": "ContactPage",
     "name": settingsStore.storeName ? `ติดต่อเรา - ${settingsStore.storeName}` : 'ติดต่อเรา',
-    "description": "ติดต่อและสอบถามข้อมูลเพิ่มเติมเกี่ยวกับสินค้าและบริการติดตั้งบ้านเก็บของ",
+    "description": settingsStore.storeDescription || "ติดต่อและสอบถามข้อมูลเพิ่มเติมเกี่ยวกับสินค้าและบริการ",
     "mainEntity": {
       "@type": "LocalBusiness",
       "name": contact.value.contact_company_name || settingsStore.storeName,

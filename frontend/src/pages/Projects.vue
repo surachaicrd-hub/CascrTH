@@ -84,7 +84,7 @@ const lineHref = computed(() => {
 onMounted(async () => {
   setMeta({
     title: 'ผลงานการติดตั้งที่ผ่านๆ มา',
-    description: 'ชมตัวอย่างผลงานการติดตั้งบ้านเก็บของ โกดังสำเร็จรูป และตู้เก็บของกลางแจ้งจากลูกค้าทั่วประเทศ',
+    description: settingsStore.storeDescription || 'ชมตัวอย่างผลงานการติดตั้งสินค้าคุณภาพจากลูกค้าทั่วประเทศ',
     canonicalUrl: window.location.href,
     type: 'website'
   })
@@ -149,7 +149,7 @@ const formatDate = (dateStr) => {
               ผลงานการติดตั้งจริง
             </h1>
             <p class="mt-3 text-slate-400 text-sm md:text-base max-w-2xl leading-relaxed">
-              ภาพผลงานการส่งมอบและติดตั้งบ้านเก็บของ โรงเรือน และตู้เก็บของกลางแจ้งของ Storage House ทั่วประเทศ การันตีความสวยงามและมาตรฐานความทนทาน
+              {{ settingsStore.storeDescription || 'ภาพผลงานการส่งมอบและติดตั้งสินค้าคุณภาพจากลูกค้าทั่วประเทศ การันตีความสวยงามและมาตรฐานความทนทาน' }}
             </p>
           </div>
 
@@ -291,7 +291,7 @@ const formatDate = (dateStr) => {
               
               <!-- Badges on top of Image -->
               <span class="card-badge-cat">
-                {{ project.category || 'บ้านเก็บของ' }}
+                {{ project.category || 'ผลงาน' }}
               </span>
               
               <span v-if="project.location" class="card-badge-loc">
@@ -523,9 +523,9 @@ const formatDate = (dateStr) => {
 }
 
 .project-card:hover .card-badge-cat {
-  background-color: rgba(240, 113, 0, 0.15);
-  border-color: rgba(240, 113, 0, 0.3);
-  color: #ff8a24;
+  background-color: rgba(2, 32, 164, 0.15);
+  border-color: rgba(2, 32, 164, 0.3);
+  color: #2B4FD4;
 }
 
 /* Card Body */
@@ -562,7 +562,7 @@ const formatDate = (dateStr) => {
 }
 
 .project-card:hover .card-title {
-  color: #ff8a24;
+  color: #2B4FD4;
 }
 
 /* Product Tag inside Card */
@@ -594,12 +594,12 @@ const formatDate = (dateStr) => {
 .card-action-text {
   font-size: 12px;
   font-weight: 700;
-  color: #ff8a24;
+  color: #2B4FD4;
   transition: color 0.3s ease;
 }
 
 .card-action-arrow {
-  color: #ff8a24;
+  color: #2B4FD4;
   transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -623,13 +623,13 @@ const formatDate = (dateStr) => {
 
 .load-more-btn:hover {
   background-color: rgba(255, 255, 255, 0.06);
-  border-color: rgba(240, 113, 0, 0.25);
+  border-color: rgba(2, 32, 164, 0.25);
   color: #f1f5f9;
 }
 
 .load-more-count {
-  background-color: rgba(240, 113, 0, 0.1);
-  color: #ff8a24;
+  background-color: rgba(2, 32, 164, 0.1);
+  color: #2B4FD4;
 }
 
 /* ─── Empty State ─── */
@@ -641,19 +641,19 @@ const formatDate = (dateStr) => {
 
 /* ─── CTA Section ─── */
 .cta-card {
-  background: linear-gradient(135deg, rgba(77, 21, 0, 0.2) 0%, rgba(15, 23, 42, 0.95) 50%, rgba(15, 23, 42, 0.98) 100%);
-  border: 1px solid rgba(240, 113, 0, 0.15);
+  background: linear-gradient(135deg, rgba(2, 32, 164, 0.2) 0%, rgba(15, 23, 42, 0.95) 50%, rgba(15, 23, 42, 0.98) 100%);
+  border: 1px solid rgba(2, 32, 164, 0.15);
 }
 
 .cta-primary-btn {
-  background-color: #f07100;
+  background-color: #0220A4;
   color: #fff;
-  box-shadow: 0 8px 24px -4px rgba(240, 113, 0, 0.35);
+  box-shadow: 0 8px 24px -4px rgba(2, 32, 164, 0.35);
   transition: all 0.3s ease;
 }
 .cta-primary-btn:hover {
-  background-color: #ff8a24;
-  box-shadow: 0 12px 28px -4px rgba(240, 113, 0, 0.45);
+  background-color: #01166F;
+  box-shadow: 0 12px 28px -4px rgba(2, 32, 164, 0.45);
 }
 
 .cta-secondary-btn {
@@ -684,12 +684,12 @@ const formatDate = (dateStr) => {
 ══════════════════════════════════════════════ */
 
 html:not(.dark) .projects-page {
-  background-color: #f8fafc;
+  background-color: #F8F9FC;
   color: #1e293b;
 }
 
 html:not(.dark) .projects-page .sticky-controls > div {
-  background-color: rgba(248, 250, 252, 0.9);
+  background-color: rgba(248, 249, 252, 0.9);
   border-bottom-color: rgba(0, 0, 0, 0.06);
 }
 
@@ -701,8 +701,8 @@ html:not(.dark) .projects-page .project-card {
 }
 
 html:not(.dark) .projects-page .project-card:hover {
-  border-color: rgba(240, 113, 0, 0.3);
-  box-shadow: 0 16px 36px -12px rgba(240, 113, 0, 0.08), 0 0 0 1px rgba(240, 113, 0, 0.15);
+  border-color: rgba(2, 32, 164, 0.3);
+  box-shadow: 0 16px 36px -12px rgba(2, 32, 164, 0.08), 0 0 0 1px rgba(2, 32, 164, 0.15);
 }
 
 html:not(.dark) .projects-page .card-overlay {
@@ -717,9 +717,9 @@ html:not(.dark) .projects-page .card-badge-loc {
 }
 
 html:not(.dark) .projects-page .project-card:hover .card-badge-cat {
-  background-color: rgba(240, 113, 0, 0.08);
-  border-color: rgba(240, 113, 0, 0.2);
-  color: #d95f00;
+  background-color: rgba(2, 32, 164, 0.08);
+  border-color: rgba(2, 32, 164, 0.2);
+  color: #01166F;
 }
 
 html:not(.dark) .projects-page .card-date {
@@ -731,7 +731,7 @@ html:not(.dark) .projects-page .card-title {
 }
 
 html:not(.dark) .projects-page .project-card:hover .card-title {
-  color: #d95f00;
+  color: #01166F;
 }
 
 html:not(.dark) .projects-page .card-product-tag {
@@ -746,11 +746,11 @@ html:not(.dark) .projects-page .card-footer {
 
 html:not(.dark) .projects-page .card-action-text,
 html:not(.dark) .projects-page .card-action-arrow {
-  color: #d95f00;
+  color: #01166F;
 }
 
 html:not(.dark) .projects-page .project-card:hover .card-action-text {
-  color: #f07100;
+  color: #0220A4;
 }
 
 /* Load More Light Mode */
@@ -761,14 +761,14 @@ html:not(.dark) .projects-page .load-more-btn {
 }
 
 html:not(.dark) .projects-page .load-more-btn:hover {
-  background-color: rgba(240, 113, 0, 0.04);
-  border-color: rgba(240, 113, 0, 0.2);
+  background-color: rgba(2, 32, 164, 0.04);
+  border-color: rgba(2, 32, 164, 0.2);
   color: #1e293b;
 }
 
 html:not(.dark) .projects-page .load-more-count {
-  background-color: rgba(240, 113, 0, 0.08);
-  color: #d95f00;
+  background-color: rgba(2, 32, 164, 0.08);
+  color: #01166F;
 }
 
 /* Empty State Light Mode */

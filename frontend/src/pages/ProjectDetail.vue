@@ -98,7 +98,7 @@ const fetchProjectDetail = async () => {
 
       // Update Dynamic SEO & GEO Tags
       const pTitle = `${project.value.title} | ผลงานติดตั้ง`
-      const pDesc = project.value.description ? project.value.description.replace(/<[^>]*>?/gm, '').substring(0, 160) : 'ผลงานติดตั้งบ้านเก็บของจากลูกค้าที่ไว้วางใจ Morespace'
+      const pDesc = project.value.description ? project.value.description.replace(/<[^>]*>?/gm, '').substring(0, 160) : (settingsStore.storeDescription || 'ผลงานการส่งมอบและติดตั้งจากลูกค้าที่ไว้วางใจ')
       const pImage = project.value.cover_image || ''
 
       setMeta({
@@ -117,7 +117,7 @@ const fetchProjectDetail = async () => {
         "image": pImage,
         "provider": {
           "@type": "LocalBusiness",
-          "name": settingsStore.storeName || "บ้านเก็บของ"
+          "name": settingsStore.storeName || ""
         }
       }, 'dynamic-structured-data')
 
@@ -781,8 +781,8 @@ const formatDate = (dateString) => {
   width: 48px;
   height: 48px;
   border-radius: 50%;
-  border: 2px solid rgba(240, 113, 0, 0.15);
-  border-top-color: #f07100;
+  border: 2px solid rgba(2, 32, 164, 0.15);
+  border-top-color: #0220A4;
   animation: pd-spin 1s linear infinite;
 }
 
@@ -822,7 +822,7 @@ const formatDate = (dateString) => {
   font-size: 120px;
   font-weight: 900;
   line-height: 1;
-  background: linear-gradient(135deg, #f07100, #ff8a24);
+  background: linear-gradient(135deg, #0220A4, #5B7CFF);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -905,7 +905,7 @@ const formatDate = (dateString) => {
   content: '—';
   position: absolute;
   left: 0;
-  color: #f07100;
+  color: #0220A4;
   font-weight: 700;
 }
 
@@ -921,19 +921,19 @@ const formatDate = (dateString) => {
 }
 
 .pd-content-body :deep(a) {
-  color: #ff8a24;
+  color: #5B7CFF;
   text-decoration: underline;
   text-underline-offset: 4px;
   transition: color 0.2s;
 }
 
 .pd-content-body :deep(a:hover) {
-  color: #ffa552;
+  color: #9DB5FF;
 }
 
 .pd-content-body :deep(blockquote) {
-  border-left: 3px solid #f07100;
-  background-color: rgba(240, 113, 0, 0.04);
+  border-left: 3px solid #0220A4;
+  background-color: rgba(2, 32, 164, 0.04);
   padding: 16px 20px;
   margin: 24px 0;
   border-radius: 0 12px 12px 0;
@@ -1026,11 +1026,11 @@ const formatDate = (dateString) => {
 }
 
 .pd-content-body :deep(table thead th) {
-  color: #ff8a24;
+  color: #2B4FD4;
   font-weight: 700;
   padding: 14px 18px;
   text-align: left;
-  border-bottom: 1px solid rgba(240, 113, 0, 0.15);
+  border-bottom: 1px solid rgba(2, 32, 164, 0.15);
   font-size: 11px;
   letter-spacing: 0.05em;
   text-transform: uppercase;
@@ -1057,19 +1057,19 @@ const formatDate = (dateString) => {
 
 /* ─── CTA Cards ─── */
 .cta-card {
-  background: linear-gradient(135deg, rgba(77, 21, 0, 0.2) 0%, rgba(15, 23, 42, 0.95) 50%, rgba(15, 23, 42, 0.98) 100%);
-  border: 1px solid rgba(240, 113, 0, 0.15);
+  background: linear-gradient(135deg, rgba(2, 32, 164, 0.2) 0%, rgba(15, 23, 42, 0.95) 50%, rgba(15, 23, 42, 0.98) 100%);
+  border: 1px solid rgba(2, 32, 164, 0.15);
 }
 
 .cta-primary-btn {
-  background-color: #f07100;
+  background-color: #0220A4;
   color: #fff;
-  box-shadow: 0 8px 24px -4px rgba(240, 113, 0, 0.35);
+  box-shadow: 0 8px 24px -4px rgba(2, 32, 164, 0.35);
   transition: all 0.3s ease;
 }
 .cta-primary-btn:hover {
-  background-color: #ff8a24;
-  box-shadow: 0 12px 28px -4px rgba(240, 113, 0, 0.45);
+  background-color: #01166F;
+  box-shadow: 0 12px 28px -4px rgba(2, 32, 164, 0.45);
 }
 
 .cta-secondary-btn {
@@ -1116,9 +1116,9 @@ const formatDate = (dateString) => {
 }
 
 .pd-lb-close:hover {
-  background-color: rgba(240, 113, 0, 0.15);
-  border-color: rgba(240, 113, 0, 0.4);
-  color: #ff8a24;
+  background-color: rgba(2, 32, 164, 0.15);
+  border-color: rgba(2, 32, 164, 0.4);
+  color: #5B7CFF;
   transform: scale(1.08) rotate(90deg);
 }
 
@@ -1141,9 +1141,9 @@ const formatDate = (dateString) => {
 }
 
 .pd-lb-nav:hover {
-  background-color: rgba(240, 113, 0, 0.15);
-  border-color: rgba(240, 113, 0, 0.4);
-  color: #ff8a24;
+  background-color: rgba(2, 32, 164, 0.15);
+  border-color: rgba(2, 32, 164, 0.4);
+  color: #5B7CFF;
   transform: translateY(-50%) scale(1.08);
 }
 
@@ -1211,9 +1211,9 @@ const formatDate = (dateString) => {
 }
 
 .pd-lb-dot--active {
-  background-color: #f07100;
+  background-color: #0220A4;
   transform: scale(1.4);
-  box-shadow: 0 0 8px rgba(240, 113, 0, 0.6);
+  box-shadow: 0 0 8px rgba(2, 32, 164, 0.6);
 }
 
 .pd-lb-swipe {
@@ -1261,12 +1261,12 @@ const formatDate = (dateString) => {
 ══════════════════════════════════════════════ */
 
 html:not(.dark) .pd-root {
-  background-color: #f8fafc;
+  background-color: #F8F9FC;
   color: #1e293b;
 }
 
 html:not(.dark) .pd-loading {
-  background-color: #f8fafc;
+  background-color: #F8F9FC;
 }
 
 html:not(.dark) .pd-not-found h2 {
@@ -1283,7 +1283,7 @@ html:not(.dark) .pd-header-split .absolute {
 }
 
 html:not(.dark) .pd-header-split .bg-gradient-to-b {
-  background: linear-gradient(to b, #ffffff 0%, #f8fafc 100%) !important;
+  background: linear-gradient(to b, #ffffff 0%, #F8F9FC 100%) !important;
 }
 
 html:not(.dark) .pd-header-split h1 {
@@ -1307,12 +1307,12 @@ html:not(.dark) .pd-header-split p.text-slate-200 {
 }
 
 html:not(.dark) .pd-header-split .text-emerald-400 {
-  color: #d95f00;
+  color: #01166F;
 }
 
 html:not(.dark) .pd-header-split .bg-emerald-500\/10 {
-  background-color: rgba(240, 113, 0, 0.08);
-  border-color: rgba(240, 113, 0, 0.2);
+  background-color: rgba(2, 32, 164, 0.08);
+  border-color: rgba(2, 32, 164, 0.2);
 }
 
 /* Sidebar Product card Light Mode */
@@ -1331,7 +1331,7 @@ html:not(.dark) .sidebar-card h3 a {
 }
 
 html:not(.dark) .sidebar-card h3 a:hover {
-  color: #d95f00;
+  color: #01166F;
 }
 
 html:not(.dark) .sidebar-card p {
@@ -1339,7 +1339,7 @@ html:not(.dark) .sidebar-card p {
 }
 
 html:not(.dark) .sidebar-card .text-xl.text-emerald-400 {
-  color: #d95f00;
+  color: #01166F;
 }
 
 html:not(.dark) .sidebar-card .text-slate-500.line-through {
@@ -1347,9 +1347,9 @@ html:not(.dark) .sidebar-card .text-slate-500.line-through {
 }
 
 html:not(.dark) .sidebar-card .bg-emerald-500\/10 {
-  background-color: rgba(240, 113, 0, 0.08);
-  border-color: rgba(240, 113, 0, 0.2);
-  color: #d95f00;
+  background-color: rgba(2, 32, 164, 0.08);
+  border-color: rgba(2, 32, 164, 0.2);
+  color: #01166F;
 }
 
 html:not(.dark) .sidebar-card .bg-white\/5 {
@@ -1363,7 +1363,7 @@ html:not(.dark) .sidebar-card .bg-white\/5:hover {
 }
 
 html:not(.dark) .sidebar-card.border-emerald-500\/10 {
-  border-color: rgba(240, 113, 0, 0.12);
+  border-color: rgba(2, 32, 164, 0.12);
 }
 
 html:not(.dark) .sidebar-card h4.text-white {
@@ -1371,8 +1371,8 @@ html:not(.dark) .sidebar-card h4.text-white {
 }
 
 html:not(.dark) .sidebar-card .bg-emerald-500\/10.text-emerald-400 {
-  background-color: rgba(240, 113, 0, 0.08);
-  color: #d95f00;
+  background-color: rgba(2, 32, 164, 0.08);
+  color: #01166F;
 }
 
 /* Rich Content Light Mode */
@@ -1398,7 +1398,7 @@ html:not(.dark) .pd-content-body :deep(ul li) {
 }
 
 html:not(.dark) .pd-content-body :deep(ul li::before) {
-  color: #d95f00;
+  color: #01166F;
 }
 
 html:not(.dark) .pd-content-body :deep(ol li) {
@@ -1406,21 +1406,21 @@ html:not(.dark) .pd-content-body :deep(ol li) {
 }
 
 html:not(.dark) .pd-content-body :deep(a) {
-  color: #d95f00;
+  color: #01166F;
 }
 
 html:not(.dark) .pd-content-body :deep(a:hover) {
-  color: #f07100;
+  color: #0220A4;
 }
 
 html:not(.dark) .pd-content-body :deep(blockquote) {
-  border-left-color: #d95f00;
-  background-color: rgba(240, 113, 0, 0.03);
+  border-left-color: #01166F;
+  background-color: rgba(2, 32, 164, 0.03);
   color: #334155;
 }
 
 html:not(.dark) .pd-content-body :deep(hr) {
-  background: linear-gradient(90deg, transparent, rgba(240, 113, 0, 0.15), transparent);
+  background: linear-gradient(90deg, transparent, rgba(2, 32, 164, 0.15), transparent);
 }
 
 html:not(.dark) .pd-content-body :deep(figure.image img) {
@@ -1436,8 +1436,8 @@ html:not(.dark) .pd-content-body :deep(table thead) {
 }
 
 html:not(.dark) .pd-content-body :deep(table thead th) {
-  color: #d95f00;
-  border-bottom-color: rgba(240, 113, 0, 0.12);
+  color: #01166F;
+  border-bottom-color: rgba(2, 32, 164, 0.12);
 }
 
 html:not(.dark) .pd-content-body :deep(table tbody tr:nth-child(even)) {
@@ -1445,7 +1445,7 @@ html:not(.dark) .pd-content-body :deep(table tbody tr:nth-child(even)) {
 }
 
 html:not(.dark) .pd-content-body :deep(table tbody tr:hover) {
-  background-color: rgba(240, 113, 0, 0.02);
+  background-color: rgba(2, 32, 164, 0.02);
 }
 
 html:not(.dark) .pd-content-body :deep(table tbody td) {
@@ -1480,8 +1480,8 @@ html:not(.dark) .prod-card {
 }
 
 html:not(.dark) .prod-card:hover {
-  border-color: rgba(240, 113, 0, 0.2);
-  box-shadow: 0 10px 24px rgba(240, 113, 0, 0.03);
+  border-color: rgba(2, 32, 164, 0.2);
+  box-shadow: 0 10px 24px rgba(2, 32, 164, 0.03);
 }
 
 html:not(.dark) .prod-card .text-slate-200 {
@@ -1493,7 +1493,7 @@ html:not(.dark) .prod-card .text-slate-500.line-through {
 }
 
 html:not(.dark) .prod-card .text-emerald-400 {
-  color: #d95f00;
+  color: #01166F;
 }
 
 html:not(.dark) .prod-card .bg-white\/5 {
@@ -1503,8 +1503,8 @@ html:not(.dark) .prod-card .bg-white\/5 {
 }
 
 html:not(.dark) .prod-card:hover .bg-white\/5 {
-  background-color: #f07100;
-  border-color: #f07100;
+  background-color: #0220A4;
+  border-color: #0220A4;
   color: #ffffff;
 }
 
@@ -1515,8 +1515,8 @@ html:not(.dark) .article-card {
 }
 
 html:not(.dark) .article-card:hover {
-  border-color: rgba(240, 113, 0, 0.2);
-  box-shadow: 0 10px 24px rgba(240, 113, 0, 0.03);
+  border-color: rgba(2, 32, 164, 0.2);
+  box-shadow: 0 10px 24px rgba(2, 32, 164, 0.03);
 }
 
 html:not(.dark) .article-card h3.text-slate-200 {
@@ -1528,24 +1528,24 @@ html:not(.dark) .article-card p.text-slate-400 {
 }
 
 html:not(.dark) .article-card .text-emerald-400 {
-  color: #d95f00;
+  color: #01166F;
 }
 
 html:not(.dark) .article-card:hover .text-emerald-400 {
-  color: #f07100;
+  color: #0220A4;
 }
 
 html:not(.dark) .article-card .bg-slate-950\/80 {
   background-color: rgba(255, 255, 255, 0.9);
   border-color: rgba(0, 0, 0, 0.06);
-  color: #d95f00;
+  color: #01166F;
 }
 
 /* CTA Card Light Mode */
 html:not(.dark) .cta-card {
-  background: linear-gradient(135deg, rgba(255, 245, 235, 0.8) 0%, #ffffff 50%, #ffffff 100%);
-  border-color: rgba(240, 113, 0, 0.15);
-  box-shadow: 0 10px 40px rgba(240, 113, 0, 0.03);
+  background: linear-gradient(135deg, rgba(243, 245, 255, 0.8) 0%, #ffffff 50%, #ffffff 100%);
+  border-color: rgba(2, 32, 164, 0.15);
+  box-shadow: 0 10px 40px rgba(2, 32, 164, 0.03);
 }
 
 html:not(.dark) .cta-card h2 {

@@ -7,13 +7,13 @@ module.exports = {
     node_args: '--max-old-space-size=128',
     env: {
       NODE_ENV: 'development',
-      PORT: 3000,
+      PORT: 8201,
       DISABLE_BG_TASKS: 'false',
       RUN_THUMBNAIL_SCAN: 'false'
     },
     env_production: {
       NODE_ENV: 'production',
-      PORT: 3000,
+      PORT: 8201,
       DISABLE_BG_TASKS: 'false',
       RUN_THUMBNAIL_SCAN: 'false'
     },

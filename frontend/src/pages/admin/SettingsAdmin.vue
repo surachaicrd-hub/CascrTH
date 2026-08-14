@@ -586,96 +586,102 @@ const loadSettings = async () => {
 const saveSettings = async () => {
   saving.value = true
   try {
-    const settingsPayload = [
-      { key: 'gemini_api_key', value: apiKey.value },
-      { key: 'gemini_preferred_model', value: geminiPreferredModel.value },
+    const toStr = (val, defaultVal = '') => (val !== undefined && val !== null) ? String(val) : defaultVal
+    const safeSplit = (text) => (typeof text === 'string' ? text : '').split(',').map(s => s.trim()).filter(Boolean)
+    const safeFilterEmails = (list) => Array.isArray(list) ? list.map(e => (e || '').trim()).filter(Boolean).join(',') : ''
+    const safeBankAccounts = Array.isArray(paymentBankAccounts.value) ? paymentBankAccounts.value.filter(b => b && b.bank && b.name && b.number) : []
 
-      { key: 'ai_recommendation_enabled', value: aiRecommendationEnabled.value.toString() },
-      { key: 'ai_widget_delay', value: aiWidgetDelay.value.toString() },
-      { key: 'ai_widget_cooldown', value: aiWidgetCooldown.value.toString() },
-      { key: 'ai_widget_product_count', value: aiWidgetProductCount.value.toString() },
-      { key: 'recently_viewed_enabled', value: recentlyViewedEnabled.value.toString() },
-      { key: 'fbt_enabled', value: fbtEnabled.value.toString() },
-      { key: 'show_cookie_consent', value: showCookieConsent.value.toString() },
-      { key: 'cookie_purpose_analytics', value: cookiePurposeAnalytics.value.toString() },
-      { key: 'cookie_purpose_marketing', value: cookiePurposeMarketing.value.toString() },
-      { key: 'cookie_purpose_personalization', value: cookiePurposePersonalization.value.toString() },
-      { key: 'online_shopping_enabled', value: onlineShoppingEnabled.value.toString() },
-      { key: 'wishlist_enabled', value: wishlistEnabled.value.toString() },
-      { key: 'compare_enabled', value: compareEnabled.value.toString() },
-      { key: 'show_product_rating', value: showProductRating.value.toString() },
-      { key: 'show_product_review', value: showProductReview.value.toString() },
+    const settingsPayload = [
+      { key: 'gemini_api_key', value: (apiKey.value || '').trim() },
+      { key: 'gemini_preferred_model', value: geminiPreferredModel.value || '' },
+      { key: 'gemini_available_models', value: JSON.stringify(availableModels.value || []) },
+
+      { key: 'ai_recommendation_enabled', value: toStr(aiRecommendationEnabled.value, 'true') },
+      { key: 'ai_widget_delay', value: toStr(aiWidgetDelay.value, '15') },
+      { key: 'ai_widget_cooldown', value: toStr(aiWidgetCooldown.value, '60') },
+      { key: 'ai_widget_product_count', value: toStr(aiWidgetProductCount.value, '4') },
+      { key: 'recently_viewed_enabled', value: toStr(recentlyViewedEnabled.value, 'true') },
+      { key: 'fbt_enabled', value: toStr(fbtEnabled.value, 'true') },
+      { key: 'show_cookie_consent', value: toStr(showCookieConsent.value, 'true') },
+      { key: 'cookie_purpose_analytics', value: toStr(cookiePurposeAnalytics.value, 'true') },
+      { key: 'cookie_purpose_marketing', value: toStr(cookiePurposeMarketing.value, 'true') },
+      { key: 'cookie_purpose_personalization', value: toStr(cookiePurposePersonalization.value, 'true') },
+      { key: 'online_shopping_enabled', value: toStr(onlineShoppingEnabled.value, 'true') },
+      { key: 'wishlist_enabled', value: toStr(wishlistEnabled.value, 'true') },
+      { key: 'compare_enabled', value: toStr(compareEnabled.value, 'true') },
+      { key: 'show_product_rating', value: toStr(showProductRating.value, 'true') },
+      { key: 'show_product_review', value: toStr(showProductReview.value, 'true') },
       
       // Maintenance & Holiday Settings
-      { key: 'maintenance_mode_enabled', value: maintenanceModeEnabled.value.toString() },
-      { key: 'maintenance_message', value: maintenanceMessage.value },
-      { key: 'holiday_mode_enabled', value: holidayModeEnabled.value.toString() },
-      { key: 'holiday_message', value: holidayMessage.value },
-      { key: 'holiday_name', value: holidayName.value },
-      { key: 'holiday_start_date', value: holidayStartDate.value },
-      { key: 'holiday_end_date', value: holidayEndDate.value },
-      { key: 'holiday_image', value: holidayImage.value },
+      { key: 'maintenance_mode_enabled', value: toStr(maintenanceModeEnabled.value, 'false') },
+      { key: 'maintenance_message', value: maintenanceMessage.value || '' },
+      { key: 'holiday_mode_enabled', value: toStr(holidayModeEnabled.value, 'false') },
+      { key: 'holiday_message', value: holidayMessage.value || '' },
+      { key: 'holiday_name', value: holidayName.value || '' },
+      { key: 'holiday_start_date', value: holidayStartDate.value || '' },
+      { key: 'holiday_end_date', value: holidayEndDate.value || '' },
+      { key: 'holiday_image', value: holidayImage.value || '' },
       
       // Store Settings
-      { key: 'store_name', value: storeName.value },
-      { key: 'store_description', value: storeDescription.value },
-      { key: 'store_keywords', value: storeKeywords.value },
-      { key: 'store_og_title', value: storeOgTitle.value },
-      { key: 'store_og_description', value: storeOgDescription.value },
-      { key: 'seo_default_llm_context', value: seoDefaultLlmContext.value },
-      { key: 'seo_ai_crawling_enabled', value: seoAiCrawlingEnabled.value.toString() },
-      { key: 'company_legal_name', value: companyLegalName.value },
-      { key: 'store_url', value: storeUrl.value },
-      { key: 'store_logo', value: storeLogo.value },
-      { key: 'store_favicon', value: storeFavicon.value },
-      { key: 'store_address', value: storeAddress.value },
-      { key: 'store_tax_id', value: storeTaxId.value },
-      { key: 'store_phone', value: storePhone.value },
-      { key: 'warehouse_lat', value: warehouseLat.value },
-      { key: 'warehouse_lng', value: warehouseLng.value },
+      { key: 'store_name', value: storeName.value || '' },
+      { key: 'store_description', value: storeDescription.value || '' },
+      { key: 'store_keywords', value: storeKeywords.value || '' },
+      { key: 'store_og_title', value: storeOgTitle.value || '' },
+      { key: 'store_og_description', value: storeOgDescription.value || '' },
+      { key: 'seo_default_llm_context', value: seoDefaultLlmContext.value || '' },
+      { key: 'seo_ai_crawling_enabled', value: toStr(seoAiCrawlingEnabled.value, 'true') },
+      { key: 'company_legal_name', value: companyLegalName.value || '' },
+      { key: 'store_url', value: storeUrl.value || '' },
+      { key: 'store_logo', value: storeLogo.value || '' },
+      { key: 'store_favicon', value: storeFavicon.value || '' },
+      { key: 'store_address', value: storeAddress.value || '' },
+      { key: 'store_tax_id', value: storeTaxId.value || '' },
+      { key: 'store_phone', value: storePhone.value || '' },
+      { key: 'warehouse_lat', value: warehouseLat.value || '' },
+      { key: 'warehouse_lng', value: warehouseLng.value || '' },
 
       // Payment Settings
-      { key: 'payment_ibanking_enabled', value: paymentIbankingEnabled.value.toString() },
-      { key: 'payment_promptpay_enabled', value: paymentPromptpayEnabled.value.toString() },
-      { key: 'payment_bank_transfer_enabled', value: paymentBankTransferEnabled.value.toString() },
-      { key: 'payment_ipay_enabled', value: paymentIpayEnabled.value.toString() },
-      { key: 'payment_ipay_merchant_id', value: paymentIpayMerchantId.value },
-      { key: 'payment_bank_accounts', value: JSON.stringify(paymentBankAccounts.value.filter(b => b.bank && b.name && b.number)) },
-      { key: 'payment_promptpay_number', value: paymentPromptpayNumber.value },
+      { key: 'payment_ibanking_enabled', value: toStr(paymentIbankingEnabled.value, 'false') },
+      { key: 'payment_promptpay_enabled', value: toStr(paymentPromptpayEnabled.value, 'false') },
+      { key: 'payment_bank_transfer_enabled', value: toStr(paymentBankTransferEnabled.value, 'false') },
+      { key: 'payment_ipay_enabled', value: toStr(paymentIpayEnabled.value, 'false') },
+      { key: 'payment_ipay_merchant_id', value: paymentIpayMerchantId.value || '' },
+      { key: 'payment_bank_accounts', value: JSON.stringify(safeBankAccounts) },
+      { key: 'payment_promptpay_number', value: paymentPromptpayNumber.value || '' },
 
       // Shipping Restrictions & Free Install
-      { key: 'shipping_restricted_provinces', value: JSON.stringify(shippingRestrictedProvincesText.value.split(',').map(s => s.trim()).filter(Boolean)) },
-      { key: 'free_install_provinces', value: JSON.stringify(freeInstallProvincesText.value.split(',').map(s => s.trim()).filter(Boolean)) },
+      { key: 'shipping_restricted_provinces', value: JSON.stringify(safeSplit(shippingRestrictedProvincesText.value)) },
+      { key: 'free_install_provinces', value: JSON.stringify(safeSplit(freeInstallProvincesText.value)) },
       { key: 'shipping_formula_config', value: JSON.stringify({
-          volumetricDivisor: shippingVolumetricDivisor.value,
-          defaultWeightPerItem: shippingDefaultWeight.value,
-          zoneRates: shippingZoneRates.value
+          volumetricDivisor: shippingVolumetricDivisor.value || 5000,
+          defaultWeightPerItem: shippingDefaultWeight.value || 5,
+          zoneRates: shippingZoneRates.value || {}
       }) },
 
       // Notification Settings
-      { key: 'notify_telegram_enabled', value: notifyTelegramEnabled.value.toString() },
-      { key: 'notify_telegram_token', value: notifyTelegramToken.value },
-      { key: 'notify_telegram_chat_id', value: notifyTelegramChatId.value },
-      { key: 'notify_line_oa_enabled', value: notifyLineOaEnabled.value.toString() },
-      { key: 'notify_line_oa_token', value: notifyLineOaToken.value },
-      { key: 'notify_line_oa_user_id', value: notifyLineOaUserId.value },
-      { key: 'notify_email_enabled', value: notifyEmailEnabled.value.toString() },
-      { key: 'notify_email_address', value: notifyEmailList.value.filter(e => e.trim()).join(',') },
-      { key: 'notify_browser_enabled', value: notifyBrowserEnabled.value.toString() },
+      { key: 'notify_telegram_enabled', value: toStr(notifyTelegramEnabled.value, 'false') },
+      { key: 'notify_telegram_token', value: notifyTelegramToken.value || '' },
+      { key: 'notify_telegram_chat_id', value: notifyTelegramChatId.value || '' },
+      { key: 'notify_line_oa_enabled', value: toStr(notifyLineOaEnabled.value, 'false') },
+      { key: 'notify_line_oa_token', value: notifyLineOaToken.value || '' },
+      { key: 'notify_line_oa_user_id', value: notifyLineOaUserId.value || '' },
+      { key: 'notify_email_enabled', value: toStr(notifyEmailEnabled.value, 'false') },
+      { key: 'notify_email_address', value: safeFilterEmails(notifyEmailList.value) },
+      { key: 'notify_browser_enabled', value: toStr(notifyBrowserEnabled.value, 'false') },
       // Social Login Settings
-      { key: 'google_login_enabled', value: googleLoginEnabled.value.toString() },
-      { key: 'google_client_id', value: googleClientId.value },
-      { key: 'line_login_enabled', value: lineLoginEnabled.value.toString() },
-      { key: 'line_channel_id', value: lineChannelId.value },
-      { key: 'line_channel_secret', value: lineChannelSecret.value },
+      { key: 'google_login_enabled', value: toStr(googleLoginEnabled.value, 'false') },
+      { key: 'google_client_id', value: googleClientId.value || '' },
+      { key: 'line_login_enabled', value: toStr(lineLoginEnabled.value, 'false') },
+      { key: 'line_channel_id', value: lineChannelId.value || '' },
+      { key: 'line_channel_secret', value: lineChannelSecret.value || '' },
 
       // SMTP Settings (stored encrypted keys)
-      { key: 'smtp_host', value: smtpHost.value },
-      { key: 'smtp_port', value: smtpPort.value },
-      { key: 'smtp_user', value: smtpUser.value },
-      { key: 'smtp_password', value: smtpPass.value },
-      { key: 'smtp_from_name', value: smtpFrom.value },
-      { key: 'smtp_secure', value: smtpSecure.value.toString() }
+      { key: 'smtp_host', value: smtpHost.value || '' },
+      { key: 'smtp_port', value: smtpPort.value || '' },
+      { key: 'smtp_user', value: smtpUser.value || '' },
+      { key: 'smtp_password', value: smtpPass.value || '' },
+      { key: 'smtp_from_name', value: smtpFrom.value || '' },
+      { key: 'smtp_secure', value: toStr(smtpSecure.value, 'false') }
     ]
 
     const res = await apiFetch('/api/settings/batch', {
@@ -683,14 +689,15 @@ const saveSettings = async () => {
       body: JSON.stringify({ settings: settingsPayload })
     })
     const data = await res.json()
-    if (data.success) {
+    if (res.ok && data.success) {
       showToast('บันทึกการตั้งค่าสำเร็จ', 'success')
+      await loadSettings()
     } else {
-      showToast('บันทึกการตั้งค่าไม่สำเร็จ', 'error')
+      showToast(data.error || 'บันทึกการตั้งค่าไม่สำเร็จ', 'error')
     }
   } catch (error) {
     console.error('Save error:', error)
-    showToast('เกิดข้อผิดพลาดในการเชื่อมต่อ', 'error')
+    showToast('เกิดข้อผิดพลาดในการบันทึกข้อมูล: ' + (error.message || 'โปรดลองใหม่'), 'error')
   } finally {
     saving.value = false
   }
@@ -1560,22 +1567,30 @@ onMounted(() => {
                 <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
                   <div class="flex-1">
                     <h3 class="font-bold text-gray-900 flex items-center gap-2 text-lg">
-                      <svg class="w-5 h-5 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" /></svg>
+                      <svg class="w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" /></svg>
                       โหมดแจ้งเตือนวันหยุด (Holiday Mode)
                     </h3>
                     <p class="text-sm text-gray-500 mt-1">แสดงแบนเนอร์ประกาศด้านบนสุดของทุกหน้าเว็บ ลูกค้ายังเข้าดูสินค้าได้ปกติ รองรับการตั้งกำหนดการล่วงหน้า</p>
                   </div>
                   <label class="relative inline-flex items-center cursor-pointer flex-shrink-0 mt-2 sm:mt-0">
                     <input type="checkbox" v-model="holidayModeEnabled" class="sr-only peer">
-                    <div class="w-14 h-7 bg-gray-200 peer-focus:outline-none rounded-full peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-orange-500"></div>
+                    <div class="w-14 h-7 bg-gray-200 peer-focus:outline-none rounded-full peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-blue-600"></div>
                   </label>
                 </div>
 
-                <div v-if="holidayModeEnabled" class="border border-orange-100 rounded-2xl bg-orange-50/60 p-5 space-y-4">
+                <div v-if="holidayModeEnabled" class="border border-blue-100 rounded-2xl bg-blue-50/60 p-5 space-y-4">
                   <!-- Preview Banner -->
-                  <div class="rounded-xl overflow-hidden bg-gradient-to-r from-orange-500 to-amber-500 text-white flex items-center justify-center gap-3 py-2.5 px-4 text-sm font-bold shadow-inner mb-1">
-                    <svg class="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" /></svg>
-                    <span>{{ holidayName || 'ชื่อวันหยุด' }}: {{ holidayMessage || 'ข้อความจะแสดงที่นี่' }}</span>
+                  <div class="rounded-2xl overflow-hidden bg-[#070C1E] text-white p-3.5 sm:p-4 shadow-md border border-amber-500/30 relative mb-3">
+                    <div class="flex flex-col sm:flex-row items-center justify-between gap-3">
+                      <div class="flex flex-col sm:flex-row items-center gap-2.5 sm:gap-3 text-center sm:text-left min-w-0">
+                        <span class="px-2.5 py-1 rounded-full bg-[#FF7A00]/20 border border-[#FF7A00]/40 text-amber-300 text-xs font-bold flex items-center gap-1.5 shrink-0">
+                          <svg class="w-3.5 h-3.5 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" /></svg>
+                          {{ holidayName || 'ประกาศพิเศษ' }}
+                        </span>
+                        <span class="text-xs sm:text-sm font-semibold text-white truncate max-w-md">{{ holidayMessage || 'ข้อความแบนเนอร์จะแสดงตรงนี้...' }}</span>
+                      </div>
+                      <span class="text-[11px] bg-gradient-to-r from-[#FF7A00] to-[#FF9E00] text-white font-bold px-3 py-1 rounded-full shrink-0 shadow-sm">ตัวอย่างหน้าเว็บ</span>
+                    </div>
                   </div>
 
                   <!-- Holiday Name -->
@@ -1585,7 +1600,7 @@ onMounted(() => {
                       v-model="holidayName"
                       type="text"
                       placeholder="เช่น สงกรานต์, ตรุษจีน, เทศกาลปีใหม่..."
-                      class="w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-orange-400 focus:border-orange-400 transition-all text-sm bg-white"
+                      class="w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-sm bg-white"
                     />
                   </div>
 
@@ -1596,14 +1611,14 @@ onMounted(() => {
                       v-model="holidayMessage"
                       rows="2"
                       placeholder="เช่น ร้านปิดทำการ 13-15 เม.ย. และจะกลับมาเปิดให้บริการตามปกติหลังวันที่ 16 เม.ย."
-                      class="w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-orange-400 focus:border-orange-400 transition-all text-sm resize-y bg-white"
+                      class="w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-sm resize-y bg-white"
                     ></textarea>
                   </div>
 
                   <!-- Date Range Scheduler -->
                   <div>
                     <div class="flex items-center gap-2 mb-2">
-                      <svg class="w-4 h-4 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                      <svg class="w-4 h-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
                       <label class="text-xs font-bold text-gray-700 uppercase tracking-wide">กำหนดการล่วงหน้า <span class="text-gray-400 font-normal normal-case">(ไม่บังคับ — หากกำหนดจะเปิดแบนเนอร์เฉพาะช่วงเวลานั้น)</span></label>
                     </div>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -1612,7 +1627,7 @@ onMounted(() => {
                         <input 
                           v-model="holidayStartDate"
                           type="date"
-                          class="w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-orange-400 focus:border-orange-400 transition-all text-sm bg-white"
+                          class="w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-sm bg-white"
                         />
                       </div>
                       <div>
@@ -1620,12 +1635,12 @@ onMounted(() => {
                         <input 
                           v-model="holidayEndDate"
                           type="date"
-                          class="w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-orange-400 focus:border-orange-400 transition-all text-sm bg-white"
+                          class="w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-sm bg-white"
                         />
                       </div>
                     </div>
-                    <p v-if="holidayStartDate && holidayEndDate" class="text-xs text-orange-600 mt-2 bg-orange-50 border border-orange-200 rounded-lg px-3 py-2 font-medium flex items-center gap-1">
-                      <svg class="w-3.5 h-3.5 inline-block text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                    <p v-if="holidayStartDate && holidayEndDate" class="text-xs text-blue-600 mt-2 bg-blue-50 border border-blue-200 rounded-lg px-3 py-2 font-medium flex items-center gap-1">
+                      <svg class="w-3.5 h-3.5 inline-block text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
                       <span>แบนเนอร์จะแสดงอัตโนมัติตั้งแต่วันที่ {{ new Date(holidayStartDate).toLocaleDateString('th-TH', {day:'numeric', month:'long', year:'numeric'}) }} ถึง {{ new Date(holidayEndDate).toLocaleDateString('th-TH', {day:'numeric', month:'long', year:'numeric'}) }}</span>
                     </p>
                   </div>
@@ -1635,7 +1650,7 @@ onMounted(() => {
                     <label class="block text-xs font-bold text-gray-700 mb-1.5 uppercase tracking-wide">รูปภาพแบนเนอร์ (ตัวเลือกเสริม)</label>
                     <div class="flex flex-col sm:flex-row items-center sm:items-start gap-4">
                       <div class="w-full sm:w-72 flex-shrink-0">
-                        <div class="relative w-full h-32 rounded-xl border-2 border-dashed border-orange-300 bg-white hover:bg-orange-50/50 flex flex-col items-center justify-center cursor-pointer overflow-hidden transition-all group">
+                        <div class="relative w-full h-32 rounded-xl border-2 border-dashed border-blue-300 bg-white hover:bg-blue-50/50 flex flex-col items-center justify-center cursor-pointer overflow-hidden transition-all group">
                           <input type="file" @change="handleHolidayImageUpload" accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" :disabled="uploadingHolidayImage">
                           <template v-if="holidayImage">
                             <img :src="holidayImage" class="w-full h-full object-contain p-2" alt="Holiday Banner">
@@ -1645,14 +1660,14 @@ onMounted(() => {
                             </div>
                           </template>
                           <template v-else-if="uploadingHolidayImage">
-                            <svg class="w-6 h-6 text-orange-500 animate-spin mb-1" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                            <svg class="w-6 h-6 text-blue-600 animate-spin mb-1" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
                             <span class="text-xs font-medium text-gray-500">กำลังอัปโหลด...</span>
                           </template>
                           <template v-else>
-                            <div class="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
-                              <svg class="w-5 h-5 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                            <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+                              <svg class="w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                             </div>
-                            <span class="text-xs font-medium text-gray-500 group-hover:text-orange-600">คลิกเพื่ออัปโหลด</span>
+                            <span class="text-xs font-medium text-gray-500 group-hover:text-blue-600">คลิกเพื่ออัปโหลด</span>
                           </template>
                         </div>
                       </div>
@@ -1675,7 +1690,7 @@ onMounted(() => {
             <div class="flex items-center justify-between p-4 border border-gray-200 rounded-xl bg-gray-50/50 mt-4">
               <div>
                 <h3 class="font-bold text-gray-900 flex items-center gap-2">
-                  <svg class="w-5 h-5 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg class="w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.813 15.904L9 21L8.188 15.904L3 15L8.188 14.096L9 9L9.813 14.096L15 15L9.813 15.904ZM19.007 10.08L18.5 13L17.993 10.08L15 9.57L17.993 9.06L18.5 6L19.007 10.08Z" />
                   </svg>
                   ป๊อปอัพ "AI แนะนำสำหรับคุณ" (AI Product Recommendation)
@@ -1684,7 +1699,7 @@ onMounted(() => {
               </div>
               <label class="relative inline-flex items-center cursor-pointer flex-shrink-0 mt-2 sm:mt-0">
                 <input type="checkbox" v-model="aiRecommendationEnabled" class="sr-only peer">
-                <div class="w-14 h-7 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-orange-500"></div>
+                <div class="w-14 h-7 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-blue-600"></div>
               </label>
             </div>
 
@@ -2399,7 +2414,7 @@ onMounted(() => {
               <div class="flex-1">
                 <div class="flex items-center gap-2">
                   <h4 class="font-bold text-gray-900 text-sm md:text-base flex items-center gap-2">
-                    <svg class="w-5 h-5 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg class="w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.813 15.904L9 21L8.188 15.904L3 15L8.188 14.096L9 9L9.813 14.096L15 15L9.813 15.904ZM19.007 10.08L18.5 13L17.993 10.08L15 9.57L17.993 9.06L18.5 6L19.007 10.08Z" />
                     </svg>
                     ป๊อปอัพ "AI แนะนำสำหรับคุณ" (AI Product Recommendation Widget)
@@ -2412,7 +2427,7 @@ onMounted(() => {
               </div>
               <label class="relative inline-flex items-center cursor-pointer flex-shrink-0">
                 <input type="checkbox" v-model="aiRecommendationEnabled" class="sr-only peer">
-                <div class="w-14 h-7 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-orange-500"></div>
+                <div class="w-14 h-7 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-blue-600"></div>
               </label>
             </div>
 
@@ -2422,7 +2437,7 @@ onMounted(() => {
                 <div>
                   <label class="block text-xs font-bold text-gray-700 mb-1.5">ระยะเวลาหน่วงก่อนแสดง (Delay)</label>
                   <div class="relative">
-                    <input v-model.number="aiWidgetDelay" type="number" min="0" class="w-full border border-gray-300 rounded-xl pl-3 pr-16 py-2 text-sm focus:ring-2 focus:ring-orange-400 focus:border-orange-400 bg-white">
+                    <input v-model.number="aiWidgetDelay" type="number" min="0" class="w-full border border-gray-300 rounded-xl pl-3 pr-16 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white">
                     <span class="absolute right-3 top-2 text-gray-400 text-xs font-medium">วินาที</span>
                   </div>
                   <p class="text-[11px] text-gray-400 mt-1">รอกี่วินาทีหลังเข้าหน้าเว็บก่อนแสดงป๊อปอัพ</p>
@@ -2431,7 +2446,7 @@ onMounted(() => {
                 <div>
                   <label class="block text-xs font-bold text-gray-700 mb-1.5">ระยะเวลาพักหลังกดปิด (Cooldown)</label>
                   <div class="relative">
-                    <input v-model.number="aiWidgetCooldown" type="number" min="0" class="w-full border border-gray-300 rounded-xl pl-3 pr-16 py-2 text-sm focus:ring-2 focus:ring-orange-400 focus:border-orange-400 bg-white">
+                    <input v-model.number="aiWidgetCooldown" type="number" min="0" class="w-full border border-gray-300 rounded-xl pl-3 pr-16 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white">
                     <span class="absolute right-3 top-2 text-gray-400 text-xs font-medium">นาที</span>
                   </div>
                   <p class="text-[11px] text-gray-400 mt-1">เมื่อผู้ใช้กดปิด จะซ่อนป๊อปอัพไว้นานกี่นาที</p>
@@ -2440,7 +2455,7 @@ onMounted(() => {
                 <div>
                   <label class="block text-xs font-bold text-gray-700 mb-1.5">จำนวนสินค้าที่แนะนำ (Limit)</label>
                   <div class="relative">
-                    <input v-model.number="aiWidgetProductCount" type="number" min="1" max="10" class="w-full border border-gray-300 rounded-xl pl-3 pr-16 py-2 text-sm focus:ring-2 focus:ring-orange-400 focus:border-orange-400 bg-white">
+                    <input v-model.number="aiWidgetProductCount" type="number" min="1" max="10" class="w-full border border-gray-300 rounded-xl pl-3 pr-16 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white">
                     <span class="absolute right-3 top-2 text-gray-400 text-xs font-medium">รายการ</span>
                   </div>
                   <p class="text-[11px] text-gray-400 mt-1">จำนวนสินค้าสูงสุดที่จะวนสไลด์แสดง</p>
@@ -2528,10 +2543,10 @@ onMounted(() => {
                 <label class="block text-sm font-bold text-gray-800">
                   Gemini API Keys
                 </label>
-                <div class="flex items-center gap-2 text-xs font-semibold px-3 py-1 rounded-full" :class="apiKey.split(',').filter(k => k.trim()).length > 0 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-slate-50 text-slate-500 border border-slate-200'">
+                <div class="flex items-center gap-2 text-xs font-semibold px-3 py-1 rounded-full" :class="(apiKey || '').split(',').filter(k => k.trim()).length > 0 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-slate-50 text-slate-500 border border-slate-200'">
                   <span class="flex items-center gap-1.5">
-                    <span class="w-1.5 h-1.5 rounded-full" :class="apiKey.split(',').filter(k => k.trim()).length > 0 ? 'bg-emerald-500' : 'bg-slate-400'"></span>
-                    <span>{{ apiKey.split(',').filter(k => k.trim()).length }} คีย์คลัง</span>
+                    <span class="w-1.5 h-1.5 rounded-full" :class="(apiKey || '').split(',').filter(k => k.trim()).length > 0 ? 'bg-emerald-500' : 'bg-slate-400'"></span>
+                    <span>{{ (apiKey || '').split(',').filter(k => k.trim()).length }} คีย์คลัง</span>
                   </span>
                   <span v-if="geminiKeyStatus && geminiKeyStatus.cooldown > 0" class="text-rose-600 font-bold ml-1">
                     (ติด Cooldown {{ geminiKeyStatus.cooldown }} คีย์)
