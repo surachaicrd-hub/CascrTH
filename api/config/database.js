@@ -1,12 +1,14 @@
 const mysql = require('mysql2/promise');
 const migrationService = require('../services/migrationService');
 
+const isProduction = process.env.NODE_ENV === 'production';
+
 // Create MySQL connection pool
 const pool = mysql.createPool({
-  host: process.env.DB_HOST || '127.0.0.1',
-  user: process.env.DB_USER || 'root',
-  password: process.env.DB_PASSWORD || '',
-  database: process.env.DB_NAME || 'cascr_th',
+  host: process.env.DB_HOST || (isProduction ? 'localhost' : '127.0.0.1'),
+  user: process.env.DB_USER || (isProduction ? 'khaotom_cascr' : 'root'),
+  password: process.env.DB_PASSWORD !== undefined ? process.env.DB_PASSWORD : (isProduction ? 'Morespace15*' : ''),
+  database: process.env.DB_NAME || (isProduction ? 'khaotom_cascr' : 'cascr_th'),
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
