@@ -1,11 +1,11 @@
 @echo off
 setlocal EnableExtensions EnableDelayedExpansion
-title StorageShed System Launcher
+title CR Distribution System Launcher
 
 cd /d "%~dp0"
 
 echo ==================================================
-echo         StorageShed System Launcher
+echo       CR Distribution System Launcher
 echo ==================================================
 echo.
 
@@ -111,12 +111,12 @@ if "%RUN_MODE%"=="1" (
     echo - Frontend Dev: http://localhost:8200
     echo.
     pushd "%~dp0api"
-    start "StorageShed Backend API (Port 8201)" cmd /k "node index.js"
+    start "CR Distribution Backend API (Port 8201)" cmd /k "node index.js"
     popd
     timeout /t 2 >nul
 
     pushd "%~dp0frontend"
-    start "StorageShed Frontend Dev (Port 8200)" cmd /k "npm.cmd run dev"
+    start "CR Distribution Frontend Dev (Port 8200)" cmd /k "npm.cmd run dev"
     popd
     timeout /t 2 >nul
 
@@ -146,7 +146,7 @@ if "%RUN_MODE%"=="2" (
 
     echo Starting Backend API...
     pushd "%~dp0api"
-    start "StorageShed Backend API (Port 8201)" cmd /k "node index.js"
+    start "CR Distribution Backend API (Port 8201)" cmd /k "node index.js"
     popd
     timeout /t 2 >nul
 
@@ -157,7 +157,7 @@ if "%RUN_MODE%"=="2" (
 if "%RUN_MODE%"=="3" (
     echo [3/3] Quick Starting System (Using Existing Build)...
     pushd "%~dp0api"
-    start "StorageShed Backend API (Port 8201)" cmd /k "node index.js"
+    start "CR Distribution Backend API (Port 8201)" cmd /k "node index.js"
     popd
     timeout /t 2 >nul
 
