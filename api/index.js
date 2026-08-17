@@ -267,9 +267,15 @@ app.use('/api/line', require('./routes/line'));
 // Serve Static Uploads
 const imageService = require('./services/imageService');
 
-const uploadsDir = (process.env.NODE_ENV !== 'production' && fs.existsSync(path.join(__dirname, '../public/uploads')))
-    ? path.join(__dirname, '../public/uploads')
-    : path.join(__dirname, 'public/uploads');
+// Resolve uploads directory: check root public/uploads first, then api/public/uploads, then cwd
+let uploadsDir = path.join(__dirname, '../public/uploads');
+if (!fs.existsSync(uploadsDir) || fs.readdirSync(uploadsDir).length <= 2) {
+    if (fs.existsSync(path.join(__dirname, 'public/uploads')) && fs.readdirSync(path.join(__dirname, 'public/uploads')).length > 2) {
+        uploadsDir = path.join(__dirname, 'public/uploads');
+    } else if (fs.existsSync(path.join(process.cwd(), 'public/uploads'))) {
+        uploadsDir = path.join(process.cwd(), 'public/uploads');
+    }
+}
 const cacheDir = path.join(uploadsDir, 'cache');
 
 // Ensure cache directory exists
