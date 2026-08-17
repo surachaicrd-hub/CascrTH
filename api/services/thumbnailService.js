@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const sharp = require('sharp');
+const imageService = require('./imageService');
 
 const targetWidths = [64, 128, 150, 200, 400, 500, 600, 700, 800, 1000, 1200, 1400, 1600];
 
@@ -14,14 +14,13 @@ function sleep(ms) {
  * Throttled to avoid overwhelming shared hosting CPU.
  */
 async function generateAllThumbnails() {
+    if (!imageService.isAvailable) {
+        return;
+    }
     console.log('🖼️ Starting background thumbnail generation scan (throttled)...');
     const uploadsDir = (process.env.NODE_ENV !== 'production' && fs.existsSync(path.join(__dirname, '../../public/uploads')))
         ? path.join(__dirname, '../../public/uploads')
         : path.join(__dirname, '../public/uploads');
-
-    // Limit sharp to 1 thread during batch processing to reduce CPU pressure
-    const originalConcurrency = sharp.concurrency();
-    sharp.concurrency(1);
 
     try {
         let processedCount = 0;
@@ -120,9 +119,6 @@ async function generateAllThumbnails() {
         console.log(`🖼️ Thumbnail generation scan complete. Processed: ${processedCount}, Skipped: ${skipCount}`);
     } catch (error) {
         console.error('Error during thumbnail generation:', error);
-    } finally {
-        // Restore original sharp concurrency for on-demand requests
-        sharp.concurrency(originalConcurrency);
     }
 }
 

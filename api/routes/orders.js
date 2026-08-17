@@ -659,7 +659,7 @@ router.get('/:id', verifyCustomerOptional, async (req, res) => {
 // POST /api/orders/:id/payment-slip
 // Upload payment proof for an order
 const multer = require('multer');
-const sharp = require('sharp');
+const imageService = require('../services/imageService');
 const path = require('path');
 const fs = require('fs');
 
@@ -692,10 +692,11 @@ router.post('/:id/payment-slip', slipUpload.single('slip'), async (req, res) => 
         const filename = 'slip-' + uniqueSuffix + '.webp';
         const filepath = path.join(slipUploadDir, filename);
 
-        await sharp(req.file.buffer)
-            .resize(800, null, { withoutEnlargement: true })
-            .webp({ quality: 85 })
-            .toFile(filepath);
+        await imageService.processAndSaveImage(req.file.buffer, filepath, {
+            width: 800,
+            format: 'webp',
+            quality: 85
+        });
 
         const slipUrl = `/uploads/slips/${filename}`;
 

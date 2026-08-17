@@ -28,9 +28,11 @@
     "node-cron": "^4.2.1",
     "nodemailer": "^8.0.1",
     "pdfkit": "^0.18.0",
-    "sharp": "^0.34.5",
     "undici": "^8.5.0",
     "uuid": "^13.0.0",
     "winston": "^3.19.0"
+  },
+  "optionalDependencies": {
+    "sharp": "^0.34.5"
   }
 }

@@ -7,7 +7,7 @@ const rateLimit = require('express-rate-limit');
 const { OAuth2Client } = require('google-auth-library');
 const fs = require('fs');
 const path = require('path');
-const sharp = require('sharp');
+const imageService = require('../services/imageService');
 const multer = require('multer');
 
 const upload = multer({ 
@@ -36,10 +36,13 @@ const downloadAndCacheAvatar = async (url, googleId) => {
         const filename = `avatar-google-${googleId}-${Date.now()}.webp`;
         const filepath = path.join(avatarsDir, filename);
 
-        await sharp(buffer)
-            .resize(200, 200, { fit: 'cover' })
-            .webp({ quality: 80 })
-            .toFile(filepath);
+        await imageService.processAndSaveImage(buffer, filepath, {
+            width: 200,
+            height: 200,
+            fit: 'cover',
+            format: 'webp',
+            quality: 80
+        });
 
         return `/uploads/avatars/${filename}`;
     } catch (error) {
@@ -472,10 +475,13 @@ router.post('/avatar', verifyCustomer, upload.single('avatar'), async (req, res)
         const filepath = path.join(avatarsDir, filename);
 
         // Resize and convert to webp
-        await sharp(req.file.buffer)
-            .resize(400, 400, { fit: 'cover' })
-            .webp({ quality: 80 })
-            .toFile(filepath);
+        await imageService.processAndSaveImage(req.file.buffer, filepath, {
+            width: 400,
+            height: 400,
+            fit: 'cover',
+            format: 'webp',
+            quality: 80
+        });
 
         const newAvatarUrl = `/uploads/avatars/${filename}`;
 

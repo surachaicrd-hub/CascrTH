@@ -3,7 +3,7 @@ const router = express.Router();
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
-const sharp = require('sharp');
+const imageService = require('../services/imageService');
 const { verifyAdmin } = require('./auth');
 
 // Create uploads directory if it doesn't exist
@@ -93,20 +93,7 @@ router.get('/resize', async (req, res) => {
             fs.mkdirSync(cachedFileDir, { recursive: true });
         }
 
-        // Generate dynamically using sharp with high fidelity Lanczos3
-        let sharpTransform = sharp(originalFilePath)
-            .rotate()
-            .resize({ width: targetWidth, withoutEnlargement: true, kernel: 'lanczos3' });
-
-        if (ext === 'webp') {
-            sharpTransform = sharpTransform.webp({ quality: 90, effort: 4, smartSubsample: true });
-        } else if (ext === 'png') {
-            sharpTransform = sharpTransform.png({ compressionLevel: 8, quality: 95 });
-        } else if (ext === 'jpg' || ext === 'jpeg') {
-            sharpTransform = sharpTransform.jpeg({ quality: 90, mozjpeg: true });
-        }
-
-        await sharpTransform.toFile(cachedFilePath);
+        await imageService.resizeFile(originalFilePath, cachedFilePath, targetWidth, null, ext);
         return res.sendFile(cachedFilePath);
     } catch (err) {
         console.error('On-the-fly resizing error:', err);
@@ -138,12 +125,13 @@ router.post('/', verifyAdmin, (req, res, next) => {
         const filename = 'image-' + uniqueSuffix + '.webp';
         const filepath = path.join(uploadDir, filename);
 
-        // Convert image to WebP with max 2560px, respect EXIF orientation and high quality (92%)
-        await sharp(req.file.buffer)
-            .rotate()
-            .resize({ width: 2560, height: 2560, fit: 'inside', withoutEnlargement: true, kernel: 'lanczos3' })
-            .webp({ quality: 92, effort: 5, smartSubsample: true })
-            .toFile(filepath);
+        // Process and save image with max 2560px
+        await imageService.processAndSaveImage(req.file.buffer, filepath, {
+            width: 2560,
+            height: 2560,
+            format: 'webp',
+            quality: 92
+        });
 
         // Pre-generate responsive thumbnails in cache
         const { generateThumbnailsForFile } = require('../services/thumbnailService');
@@ -178,12 +166,13 @@ router.post('/ckeditor', verifyAdmin, (req, res, next) => {
         const filename = 'ck-image-' + uniqueSuffix + '.webp';
         const filepath = path.join(uploadDir, filename);
 
-        // Convert the image to webp with max 2560px and high quality
-        await sharp(req.file.buffer)
-            .rotate()
-            .resize({ width: 2560, height: 2560, fit: 'inside', withoutEnlargement: true, kernel: 'lanczos3' })
-            .webp({ quality: 92, effort: 5, smartSubsample: true })
-            .toFile(filepath);
+        // Process and save image with max 2560px
+        await imageService.processAndSaveImage(req.file.buffer, filepath, {
+            width: 2560,
+            height: 2560,
+            format: 'webp',
+            quality: 92
+        });
 
         // Pre-generate responsive thumbnails in cache
         const { generateThumbnailsForFile } = require('../services/thumbnailService');
@@ -252,10 +241,12 @@ router.post('/convert-all-existing', verifyAdmin, async (req, res) => {
                     
                     try {
                         // Convert to WebP and limit size to 2000px
-                        await sharp(filePath)
-                            .resize({ width: 2000, height: 2000, fit: 'inside', withoutEnlargement: true })
-                            .webp({ quality: 80 })
-                            .toFile(newFilePath);
+                        await imageService.processAndSaveImage(filePath, newFilePath, {
+                            width: 2000,
+                            height: 2000,
+                            format: 'webp',
+                            quality: 80
+                        });
                         
                         convertedCount++;
                         

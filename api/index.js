@@ -265,8 +265,7 @@ app.use('/api/export', require('./routes/export'));
 app.use('/api/line', require('./routes/line'));
 
 // Serve Static Uploads
-const sharp = require('sharp');
-sharp.cache(false); // Disable sharp caching to save memory
+const imageService = require('./services/imageService');
 const fs = require('fs');
 
 const uploadsDir = (process.env.NODE_ENV !== 'production' && fs.existsSync(path.join(__dirname, '../public/uploads')))
@@ -326,21 +325,7 @@ app.get(['/uploads/cache/:filename', '/uploads/:subfolder/cache/:filename'], asy
             fs.mkdirSync(currentCacheDir, { recursive: true });
         }
 
-        let sharpTransform = sharp(originalFilePath)
-            .rotate()
-            .resize({ width: targetWidth, withoutEnlargement: true, kernel: 'lanczos3' });
-
-        const extLower = ext.toLowerCase();
-        if (extLower === '.webp') {
-            sharpTransform = sharpTransform.webp({ quality: 90, effort: 4, smartSubsample: true });
-        } else if (extLower === '.png') {
-            sharpTransform = sharpTransform.png({ compressionLevel: 8, quality: 95 });
-        } else if (extLower === '.jpg' || extLower === '.jpeg') {
-            sharpTransform = sharpTransform.jpeg({ quality: 90, mozjpeg: true });
-        }
-
-        await sharpTransform.toFile(cachedFilePath);
-
+        await imageService.resizeFile(originalFilePath, cachedFilePath, targetWidth, null, ext.replace('.', ''));
         res.setHeader('Cache-Control', 'public, max-age=2592000'); // 30 days
         return res.sendFile(cachedFilePath);
     } catch (err) {
@@ -386,22 +371,7 @@ app.get('/uploads/:filename', async (req, res, next) => {
     }
 
     try {
-        // Resize using sharp with Lanczos3, preserving aspect ratio and high fidelity
-        let dynamicTransform = sharp(originalFilePath)
-            .rotate()
-            .resize({ width: targetWidth, withoutEnlargement: true, kernel: 'lanczos3' });
-
-        const extLower = ext.toLowerCase();
-        if (extLower === '.webp') {
-            dynamicTransform = dynamicTransform.webp({ quality: 90, effort: 4, smartSubsample: true });
-        } else if (extLower === '.png') {
-            dynamicTransform = dynamicTransform.png({ compressionLevel: 8, quality: 95 });
-        } else if (extLower === '.jpg' || extLower === '.jpeg') {
-            dynamicTransform = dynamicTransform.jpeg({ quality: 90, mozjpeg: true });
-        }
-
-        await dynamicTransform.toFile(cachedFilePath);
-
+        await imageService.resizeFile(originalFilePath, cachedFilePath, targetWidth, null, ext.replace('.', ''));
         return res.sendFile(cachedFilePath);
     } catch (err) {
         console.error('Image resizing error:', err);
