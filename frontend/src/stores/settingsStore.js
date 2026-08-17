@@ -78,6 +78,15 @@ export const useSettingsStore = defineStore('settings', () => {
     const contactAddress = ref('')
     const contactWorkingHours = ref('')
 
+    // Page Hero Backgrounds
+    const productsHeroBg = ref('')
+    const servicesHeroBg = ref('')
+    const aboutHeroBg = ref('')
+    const contactHeroBg = ref('')
+    const blogHeroBg = ref('')
+    const projectsHeroBg = ref('')
+    const quotationHeroBg = ref('')
+
     // Footer Settings
     const footerNewsletterTitle = ref('')
     const footerNewsletterSubtitle = ref('')
@@ -90,6 +99,15 @@ export const useSettingsStore = defineStore('settings', () => {
 
     const initializeSettings = (pubSettings) => {
         if (!pubSettings) return
+
+        // Hero Backgrounds
+        if (pubSettings.products_hero_bg !== undefined) productsHeroBg.value = pubSettings.products_hero_bg || '';
+        if (pubSettings.services_hero_bg !== undefined) servicesHeroBg.value = pubSettings.services_hero_bg || '';
+        if (pubSettings.about_hero_bg !== undefined) aboutHeroBg.value = pubSettings.about_hero_bg || '';
+        if (pubSettings.contact_hero_bg !== undefined) contactHeroBg.value = pubSettings.contact_hero_bg || '';
+        if (pubSettings.blog_hero_bg !== undefined) blogHeroBg.value = pubSettings.blog_hero_bg || '';
+        if (pubSettings.projects_hero_bg !== undefined) projectsHeroBg.value = pubSettings.projects_hero_bg || '';
+        if (pubSettings.quotation_hero_bg !== undefined) quotationHeroBg.value = pubSettings.quotation_hero_bg || '';
 
         if (pubSettings.online_shopping_enabled !== undefined) {
             isOnlineShoppingEnabled.value = String(pubSettings.online_shopping_enabled) === 'true'
@@ -375,6 +393,13 @@ export const useSettingsStore = defineStore('settings', () => {
         contactCompanyName,
         contactAddress,
         contactWorkingHours,
+        productsHeroBg,
+        servicesHeroBg,
+        aboutHeroBg,
+        contactHeroBg,
+        blogHeroBg,
+        projectsHeroBg,
+        quotationHeroBg,
         footerNewsletterTitle,
         footerNewsletterSubtitle,
         footerNewsletterPrivacy,

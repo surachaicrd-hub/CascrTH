@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const INDEXNOW_KEY = process.env.INDEXNOW_KEY || 'morespace2026indexnowkey8888';
+const INDEXNOW_KEY = process.env.INDEXNOW_KEY || 'webai2026indexnowkey8888';
 
 /**
  * Ensure the IndexNow key verification file exists in the public directory

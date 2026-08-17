@@ -105,6 +105,62 @@ const holidayStartDate = ref('')
 const holidayEndDate = ref('')
 const holidayImage = ref('')
 const uploadingHolidayImage = ref(false)
+
+// Hero Banners State
+const productsHeroBg = ref('')
+const servicesHeroBg = ref('')
+const aboutHeroBg = ref('')
+const contactHeroBg = ref('')
+const blogHeroBg = ref('')
+const projectsHeroBg = ref('')
+const quotationHeroBg = ref('')
+const uploadingHeroBg = ref({})
+
+const handleHeroBgUpload = async (pageKey, event) => {
+  const file = event.target.files[0]
+  if (!file) return
+
+  const formData = new FormData()
+  formData.append('image', file)
+
+  uploadingHeroBg.value[pageKey] = true
+  try {
+    const res = await apiFetch('/api/upload', {
+      method: 'POST',
+      body: formData
+    })
+    const data = await res.json()
+    if (data.success) {
+      if (pageKey === 'products') productsHeroBg.value = data.url
+      else if (pageKey === 'services') servicesHeroBg.value = data.url
+      else if (pageKey === 'about') aboutHeroBg.value = data.url
+      else if (pageKey === 'contact') contactHeroBg.value = data.url
+      else if (pageKey === 'blog') blogHeroBg.value = data.url
+      else if (pageKey === 'projects') projectsHeroBg.value = data.url
+      else if (pageKey === 'quotation') quotationHeroBg.value = data.url
+      showToast('อัปโหลดรูปภาพส่วนหัวสำเร็จ (กรุณากดบันทึกการตั้งค่า)', 'success')
+    } else {
+      showToast(data.error || 'ไม่สามารถอัปโหลดรูปภาพได้', 'error')
+    }
+  } catch (err) {
+    showToast('เกิดข้อผิดพลาดในการเชื่อมต่อ', 'error')
+  } finally {
+    uploadingHeroBg.value[pageKey] = false
+    event.target.value = ''
+  }
+}
+
+const resetHeroBg = (pageKey) => {
+  if (pageKey === 'products') productsHeroBg.value = ''
+  else if (pageKey === 'services') servicesHeroBg.value = ''
+  else if (pageKey === 'about') aboutHeroBg.value = ''
+  else if (pageKey === 'contact') contactHeroBg.value = ''
+  else if (pageKey === 'blog') blogHeroBg.value = ''
+  else if (pageKey === 'projects') projectsHeroBg.value = ''
+  else if (pageKey === 'quotation') quotationHeroBg.value = ''
+  showToast('รีเซ็ตรูปภาพเป็นค่าเริ่มต้นแล้ว (กรุณากดบันทึกการตั้งค่า)', 'info')
+}
+
 const storeName = ref('')
 const storeDescription = ref('')
 const storeKeywords = ref('')
@@ -438,6 +494,15 @@ const loadSettings = async () => {
       if (data.data.warehouse_lat !== undefined) warehouseLat.value = data.data.warehouse_lat
       if (data.data.warehouse_lng !== undefined) warehouseLng.value = data.data.warehouse_lng
 
+      // Load Page Hero Backgrounds
+      if (data.data.products_hero_bg !== undefined) productsHeroBg.value = data.data.products_hero_bg
+      if (data.data.services_hero_bg !== undefined) servicesHeroBg.value = data.data.services_hero_bg
+      if (data.data.about_hero_bg !== undefined) aboutHeroBg.value = data.data.about_hero_bg
+      if (data.data.contact_hero_bg !== undefined) contactHeroBg.value = data.data.contact_hero_bg
+      if (data.data.blog_hero_bg !== undefined) blogHeroBg.value = data.data.blog_hero_bg
+      if (data.data.projects_hero_bg !== undefined) projectsHeroBg.value = data.data.projects_hero_bg
+      if (data.data.quotation_hero_bg !== undefined) quotationHeroBg.value = data.data.quotation_hero_bg
+
       // Load Payment Settings
       if (data.data.payment_ibanking_enabled !== undefined) {
         paymentIbankingEnabled.value = data.data.payment_ibanking_enabled === 'true'
@@ -639,6 +704,15 @@ const saveSettings = async () => {
       { key: 'store_phone', value: storePhone.value || '' },
       { key: 'warehouse_lat', value: warehouseLat.value || '' },
       { key: 'warehouse_lng', value: warehouseLng.value || '' },
+
+      // Page Hero Backgrounds
+      { key: 'products_hero_bg', value: productsHeroBg.value || '' },
+      { key: 'services_hero_bg', value: servicesHeroBg.value || '' },
+      { key: 'about_hero_bg', value: aboutHeroBg.value || '' },
+      { key: 'contact_hero_bg', value: contactHeroBg.value || '' },
+      { key: 'blog_hero_bg', value: blogHeroBg.value || '' },
+      { key: 'projects_hero_bg', value: projectsHeroBg.value || '' },
+      { key: 'quotation_hero_bg', value: quotationHeroBg.value || '' },
 
       // Payment Settings
       { key: 'payment_ibanking_enabled', value: toStr(paymentIbankingEnabled.value, 'false') },
@@ -1179,6 +1253,14 @@ onMounted(() => {
         <button type="button" @click="activeTab = 'seo'" :class="[activeTab === 'seo' ? 'bg-amber-500 text-white shadow-md' : 'text-gray-600 hover:text-gray-900 hover:bg-white/60', 'group flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm transition-all duration-300 whitespace-nowrap']">
           <svg class="w-4 h-4" :class="activeTab === 'seo' ? 'text-white' : 'text-amber-500'" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
           SEO & AI (GEO Engine)
+        </button>
+
+        <!-- Tab: Hero Banners -->
+        <button type="button" @click="activeTab = 'hero_banners'" :class="[activeTab === 'hero_banners' ? 'bg-emerald-600 text-white shadow-md' : 'text-gray-600 hover:text-gray-900 hover:bg-white/60', 'group flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm transition-all duration-300 whitespace-nowrap']">
+          <svg class="w-4 h-4" :class="activeTab === 'hero_banners' ? 'text-white' : 'text-emerald-500'" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+          </svg>
+          ภาพส่วนหัวแต่ละหน้า (Hero Banners)
         </button>
       </nav>
     </div>
@@ -3177,6 +3259,627 @@ onMounted(() => {
                 <span class="text-[10px] text-gray-500 mt-1 block">ฐานข้อมูลสินค้าฉบับเต็ม</span>
               </a>
             </div>
+          </div>
+        </div>
+
+        <!-- ======================= -->
+        <!-- HERO BANNERS TAB -->
+        <!-- ======================= -->
+        <div v-if="activeTab === 'hero_banners'" class="space-y-8 animate-fade-in-up">
+          <!-- Header Banner -->
+          <div class="bg-gradient-to-r from-slate-900 via-slate-800 to-emerald-950 rounded-2xl p-6 sm:p-8 text-white border border-emerald-500/20 shadow-xl relative overflow-hidden">
+            <div class="absolute -right-10 -bottom-10 w-60 h-60 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
+            <div class="relative z-10">
+              <div class="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-emerald-500/20 text-emerald-300 text-xs font-bold mb-3 border border-emerald-500/30">
+                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                </svg>
+                <span>ระบบจัดการภาพส่วนหัวของเว็บไซต์ (Hero Header Banners)</span>
+              </div>
+              <h2 class="text-xl sm:text-2xl font-black tracking-tight">จัดการภาพพื้นหลังส่วนหัวแต่ละหน้า (Hero Backgrounds)</h2>
+              <p class="text-slate-300 text-sm mt-1 max-w-2xl font-light leading-relaxed">
+                อัปโหลดและปรับแต่งรูปภาพพื้นหลังส่วนหัว (Hero Header) ทุกหน้าให้สวยงาม โดดเด่นระดับ Enterprise โดยระบบจะใส่ฟิลเตอร์และเลเยอร์ความโปร่งแสงให้อัตโนมัติเพื่อให้ตัวหนังสือคมชัดอ่านง่ายที่สุด
+              </p>
+              <div class="mt-4 flex flex-wrap gap-4 text-xs text-slate-400">
+                <div class="flex items-center gap-1.5">
+                  <svg class="w-4 h-4 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                  </svg>
+                  <span>ขนาดแนะนำ: <strong>1920 × 600 px</strong> หรืออัตราส่วน <strong>16:9</strong></span>
+                </div>
+                <div class="flex items-center gap-1.5">
+                  <svg class="w-4 h-4 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                  </svg>
+                  <span>รองรับไฟล์: JPG, PNG, WEBP (ไม่เกิน 5MB)</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Hero Banner Cards Grid (7 Pages) -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+            <!-- 1. Products Page Hero Banner -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col justify-between">
+              <div>
+                <div class="p-5 border-b border-slate-100 flex items-center justify-between">
+                  <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-sm">
+                      1
+                    </div>
+                    <div>
+                      <h3 class="font-bold text-slate-900 text-base">หน้าสินค้า (Products Page)</h3>
+                      <p class="text-xs text-slate-500">เส้นทาง: <span class="font-mono text-emerald-600">/products</span></p>
+                    </div>
+                  </div>
+                  <span class="text-[11px] font-bold px-2.5 py-1 rounded-lg bg-slate-100 text-slate-600">แคตตาล็อกสินค้า</span>
+                </div>
+
+                <!-- Preview Area -->
+                <div class="p-5">
+                  <div class="relative h-44 rounded-xl overflow-hidden bg-slate-950 border border-slate-800 flex items-center justify-center group shadow-inner">
+                    <!-- Image Background with Dark Overlay Simulation -->
+                    <img 
+                      v-if="productsHeroBg" 
+                      :src="productsHeroBg" 
+                      class="absolute inset-0 w-full h-full object-cover opacity-60 mix-blend-luminosity" 
+                      alt="Products Hero Preview"
+                    />
+                    <img 
+                      v-else 
+                      src="/images/hero/products-hero.jpg" 
+                      class="absolute inset-0 w-full h-full object-cover opacity-40 mix-blend-luminosity" 
+                      alt="Default Products Hero"
+                    />
+                    <div class="absolute inset-0 bg-gradient-to-t from-[#070A0F] via-[#070A0F]/60 to-[#070A0F]/80"></div>
+                    <div class="absolute inset-0 bg-gradient-to-r from-[#070A0F]/90 via-[#070A0F]/70 to-transparent"></div>
+
+                    <!-- Simulated Hero Typography -->
+                    <div class="relative z-10 text-left px-5 w-full">
+                      <span class="text-[10px] font-bold text-emerald-400 uppercase tracking-widest block mb-1">PRO-SERIES CATALOG</span>
+                      <h4 class="text-lg font-black text-white leading-tight">บ้านเก็บของ และคลังสำเร็จรูป</h4>
+                      <p class="text-[11px] text-slate-300 mt-1 font-light">ตัวอย่างการแสดงผลส่วนหัวหน้าสินค้า</p>
+                    </div>
+
+                    <!-- Custom Badge Indicator -->
+                    <div class="absolute top-2.5 right-2.5 z-20">
+                      <span v-if="productsHeroBg" class="px-2 py-0.5 rounded-md bg-emerald-500/80 text-white text-[10px] font-bold backdrop-blur-sm shadow-sm">กำหนดเอง</span>
+                      <span v-else class="px-2 py-0.5 rounded-md bg-slate-800/80 text-slate-300 text-[10px] font-medium backdrop-blur-sm">ค่าเริ่มต้น</span>
+                    </div>
+                  </div>
+
+                  <!-- Upload Controls -->
+                  <div class="mt-4 space-y-2.5">
+                    <div class="flex items-center gap-2">
+                      <label class="flex-1">
+                        <input 
+                          type="file" 
+                          accept="image/*" 
+                          class="hidden" 
+                          @change="handleHeroBgUpload('products', $event)" 
+                          :disabled="uploadingHeroBg['products']"
+                        />
+                        <span class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-50 text-emerald-700 hover:bg-emerald-100 text-xs font-bold cursor-pointer transition-colors border border-emerald-200">
+                          <svg v-if="uploadingHeroBg['products']" class="w-4 h-4 animate-spin text-emerald-600" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                          <svg v-else class="w-4 h-4 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                          <span>{{ uploadingHeroBg['products'] ? 'กำลังอัปโหลด...' : 'เลือกรูปภาพใหม่' }}</span>
+                        </span>
+                      </label>
+                      <button 
+                        v-if="productsHeroBg" 
+                        type="button" 
+                        @click="resetHeroBg('products')" 
+                        class="px-3.5 py-2.5 rounded-xl border border-rose-200 text-rose-600 hover:bg-rose-50 text-xs font-bold transition-colors"
+                        title="รีเซ็ตเป็นค่าเริ่มต้น"
+                      >
+                        ลบภาพ
+                      </button>
+                    </div>
+                    <input 
+                      v-model="productsHeroBg" 
+                      type="text" 
+                      placeholder="หรือวาง URL รูปภาพโดยตรง (https://...)" 
+                      class="w-full border border-slate-200 rounded-xl px-3 py-1.5 text-xs text-slate-700 font-mono focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 2. Services Page Hero Banner -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col justify-between">
+              <div>
+                <div class="p-5 border-b border-slate-100 flex items-center justify-between">
+                  <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center font-bold text-sm">
+                      2
+                    </div>
+                    <div>
+                      <h3 class="font-bold text-slate-900 text-base">หน้าบริการ (Services Page)</h3>
+                      <p class="text-xs text-slate-500">เส้นทาง: <span class="font-mono text-teal-600">/services</span></p>
+                    </div>
+                  </div>
+                  <span class="text-[11px] font-bold px-2.5 py-1 rounded-lg bg-slate-100 text-slate-600">บริการ & การติดตั้ง</span>
+                </div>
+
+                <!-- Preview Area -->
+                <div class="p-5">
+                  <div class="relative h-44 rounded-xl overflow-hidden bg-slate-950 border border-slate-800 flex items-center justify-center group shadow-inner">
+                    <img 
+                      v-if="servicesHeroBg" 
+                      :src="servicesHeroBg" 
+                      class="absolute inset-0 w-full h-full object-cover opacity-60 mix-blend-luminosity" 
+                      alt="Services Hero Preview"
+                    />
+                    <img 
+                      v-else 
+                      src="/images/hero/services-hero.jpg" 
+                      class="absolute inset-0 w-full h-full object-cover opacity-40 mix-blend-luminosity" 
+                      alt="Default Services Hero"
+                    />
+                    <div class="absolute inset-0 bg-gradient-to-t from-[#070A0F] via-[#070A0F]/60 to-[#070A0F]/80"></div>
+                    <div class="absolute inset-0 bg-gradient-to-r from-[#070A0F]/90 via-[#070A0F]/70 to-transparent"></div>
+
+                    <div class="relative z-10 text-left px-5 w-full">
+                      <span class="text-[10px] font-bold text-teal-400 uppercase tracking-widest block mb-1">SERVICES & SOLUTIONS</span>
+                      <h4 class="text-lg font-black text-white leading-tight">บริการครบวงจร มาตรฐานวิศวกรรม</h4>
+                      <p class="text-[11px] text-slate-300 mt-1 font-light">ตัวอย่างการแสดงผลส่วนหัวหน้าบริการ</p>
+                    </div>
+
+                    <div class="absolute top-2.5 right-2.5 z-20">
+                      <span v-if="servicesHeroBg" class="px-2 py-0.5 rounded-md bg-teal-500/80 text-white text-[10px] font-bold backdrop-blur-sm shadow-sm">กำหนดเอง</span>
+                      <span v-else class="px-2 py-0.5 rounded-md bg-slate-800/80 text-slate-300 text-[10px] font-medium backdrop-blur-sm">ค่าเริ่มต้น</span>
+                    </div>
+                  </div>
+
+                  <div class="mt-4 space-y-2.5">
+                    <div class="flex items-center gap-2">
+                      <label class="flex-1">
+                        <input 
+                          type="file" 
+                          accept="image/*" 
+                          class="hidden" 
+                          @change="handleHeroBgUpload('services', $event)" 
+                          :disabled="uploadingHeroBg['services']"
+                        />
+                        <span class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-teal-50 text-teal-700 hover:bg-teal-100 text-xs font-bold cursor-pointer transition-colors border border-teal-200">
+                          <svg v-if="uploadingHeroBg['services']" class="w-4 h-4 animate-spin text-teal-600" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                          <svg v-else class="w-4 h-4 text-teal-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                          <span>{{ uploadingHeroBg['services'] ? 'กำลังอัปโหลด...' : 'เลือกรูปภาพใหม่' }}</span>
+                        </span>
+                      </label>
+                      <button 
+                        v-if="servicesHeroBg" 
+                        type="button" 
+                        @click="resetHeroBg('services')" 
+                        class="px-3.5 py-2.5 rounded-xl border border-rose-200 text-rose-600 hover:bg-rose-50 text-xs font-bold transition-colors"
+                        title="รีเซ็ตเป็นค่าเริ่มต้น"
+                      >
+                        ลบภาพ
+                      </button>
+                    </div>
+                    <input 
+                      v-model="servicesHeroBg" 
+                      type="text" 
+                      placeholder="หรือวาง URL รูปภาพโดยตรง (https://...)" 
+                      class="w-full border border-slate-200 rounded-xl px-3 py-1.5 text-xs text-slate-700 font-mono focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 3. About Page Hero Banner -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col justify-between">
+              <div>
+                <div class="p-5 border-b border-slate-100 flex items-center justify-between">
+                  <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-sm">
+                      3
+                    </div>
+                    <div>
+                      <h3 class="font-bold text-slate-900 text-base">หน้าเกี่ยวกับเรา (About Page)</h3>
+                      <p class="text-xs text-slate-500">เส้นทาง: <span class="font-mono text-blue-600">/about</span></p>
+                    </div>
+                  </div>
+                  <span class="text-[11px] font-bold px-2.5 py-1 rounded-lg bg-slate-100 text-slate-600">ประวัติ & วิสัยทัศน์</span>
+                </div>
+
+                <div class="p-5">
+                  <div class="relative h-44 rounded-xl overflow-hidden bg-slate-950 border border-slate-800 flex items-center justify-center group shadow-inner">
+                    <img 
+                      v-if="aboutHeroBg" 
+                      :src="aboutHeroBg" 
+                      class="absolute inset-0 w-full h-full object-cover opacity-60 mix-blend-luminosity" 
+                      alt="About Hero Preview"
+                    />
+                    <img 
+                      v-else 
+                      src="/images/hero/about-hero.jpg" 
+                      class="absolute inset-0 w-full h-full object-cover opacity-40 mix-blend-luminosity" 
+                      alt="Default About Hero"
+                    />
+                    <div class="absolute inset-0 bg-gradient-to-t from-[#070A0F] via-[#070A0F]/60 to-[#070A0F]/80"></div>
+                    <div class="absolute inset-0 bg-gradient-to-r from-[#070A0F]/90 via-[#070A0F]/70 to-transparent"></div>
+
+                    <div class="relative z-10 text-left px-5 w-full">
+                      <span class="text-[10px] font-bold text-blue-400 uppercase tracking-widest block mb-1">ABOUT CR DISTRIBUTION</span>
+                      <h4 class="text-lg font-black text-white leading-tight">ผู้นำด้านโครงสร้างและตู้เก็บของ</h4>
+                      <p class="text-[11px] text-slate-300 mt-1 font-light">ตัวอย่างการแสดงผลส่วนหัวหน้าเกี่ยวกับเรา</p>
+                    </div>
+
+                    <div class="absolute top-2.5 right-2.5 z-20">
+                      <span v-if="aboutHeroBg" class="px-2 py-0.5 rounded-md bg-blue-500/80 text-white text-[10px] font-bold backdrop-blur-sm shadow-sm">กำหนดเอง</span>
+                      <span v-else class="px-2 py-0.5 rounded-md bg-slate-800/80 text-slate-300 text-[10px] font-medium backdrop-blur-sm">ค่าเริ่มต้น</span>
+                    </div>
+                  </div>
+
+                  <div class="mt-4 space-y-2.5">
+                    <div class="flex items-center gap-2">
+                      <label class="flex-1">
+                        <input 
+                          type="file" 
+                          accept="image/*" 
+                          class="hidden" 
+                          @change="handleHeroBgUpload('about', $event)" 
+                          :disabled="uploadingHeroBg['about']"
+                        />
+                        <span class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-blue-50 text-blue-700 hover:bg-blue-100 text-xs font-bold cursor-pointer transition-colors border border-blue-200">
+                          <svg v-if="uploadingHeroBg['about']" class="w-4 h-4 animate-spin text-blue-600" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                          <svg v-else class="w-4 h-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                          <span>{{ uploadingHeroBg['about'] ? 'กำลังอัปโหลด...' : 'เลือกรูปภาพใหม่' }}</span>
+                        </span>
+                      </label>
+                      <button 
+                        v-if="aboutHeroBg" 
+                        type="button" 
+                        @click="resetHeroBg('about')" 
+                        class="px-3.5 py-2.5 rounded-xl border border-rose-200 text-rose-600 hover:bg-rose-50 text-xs font-bold transition-colors"
+                        title="รีเซ็ตเป็นค่าเริ่มต้น"
+                      >
+                        ลบภาพ
+                      </button>
+                    </div>
+                    <input 
+                      v-model="aboutHeroBg" 
+                      type="text" 
+                      placeholder="หรือวาง URL รูปภาพโดยตรง (https://...)" 
+                      class="w-full border border-slate-200 rounded-xl px-3 py-1.5 text-xs text-slate-700 font-mono focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 4. Contact Page Hero Banner -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col justify-between">
+              <div>
+                <div class="p-5 border-b border-slate-100 flex items-center justify-between">
+                  <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-sm">
+                      4
+                    </div>
+                    <div>
+                      <h3 class="font-bold text-slate-900 text-base">หน้าติดต่อเรา (Contact Page)</h3>
+                      <p class="text-xs text-slate-500">เส้นทาง: <span class="font-mono text-indigo-600">/contact</span></p>
+                    </div>
+                  </div>
+                  <span class="text-[11px] font-bold px-2.5 py-1 rounded-lg bg-slate-100 text-slate-600">ข้อมูลติดต่อ & ฝ่ายขาย</span>
+                </div>
+
+                <div class="p-5">
+                  <div class="relative h-44 rounded-xl overflow-hidden bg-slate-950 border border-slate-800 flex items-center justify-center group shadow-inner">
+                    <img 
+                      v-if="contactHeroBg" 
+                      :src="contactHeroBg" 
+                      class="absolute inset-0 w-full h-full object-cover opacity-60 mix-blend-luminosity" 
+                      alt="Contact Hero Preview"
+                    />
+                    <img 
+                      v-else 
+                      src="/images/hero/contact-hero.jpg" 
+                      class="absolute inset-0 w-full h-full object-cover opacity-40 mix-blend-luminosity" 
+                      alt="Default Contact Hero"
+                    />
+                    <div class="absolute inset-0 bg-gradient-to-t from-[#070A0F] via-[#070A0F]/60 to-[#070A0F]/80"></div>
+                    <div class="absolute inset-0 bg-gradient-to-r from-[#070A0F]/90 via-[#070A0F]/70 to-transparent"></div>
+
+                    <div class="relative z-10 text-left px-5 w-full">
+                      <span class="text-[10px] font-bold text-indigo-400 uppercase tracking-widest block mb-1">CONTACT HEADQUARTERS</span>
+                      <h4 class="text-lg font-black text-white leading-tight">ติดต่อศูนย์บริการและฝ่ายขาย</h4>
+                      <p class="text-[11px] text-slate-300 mt-1 font-light">ตัวอย่างการแสดงผลส่วนหัวหน้าติดต่อเรา</p>
+                    </div>
+
+                    <div class="absolute top-2.5 right-2.5 z-20">
+                      <span v-if="contactHeroBg" class="px-2 py-0.5 rounded-md bg-indigo-500/80 text-white text-[10px] font-bold backdrop-blur-sm shadow-sm">กำหนดเอง</span>
+                      <span v-else class="px-2 py-0.5 rounded-md bg-slate-800/80 text-slate-300 text-[10px] font-medium backdrop-blur-sm">ค่าเริ่มต้น</span>
+                    </div>
+                  </div>
+
+                  <div class="mt-4 space-y-2.5">
+                    <div class="flex items-center gap-2">
+                      <label class="flex-1">
+                        <input 
+                          type="file" 
+                          accept="image/*" 
+                          class="hidden" 
+                          @change="handleHeroBgUpload('contact', $event)" 
+                          :disabled="uploadingHeroBg['contact']"
+                        />
+                        <span class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-50 text-indigo-700 hover:bg-indigo-100 text-xs font-bold cursor-pointer transition-colors border border-indigo-200">
+                          <svg v-if="uploadingHeroBg['contact']" class="w-4 h-4 animate-spin text-indigo-600" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                          <svg v-else class="w-4 h-4 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                          <span>{{ uploadingHeroBg['contact'] ? 'กำลังอัปโหลด...' : 'เลือกรูปภาพใหม่' }}</span>
+                        </span>
+                      </label>
+                      <button 
+                        v-if="contactHeroBg" 
+                        type="button" 
+                        @click="resetHeroBg('contact')" 
+                        class="px-3.5 py-2.5 rounded-xl border border-rose-200 text-rose-600 hover:bg-rose-50 text-xs font-bold transition-colors"
+                        title="รีเซ็ตเป็นค่าเริ่มต้น"
+                      >
+                        ลบภาพ
+                      </button>
+                    </div>
+                    <input 
+                      v-model="contactHeroBg" 
+                      type="text" 
+                      placeholder="หรือวาง URL รูปภาพโดยตรง (https://...)" 
+                      class="w-full border border-slate-200 rounded-xl px-3 py-1.5 text-xs text-slate-700 font-mono focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 5. Blog Page Hero Banner -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col justify-between">
+              <div>
+                <div class="p-5 border-b border-slate-100 flex items-center justify-between">
+                  <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold text-sm">
+                      5
+                    </div>
+                    <div>
+                      <h3 class="font-bold text-slate-900 text-base">หน้าบทความ (Blog Page)</h3>
+                      <p class="text-xs text-slate-500">เส้นทาง: <span class="font-mono text-amber-600">/blog</span></p>
+                    </div>
+                  </div>
+                  <span class="text-[11px] font-bold px-2.5 py-1 rounded-lg bg-slate-100 text-slate-600">สาระน่ารู้ & เทคนิค</span>
+                </div>
+
+                <div class="p-5">
+                  <div class="relative h-44 rounded-xl overflow-hidden bg-slate-950 border border-slate-800 flex items-center justify-center group shadow-inner">
+                    <img 
+                      v-if="blogHeroBg" 
+                      :src="blogHeroBg" 
+                      class="absolute inset-0 w-full h-full object-cover opacity-60 mix-blend-luminosity" 
+                      alt="Blog Hero Preview"
+                    />
+                    <img 
+                      v-else 
+                      src="/images/hero/blog-hero.jpg" 
+                      class="absolute inset-0 w-full h-full object-cover opacity-40 mix-blend-luminosity" 
+                      alt="Default Blog Hero"
+                    />
+                    <div class="absolute inset-0 bg-gradient-to-t from-[#070A0F] via-[#070A0F]/60 to-[#070A0F]/80"></div>
+                    <div class="absolute inset-0 bg-gradient-to-r from-[#070A0F]/90 via-[#070A0F]/70 to-transparent"></div>
+
+                    <div class="relative z-10 text-left px-5 w-full">
+                      <span class="text-[10px] font-bold text-amber-400 uppercase tracking-widest block mb-1">KNOWLEDGE BASE & GUIDES</span>
+                      <h4 class="text-lg font-black text-white leading-tight">ศูนย์รวมสาระน่ารู้และเทคนิค</h4>
+                      <p class="text-[11px] text-slate-300 mt-1 font-light">ตัวอย่างการแสดงผลส่วนหัวหน้าบทความ</p>
+                    </div>
+
+                    <div class="absolute top-2.5 right-2.5 z-20">
+                      <span v-if="blogHeroBg" class="px-2 py-0.5 rounded-md bg-amber-500/80 text-white text-[10px] font-bold backdrop-blur-sm shadow-sm">กำหนดเอง</span>
+                      <span v-else class="px-2 py-0.5 rounded-md bg-slate-800/80 text-slate-300 text-[10px] font-medium backdrop-blur-sm">ค่าเริ่มต้น</span>
+                    </div>
+                  </div>
+
+                  <div class="mt-4 space-y-2.5">
+                    <div class="flex items-center gap-2">
+                      <label class="flex-1">
+                        <input 
+                          type="file" 
+                          accept="image/*" 
+                          class="hidden" 
+                          @change="handleHeroBgUpload('blog', $event)" 
+                          :disabled="uploadingHeroBg['blog']"
+                        />
+                        <span class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-amber-50 text-amber-700 hover:bg-amber-100 text-xs font-bold cursor-pointer transition-colors border border-amber-200">
+                          <svg v-if="uploadingHeroBg['blog']" class="w-4 h-4 animate-spin text-amber-600" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                          <svg v-else class="w-4 h-4 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                          <span>{{ uploadingHeroBg['blog'] ? 'กำลังอัปโหลด...' : 'เลือกรูปภาพใหม่' }}</span>
+                        </span>
+                      </label>
+                      <button 
+                        v-if="blogHeroBg" 
+                        type="button" 
+                        @click="resetHeroBg('blog')" 
+                        class="px-3.5 py-2.5 rounded-xl border border-rose-200 text-rose-600 hover:bg-rose-50 text-xs font-bold transition-colors"
+                        title="รีเซ็ตเป็นค่าเริ่มต้น"
+                      >
+                        ลบภาพ
+                      </button>
+                    </div>
+                    <input 
+                      v-model="blogHeroBg" 
+                      type="text" 
+                      placeholder="หรือวาง URL รูปภาพโดยตรง (https://...)" 
+                      class="w-full border border-slate-200 rounded-xl px-3 py-1.5 text-xs text-slate-700 font-mono focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 6. Projects Page Hero Banner -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col justify-between">
+              <div>
+                <div class="p-5 border-b border-slate-100 flex items-center justify-between">
+                  <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-xl bg-violet-50 text-violet-600 flex items-center justify-center font-bold text-sm">
+                      6
+                    </div>
+                    <div>
+                      <h3 class="font-bold text-slate-900 text-base">หน้าผลงาน (Projects Page)</h3>
+                      <p class="text-xs text-slate-500">เส้นทาง: <span class="font-mono text-violet-600">/projects</span></p>
+                    </div>
+                  </div>
+                  <span class="text-[11px] font-bold px-2.5 py-1 rounded-lg bg-slate-100 text-slate-600">ภาพผลงานจริง</span>
+                </div>
+
+                <div class="p-5">
+                  <div class="relative h-44 rounded-xl overflow-hidden bg-slate-950 border border-slate-800 flex items-center justify-center group shadow-inner">
+                    <img 
+                      v-if="projectsHeroBg" 
+                      :src="projectsHeroBg" 
+                      class="absolute inset-0 w-full h-full object-cover opacity-60 mix-blend-luminosity" 
+                      alt="Projects Hero Preview"
+                    />
+                    <img 
+                      v-else 
+                      src="/images/hero/projects-hero.jpg" 
+                      class="absolute inset-0 w-full h-full object-cover opacity-40 mix-blend-luminosity" 
+                      alt="Default Projects Hero"
+                    />
+                    <div class="absolute inset-0 bg-gradient-to-t from-[#070A0F] via-[#070A0F]/60 to-[#070A0F]/80"></div>
+                    <div class="absolute inset-0 bg-gradient-to-r from-[#070A0F]/90 via-[#070A0F]/70 to-transparent"></div>
+
+                    <div class="relative z-10 text-left px-5 w-full">
+                      <span class="text-[10px] font-bold text-violet-400 uppercase tracking-widest block mb-1">FEATURED INSTALLATIONS</span>
+                      <h4 class="text-lg font-black text-white leading-tight">ผลงานการประกอบและติดตั้งจริง</h4>
+                      <p class="text-[11px] text-slate-300 mt-1 font-light">ตัวอย่างการแสดงผลส่วนหัวหน้าผลงาน</p>
+                    </div>
+
+                    <div class="absolute top-2.5 right-2.5 z-20">
+                      <span v-if="projectsHeroBg" class="px-2 py-0.5 rounded-md bg-violet-500/80 text-white text-[10px] font-bold backdrop-blur-sm shadow-sm">กำหนดเอง</span>
+                      <span v-else class="px-2 py-0.5 rounded-md bg-slate-800/80 text-slate-300 text-[10px] font-medium backdrop-blur-sm">ค่าเริ่มต้น</span>
+                    </div>
+                  </div>
+
+                  <div class="mt-4 space-y-2.5">
+                    <div class="flex items-center gap-2">
+                      <label class="flex-1">
+                        <input 
+                          type="file" 
+                          accept="image/*" 
+                          class="hidden" 
+                          @change="handleHeroBgUpload('projects', $event)" 
+                          :disabled="uploadingHeroBg['projects']"
+                        />
+                        <span class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-violet-50 text-violet-700 hover:bg-violet-100 text-xs font-bold cursor-pointer transition-colors border border-violet-200">
+                          <svg v-if="uploadingHeroBg['projects']" class="w-4 h-4 animate-spin text-violet-600" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                          <svg v-else class="w-4 h-4 text-violet-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                          <span>{{ uploadingHeroBg['projects'] ? 'กำลังอัปโหลด...' : 'เลือกรูปภาพใหม่' }}</span>
+                        </span>
+                      </label>
+                      <button 
+                        v-if="projectsHeroBg" 
+                        type="button" 
+                        @click="resetHeroBg('projects')" 
+                        class="px-3.5 py-2.5 rounded-xl border border-rose-200 text-rose-600 hover:bg-rose-50 text-xs font-bold transition-colors"
+                        title="รีเซ็ตเป็นค่าเริ่มต้น"
+                      >
+                        ลบภาพ
+                      </button>
+                    </div>
+                    <input 
+                      v-model="projectsHeroBg" 
+                      type="text" 
+                      placeholder="หรือวาง URL รูปภาพโดยตรง (https://...)" 
+                      class="w-full border border-slate-200 rounded-xl px-3 py-1.5 text-xs text-slate-700 font-mono focus:ring-2 focus:ring-violet-500 focus:border-violet-500"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 7. Quotation Page Hero Banner -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col justify-between md:col-span-2">
+              <div>
+                <div class="p-5 border-b border-slate-100 flex items-center justify-between">
+                  <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-xl bg-cyan-50 text-cyan-600 flex items-center justify-center font-bold text-sm">
+                      7
+                    </div>
+                    <div>
+                      <h3 class="font-bold text-slate-900 text-base">หน้าขอใบเสนอราคา (Quotation Page)</h3>
+                      <p class="text-xs text-slate-500">เส้นทาง: <span class="font-mono text-cyan-600">/quotation</span></p>
+                    </div>
+                  </div>
+                  <span class="text-[11px] font-bold px-2.5 py-1 rounded-lg bg-slate-100 text-slate-600">ระบบใบเสนอราคา</span>
+                </div>
+
+                <div class="p-5">
+                  <div class="relative h-44 rounded-xl overflow-hidden bg-slate-950 border border-slate-800 flex items-center justify-center group shadow-inner">
+                    <img 
+                      v-if="quotationHeroBg" 
+                      :src="quotationHeroBg" 
+                      class="absolute inset-0 w-full h-full object-cover opacity-60 mix-blend-luminosity" 
+                      alt="Quotation Hero Preview"
+                    />
+                    <img 
+                      v-else 
+                      src="/images/hero/quotation-hero.jpg" 
+                      class="absolute inset-0 w-full h-full object-cover opacity-40 mix-blend-luminosity" 
+                      alt="Default Quotation Hero"
+                    />
+                    <div class="absolute inset-0 bg-gradient-to-t from-[#070A0F] via-[#070A0F]/60 to-[#070A0F]/80"></div>
+                    <div class="absolute inset-0 bg-gradient-to-r from-[#070A0F]/90 via-[#070A0F]/70 to-transparent"></div>
+
+                    <div class="relative z-10 text-left px-5 w-full">
+                      <span class="text-[10px] font-bold text-cyan-400 uppercase tracking-widest block mb-1">ONLINE INSTANT ESTIMATION</span>
+                      <h4 class="text-lg font-black text-white leading-tight">ขอใบเสนอราคาออนไลน์รวดเร็ว</h4>
+                      <p class="text-[11px] text-slate-300 mt-1 font-light">ตัวอย่างการแสดงผลส่วนหัวหน้าขอใบเสนอราคา</p>
+                    </div>
+
+                    <div class="absolute top-2.5 right-2.5 z-20">
+                      <span v-if="quotationHeroBg" class="px-2 py-0.5 rounded-md bg-cyan-500/80 text-white text-[10px] font-bold backdrop-blur-sm shadow-sm">กำหนดเอง</span>
+                      <span v-else class="px-2 py-0.5 rounded-md bg-slate-800/80 text-slate-300 text-[10px] font-medium backdrop-blur-sm">ค่าเริ่มต้น</span>
+                    </div>
+                  </div>
+
+                  <div class="mt-4 space-y-2.5 max-w-xl">
+                    <div class="flex items-center gap-2">
+                      <label class="flex-1">
+                        <input 
+                          type="file" 
+                          accept="image/*" 
+                          class="hidden" 
+                          @change="handleHeroBgUpload('quotation', $event)" 
+                          :disabled="uploadingHeroBg['quotation']"
+                        />
+                        <span class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-cyan-50 text-cyan-700 hover:bg-cyan-100 text-xs font-bold cursor-pointer transition-colors border border-cyan-200">
+                          <svg v-if="uploadingHeroBg['quotation']" class="w-4 h-4 animate-spin text-cyan-600" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                          <svg v-else class="w-4 h-4 text-cyan-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                          <span>{{ uploadingHeroBg['quotation'] ? 'กำลังอัปโหลด...' : 'เลือกรูปภาพใหม่' }}</span>
+                        </span>
+                      </label>
+                      <button 
+                        v-if="quotationHeroBg" 
+                        type="button" 
+                        @click="resetHeroBg('quotation')" 
+                        class="px-3.5 py-2.5 rounded-xl border border-rose-200 text-rose-600 hover:bg-rose-50 text-xs font-bold transition-colors"
+                        title="รีเซ็ตเป็นค่าเริ่มต้น"
+                      >
+                        ลบภาพ
+                      </button>
+                    </div>
+                    <input 
+                      v-model="quotationHeroBg" 
+                      type="text" 
+                      placeholder="หรือวาง URL รูปภาพโดยตรง (https://...)" 
+                      class="w-full border border-slate-200 rounded-xl px-3 py-1.5 text-xs text-slate-700 font-mono focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
           </div>
         </div>
 

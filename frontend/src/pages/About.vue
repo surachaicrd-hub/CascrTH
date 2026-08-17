@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { getImageUrl } from '../utils/image'
 import { useSettingsStore } from '../stores/settingsStore'
 import { useSEO } from '../composables/useSEO'
@@ -11,8 +11,13 @@ const visibleSections = ref(new Set())
 let observer = null
 
 const s = ref({
-  about_hero_title: '', about_hero_subtitle: '', about_hero_desc: '', about_hero_bg: '',
-  about_main_img: '', about_quote_title: '', about_quote_text: '',
+  about_hero_title: '', 
+  about_hero_subtitle: '', 
+  about_hero_desc: '', 
+  about_hero_bg: '',
+  about_main_img: '', 
+  about_quote_title: '', 
+  about_quote_text: '',
   about_core_1_title: '', about_core_1_desc: '', about_core_1_img: '',
   about_core_2_title: '', about_core_2_desc: '', about_core_2_img: '',
   about_core_3_title: '', about_core_3_desc: '', about_core_3_img: '',
@@ -43,12 +48,11 @@ const closeModal = () => {
   isModalOpen.value = false
   setTimeout(() => {
     selectedCoreValue.value = null
-  }, 300) // wait for animation
+  }, 300)
   document.body.style.overflow = 'auto'
 }
 
-const isRichContentSet = ref(false)
-const showRichContent = ref(true)
+const showRichContent = ref(false)
 const displayRichContent = ref('')
 
 const isEmptyHtml = (html) => {
@@ -57,35 +61,71 @@ const isEmptyHtml = (html) => {
   return clean === ''
 }
 
-const coreIcons = [
-  'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z',
-  'M13 10V3L4 14h7v7l9-11h-7z',
-  'M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z',
-  'M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477-4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253'
+// Fallback real default core values
+const defaultCoreValues = [
+  {
+    title: 'คุณภาพมาตรฐานอุตสาหกรรม',
+    desc: 'ทุกชิ้นส่วนและผลิตภัณฑ์ผ่านการคัดสรรจากวัสดุเกรดพรีเมียม ทนทานต่อสภาพอากาศ ใช้งานได้ยาวนาน ปลอดภัยคุ้มค่าการลงทุน',
+    icon: 'shield',
+    tag: 'QUALITY ASSURANCE'
+  },
+  {
+    title: 'บริการให้คำปรึกษาและออกแบบ',
+    desc: 'ทีมวิศวกรผู้เชี่ยวชาญพร้อมให้คำปรึกษา คำนวณขนาดพื้นที่ และแนะนำโซลูชั่นที่เหมาะสมกับรูปแบบการใช้งานจริงของลูกค้าแต่ละท่าน',
+    icon: 'solution',
+    tag: 'EXPERT CONSULTATION'
+  },
+  {
+    title: 'ทีมช่างผู้ชำนาญการติดตั้ง',
+    desc: 'เรามีทีมงานช่างติดตั้งมืออาชีพที่ผ่านการฝึกอบรมมาตรฐาน ให้บริการจัดส่งและประกอบติดตั้งอย่างประณีต ครอบคลุมทั่วประเทศ',
+    icon: 'wrench',
+    tag: 'PROFESSIONAL INSTALLATION'
+  },
+  {
+    title: 'รับประกันและดูแลหลังการขาย',
+    desc: 'มั่นใจได้ด้วยการรับประกันสินค้า โครงสร้าง และบริการหลังการขายที่รวดเร็ว พร้อมสต็อกอะไหล่และทีมงานดูแลอย่างต่อเนื่อง',
+    icon: 'support',
+    tag: 'AFTER-SALES SERVICE'
+  }
+]
+
+// Fallback real stats
+const defaultStats = [
+  { val: '20+', label: 'ปีแห่งประสบการณ์ความเชี่ยวชาญ' },
+  { val: '1,000+', label: 'โครงการและงานติดตั้งสำเร็จ' },
+  { val: '100%', label: 'มาตรฐานสินค้าและการรับประกัน' },
+  { val: 'ทั่วไทย', label: 'บริการจัดส่งและประกอบติดตั้ง' }
 ]
 
 const buildComputed = () => {
-  coreValues.value = [1, 2, 3, 4]
-    .map(i => {
+  const dynamicCores = [1, 2, 3, 4]
+    .map((i, idx) => {
       const title = s.value[`about_core_${i}_title`] || ''
       const desc = s.value[`about_core_${i}_desc`] || ''
       const imgUrl = s.value[`about_core_${i}_img`] || ''
+      const defaultItem = defaultCoreValues[idx] || {}
       
+      if (!title) return null
       return {
         title,
         desc,
         img: imgUrl,
-        icon: coreIcons[i - 1]
+        icon: defaultItem.icon || 'shield',
+        tag: defaultItem.tag || 'CORE VALUE'
       }
     })
-    .filter(v => v.title)
+    .filter(Boolean)
 
-  stats.value = [1, 2, 3, 4]
+  coreValues.value = dynamicCores.length > 0 ? dynamicCores : defaultCoreValues
+
+  const dynamicStats = [1, 2, 3, 4]
     .map(i => ({
       val: s.value[`about_stat_${i}_val`] || '',
       label: s.value[`about_stat_${i}_label`] || ''
     }))
     .filter(st => st.val || st.label)
+
+  stats.value = dynamicStats.length > 0 ? dynamicStats : defaultStats
 
   if (s.value.about_content_rich && !isEmptyHtml(s.value.about_content_rich)) {
     showRichContent.value = true
@@ -113,16 +153,18 @@ const loadSettings = async () => {
     const res = await fetch('/api/settings')
     const data = await res.json()
     if (data.success && data.data) {
-      isRichContentSet.value = 'about_content_rich' in data.data
       Object.keys(s.value).forEach(key => {
         if (data.data[key] !== undefined && data.data[key] !== null) {
           s.value[key] = data.data[key]
         }
       })
       buildComputed()
+    } else {
+      buildComputed()
     }
   } catch (e) {
     console.error('Failed to load about settings:', e)
+    buildComputed()
   } finally {
     loading.value = false
     setTimeout(setupObserver, 100)
@@ -131,11 +173,30 @@ const loadSettings = async () => {
 
 onMounted(() => {
   setMeta({
-    title: 'เกี่ยวกับเรา (About Us)',
-    description: settingsStore.storeDescription || 'ทำความรู้จักกับเรา ผู้เชี่ยวชาญด้านการออกแบบ จำหน่าย และติดตั้งระดับพรีเมียม',
+    title: 'เกี่ยวกับเรา (About Us) - บริษัท ซีอาร์ ดิสทริบิวชั่น จำกัด',
+    description: 'ทำความรู้จัก บริษัท ซีอาร์ ดิสทริบิวชั่น จำกัด ผู้เชี่ยวชาญด้านการจำหน่ายและติดตั้งโรงเก็บของสำเร็จรูปพรีเมียม และอุปกรณ์มาตรฐานอุตสาหกรรม ด้วยประสบการณ์กว่า 20 ปี',
     canonicalUrl: window.location.href,
     type: 'website'
   })
+
+  setStructuredData({
+    "@context": "https://schema.org",
+    "@type": "AboutPage",
+    "name": "เกี่ยวกับเรา - บริษัท ซีอาร์ ดิสทริบิวชั่น จำกัด",
+    "description": "ประวัติความเป็นมา วิสัยทัศน์ พันธกิจ และมาตรฐานการให้บริการของ บริษัท ซีอาร์ ดิสทริบิวชั่น จำกัด",
+    "mainEntity": {
+      "@type": "Organization",
+      "name": "บริษัท ซีอาร์ ดิสทริบิวชั่น จำกัด",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "75/110 หมู่ 11 ตำบลคลองหนึ่ง",
+        "addressLocality": "อำเภอคลองหลวง",
+        "addressRegion": "จังหวัดปทุมธานี",
+        "postalCode": "12120",
+        "addressCountry": "TH"
+      }
+    }
+  }, 'dynamic-about-data')
 
   setStructuredData({
     "@context": "https://schema.org",
@@ -148,292 +209,450 @@ onMounted(() => {
 
   loadSettings()
 })
+
+const heroBg = computed(() => {
+  return s.value.about_hero_bg || settingsStore.aboutHeroBg || '/images/hero/about-hero.jpg'
+})
+
 onUnmounted(() => { 
   if (observer) observer.disconnect() 
 })
 </script>
 
 <template>
-  <div class="about-page min-h-screen pb-20 transition-colors duration-500 overflow-x-hidden">
+  <div class="bg-slate-50/50 dark:bg-[#090C12] min-h-screen transition-colors duration-500 font-sans text-slate-800 dark:text-slate-100 pb-20">
 
     <!-- Loading State -->
-    <div v-if="loading" class="flex justify-center items-center min-h-screen">
+    <div v-if="loading" class="flex justify-center items-center min-h-[60vh]">
        <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-emerald-500"></div>
     </div>
 
     <div v-else>
-      <!-- ══════════════════════════════════════════════
-           COMPACT HEADER SECTION
-      ══════════════════════════════════════════════ -->
-      <header class="relative overflow-hidden pt-28 pb-14 bg-[#080b10] border-b border-white/[0.03]">
-        <!-- Background mesh and radial gradient -->
-        <div class="absolute inset-0 opacity-[0.03] pointer-events-none"
-          style="background-image: radial-gradient(circle, rgba(255,255,255,0.6) 1px, transparent 1px); background-size: 30px 30px;">
+      <!-- =========================================================================
+           HERO HEADER SECTION (Enterprise Dark Aesthetic)
+           ========================================================================= -->
+      <header class="relative overflow-hidden pt-28 pb-16 bg-[#070A0F] border-b border-white/[0.05]">
+        <!-- Hero Background Image (Admin Managed) -->
+        <div 
+          class="absolute inset-0 bg-cover bg-center bg-no-repeat transition-all duration-700 opacity-60 scale-100 pointer-events-none"
+          :style="{ backgroundImage: `url(${heroBg})` }"
+        ></div>
+        <!-- Directional Gradient Overlays: Dark on text area, clear and luminous on image -->
+        <div class="absolute inset-0 bg-gradient-to-r from-[#070A0F] via-[#070A0F]/70 to-[#070A0F]/20 pointer-events-none"></div>
+        <div class="absolute inset-0 bg-gradient-to-t from-[#070A0F] via-transparent to-[#070A0F]/40 pointer-events-none"></div>
+
+        <!-- Background Mesh Pattern -->
+        <div class="absolute inset-0 opacity-[0.035] pointer-events-none"
+          style="background-image: radial-gradient(circle, rgba(255,255,255,0.7) 1px, transparent 1px); background-size: 28px 28px;">
         </div>
-        <div class="absolute inset-0 bg-gradient-to-b from-[#080b10] via-[#090e15]/85 to-[#080b10] pointer-events-none"></div>
         
-        <!-- Subtle glowing blobs for aesthetic warmth -->
-        <div class="absolute -top-40 -left-40 w-96 h-96 bg-emerald-500/10 rounded-full blur-[120px] pointer-events-none"></div>
-        <div class="absolute -bottom-40 -right-40 w-96 h-96 bg-emerald-600/5 rounded-full blur-[120px] pointer-events-none"></div>
+        <!-- Ambient Atmospheric Glows -->
+        <div class="absolute -top-32 -left-32 w-96 h-96 bg-emerald-500/10 rounded-full blur-[120px] pointer-events-none"></div>
+        <div class="absolute top-1/2 right-0 w-80 h-80 bg-teal-500/10 rounded-full blur-[100px] pointer-events-none"></div>
 
         <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
-            <div class="text-center md:text-left">
+          <!-- Breadcrumb Bar -->
+          <nav class="flex items-center gap-2 text-xs font-medium text-slate-400 mb-6" aria-label="Breadcrumb">
+            <router-link to="/" class="hover:text-emerald-400 transition-colors flex items-center gap-1.5">
+              <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+              </svg>
+              <span>หน้าแรก</span>
+            </router-link>
+            <svg class="w-3 h-3 text-slate-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+            </svg>
+            <span class="text-emerald-400 font-semibold">เกี่ยวกับเรา</span>
+          </nav>
+
+          <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-8">
+            <div class="max-w-3xl">
               <!-- Eyebrow Pill -->
-              <div v-if="s.about_hero_subtitle" class="inline-flex items-center gap-2 mb-4 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20">
-                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                <span class="text-emerald-400 text-[10px] font-bold tracking-[0.2em] uppercase">{{ s.about_hero_subtitle }}</span>
+              <div class="inline-flex items-center gap-2 mb-4 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 backdrop-blur-md">
+                <svg class="w-3.5 h-3.5 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                </svg>
+                <span class="text-emerald-400 text-[11px] font-bold tracking-[0.2em] uppercase">
+                  {{ s.about_hero_subtitle || 'ABOUT CR DISTRIBUTION' }}
+                </span>
               </div>
               
-              <h1 class="text-3xl sm:text-4xl md:text-5xl font-black text-white leading-tight tracking-tight" v-html="s.about_hero_title || 'ผู้เชี่ยวชาญด้านโรงเก็บของพรีเมียม'"></h1>
-              <p class="mt-3 text-slate-400 text-sm md:text-base max-w-2xl leading-relaxed whitespace-pre-line">
-                {{ s.about_hero_desc || 'เราคือผู้นำในการรังสรรค์และติดตั้งโรงเก็บของพรีเมียมคุณภาพสูง ที่ไม่เพียงแต่ตอบสนองความต้องการด้านการจัดเก็บ แต่ยังยกระดับความสวยงามและเพิ่มมูลค่าให้กับพื้นที่ของคุณ' }}
+              <h1 class="text-3xl sm:text-4xl lg:text-5xl font-black text-white leading-tight tracking-tight">
+                ประวัติความเป็นมาของ <br/>
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-300 to-teal-400">
+                  {{ settingsStore.storeName || 'บริษัท ซีอาร์ ดิสทริบิวชั่น จำกัด' }}
+                </span>
+              </h1>
+              
+              <p class="mt-4 text-slate-400 text-sm sm:text-base leading-relaxed max-w-2xl font-light">
+                {{ s.about_hero_desc || 'บริษัท ซีอาร์ ดิสทริบิวชั่น จำกัด เป็นผู้นำในการนำเข้าและตัวแทนจำหน่ายสินค้าสำเร็จรูปพรีเมียมและอุปกรณ์จัดเก็บมาตรฐานอุตสาหกรรม ด้วยประสบการณ์และความเชี่ยวชาญกว่า 20 ปี เรามุ่งมั่นสรรหาสินค้าคุณภาพสูงสุดเพื่อตอบโจทย์ทุกความต้องการของลูกค้าอย่างยั่งยืน' }}
               </p>
             </div>
 
             <!-- Quick Action Buttons -->
-            <div class="flex flex-wrap items-center justify-center md:justify-end gap-3 flex-shrink-0 self-center md:self-auto">
-              <router-link to="/contact" class="group inline-flex items-center justify-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-white font-bold py-3.5 px-6 rounded-xl shadow-lg shadow-emerald-500/20 transition-all active:scale-95 text-xs">
-                ติดต่อเรา
-                <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+            <div class="flex flex-wrap items-center gap-3 shrink-0">
+              <router-link 
+                to="/contact" 
+                class="inline-flex items-center justify-center gap-2 h-12 px-6 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm shadow-lg shadow-emerald-600/25 transition-all duration-200 active:scale-95"
+              >
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
+                </svg>
+                <span>ติดต่อเรา</span>
               </router-link>
-              <router-link to="/services" class="inline-flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white font-bold py-3.5 px-6 rounded-xl border border-white/15 transition-all active:scale-95 text-xs">
-                ดูบริการ
+
+              <router-link 
+                to="/products" 
+                class="inline-flex items-center justify-center gap-2 h-12 px-6 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-sm border border-white/15 backdrop-blur-sm transition-all duration-200 active:scale-95"
+              >
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h7"/>
+                </svg>
+                <span>ดูสินค้าทั้งหมด</span>
               </router-link>
             </div>
           </div>
         </div>
       </header>
 
-      <!-- ══════════════════════════════════════════════
-           STATS BAR
-      ══════════════════════════════════════════════ -->
-      <section v-if="stats.length" data-section="stats" class="relative -mt-6 z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="bg-white dark:bg-[#111622] rounded-2xl shadow-xl border border-slate-200/50 dark:border-white/[0.04] p-5 md:p-6 grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-          <div v-for="(stat, i) in stats" :key="i" class="text-center border-r border-slate-100 dark:border-white/[0.03] last:border-r-0">
-            <p class="text-2xl md:text-3xl font-black text-emerald-500 dark:text-emerald-400 mb-0.5 tabular-nums">{{ stat.val }}</p>
-            <p class="text-[10px] md:text-xs text-slate-500 dark:text-slate-400 font-bold tracking-wider uppercase whitespace-pre-line px-2">{{ stat.label }}</p>
+      <!-- =========================================================================
+           STATS BAR (Enterprise Highlights)
+           ========================================================================= -->
+      <section data-section="stats" class="relative -mt-8 z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="bg-white dark:bg-[#10141D] rounded-3xl p-6 sm:p-8 border border-slate-200/80 dark:border-white/[0.06] shadow-xl shadow-slate-900/5 dark:shadow-black/20">
+          <div class="grid grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 divide-y sm:divide-y-0 sm:divide-x divide-slate-100 dark:divide-white/[0.06]">
+            <div v-for="(stat, i) in stats" :key="i" class="text-center pt-4 sm:pt-0 first:pt-0 px-2 sm:px-4">
+              <p class="text-3xl sm:text-4xl lg:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 to-teal-400 font-mono tracking-tight mb-1">
+                {{ stat.val }}
+              </p>
+              <p class="text-xs sm:text-sm font-bold text-slate-700 dark:text-slate-300">
+                {{ stat.label }}
+              </p>
+            </div>
           </div>
         </div>
       </section>
 
-      <!-- ══════════════════════════════════════════════
-           CORE VALUES
-      ══════════════════════════════════════════════ -->
-      <section v-if="coreValues.length" class="py-16 md:py-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center mb-12">
-          <span class="text-emerald-500 dark:text-emerald-400 text-[10px] font-bold tracking-[0.2em] uppercase">Why Choose Us</span>
-          <h2 class="text-2xl md:text-4xl font-black text-slate-800 dark:text-white mt-2 tracking-tight">
-            หัวใจสำคัญในการสร้างสรรค์ผลงาน
-          </h2>
-          <div class="mt-3 w-12 h-1 bg-emerald-500 rounded-full mx-auto"></div>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
-          <div v-for="(val, index) in coreValues" :key="index"
-               @click="openModal(val)"
-               class="group bg-white dark:bg-[#111622] border border-slate-200/50 dark:border-white/5 rounded-3xl p-6 shadow-md hover:shadow-xl hover:border-emerald-500/30 transition-all duration-300 transform hover:-translate-y-1 cursor-pointer flex flex-col justify-between h-full">
-            <div>
-              <!-- Icon Frame -->
-              <div class="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 flex items-center justify-center mb-5 group-hover:bg-emerald-500 group-hover:text-white transition-all duration-300">
-                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" :d="val.icon"></path>
-                </svg>
+      <!-- =========================================================================
+           COMPANY STORY & OVERVIEW SECTION (Split Layout)
+           ========================================================================= -->
+      <section data-section="story" class="py-16 md:py-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center">
+          
+          <!-- Left: Main Visual / Facility Image -->
+          <div class="lg:col-span-5">
+            <div class="relative rounded-3xl overflow-hidden shadow-2xl border border-slate-200/80 dark:border-white/[0.08] bg-slate-900 group">
+              <img 
+                v-if="s.about_main_img" 
+                :src="getImageUrl(s.about_main_img)" 
+                class="w-full h-[380px] sm:h-[460px] object-cover transition-transform duration-700 group-hover:scale-105" 
+                alt="CR Distribution Headquarters" 
+              />
+              <div v-else class="w-full h-[380px] sm:h-[460px] bg-gradient-to-br from-slate-800 to-slate-950 flex items-center justify-center p-8 text-center">
+                <div>
+                  <div class="w-16 h-16 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                    </svg>
+                  </div>
+                  <h4 class="text-white font-bold text-base mb-1">บริษัท ซีอาร์ ดิสทริบิวชั่น จำกัด</h4>
+                  <p class="text-xs text-slate-400">สำนักงานใหญ่และคลังสินค้า อำเภอคลองหลวง จังหวัดปทุมธานี</p>
+                </div>
               </div>
+              <div class="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent"></div>
+              
+              <!-- Bottom Badge -->
+              <div class="absolute bottom-5 left-5 right-5 p-4 rounded-2xl bg-white/10 dark:bg-black/40 backdrop-blur-md border border-white/20 text-white flex items-center gap-3">
+                <div class="w-9 h-9 rounded-xl bg-emerald-500 text-white flex items-center justify-center shrink-0">
+                  <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                  </svg>
+                </div>
+                <div>
+                  <p class="text-xs font-bold leading-tight">นำเข้าและจัดจำหน่ายมาตรฐานสากล</p>
+                  <p class="text-[11px] text-slate-300 font-light">มีสถานที่จริง พร้อมทีมงานวิศวกรดูแล</p>
+                </div>
+              </div>
+            </div>
+          </div>
 
-              <h3 class="text-lg font-bold text-slate-800 dark:text-white mb-3 group-hover:text-emerald-500 transition-colors duration-300">
-                {{ val.title }}
-              </h3>
-              <p class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed line-clamp-3">
-                {{ val.desc }}
-              </p>
+          <!-- Right: Text & Key Highlights -->
+          <div class="lg:col-span-7 space-y-6">
+            <div>
+              <div class="inline-flex items-center gap-2 mb-3 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-[11px] font-bold tracking-wider uppercase">
+                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                <span>COMPANY BACKGROUND</span>
+              </div>
+              <h2 class="text-2xl sm:text-3xl lg:text-4xl font-black text-slate-900 dark:text-white tracking-tight leading-tight">
+                มุ่งมั่นส่งมอบโซลูชั่นที่ดีที่สุด <br class="hidden sm:inline" />
+                เพื่อความคุ้มค่าและความปลอดภัย
+              </h2>
             </div>
 
-            <div class="mt-6 pt-4 border-t border-slate-100 dark:border-white/[0.03] flex items-center justify-between">
-              <span class="text-xs font-bold text-emerald-500 group-hover:text-emerald-400 transition-colors">อ่านรายละเอียดเพิ่มเติม</span>
-              <svg class="w-4 h-4 text-emerald-500 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M9 5l7 7-7 7"></path>
+            <p class="text-sm sm:text-base text-slate-600 dark:text-slate-300 leading-relaxed font-light">
+              <strong>บริษัท ซีอาร์ ดิสทริบิวชั่น จำกัด</strong> ดำเนินธุรกิจด้วยความมุ่งมั่นในการเป็นผู้นำด้านการจัดจำหน่ายและให้บริการโซลูชั่นจัดเก็บสินค้าและโรงเก็บของมาตรฐานระดับพรีเมียม รวมถึงเครื่องจักรและอุปกรณ์อุตสาหกรรมเฉพาะทาง โดยให้ความสำคัญสูงสุดกับคุณภาพของวัสดุ ความแข็งแรงทนทาน และความปลอดภัยของผู้ใช้งาน
+            </p>
+
+            <p class="text-sm sm:text-base text-slate-600 dark:text-slate-300 leading-relaxed font-light">
+              ด้วยประสบการณ์ในแวดวงอุตสาหกรรมกว่า 20 ปี เรามีทีมงานผู้เชี่ยวชาญพร้อมให้คำปรึกษาตั้งแต่ขั้นตอนการเลือกขนาด ประเมินหน้างานจริง ไปจนถึงบริการจัดส่งและประกอบติดตั้งอย่างมืออาชีพ พร้อมดูแลหลังการขายอย่างต่อเนื่อง
+            </p>
+
+            <!-- Feature Checkpoints -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-2">
+              <div class="flex items-start gap-2.5 p-3 rounded-xl bg-white dark:bg-[#10141D] border border-slate-200/60 dark:border-white/[0.04]">
+                <svg class="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                </svg>
+                <span class="text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-200">จดทะเบียนถูกต้อง ออกใบกำกับภาษีได้</span>
+              </div>
+
+              <div class="flex items-start gap-2.5 p-3 rounded-xl bg-white dark:bg-[#10141D] border border-slate-200/60 dark:border-white/[0.04]">
+                <svg class="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                </svg>
+                <span class="text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-200">มีโชว์รูมและคลังสินค้าจริงในไทย</span>
+              </div>
+
+              <div class="flex items-start gap-2.5 p-3 rounded-xl bg-white dark:bg-[#10141D] border border-slate-200/60 dark:border-white/[0.04]">
+                <svg class="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                </svg>
+                <span class="text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-200">ทีมช่างชำนาญการติดตั้งทั่วประเทศ</span>
+              </div>
+
+              <div class="flex items-start gap-2.5 p-3 rounded-xl bg-white dark:bg-[#10141D] border border-slate-200/60 dark:border-white/[0.04]">
+                <svg class="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                </svg>
+                <span class="text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-200">การรับประกันและบริการหลังการขายจริง</span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      <!-- =========================================================================
+           CORE VALUES & STRENGTHS SECTION
+           ========================================================================= -->
+      <section data-section="core" class="py-16 md:py-20 bg-slate-100/60 dark:bg-[#0B0F19] border-t border-b border-slate-200/60 dark:border-white/[0.04]">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          
+          <div class="text-center max-w-2xl mx-auto mb-14">
+            <div class="inline-flex items-center gap-2 mb-3.5 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs font-bold tracking-wider uppercase">
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+              </svg>
+              <span>OUR CORE VALUES</span>
+            </div>
+            
+            <h2 class="text-2xl sm:text-3xl lg:text-4xl font-black text-slate-900 dark:text-white tracking-tight leading-tight">
+              หัวใจสำคัญในการส่งมอบคุณค่าแก่ลูกค้า
+            </h2>
+            <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-3 leading-relaxed font-light">
+              หลักการทำงานและความมุ่งมั่นที่เรายึดถือในทุกขั้นตอน เพื่อให้ลูกค้าได้รับความพึงพอใจสูงสุด
+            </p>
+          </div>
+
+          <!-- Cards Grid -->
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div 
+              v-for="(val, index) in coreValues" 
+              :key="index"
+              @click="openModal(val)"
+              class="group bg-white dark:bg-[#10141D] border border-slate-200/80 dark:border-white/[0.06] rounded-3xl p-6 sm:p-7 shadow-lg shadow-slate-900/5 dark:shadow-black/20 hover:border-emerald-500/40 hover:shadow-xl transition-all duration-300 flex flex-col justify-between cursor-pointer"
+            >
+              <div>
+                <!-- Icon Box -->
+                <div class="w-12 h-12 rounded-2xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 flex items-center justify-center mb-5 group-hover:bg-emerald-500 group-hover:text-white transition-colors duration-300">
+                  <svg v-if="val.icon === 'shield'" class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                  </svg>
+                  <svg v-else-if="val.icon === 'solution'" class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+                  </svg>
+                  <svg v-else-if="val.icon === 'wrench'" class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                  </svg>
+                  <svg v-else class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"/>
+                  </svg>
+                </div>
+
+                <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 mb-2 inline-block">
+                  {{ val.tag }}
+                </span>
+
+                <h3 class="text-base sm:text-lg font-bold text-slate-900 dark:text-white mb-2.5 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
+                  {{ val.title }}
+                </h3>
+
+                <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 leading-relaxed font-light line-clamp-4">
+                  {{ val.desc }}
+                </p>
+              </div>
+
+              <div class="mt-6 pt-4 border-t border-slate-100 dark:border-white/[0.06] flex items-center justify-between text-xs font-bold text-emerald-600 dark:text-emerald-400">
+                <span>อ่านรายละเอียด</span>
+                <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+                </svg>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- =========================================================================
+           VISION & MISSION (Two-Column Feature Card)
+           ========================================================================= -->
+      <section data-section="vision" class="py-16 md:py-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+          
+          <!-- Vision Card -->
+          <div class="bg-white dark:bg-[#10141D] rounded-3xl p-8 sm:p-10 border border-slate-200/80 dark:border-white/[0.06] shadow-xl shadow-slate-900/5 dark:shadow-black/20 relative overflow-hidden">
+            <div class="w-14 h-14 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mb-6">
+              <svg class="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
               </svg>
             </div>
-          </div>
-        </div>
-      </section>
 
-      <!-- ══════════════════════════════════════════════
-           QUOTE & MAIN VISUAL (Split Layout)
-      ══════════════════════════════════════════════ -->
-      <section data-section="quote" class="py-16 md:py-24 bg-slate-50 dark:bg-[#0a0f16] border-t border-b border-slate-200/40 dark:border-white/[0.03]">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div class="flex flex-col lg:flex-row gap-12 items-center">
+            <span class="text-[11px] font-bold text-emerald-500 uppercase tracking-widest block mb-1">OUR VISION</span>
+            <h3 class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white mb-4">
+              {{ s.about_vision_title || 'วิสัยทัศน์ของเรา' }}
+            </h3>
             
-            <!-- Left Side: Main Visual Image -->
-            <div v-if="s.about_main_img" class="w-full lg:w-5/12">
-              <div class="relative aspect-[4/3] rounded-3xl overflow-hidden shadow-2xl border-[6px] border-white dark:border-[#111622]">
-                <img :src="getImageUrl(s.about_main_img)" class="w-full h-full object-cover transform hover:scale-105 transition-transform duration-1000" alt="Main Visual" />
-                <div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
-              </div>
-            </div>
-
-            <!-- Right Side: Quote Card -->
-            <div class="w-full" :class="s.about_main_img ? 'lg:w-7/12' : 'max-w-3xl mx-auto text-center'">
-              <div class="relative p-6 sm:p-10">
-                <!-- Giant Quote Icon Watermark -->
-                <svg class="absolute top-0 left-0 w-32 h-32 text-emerald-500/5 dark:text-emerald-500/5 rotate-180 pointer-events-none" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z"/>
-                </svg>
-
-                <div class="relative z-10">
-                  <span class="text-xs font-bold text-emerald-500 tracking-widest uppercase block mb-3">
-                    {{ s.about_quote_title || 'แรงบันดาลใจที่ส่งต่อสู่พันธกิจ' }}
-                  </span>
-                  <h3 class="text-xl sm:text-2xl lg:text-3xl font-black text-slate-800 dark:text-white leading-snug italic whitespace-pre-line">
-                    "{{ s.about_quote_text || 'ด้วยความเข้าใจอย่างลึกซึ้งในความต้องการของลูกค้าและประสบการณ์อันยาวนาน เรามุ่งมั่นที่จะนำเสนอโซลูชั่นที่เหนือกว่าในทุกด้าน' }}"
-                  </h3>
-                </div>
-              </div>
-            </div>
+            <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed font-light">
+              {{ s.about_vision_desc || 'มุ่งมั่นสู่การเป็นผู้นำอันดับหนึ่งในการนำเข้า จัดจำหน่าย และให้บริการโซลูชั่นจัดเก็บสินค้าและโรงเก็บของสำเร็จรูปมาตรฐานสากล ที่ได้รับความไว้วางใจสูงสุดจากลูกค้าทั้งภาคครัวเรือนและภาคธุรกิจอุตสาหกรรมทั่วประเทศไทย' }}
+            </p>
           </div>
-        </div>
-      </section>
 
-      <!-- ══════════════════════════════════════════════
-           VISION & MISSION
-      ══════════════════════════════════════════════ -->
-      <section data-section="vision" class="py-16 md:py-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="bg-white dark:bg-[#111622] border border-slate-200/50 dark:border-white/5 rounded-3xl overflow-hidden shadow-md">
-          <div class="flex flex-col lg:flex-row">
+          <!-- Mission Card -->
+          <div class="bg-white dark:bg-[#10141D] rounded-3xl p-8 sm:p-10 border border-slate-200/80 dark:border-white/[0.06] shadow-xl shadow-slate-900/5 dark:shadow-black/20 relative overflow-hidden">
+            <div class="w-14 h-14 rounded-2xl bg-teal-500/10 border border-teal-500/20 text-teal-600 dark:text-teal-400 flex items-center justify-center mb-6">
+              <svg class="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+              </svg>
+            </div>
+
+            <span class="text-[11px] font-bold text-teal-500 uppercase tracking-widest block mb-1">OUR MISSION</span>
+            <h3 class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white mb-4">
+              {{ s.about_mission_title || 'พันธกิจของเรา' }}
+            </h3>
             
-            <!-- Left: Visual Image Frame -->
-            <div class="w-full lg:w-5/12 relative min-h-[300px] lg:min-h-full">
-              <img v-if="s.about_vision_img" :src="getImageUrl(s.about_vision_img)" class="absolute inset-0 w-full h-full object-cover" @error="$event.target.src = 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80'" />
-              <img v-else src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80" class="absolute inset-0 w-full h-full object-cover" />
-              <div class="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent lg:bg-gradient-to-r lg:from-transparent lg:to-white dark:lg:to-[#111622]"></div>
-            </div>
-
-            <!-- Right: Content -->
-            <div class="w-full lg:w-7/12 p-8 sm:p-12 lg:p-16 flex flex-col justify-center gap-10">
-              <!-- Vision -->
-              <div v-if="s.about_vision_title || s.about_vision_desc" class="flex gap-5 items-start">
-                <div class="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 flex items-center justify-center shrink-0">
-                  <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                  </svg>
-                </div>
-                <div>
-                  <h3 class="text-xl font-bold text-slate-800 dark:text-white mb-2">{{ s.about_vision_title || 'วิสัยทัศน์ของเรา' }}</h3>
-                  <p class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed whitespace-pre-line">{{ s.about_vision_desc }}</p>
-                </div>
-              </div>
-
-              <!-- Mission -->
-              <div v-if="s.about_mission_title || s.about_mission_desc" class="flex gap-5 items-start">
-                <div class="w-12 h-12 rounded-xl bg-teal-500/10 border border-teal-500/20 text-teal-500 flex items-center justify-center shrink-0">
-                  <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-                  </svg>
-                </div>
-                <div>
-                  <h3 class="text-xl font-bold text-slate-800 dark:text-white mb-2">{{ s.about_mission_title || 'พันธกิจของเรา' }}</h3>
-                  <p class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed whitespace-pre-line">{{ s.about_mission_desc }}</p>
-                </div>
-              </div>
-            </div>
-
+            <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed font-light">
+              {{ s.about_mission_desc || 'คัดสรรและส่งมอบผลิตภัณฑ์ที่มีคุณภาพสูงสุด พัฒนาการบริการคำปรึกษาและติดตั้งให้มีประสิทธิภาพ รวดเร็ว ตรงเวลา พร้อมดูแลและรับประกันหลังการขายด้วยความซื่อสัตย์ จริงใจ เพื่อสร้างความคุ้มค่าและความพึงพอใจสูงสุดให้แก่ลูกค้าทุกท่าน' }}
+            </p>
           </div>
+
         </div>
       </section>
 
-      <!-- ══════════════════════════════════════════════
-           RICH CONTENT SECTION
-      ══════════════════════════════════════════════ -->
-      <section v-if="showRichContent" class="py-16 max-w-4xl mx-auto px-4">
-        <div class="mb-10 text-center">
-          <h2 class="text-2xl md:text-3xl font-black text-slate-800 dark:text-white tracking-tight">รายละเอียดเพิ่มเติม</h2>
-          <div class="mt-3 w-16 h-1 bg-emerald-500 rounded-full mx-auto"></div>
+      <!-- =========================================================================
+           RICH CONTENT (Optional Admin Extended Details)
+           ========================================================================= -->
+      <section v-if="showRichContent" class="py-12 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="mb-8 text-center">
+          <h2 class="text-2xl font-black text-slate-900 dark:text-white tracking-tight">ข้อมูลรายละเอียดเพิ่มเติม</h2>
+          <div class="mt-2.5 w-12 h-1 bg-emerald-500 rounded-full mx-auto"></div>
         </div>
-        <div class="bg-white dark:bg-[#111622] rounded-3xl p-8 md:p-12 border border-slate-200/50 dark:border-white/[0.04] shadow-sm about-rich-content prose prose-emerald prose-lg dark:prose-invert max-w-none" v-html="displayRichContent"></div>
+        <div class="bg-white dark:bg-[#10141D] rounded-3xl p-8 sm:p-12 border border-slate-200/80 dark:border-white/[0.06] shadow-xl prose prose-emerald dark:prose-invert max-w-none text-sm leading-relaxed" v-html="displayRichContent"></div>
       </section>
 
-      <!-- ══════════════════════════════════════════════
-           CTA BANNER
-      ══════════════════════════════════════════════ -->
-      <section data-section="cta" class="py-16 md:py-24 px-4 sm:px-6 lg:px-8">
-        <div class="max-w-7xl mx-auto cta-card relative rounded-3xl overflow-hidden p-8 sm:p-12 lg:p-14 border border-emerald-500/10">
-          <!-- Glowing blobs -->
-          <div class="absolute -top-12 -right-12 w-72 h-72 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
-          <div class="absolute -bottom-12 -left-12 w-60 h-60 bg-emerald-500/5 rounded-full blur-3xl pointer-events-none"></div>
-          <!-- Grid lines overlay -->
-          <div class="absolute inset-0 opacity-[0.05] pointer-events-none"
-            style="background-image: linear-gradient(rgba(240,113,0,0.12) 1px, transparent 1px), linear-gradient(90deg, rgba(240,113,0,0.12) 1px, transparent 1px); background-size: 48px 48px;">
-          </div>
+      <!-- =========================================================================
+           CTA BANNER (Start Your Project)
+           ========================================================================= -->
+      <section data-section="cta" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
+        <div class="rounded-3xl p-8 sm:p-12 lg:p-14 bg-gradient-to-br from-slate-900 via-slate-900 to-slate-950 text-white border border-white/[0.08] shadow-2xl relative overflow-hidden">
+          
+          <!-- Ambient Glows -->
+          <div class="absolute -top-20 -right-20 w-80 h-80 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
           
           <div class="relative z-10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8">
-            <div class="max-w-2xl text-center lg:text-left">
-              <!-- Eyebrow Pill -->
-              <div class="inline-flex items-center gap-2 mb-4 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20">
-                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                <span class="text-emerald-400 text-[10px] font-bold tracking-[0.2em] uppercase">เริ่มต้นสร้างพื้นที่ในฝัน</span>
+            <div class="max-w-2xl">
+              <div class="inline-flex items-center gap-2 mb-3.5 px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-[11px] font-bold tracking-wider uppercase">
+                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                </svg>
+                <span>GET IN TOUCH WITH US</span>
               </div>
 
-              <h2 class="text-2xl sm:text-3xl md:text-4xl font-black text-white mb-3 tracking-tight">
-                {{ s.about_cta_title || 'พร้อมที่จะเริ่มต้นโครงการของคุณหรือยัง?' }}
+              <h2 class="text-2xl sm:text-3xl lg:text-4xl font-black text-white tracking-tight leading-tight mb-3">
+                {{ s.about_cta_title || 'พร้อมรับคำปรึกษาและใบเสนอราคาด่วนแล้วหรือยัง?' }}
               </h2>
-              <p class="text-slate-400 text-sm md:text-base leading-relaxed">
-                {{ s.about_cta_desc || 'ติดต่อเราวันนี้เพื่อรับคำปรึกษาและใบเสนอราคาฟรี ทีมงานผู้เชี่ยวชาญของเราพร้อมที่จะเนรมิตพื้นที่ในฝันของคุณให้เป็นจริง' }}
+              <p class="text-xs sm:text-sm text-slate-400 leading-relaxed font-light">
+                {{ s.about_cta_desc || 'ทีมวิศวกรและฝ่ายบริการลูกค้าพร้อมให้คำแนะนำ ประเมินขนาดพื้นที่ และนำเสนอโซลูชั่นที่คุ้มค่าที่สุดสำหรับคุณ' }}
               </p>
             </div>
 
-            <div class="flex flex-col sm:flex-row justify-center lg:justify-end gap-3 flex-shrink-0">
-              <router-link to="/quotation" class="cta-primary-btn group inline-flex items-center justify-center gap-2 py-3.5 px-7 rounded-xl font-bold text-xs active:scale-95 text-white">
-                ประเมินราคาฟรี
-                <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+            <!-- Standard CTA Buttons -->
+            <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 shrink-0">
+              <router-link 
+                to="/quotation" 
+                class="inline-flex items-center justify-center gap-2.5 h-12 px-6 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm shadow-lg shadow-emerald-600/25 transition-all duration-200 active:scale-95 min-w-[160px]"
+              >
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                </svg>
+                <span>ขอใบเสนอราคา</span>
               </router-link>
-              
-              <a v-if="settingsStore.contactLines.length > 0"
-                 :href="settingsStore.contactLines[0].url || ('https://line.me/ti/p/~' + (settingsStore.contactLines[0].value || '').replace(/^@/, ''))"
-                 target="_blank"
-                 class="inline-flex items-center justify-center gap-2 bg-[#00B900] hover:bg-[#009900] text-white font-bold py-3.5 px-7 rounded-xl shadow-lg transition-all active:scale-95 text-xs">
-                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M24 10.304c0-5.369-5.383-9.738-12-9.738-6.616 0-12 4.369-12 9.738 0 4.814 3.966 8.887 9.539 9.613.385.082.906.262 1.042.6.12.3.05.748.024 1.036l-.16 1.94c-.039.232-.178 1.066.938.595 1.114-.47 6.012-3.542 8.441-6.234 2.802-3.09 4.176-5.834 4.176-7.55z"/></svg>
-                ติดต่อผ่าน LINE
+
+              <a 
+                v-if="settingsStore.contactLines.length > 0"
+                :href="settingsStore.contactLines[0].url || ('https://line.me/ti/p/~' + (settingsStore.contactLines[0].value || '').replace(/^@/, ''))"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="inline-flex items-center justify-center gap-2.5 h-12 px-6 rounded-xl bg-[#06C755] hover:bg-[#05B34C] text-white font-bold text-sm shadow-lg shadow-[#06C755]/25 transition-all duration-200 active:scale-95 min-w-[160px]"
+              >
+                <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M24 10.304c0-5.369-5.383-9.738-12-9.738-6.616 0-12 4.369-12 9.738 0 4.814 3.966 8.887 9.539 9.613.385.082.906.262 1.042.6.12.3.05.748.024 1.036l-.16 1.94c-.039.232-.178 1.066.938.595 1.114-.47 6.012-3.542 8.441-6.234 2.802-3.09 4.176-5.834 4.176-7.55z"/>
+                </svg>
+                <span>ติดต่อผ่าน LINE</span>
               </a>
             </div>
+
           </div>
         </div>
       </section>
 
-      <!-- Core Value Modal -->
+      <!-- =========================================================================
+           CORE VALUE MODAL (Detailed Pop-up View)
+           ========================================================================= -->
       <transition 
         enter-active-class="transition duration-300 ease-out" 
         enter-from-class="opacity-0" 
         enter-to-class="opacity-100" 
         leave-active-class="transition duration-200 ease-in" 
         leave-from-class="opacity-100" 
-        leave-to-class="opacity-0">
+        leave-to-class="opacity-0"
+      >
         <div v-if="isModalOpen && selectedCoreValue" class="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
-          <div class="absolute inset-0 bg-slate-950/80 backdrop-blur-sm cursor-pointer" @click="closeModal"></div>
+          <div class="absolute inset-0 bg-slate-950/80 backdrop-blur-md cursor-pointer" @click="closeModal"></div>
           
-          <div class="relative bg-white dark:bg-[#111622] rounded-[2rem] shadow-2xl w-full max-w-xl overflow-hidden border border-slate-200/50 dark:border-white/5" @click.stop>
-            <button @click="closeModal" class="absolute top-4 right-4 w-8 h-8 bg-black/20 hover:bg-black/40 backdrop-blur-md rounded-full flex items-center justify-center text-white z-20 transition-colors">
-              <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+          <div class="relative bg-white dark:bg-[#111622] rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden border border-slate-200 dark:border-white/[0.08]" @click.stop>
+            <button @click="closeModal" class="absolute top-4 right-4 w-9 h-9 bg-slate-900/40 hover:bg-slate-900/70 backdrop-blur-md rounded-full flex items-center justify-center text-white z-20 transition-colors">
+              <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+              </svg>
             </button>
             
-            <div class="h-48 relative">
-              <img v-if="selectedCoreValue.img" :src="getImageUrl(selectedCoreValue.img)" :alt="selectedCoreValue.title" class="w-full h-full object-cover" @error="$event.target.src = selectedCoreValue.fallbackImg" />
-              <div v-else class="w-full h-full bg-slate-200 dark:bg-slate-800"></div>
-              
-              <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/60 to-transparent"></div>
-              
-              <div class="absolute bottom-5 left-6 right-6 flex items-center gap-3 z-10">
-                 <div class="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center text-white shrink-0 shadow-lg">
-                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="selectedCoreValue.icon"></path></svg>
-                  </div>
-                  <h3 class="text-xl font-bold text-white drop-shadow-md">{{ selectedCoreValue.title }}</h3>
+            <div class="p-6 sm:p-8 bg-slate-50 dark:bg-slate-900/50 border-b border-slate-100 dark:border-white/[0.06]">
+              <div class="w-12 h-12 rounded-2xl bg-emerald-500 text-white flex items-center justify-center mb-4 shadow-lg shadow-emerald-500/25">
+                <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                </svg>
               </div>
+              <h3 class="text-xl font-bold text-slate-900 dark:text-white">{{ selectedCoreValue.title }}</h3>
+              <p class="text-xs text-emerald-600 dark:text-emerald-400 font-bold uppercase tracking-wider mt-1">{{ selectedCoreValue.tag }}</p>
             </div>
             
-            <div class="p-6 max-h-[50vh] overflow-y-auto custom-scrollbar bg-white dark:bg-[#111622]">
-              <p class="text-slate-600 dark:text-slate-300 leading-relaxed whitespace-pre-line text-sm">
+            <div class="p-6 sm:p-8 max-h-[60vh] overflow-y-auto">
+              <p class="text-slate-600 dark:text-slate-300 leading-relaxed whitespace-pre-line text-sm font-light">
                 {{ selectedCoreValue.desc }}
               </p>
             </div>
@@ -443,114 +662,3 @@ onUnmounted(() => {
     </div>
   </div>
 </template>
-
-<style scoped>
-/* ─── Page Base styling ─── */
-.about-page {
-  background-color: #0c0e14;
-  color: #f8fafc;
-}
-
-/* ─── Scrollbar Hide / Custom ─── */
-.scrollbar-none {
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-}
-.scrollbar-none::-webkit-scrollbar {
-  display: none;
-}
-
-.custom-scrollbar::-webkit-scrollbar {
-  width: 6px;
-}
-.custom-scrollbar::-webkit-scrollbar-track {
-  background: transparent;
-}
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 10px;
-}
-.dark .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #334155;
-}
-
-/* ─── CTA Card Custom Styling ─── */
-.cta-card {
-  background: linear-gradient(135deg, rgba(77, 21, 0, 0.2) 0%, rgba(15, 23, 42, 0.95) 50%, rgba(15, 23, 42, 0.98) 100%);
-  border-color: rgba(2, 32, 164, 0.15);
-}
-
-.cta-primary-btn {
-  background-color: #0220A4;
-  box-shadow: 0 8px 24px -4px rgba(2, 32, 164, 0.35);
-  transition: all 0.3s ease;
-}
-.cta-primary-btn:hover {
-  background-color: #01166F;
-  box-shadow: 0 12px 28px -4px rgba(2, 32, 164, 0.45);
-}
-
-/* ─── Rich Content Styles ─── */
-.about-rich-content :deep(h2), .about-rich-content :deep(h3), .about-rich-content :deep(h4) { color: #0220A4; font-weight: 800; margin-top: 2rem; margin-bottom: 0.75rem; }
-.about-rich-content :deep(p) { color: #cbd5e1; line-height: 1.9; margin-bottom: 1rem; }
-.about-rich-content :deep(strong) { color: #5B7CFF; }
-.about-rich-content :deep(ul), .about-rich-content :deep(ol) { padding-left: 1.5rem; margin-bottom: 1rem; }
-.about-rich-content :deep(li) { margin-bottom: 0.5rem; line-height: 1.8; color: #cbd5e1; }
-.about-rich-content :deep(li::marker) { color: #0220A4; }
-.about-rich-content :deep(a) { color: #5B7CFF; text-decoration: underline; }
-.about-rich-content :deep(table) { width: 100% !important; border-collapse: separate !important; border-spacing: 0 !important; border-radius: 16px; overflow: hidden; border: 1px solid rgba(2, 32, 164, 0.15) !important; margin: 2rem auto; }
-.about-rich-content :deep(table thead) { background: linear-gradient(135deg, #01166F, #0220A4); }
-.about-rich-content :deep(table thead th) { color: white; font-weight: 700; padding: 14px 20px; }
-.about-rich-content :deep(table tbody tr:nth-child(even)) { background-color: rgba(2, 32, 164, 0.1); }
-.about-rich-content :deep(table tbody tr:hover) { background-color: rgba(2, 32, 164, 0.2); }
-.about-rich-content :deep(table tbody td) { padding: 12px 20px; border-bottom: 1px solid rgba(2, 32, 164, 0.05); color: #cbd5e1; }
-.about-rich-content :deep(figure.table) { display: flex; justify-content: center; margin: 2rem auto; width: 100%; }
-</style>
-
-<style>
-/* ══════════════════════════════════════════════
-   LIGHT MODE OVERRIDES
-   ══════════════════════════════════════════════ */
-
-html:not(.dark) .about-page {
-  background-color: #F8F9FC;
-  color: #1e293b;
-}
-
-html:not(.dark) .about-page .bg-white {
-  background-color: #ffffff;
-}
-
-html:not(.dark) .about-page .prose {
-  color: #334155;
-}
-
-/* Rich Content light mode */
-html:not(.dark) .about-rich-content :deep(h2), 
-html:not(.dark) .about-rich-content :deep(h3), 
-html:not(.dark) .about-rich-content :deep(h4) { color: #01166F; }
-html:not(.dark) .about-rich-content :deep(p) { color: #475569; }
-html:not(.dark) .about-rich-content :deep(strong) { color: #0220A4; }
-html:not(.dark) .about-rich-content :deep(li) { color: #475569; }
-html:not(.dark) .about-rich-content :deep(li::marker) { color: #01166F; }
-html:not(.dark) .about-rich-content :deep(a) { color: #0220A4; }
-html:not(.dark) .about-rich-content :deep(table) { border-color: rgba(2, 32, 164, 0.15) !important; }
-html:not(.dark) .about-rich-content :deep(table tbody tr:nth-child(even)) { background-color: #F3F5FF; }
-html:not(.dark) .about-rich-content :deep(table tbody tr:hover) { background-color: #E8EDFF; }
-html:not(.dark) .about-rich-content :deep(table tbody td) { border-bottom-color: rgba(2, 32, 164, 0.05); color: #475569; }
-
-/* CTA Card Light Mode */
-html:not(.dark) .about-page .cta-card {
-  background: linear-gradient(135deg, rgba(255, 245, 235, 0.8) 0%, #ffffff 50%, #ffffff 100%);
-  border-color: rgba(240, 113, 0, 0.15);
-  box-shadow: 0 10px 40px rgba(240, 113, 0, 0.03);
-}
-
-html:not(.dark) .about-page .cta-card h2 {
-  color: #0f172a;
-}
-
-html:not(.dark) .about-page .cta-card p {
-  color: #475569;
-}
-</style>

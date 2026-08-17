@@ -3,11 +3,16 @@ const router = express.Router();
 const db = require('../config/database');
 const { verifyAdmin } = require('./auth');
 
-// ── Auto-migrate: ensure slug column exists ──
+// ── Auto-migrate: ensure slug and category columns exist ──
 const initTable = async () => {
     try {
         await db.query(`ALTER TABLE projects ADD COLUMN slug VARCHAR(500) UNIQUE`);
         console.log('projects: slug column added');
+    } catch (e) { /* Column already exists */ }
+
+    try {
+        await db.query(`ALTER TABLE projects ADD COLUMN category VARCHAR(150) DEFAULT 'ยานยนต์ & ไวร์ริ่งฮาร์เนส'`);
+        console.log('projects: category column added');
     } catch (e) { /* Column already exists */ }
 
     // Back-fill slugs for existing rows that don't have one
@@ -156,7 +161,7 @@ router.get('/:id', async (req, res) => {
 router.post('/', verifyAdmin, async (req, res) => {
     try {
         const {
-            title, description, client_name, location, cover_image,
+            title, description, client_name, location, category, cover_image,
             gallery_images, content_rich, is_published, product_id,
             service_date, badge_size, badge_tag
         } = req.body;
@@ -179,15 +184,16 @@ router.post('/', verifyAdmin, async (req, res) => {
 
         const [result] = await db.query(`
             INSERT INTO projects
-                (title, slug, description, client_name, location, cover_image,
+                (title, slug, description, client_name, location, category, cover_image,
                  gallery_images, content_rich, is_published, product_id,
                  service_date, badge_size, badge_tag)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `, [
             title, slug,
             description || '',
             client_name || '',
             location || '',
+            category || 'ยานยนต์ & ไวร์ริ่งฮาร์เนส',
             cover_image || '',
             galleryJson,
             content_rich || '',
@@ -214,7 +220,7 @@ router.post('/', verifyAdmin, async (req, res) => {
 router.put('/:id', verifyAdmin, async (req, res) => {
     try {
         const {
-            title, description, client_name, location, cover_image,
+            title, description, client_name, location, category, cover_image,
             gallery_images, content_rich, is_published, product_id,
             service_date, badge_size, badge_tag, slug: customSlug
         } = req.body;
@@ -239,7 +245,7 @@ router.put('/:id', verifyAdmin, async (req, res) => {
 
         const [result] = await db.query(`
             UPDATE projects
-            SET title = ?, slug = ?, description = ?, client_name = ?, location = ?,
+            SET title = ?, slug = ?, description = ?, client_name = ?, location = ?, category = ?,
                 cover_image = ?, gallery_images = ?, content_rich = ?, is_published = ?,
                 product_id = ?, service_date = ?, badge_size = ?, badge_tag = ?
             WHERE id = ?
@@ -248,6 +254,7 @@ router.put('/:id', verifyAdmin, async (req, res) => {
             description || '',
             client_name || '',
             location || '',
+            category || 'ยานยนต์ & ไวร์ริ่งฮาร์เนส',
             cover_image || '',
             galleryJson,
             content_rich || '',

@@ -34,14 +34,14 @@ Node Environment: production
 ตัวอย่าง ถ้าแตกไฟล์ไว้ที่:
 
 ```text
-/home/USER/morespace
+/home/USER/app
 ```
 
 ให้ตั้ง:
 
 ```text
-Application Root: /home/USER/morespace
-Document Root:    /home/USER/morespace/public
+Application Root: /home/USER/app
+Document Root:    /home/USER/app/public
 Startup File:     index.js
 ```
 

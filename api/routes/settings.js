@@ -71,6 +71,7 @@ router.get('/public', async (req, res) => {
             'about_cta_title', 'about_cta_desc', 'about_content_rich',
             'services_hero_title', 'services_hero_subtitle', 'services_hero_desc', 'services_hero_bg',
             'services_items', 'services_stats', 'services_cta_title', 'services_cta_desc', 'services_content_rich',
+            'products_hero_bg', 'contact_hero_bg', 'blog_hero_bg', 'projects_hero_bg', 'quotation_hero_bg',
             'footer_newsletter_title', 'footer_newsletter_subtitle', 'footer_newsletter_privacy',
             'footer_trust_badges', 'footer_distributor_label', 'footer_distributor_url',
             'footer_sitemap_label', 'footer_sitemap_url',
@@ -100,7 +101,7 @@ router.get('/public', async (req, res) => {
 router.get('/seo-preview', async (req, res) => {
     try {
         const protocol = req.headers['x-forwarded-proto'] || req.protocol || 'https';
-        const host = req.headers['x-forwarded-host'] || req.headers.host || 'morespace.co.th';
+        const host = req.headers['x-forwarded-host'] || req.headers.host || 'localhost';
         const siteUrl = (process.env.SITE_URL || `${protocol}://${host}`).replace(/\/$/, '');
 
         const type = req.query.type || 'home';

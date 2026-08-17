@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, onUnmounted, computed } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { getOptimizedImageUrl, onImageError } from '../utils/image'
 import { useSettingsStore } from '../stores/settingsStore'
@@ -27,36 +27,44 @@ const loadArticles = async () => {
     
     const res = await fetch(`/api/articles/published?${params}`)
     const data = await res.json()
-    if (data.success) {
+    if (data.success && Array.isArray(data.data)) {
       articles.value = data.data
-      totalPages.value = data.pagination.totalPages
-      totalArticles.value = data.pagination.total
+      totalPages.value = data.pagination?.totalPages || 1
+      totalArticles.value = data.pagination?.total || 0
     }
-  } catch (e) { console.error(e) } finally { loading.value = false }
+  } catch (e) {
+    console.error('Failed to load articles:', e)
+  } finally {
+    loading.value = false
+  }
 }
 
 const paginationRange = computed(() => {
-    const range = []
-    const total = totalPages.value
-    const current = currentPage.value
-    const delta = 2
-    let left = Math.max(2, current - delta)
-    let right = Math.min(total - 1, current + delta)
-    
-    range.push(1)
-    if (left > 2) range.push('...')
-    for (let i = left; i <= right; i++) range.push(i)
-    if (right < total - 1) range.push('...')
-    if (total > 1) range.push(total)
-    return range
+  const range = []
+  const total = totalPages.value
+  const current = currentPage.value
+  const delta = 2
+  let left = Math.max(2, current - delta)
+  let right = Math.min(total - 1, current + delta)
+  
+  range.push(1)
+  if (left > 2) range.push('...')
+  for (let i = left; i <= right; i++) range.push(i)
+  if (right < total - 1) range.push('...')
+  if (total > 1) range.push(total)
+  return range
 })
 
 const loadCategories = async () => {
   try {
     const res = await fetch('/api/articles/categories')
     const data = await res.json()
-    if (data.success) categories.value = data.data
-  } catch (e) { /* */ }
+    if (data.success && Array.isArray(data.data)) {
+      categories.value = data.data
+    }
+  } catch (e) {
+    console.error('Failed to load categories:', e)
+  }
 }
 
 const filterCategory = (cat) => {
@@ -66,19 +74,20 @@ const filterCategory = (cat) => {
 }
 
 const changePage = (p) => {
+  if (p === '...' || p === currentPage.value) return
   currentPage.value = p
   loadArticles()
   window.scrollTo({ top: 0, behavior: 'smooth' })
 }
 
 const formatArticleDate = (dateString) => {
-  if (!dateString) return 'ล่าสุด';
+  if (!dateString) return 'ล่าสุด'
   try {
-    const d = new Date(dateString);
-    if (isNaN(d.getTime())) return 'ล่าสุด';
-    return d.toLocaleDateString('th-TH', { year: 'numeric', month: 'short', day: 'numeric' });
+    const d = new Date(dateString)
+    if (isNaN(d.getTime())) return 'ล่าสุด'
+    return d.toLocaleDateString('th-TH', { year: 'numeric', month: 'short', day: 'numeric' })
   } catch(e) {
-    return 'ล่าสุด';
+    return 'ล่าสุด'
   }
 }
 
@@ -98,16 +107,6 @@ const clearSearch = () => {
   searchQuery.value = ''
   currentPage.value = 1
   loadArticles()
-}
-
-const totalCategoriesCount = computed(() => {
-  return categories.value.reduce((acc, cat) => acc + (cat.count || 0), 0)
-})
-
-const getImageUrl = (path) => {
-  if (!path) return 'https://images.unsplash.com/photo-1546410531-bb4caa6b424d?q=80&w=1200'
-  if (path.startsWith('http')) return path
-  return `${import.meta.env.VITE_API_URL || ''}${path}`
 }
 
 const getOptimizedBlogImageUrl = (path, width) => {
@@ -130,14 +129,21 @@ const gridArticles = computed(() => {
   return articles.value.filter(a => a.id !== featured.id)
 })
 
+const lineHref = computed(() => {
+  const l = settingsStore.contactLines?.[0]
+  if (!l) return '/contact'
+  if (typeof l === 'string') return `https://line.me/ti/p/~${l.replace(/^@/, '')}`
+  return l.url || (l.value ? `https://line.me/ti/p/~${l.value.replace(/^@/, '')}` : '/contact')
+})
+
 // Schema
 const addSchema = () => {
-  const storeName = settingsStore.storeName || ''
+  const storeName = settingsStore.storeName || 'บริษัท ซีอาร์ ดิสทริบิวชั่น จำกัด'
   const baseUrl = window.location.origin
   
   setMeta({
-    title: 'บทความและสาระน่ารู้',
-    description: settingsStore.storeDescription || 'รวบรวมไอเดีย บทความน่ารู้ เทคนิคการดูแลรักษา และเคล็ดลับการจัดระเบียบพื้นที่',
+    title: 'บทความและสาระน่ารู้ - บริษัท ซีอาร์ ดิสทริบิวชั่น จำกัด',
+    description: settingsStore.storeDescription || 'รวบรวมบทความน่ารู้ คู่มือการเลือกซื้อโรงเก็บของสำเร็จรูป การเตรียมงานฐานราก และเคล็ดลับการจัดระเบียบพื้นที่มาตรฐานสากล',
     canonicalUrl: `${baseUrl}/blog`,
     type: 'website'
   })
@@ -145,12 +151,12 @@ const addSchema = () => {
   setStructuredData({
     "@context": "https://schema.org",
     "@type": "Blog",
-    "name": storeName ? `บทความ ${storeName}`.trim() : 'บทความและสาระน่ารู้',
-    "description": settingsStore.storeDescription || "บทความให้ความรู้ การดูแลรักษา และเคล็ดลับจัดพื้นที่",
+    "name": `บทความและความรู้ - ${storeName}`,
+    "description": settingsStore.storeDescription || "บทความให้ความรู้ การดูแลรักษา และเคล็ดลับการเลือกใช้โรงเก็บของมาตรฐาน",
     "url": `${baseUrl}/blog`,
     "publisher": {
       "@type": "Organization",
-      "name": storeName || undefined,
+      "name": storeName,
       "url": baseUrl
     }
   }, 'dynamic-structured-data')
@@ -165,6 +171,10 @@ const addSchema = () => {
   }, 'dynamic-breadcrumb-data')
 }
 
+const heroBg = computed(() => {
+  return settingsStore.blogHeroBg || '/images/hero/blog-hero.jpg'
+})
+
 onMounted(() => {
   loadArticles()
   loadCategories()
@@ -173,122 +183,151 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="blog-page min-h-screen pb-20 transition-colors duration-500">
+  <div class="bg-slate-50/50 dark:bg-[#090C12] min-h-screen transition-colors duration-500 font-sans text-slate-800 dark:text-slate-100 pb-20">
 
-    <!-- ══════════════════════════════════════════════
-         COMPACT HEADER SECTION
-    ══════════════════════════════════════════════ -->
-    <header class="relative overflow-hidden pt-28 pb-14 bg-[#080b10] border-b border-white/[0.03]">
-      <!-- Background mesh and radial gradient -->
-      <div class="absolute inset-0 opacity-[0.03] pointer-events-none"
-        style="background-image: radial-gradient(circle, rgba(255,255,255,0.6) 1px, transparent 1px); background-size: 30px 30px;">
+    <!-- =========================================================================
+         HERO HEADER SECTION (Enterprise Dark Aesthetic)
+         ========================================================================= -->
+    <header class="relative overflow-hidden pt-28 pb-16 bg-[#070A0F] border-b border-white/[0.05]">
+      <!-- Hero Background Image (Admin Managed) -->
+      <div 
+        class="absolute inset-0 bg-cover bg-center bg-no-repeat transition-all duration-700 opacity-60 scale-100 pointer-events-none"
+        :style="{ backgroundImage: `url(${heroBg})` }"
+      ></div>
+      <!-- Directional Gradient Overlays: Dark on text area, clear and luminous on image -->
+      <div class="absolute inset-0 bg-gradient-to-r from-[#070A0F] via-[#070A0F]/70 to-[#070A0F]/20 pointer-events-none"></div>
+      <div class="absolute inset-0 bg-gradient-to-t from-[#070A0F] via-transparent to-[#070A0F]/40 pointer-events-none"></div>
+
+      <!-- Mesh Pattern Background -->
+      <div class="absolute inset-0 opacity-[0.035] pointer-events-none"
+        style="background-image: radial-gradient(circle, rgba(255,255,255,0.7) 1px, transparent 1px); background-size: 28px 28px;">
       </div>
-      <div class="absolute inset-0 bg-gradient-to-b from-[#080b10] via-[#090e15]/85 to-[#080b10] pointer-events-none"></div>
       
-      <!-- Subtle glowing blobs for aesthetic warmth -->
-      <div class="absolute -top-40 -left-40 w-96 h-96 bg-emerald-500/10 rounded-full blur-[120px] pointer-events-none"></div>
-      <div class="absolute -bottom-40 -right-40 w-96 h-96 bg-emerald-600/5 rounded-full blur-[120px] pointer-events-none"></div>
+      <!-- Ambient Atmospheric Glows -->
+      <div class="absolute -top-32 -left-32 w-96 h-96 bg-emerald-500/10 rounded-full blur-[120px] pointer-events-none"></div>
+      <div class="absolute top-1/2 right-0 w-80 h-80 bg-teal-500/10 rounded-full blur-[100px] pointer-events-none"></div>
 
       <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
-          <div class="text-center md:text-left">
+        <!-- Breadcrumb Bar -->
+        <nav class="flex items-center gap-2 text-xs font-medium text-slate-400 mb-6" aria-label="Breadcrumb">
+          <router-link to="/" class="hover:text-emerald-400 transition-colors flex items-center gap-1.5">
+            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+            </svg>
+            <span>หน้าแรก</span>
+          </router-link>
+          <svg class="w-3 h-3 text-slate-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+          </svg>
+          <span class="text-emerald-400 font-semibold">บทความและความรู้</span>
+        </nav>
+
+        <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-8">
+          <div class="max-w-3xl">
             <!-- Eyebrow Pill -->
-            <div class="inline-flex items-center gap-2 mb-4 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20">
-              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-              <span class="text-emerald-400 text-[10px] font-bold tracking-[0.2em] uppercase">BLOG & KNOWLEDGE</span>
+            <div class="inline-flex items-center gap-2 mb-4 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 backdrop-blur-md">
+              <svg class="w-3.5 h-3.5 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+              </svg>
+              <span class="text-emerald-400 text-[11px] font-bold tracking-[0.2em] uppercase">
+                KNOWLEDGE & ARTICLES
+              </span>
             </div>
             
-            <h1 class="text-3xl sm:text-4xl md:text-5xl font-black text-white leading-tight tracking-tight">
-              บทความและความรู้
+            <h1 class="text-3xl sm:text-4xl lg:text-5xl font-black text-white leading-tight tracking-tight">
+              คลังบทความและสาระน่ารู้ <br/>
+              <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-300 to-teal-400">
+                คู่มือการเลือกใช้และดูแลรักษาพื้นที่
+              </span>
             </h1>
-            <p class="mt-3 text-slate-400 text-sm md:text-base max-w-2xl leading-relaxed">
-              {{ settingsStore.storeDescription || 'เจาะลึกเทคนิคการจัดพื้นที่ เคล็ดลับดูแลรักษา และแรงบันดาลใจในการตกแต่ง' }}
+            
+            <p class="mt-4 text-slate-400 text-sm sm:text-base leading-relaxed max-w-2xl font-light">
+              เจาะลึกเทคนิคการเลือกซื้อโรงเก็บของสำเร็จรูป การเตรียมความพร้อมงานฐานราก การบำรุงรักษาโครงสร้าง และเกร็ดความรู้มาตรฐานอุตสาหกรรมจากทีมวิศวกรผู้เชี่ยวชาญ
             </p>
           </div>
 
-          <!-- Stats Strip -->
-          <div class="flex items-center justify-center md:justify-end gap-6 sm:gap-8 bg-slate-900/40 border border-white/5 backdrop-blur-md px-6 py-4 rounded-2xl self-center md:self-auto">
+          <!-- Key Stats Strip -->
+          <div class="flex items-center justify-center lg:justify-end gap-6 sm:gap-8 bg-slate-900/60 border border-white/10 backdrop-blur-md px-6 py-4 rounded-2xl shrink-0">
             <div class="text-center">
-              <p class="text-xl sm:text-2xl font-black text-white tabular-nums">{{ totalArticles }}</p>
-              <p class="text-[10px] text-slate-400 font-semibold tracking-wider uppercase mt-0.5">บทความทั้งหมด</p>
+              <p class="text-2xl sm:text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-300 font-mono">{{ totalArticles }}</p>
+              <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-0.5">บทความทั้งหมด</p>
             </div>
             <div class="w-px h-8 bg-white/10"></div>
             <div class="text-center">
-              <p class="text-xl sm:text-2xl font-black text-white tabular-nums">{{ categories.length }}</p>
-              <p class="text-[10px] text-slate-400 font-semibold tracking-wider uppercase mt-0.5">หมวดหมู่</p>
+              <p class="text-2xl sm:text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-300 font-mono">{{ categories.length }}</p>
+              <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-0.5">หมวดหมู่ความรู้</p>
             </div>
           </div>
         </div>
       </div>
     </header>
 
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-10">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-12">
 
-      <!-- ══════════════════════════════════════════════
+      <!-- =========================================================================
            FEATURED ARTICLE SHOWCASE (Page 1 Only)
-      ══════════════════════════════════════════════ -->
-      <section v-if="featuredArticle && !loading" class="mb-10">
+           ========================================================================= -->
+      <section v-if="featuredArticle && !loading" class="mb-12">
         <router-link
           :to="'/blog/' + (featuredArticle.slug || featuredArticle.id)"
-          class="featured-hero-card group"
+          class="group block bg-white dark:bg-[#10141D] rounded-3xl overflow-hidden border border-slate-200/80 dark:border-white/[0.06] shadow-xl shadow-slate-900/5 dark:shadow-black/20 hover:border-emerald-500/40 hover:shadow-2xl transition-all duration-300"
         >
-          <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center p-6 sm:p-8">
             <!-- Cover Image -->
-            <div class="lg:col-span-7 relative rounded-2xl overflow-hidden aspect-[16/10] lg:aspect-[1.8/1] bg-slate-950 shadow-inner">
+            <div class="lg:col-span-7 relative rounded-2xl overflow-hidden aspect-[16/10] bg-slate-900 shadow-inner">
               <img
                 :src="getOptimizedBlogImageUrl(featuredArticle.cover_image, 1200)"
                 :alt="featuredArticle.title"
-                class="w-full h-full object-cover transform group-hover:scale-102 transition-transform duration-[1.2s] ease-out"
+                class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                 @error="onImageError"
               />
-              <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent"></div>
+              <div class="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-transparent to-transparent opacity-60 group-hover:opacity-80 transition-opacity"></div>
               
               <!-- Badges on image -->
-              <div class="absolute top-4 left-4 flex gap-2">
-                <span class="bg-gradient-to-r from-blue-400 to-blue-500 text-white px-3 py-1 text-[10px] font-black rounded-full uppercase tracking-wider shadow-md flex items-center gap-1">
-                  <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
-                  แนะนำ
+              <div class="absolute top-4 left-4 flex items-center gap-2">
+                <span class="bg-emerald-600 text-white px-3 py-1 text-[10px] font-bold rounded-full uppercase tracking-wider shadow-md flex items-center gap-1.5">
+                  <svg class="w-3 h-3 text-emerald-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>
+                  </svg>
+                  บทความแนะนำ
                 </span>
-                <span class="bg-emerald-500 text-white px-3 py-1 text-[10px] font-black rounded-full uppercase tracking-wider shadow-md">
+                <span v-if="featuredArticle.category" class="bg-slate-900/80 backdrop-blur-md text-emerald-400 border border-emerald-500/20 px-3 py-1 text-[10px] font-bold rounded-full uppercase tracking-wider shadow-md">
                   {{ featuredArticle.category }}
                 </span>
               </div>
             </div>
 
             <!-- Content Details -->
-            <div class="lg:col-span-5 flex flex-col justify-between h-full py-2">
-              <div class="space-y-4">
-                <span class="text-xs font-bold text-emerald-500 dark:text-emerald-400 uppercase tracking-widest flex items-center gap-2">
-                  <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            <div class="lg:col-span-5 flex flex-col justify-between h-full space-y-4">
+              <div class="space-y-3">
+                <div class="flex items-center gap-2 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
+                  <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                   </svg>
-                  เผยแพร่เมื่อ {{ formatArticleDate(featuredArticle.published_at || featuredArticle.created_at) }}
-                </span>
+                  <span>{{ formatArticleDate(featuredArticle.published_at || featuredArticle.created_at) }}</span>
+                </div>
                 
-                <h2 class="featured-hero-title">
+                <h2 class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white leading-snug group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
                   {{ featuredArticle.title }}
                 </h2>
                 
-                <p class="text-slate-500 dark:text-slate-400 text-sm md:text-base leading-relaxed line-clamp-4 font-light">
-                  {{ featuredArticle.excerpt || featuredArticle.seo_description || 'อ่านรายละเอียดเชิงลึกและเทคนิคต่าง ๆ เพิ่มเติมได้ในบทความพิเศษนี้...' }}
+                <p class="text-slate-600 dark:text-slate-300 text-xs sm:text-sm leading-relaxed line-clamp-3 font-light">
+                  {{ featuredArticle.excerpt || featuredArticle.seo_description || 'อ่านรายละเอียดเชิงลึกและคำแนะนำสำคัญเพิ่มเติมได้ในบทความพิเศษนี้' }}
                 </p>
               </div>
 
-              <div class="flex items-center justify-between pt-6 border-t border-slate-100 dark:border-white/[0.05] mt-6">
-                <div class="flex items-center gap-4 text-xs text-slate-400">
-                  <span class="flex items-center gap-1.5">
-                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                    </svg>
-                    {{ featuredArticle.view_count || 0 }} ยอดเข้าชม
-                  </span>
-                  <span>•</span>
-                  <span v-if="featuredArticle.author || settingsStore.storeName">โดย {{ featuredArticle.author || settingsStore.storeName }}</span>
+              <div class="flex items-center justify-between pt-5 border-t border-slate-100 dark:border-white/[0.04] mt-2">
+                <div class="flex items-center gap-2 text-xs text-slate-400 font-medium">
+                  <svg class="w-4 h-4 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                  </svg>
+                  <span>{{ featuredArticle.view_count || 0 }} ยอดเข้าชม</span>
                 </div>
                 
-                <span class="featured-hero-action">
-                  <span>อ่านบทความ</span>
-                  <svg class="w-4 h-4 transform group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                <span class="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-600 dark:text-emerald-400">
+                  <span>อ่านบทความฉบับเต็ม</span>
+                  <svg class="w-4 h-4 transform group-hover:translate-x-1.5 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
                   </svg>
                 </span>
@@ -298,11 +337,11 @@ onMounted(() => {
         </router-link>
       </section>
 
-      <!-- ══════════════════════════════════════════════
+      <!-- =========================================================================
            STICKY FILTER & SEARCH BAR
-      ══════════════════════════════════════════════ -->
-      <div class="sticky-controls sticky z-30 transition-all duration-300">
-        <div class="w-full border-b border-slate-200/80 dark:border-white/[0.05] bg-[#faf9f6]/95 dark:bg-[#0c0e14]/95 backdrop-blur-md py-4">
+           ========================================================================= -->
+      <div class="sticky top-[60px] lg:top-[72px] z-30 transition-all duration-300 bg-white/80 dark:bg-[#090C12]/85 backdrop-blur-md border-b border-slate-200/80 dark:border-white/[0.06] py-3.5 mb-10 shadow-sm rounded-2xl">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             
             <!-- Category Pills (Horizontal scrollable) -->
@@ -310,14 +349,14 @@ onMounted(() => {
               <button
                 @click="filterCategory('all')"
                 :class="[
-                  'px-4 py-2 rounded-full text-xs font-bold transition-all duration-200 whitespace-nowrap border',
+                  'px-4 py-2 rounded-xl text-xs font-bold transition-all duration-200 whitespace-nowrap border',
                   selectedCategory === 'all'
-                    ? 'bg-emerald-500 text-white border-emerald-500 shadow-md shadow-emerald-500/20'
-                    : 'bg-white/45 dark:bg-slate-900/40 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-white/5 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-800 dark:hover:text-white'
+                    ? 'bg-emerald-600 text-white border-emerald-600 shadow-md shadow-emerald-600/20'
+                    : 'bg-white dark:bg-[#10141D] text-slate-600 dark:text-slate-400 border-slate-200/80 dark:border-white/[0.06] hover:bg-slate-100 dark:hover:bg-slate-800/60 hover:text-slate-900 dark:hover:text-white'
                 ]"
               >
                 ทั้งหมด
-                <span class="ml-1.5 opacity-60 font-semibold">{{ totalArticles }}</span>
+                <span class="ml-1.5 opacity-70 font-mono">{{ totalArticles }}</span>
               </button>
               
               <button
@@ -325,46 +364,44 @@ onMounted(() => {
                 :key="cat.category"
                 @click="filterCategory(cat.category)"
                 :class="[
-                  'px-4 py-2 rounded-full text-xs font-bold transition-all duration-200 whitespace-nowrap border',
+                  'px-4 py-2 rounded-xl text-xs font-bold transition-all duration-200 whitespace-nowrap border',
                   selectedCategory === cat.category
-                    ? 'bg-emerald-500 text-white border-emerald-500 shadow-md shadow-emerald-500/20'
-                    : 'bg-white/45 dark:bg-slate-900/40 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-white/5 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-800 dark:hover:text-white'
+                    ? 'bg-emerald-600 text-white border-emerald-600 shadow-md shadow-emerald-600/20'
+                    : 'bg-white dark:bg-[#10141D] text-slate-600 dark:text-slate-400 border-slate-200/80 dark:border-white/[0.06] hover:bg-slate-100 dark:hover:bg-slate-800/60 hover:text-slate-900 dark:hover:text-white'
                 ]"
               >
                 {{ cat.category }}
-                <span class="ml-1.5 opacity-60 font-semibold">{{ cat.count }}</span>
+                <span class="ml-1.5 opacity-70 font-mono">{{ cat.count }}</span>
               </button>
             </div>
 
             <!-- Search Panel -->
-            <div class="flex items-center gap-3 justify-between md:justify-end flex-shrink-0">
+            <div class="flex items-center gap-4 justify-between md:justify-end shrink-0">
               <!-- Result count -->
-              <span class="text-xs font-medium text-slate-500 dark:text-slate-400 tabular-nums">
-                พบ <strong class="text-emerald-500 font-bold dark:text-emerald-400">{{ totalArticles }}</strong> บทความ
+              <span class="text-xs font-medium text-slate-500 dark:text-slate-400">
+                พบ <strong class="text-emerald-600 dark:text-emerald-400 font-bold font-mono">{{ totalArticles }}</strong> บทความ
               </span>
 
-              <!-- Search Input Capsule -->
+              <!-- Search Input -->
               <div class="relative w-full max-w-[240px]">
-                <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <svg class="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                  <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                   </svg>
                 </span>
                 <input
                   v-model="searchInput"
                   @input="onSearchInput"
-                  @keyup.enter="onSearchInput"
                   type="text"
                   placeholder="ค้นหาบทความ..."
-                  class="w-full bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-white/10 rounded-full pl-9 pr-8 py-2 text-xs text-slate-800 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all duration-200"
+                  class="w-full bg-white dark:bg-[#10141D] border border-slate-200/80 dark:border-white/[0.08] rounded-xl pl-9 pr-8 py-2 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all"
                 />
-                <!-- Clear Button -->
                 <button
                   v-if="searchInput"
                   @click="clearSearch"
-                  class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-white"
+                  class="absolute inset-y-0 right-0 pr-2.5 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-white"
                 >
-                  <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
                   </svg>
                 </button>
@@ -375,535 +412,204 @@ onMounted(() => {
         </div>
       </div>
 
-      <!-- ══════════════════════════════════════════════
+      <!-- =========================================================================
            ARTICLES GRID
-      ══════════════════════════════════════════════ -->
-      <section class="py-8">
-        
-        <!-- Loading Skeleton -->
-        <div v-if="loading" class="articles-grid">
-          <div v-for="n in 6" :key="n"
-            class="flex flex-col bg-white dark:bg-slate-900/20 border border-slate-200/50 dark:border-white/[0.04] rounded-2xl overflow-hidden aspect-[4/3] animate-pulse"
-          >
+           ========================================================================= -->
+      <section>
+        <!-- Loading State -->
+        <div v-if="loading" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+          <div v-for="n in 6" :key="'art-skel-'+n" class="bg-white dark:bg-[#10141D] rounded-3xl overflow-hidden border border-slate-200/80 dark:border-white/[0.06] shadow-sm animate-pulse flex flex-col">
             <div class="aspect-[16/10] bg-slate-200 dark:bg-slate-800"></div>
-            <div class="p-5 space-y-3 flex-1 flex flex-col justify-between">
-              <div class="space-y-2">
+            <div class="p-6 space-y-4 flex-1 flex flex-col justify-between">
+              <div class="space-y-2.5">
                 <div class="h-4 bg-slate-200 dark:bg-slate-800 rounded w-3/4"></div>
-                <div class="h-3 bg-slate-200 dark:bg-slate-800 rounded w-full"></div>
-                <div class="h-3 bg-slate-200 dark:bg-slate-800 rounded w-2/3"></div>
+                <div class="h-3 bg-slate-200 dark:bg-slate-800 rounded w-1/2"></div>
               </div>
-              <div class="h-3 bg-slate-200 dark:bg-slate-800 rounded w-1/4"></div>
+              <div class="h-3 bg-slate-200 dark:bg-slate-800 rounded w-1/3"></div>
             </div>
           </div>
         </div>
 
         <!-- Empty State -->
-        <div v-else-if="articles.length === 0" class="text-center py-20 bg-slate-900/10 dark:bg-slate-900/20 border border-slate-200/50 dark:border-white/5 rounded-3xl p-8 max-w-lg mx-auto">
-          <div class="w-16 h-16 empty-icon-box rounded-2xl flex items-center justify-center mx-auto mb-4">
-            <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"/>
+        <div v-else-if="gridArticles.length === 0 && !featuredArticle" class="text-center py-20 bg-white dark:bg-[#10141D] border border-slate-200/80 dark:border-white/[0.06] rounded-3xl p-8 max-w-lg mx-auto shadow-sm">
+          <div class="w-14 h-14 rounded-2xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mx-auto mb-4">
+            <svg class="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
             </svg>
           </div>
-          <h3 class="text-base font-bold text-slate-700 dark:text-slate-300 mb-1">ยังไม่มีบทความในหมวดหมู่นี้</h3>
-          <p class="text-xs text-slate-400 dark:text-slate-500 mb-6">ลองเปลี่ยนคำค้นหาหรือเลือกหมวดหมู่อื่นเพื่อค้นหาข้อมูลที่คุณต้องการ</p>
+          <h3 class="text-base font-bold text-slate-800 dark:text-slate-200 mb-1">ไม่พบบทความที่ต้องการค้นหา</h3>
+          <p class="text-xs text-slate-500 dark:text-slate-400 mb-6 font-light">ลองเปลี่ยนคำค้นหา หรือเลือกหมวดหมู่อื่นเพื่อดูบทความ</p>
           <button
             @click="filterCategory('all'); clearSearch()"
-            class="px-5 py-2 bg-emerald-500 hover:bg-emerald-400 text-white font-bold text-xs rounded-full transition-colors"
+            class="h-10 px-6 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl transition-all"
           >
             แสดงบทความทั้งหมด
           </button>
         </div>
 
         <!-- Articles Grid Content -->
-        <div v-else class="articles-grid">
+        <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
           <router-link
             v-for="article in gridArticles"
             :key="article.id"
             :to="'/blog/' + (article.slug || article.id)"
-            class="article-card group"
+            class="group bg-white dark:bg-[#10141D] rounded-3xl overflow-hidden border border-slate-200/80 dark:border-white/[0.06] shadow-lg shadow-slate-900/5 dark:shadow-black/20 hover:border-emerald-500/40 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1.5 flex flex-col justify-between"
           >
             <!-- Card Image -->
-            <div class="card-image-wrapper">
-              <img
-                :src="getOptimizedBlogImageUrl(article.cover_image, 600)"
-                :alt="article.title"
-                class="card-img"
-                @error="onImageError"
-              />
-              <div class="card-overlay"></div>
-              
-              <!-- Badges on top of Image -->
-              <span class="card-badge-cat">
-                {{ article.category || 'ทั่วไป' }}
-              </span>
-              
-              <span v-if="article.is_featured" class="card-badge-featured">
-                <svg class="w-3 h-3 text-amber-400 fill-amber-400" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
-                แนะนำ
-              </span>
+            <div>
+              <div class="relative aspect-[16/10] overflow-hidden bg-slate-900">
+                <img
+                  :src="getOptimizedBlogImageUrl(article.cover_image, 600)"
+                  :alt="article.title"
+                  class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                  @error="onImageError"
+                />
+                <div class="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-transparent to-transparent opacity-60 group-hover:opacity-80 transition-opacity"></div>
+                
+                <!-- Category Badge -->
+                <span v-if="article.category" class="absolute top-4 left-4 px-3 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase bg-slate-900/80 text-emerald-400 border border-emerald-500/20 backdrop-blur-md">
+                  {{ article.category }}
+                </span>
+              </div>
+
+              <!-- Card Body -->
+              <div class="p-6">
+                <div class="flex items-center gap-2 mb-2 text-slate-400 text-[11px] font-medium">
+                  <svg class="w-3.5 h-3.5 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                  </svg>
+                  <span>{{ formatArticleDate(article.published_at || article.created_at) }}</span>
+                </div>
+                
+                <h3 class="text-base sm:text-lg font-bold text-slate-900 dark:text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors duration-200 line-clamp-2 leading-snug mb-2.5">
+                  {{ article.title }}
+                </h3>
+                
+                <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 line-clamp-3 leading-relaxed font-light">
+                  {{ article.excerpt || article.seo_description || 'อ่านรายละเอียดและข้อแนะนำเพิ่มเติมในบทความ...' }}
+                </p>
+              </div>
             </div>
 
-            <!-- Card Body -->
-            <div class="card-body">
-              <div class="card-meta">
-                <span class="card-date">{{ formatArticleDate(article.published_at || article.created_at) }}</span>
-              </div>
-              
-              <h3 class="card-title">
-                {{ article.title }}
-              </h3>
-              
-              <p class="card-excerpt">
-                {{ article.excerpt || article.seo_description || 'อ่านรายละเอียดเชิงลึกและข้อมูลที่น่าสนใจเพิ่มเติมในบทความนี้...' }}
-              </p>
-              
-              <!-- Footer border and action -->
-              <div class="card-footer">
-                <span class="card-views flex items-center gap-1">
-                  <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                  </svg>
-                  {{ article.view_count || 0 }} วิว
-                </span>
-                <span class="card-action">
-                  <span class="card-action-text">อ่านรายละเอียด</span>
-                  <svg class="card-action-arrow w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
-                  </svg>
-                </span>
+            <!-- Card Footer -->
+            <div class="px-6 pb-6 pt-2">
+              <div class="pt-4 border-t border-slate-100 dark:border-white/[0.04] flex items-center justify-between text-xs font-bold text-emerald-600 dark:text-emerald-400">
+                <span>อ่านบทความ</span>
+                <svg class="w-4 h-4 group-hover:translate-x-1.5 transition-transform duration-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+                </svg>
               </div>
             </div>
           </router-link>
         </div>
-      </section>
 
-      <!-- ══════════════════════════════════════════════
-           PAGINATION
-      ══════════════════════════════════════════════ -->
-      <div v-if="totalPages > 1 && !loading" class="flex flex-col items-center gap-3 mt-12 pb-8">
-        <div class="flex gap-1.5 items-center bg-white dark:bg-slate-900/40 p-1.5 rounded-full border border-slate-200/80 dark:border-white/5 shadow-sm">
+        <!-- Pagination -->
+        <div v-if="totalPages > 1" class="flex justify-center items-center gap-2 mt-12">
           <button
             @click="changePage(currentPage - 1)"
-            :disabled="currentPage <= 1"
-            :class="currentPage <= 1 ? 'opacity-30 cursor-not-allowed' : 'hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300'"
-            class="w-9 h-9 rounded-full text-xs font-bold transition-colors flex items-center justify-center"
+            :disabled="currentPage === 1"
+            class="w-10 h-10 rounded-xl bg-white dark:bg-[#10141D] border border-slate-200/80 dark:border-white/[0.06] text-slate-700 dark:text-slate-300 flex items-center justify-center transition-all disabled:opacity-40 disabled:cursor-not-allowed hover:border-emerald-500/40"
           >
-            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
               <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
             </svg>
           </button>
-          
-          <template v-for="p in paginationRange" :key="p">
-            <span v-if="p === '...'" class="px-2 text-slate-400 font-bold tracking-widest text-xs">…</span>
-            <button
-              v-else
-              @click="changePage(p)" 
-              :class="currentPage === p ? 'bg-emerald-500 text-white shadow-sm' : 'bg-transparent text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'" 
-              class="w-9 h-9 rounded-full text-xs font-bold transition-all duration-200 flex items-center justify-center"
-            >
-              {{ p }}
-            </button>
-          </template>
-          
+
+          <button
+            v-for="(p, index) in paginationRange"
+            :key="'page-'+index"
+            @click="changePage(p)"
+            :disabled="p === '...'"
+            :class="[
+              'w-10 h-10 rounded-xl font-bold text-xs transition-all font-mono',
+              p === currentPage
+                ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/25'
+                : p === '...'
+                  ? 'cursor-default text-slate-400'
+                  : 'bg-white dark:bg-[#10141D] border border-slate-200/80 dark:border-white/[0.06] text-slate-700 dark:text-slate-300 hover:border-emerald-500/40 hover:text-emerald-600'
+            ]"
+          >
+            {{ p }}
+          </button>
+
           <button
             @click="changePage(currentPage + 1)"
-            :disabled="currentPage >= totalPages"
-            :class="currentPage >= totalPages ? 'opacity-30 cursor-not-allowed' : 'hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300'"
-            class="w-9 h-9 rounded-full text-xs font-bold transition-colors flex items-center justify-center"
+            :disabled="currentPage === totalPages"
+            class="w-10 h-10 rounded-xl bg-white dark:bg-[#10141D] border border-slate-200/80 dark:border-white/[0.06] text-slate-700 dark:text-slate-300 flex items-center justify-center transition-all disabled:opacity-40 disabled:cursor-not-allowed hover:border-emerald-500/40"
           >
-            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
               <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
             </svg>
           </button>
         </div>
-        <p class="text-[11px] font-medium text-slate-400 dark:text-slate-500 tracking-wide">
-          หน้า {{ currentPage }} จาก {{ totalPages }} <span class="mx-1.5 opacity-40">•</span> มีทั้งหมด {{ totalArticles }} บทความ
-        </p>
-      </div>
+      </section>
 
     </div>
+
+    <!-- =========================================================================
+         CTA BANNER (Start Your Installation Project)
+         ========================================================================= -->
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16">
+      <div class="rounded-3xl p-8 sm:p-12 lg:p-14 bg-gradient-to-br from-slate-900 via-slate-900 to-slate-950 text-white border border-white/[0.08] shadow-2xl relative overflow-hidden">
+        
+        <!-- Ambient Glows -->
+        <div class="absolute -top-20 -right-20 w-80 h-80 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
+        
+        <div class="relative z-10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8">
+          <div class="max-w-2xl">
+            <div class="inline-flex items-center gap-2 mb-3.5 px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-[11px] font-bold tracking-wider uppercase">
+              <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+              </svg>
+              <span>EXPERT CONSULTATION</span>
+            </div>
+
+            <h2 class="text-2xl sm:text-3xl lg:text-4xl font-black text-white tracking-tight leading-tight mb-3">
+              ต้องการคำปรึกษาเพิ่มเติมด้านเทคนิค?
+            </h2>
+            <p class="text-xs sm:text-sm text-slate-400 leading-relaxed font-light">
+              ทีมวิศวกรฝ่ายเทคนิคและทีมงานผู้เชี่ยวชาญพร้อมตอบทุกข้อสงสัย ให้คำแนะนำโครงสร้าง และประเมินราคาฟรี
+            </p>
+          </div>
+
+          <!-- Standard CTA Buttons -->
+          <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 shrink-0">
+            <router-link 
+              to="/quotation" 
+              class="inline-flex items-center justify-center gap-2.5 h-12 px-6 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm shadow-lg shadow-emerald-600/25 transition-all duration-200 active:scale-95 min-w-[160px]"
+            >
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+              </svg>
+              <span>ขอใบเสนอราคา</span>
+            </router-link>
+
+            <a 
+              :href="lineHref"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="inline-flex items-center justify-center gap-2.5 h-12 px-6 rounded-xl bg-[#06C755] hover:bg-[#05B34C] text-white font-bold text-sm shadow-lg shadow-[#06C755]/25 transition-all duration-200 active:scale-95 min-w-[160px]"
+            >
+              <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M24 10.304c0-5.369-5.383-9.738-12-9.738-6.616 0-12 4.369-12 9.738 0 4.814 3.966 8.887 9.539 9.613.385.082.906.262 1.042.6.12.3.05.748.024 1.036l-.16 1.94c-.039.232-.178 1.066.938.595 1.114-.47 6.012-3.542 8.441-6.234 2.802-3.09 4.176-5.834 4.176-7.55z"/>
+              </svg>
+              <span>ปรึกษาผ่าน LINE</span>
+            </a>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
   </div>
 </template>
 
 <style scoped>
-/* ─── Page Base ─── */
-.blog-page {
-  background-color: #0c0e14;
-  color: #f8fafc;
-}
-
-/* ─── Sticky Controls ─── */
-.sticky-controls {
-  top: 60px;
-}
-@media (min-width: 1024px) {
-  .sticky-controls {
-    top: 72px;
-  }
-}
-
-/* ─── Featured Hero Card ─── */
-.featured-hero-card {
-  display: block;
-  background-color: #111622;
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 24px;
-  padding: 24px;
-  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.3);
-  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-  text-decoration: none;
-}
-
-.featured-hero-card:hover {
-  border-color: rgba(16, 185, 129, 0.3);
-  box-shadow: 0 20px 40px -15px rgba(16, 185, 129, 0.08), 0 0 0 1px rgba(16, 185, 129, 0.2);
-}
-
-.featured-hero-title {
-  font-size: 24px;
-  font-weight: 900;
-  line-height: 1.3;
-  color: #ffffff;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  transition: color 0.3s ease;
-}
-
-@media (min-width: 768px) {
-  .featured-hero-title {
-    font-size: 28px;
-  }
-}
-
-.featured-hero-card:hover .featured-hero-title {
-  color: #10b981;
-}
-
-.featured-hero-action {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 13px;
-  font-weight: 700;
-  color: #10b981;
-  transition: color 0.3s ease;
-}
-
-.featured-hero-card:hover .featured-hero-action {
-  color: #34d399;
-}
-
-/* ─── Grid Layout ─── */
-.articles-grid {
-  display: grid;
-  grid-template-columns: repeat(1, minmax(0, 1fr));
-  gap: 20px;
-}
-@media (min-width: 640px) {
-  .articles-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 24px;
-  }
-}
-@media (min-width: 1024px) {
-  .articles-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 28px;
-  }
-}
-
-/* ─── Article Card ─── */
-.article-card {
-  display: flex;
-  flex-direction: column;
-  background-color: #111622;
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 20px;
-  overflow: hidden;
-  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.3);
-  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-  text-decoration: none;
-}
-
-.article-card:hover {
-  transform: translateY(-4px);
-  border-color: rgba(16, 185, 129, 0.3);
-  box-shadow: 0 20px 40px -15px rgba(16, 185, 129, 0.08), 0 0 0 1px rgba(16, 185, 129, 0.2);
-}
-
-.card-image-wrapper {
-  position: relative;
-  width: 100%;
-  aspect-ratio: 16 / 10;
-  overflow: hidden;
-  background-color: #080b10;
-}
-
-.card-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.article-card:hover .card-img {
-  transform: scale(1.04);
-}
-
-.card-overlay {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(to top, rgba(8, 11, 16, 0.35) 0%, rgba(8, 11, 16, 0) 50%);
-  pointer-events: none;
-}
-
-/* Badges */
-.card-badge-cat {
-  position: absolute;
-  top: 12px;
-  left: 12px;
-  background-color: rgba(12, 14, 20, 0.75);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  color: rgba(255, 255, 255, 0.85);
-  font-size: 10px;
-  font-weight: 700;
-  padding: 4px 10px;
-  border-radius: 9999px;
-  letter-spacing: 0.05em;
-}
-
-.card-badge-featured {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  display: flex;
-  align-items: center;
-  gap: 3px;
-  background-color: rgba(12, 14, 20, 0.75);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  color: #fbbf24;
-  font-size: 9px;
-  font-weight: 800;
-  padding: 4px 10px;
-  border-radius: 9999px;
-  letter-spacing: 0.05em;
-}
-
-.article-card:hover .card-badge-cat {
-  background-color: rgba(16, 185, 129, 0.15);
-  border-color: rgba(16, 185, 129, 0.3);
-  color: #34d399;
-}
-
-/* Card Body */
-.card-body {
-  padding: 18px;
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-}
-
-.card-meta {
-  display: flex;
-  align-items: center;
-  margin-bottom: 6px;
-}
-
-.card-date {
-  font-size: 11px;
-  font-weight: 500;
-  color: #64748b;
-}
-
-.card-title {
-  font-size: 15px;
-  font-weight: 700;
-  line-height: 1.4;
-  color: #f1f5f9;
-  margin-bottom: 8px;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  transition: color 0.3s ease;
-}
-
-.article-card:hover .card-title {
-  color: #10b981;
-}
-
-.card-excerpt {
-  font-size: 13px;
-  line-height: 1.5;
-  color: #94a3b8;
-  font-weight: 300;
-  margin-bottom: 16px;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-/* Card Footer */
-.card-footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
-  padding-top: 12px;
-  margin-top: auto;
-}
-
-.card-views {
-  font-size: 11px;
-  color: #64748b;
-}
-
-.card-action {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.card-action-text {
-  font-size: 11px;
-  font-weight: 700;
-  color: #10b981;
-  transition: color 0.3s ease;
-}
-
-.card-action-arrow {
-  color: #10b981;
-  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.article-card:hover .card-action-arrow {
-  transform: translateX(3px);
-}
-
-.article-card:hover .card-action-text {
-  color: #34d399;
-}
-
-/* ─── Empty State ─── */
-.empty-icon-box {
-  background-color: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  color: #475569;
-}
-
-/* ─── Scrollbar hide ─── */
 .scrollbar-none {
   scrollbar-width: none;
   -ms-overflow-style: none;
 }
 .scrollbar-none::-webkit-scrollbar {
   display: none;
-}
-</style>
-
-<style>
-/* ══════════════════════════════════════════════
-   LIGHT MODE OVERRIDES
-══════════════════════════════════════════════ */
-
-html:not(.dark) .blog-page {
-  background-color: #faf9f6;
-  color: #1e293b;
-}
-
-html:not(.dark) .blog-page .sticky-controls > div {
-  background-color: rgba(250, 249, 246, 0.92);
-  border-bottom-color: rgba(0, 0, 0, 0.06);
-}
-
-/* Featured Hero Card Light Mode */
-html:not(.dark) .blog-page .featured-hero-card {
-  background-color: #ffffff;
-  border-color: rgba(0, 0, 0, 0.06);
-  box-shadow: 0 4px 20px -4px rgba(0, 0, 0, 0.05);
-}
-
-html:not(.dark) .blog-page .featured-hero-card:hover {
-  border-color: rgba(16, 185, 129, 0.3);
-  box-shadow: 0 16px 36px -12px rgba(16, 185, 129, 0.08), 0 0 0 1px rgba(16, 185, 129, 0.15);
-}
-
-html:not(.dark) .blog-page .featured-hero-card h2 {
-  color: #1e293b;
-}
-
-html:not(.dark) .blog-page .featured-hero-card:hover h2 {
-  color: #10b981;
-}
-
-/* Article Card Light Mode */
-html:not(.dark) .blog-page .article-card {
-  background-color: #ffffff;
-  border-color: rgba(0, 0, 0, 0.06);
-  box-shadow: 0 4px 20px -4px rgba(0, 0, 0, 0.05);
-}
-
-html:not(.dark) .blog-page .article-card:hover {
-  border-color: rgba(16, 185, 129, 0.3);
-  box-shadow: 0 16px 36px -12px rgba(16, 185, 129, 0.08), 0 0 0 1px rgba(16, 185, 129, 0.15);
-}
-
-html:not(.dark) .blog-page .card-overlay {
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.15) 0%, rgba(0, 0, 0, 0) 50%);
-}
-
-html:not(.dark) .blog-page .card-badge-cat,
-html:not(.dark) .blog-page .card-badge-featured {
-  background-color: rgba(255, 255, 255, 0.85);
-  border-color: rgba(0, 0, 0, 0.05);
-  color: #334155;
-}
-
-html:not(.dark) .blog-page .article-card:hover .card-badge-cat {
-  background-color: rgba(16, 185, 129, 0.08);
-  border-color: rgba(16, 185, 129, 0.2);
-  color: #059669;
-}
-
-html:not(.dark) .blog-page .article-card .card-badge-featured {
-  color: #d97706;
-}
-
-html:not(.dark) .blog-page .card-date {
-  color: #64748b;
-}
-
-html:not(.dark) .blog-page .card-title {
-  color: #1e293b;
-}
-
-html:not(.dark) .blog-page .article-card:hover .card-title {
-  color: #10b981;
-}
-
-html:not(.dark) .blog-page .card-excerpt {
-  color: #475569;
-}
-
-html:not(.dark) .blog-page .card-footer {
-  border-top-color: rgba(0, 0, 0, 0.05);
-}
-
-html:not(.dark) .blog-page .card-views {
-  color: #64748b;
-}
-
-/* Empty State Light Mode */
-html:not(.dark) .blog-page .empty-icon-box {
-  background-color: #ffffff;
-  border-color: rgba(0, 0, 0, 0.06);
-  color: #94a3b8;
 }
 </style>

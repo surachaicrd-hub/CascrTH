@@ -1,9 +1,10 @@
 User-agent: *
 Allow: /
 Allow: /api/sitemap.xml
+Allow: /llms.txt
+Allow: /llms-full.txt
 Disallow: /admin/
 Disallow: /api/
 
-Sitemap: https://morespace.co.th/sitemap.xml
-
-# Morespace - Premium Storage Solutions
+Sitemap: /sitemap.xml
+LLMs-txt: /llms.txt

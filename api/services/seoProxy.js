@@ -5,7 +5,7 @@ const db = require('../config/database');
 /**
  * Helper to generate SEO/GEO tags and inject JSON-LD
  */
-const generateMetaTags = ({ title, description, image, url, keywords = '', llmContext = '', jsonLdHtml = '' }) => {
+const generateMetaTags = ({ title, description, image, url, keywords = '', llmContext = '', jsonLdHtml = '', author = '', siteName = '' }) => {
     let tags = `
   <!-- Primary SEO Meta Tags -->
   <title>${title}</title>
@@ -13,8 +13,7 @@ const generateMetaTags = ({ title, description, image, url, keywords = '', llmCo
   <meta name="description" content="${description}" />
   <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
   <link rel="canonical" href="${url}" />
-  <meta name="author" content="Morespace Storage Solutions" />
-  <meta name="ai-content-type" content="e-commerce, product-catalog, technical-knowledge" />
+${author ? `  <meta name="author" content="${author}" />\n` : ''}  <meta name="ai-content-type" content="e-commerce, product-catalog, technical-knowledge" />
 `;
 
     if (keywords) {
@@ -31,8 +30,7 @@ const generateMetaTags = ({ title, description, image, url, keywords = '', llmCo
   <meta property="og:title" content="${title}" />
   <meta property="og:description" content="${description}" />
   <meta property="og:image" content="${image}" />
-  <meta property="og:site_name" content="Morespace" />
-  <meta property="og:locale" content="th_TH" />
+${siteName ? `  <meta property="og:site_name" content="${siteName}" />\n` : ''}  <meta property="og:locale" content="th_TH" />
 
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image" />
@@ -374,6 +372,8 @@ const seoProxyMiddleware = async (req, res, next) => {
                 url,
                 keywords: keywords.replace(/"/g, '&quot;'),
                 llmContext: llmContext.replace(/"/g, '&quot;'),
+                author: storeName.replace(/"/g, '&quot;'),
+                siteName: storeName.replace(/"/g, '&quot;'),
                 jsonLdHtml: jsonLdList.join('\n')
             });
 

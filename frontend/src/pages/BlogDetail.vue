@@ -1,9 +1,8 @@
 <script setup>
-import { ref, onMounted, onUnmounted, computed } from 'vue'
+import { ref, onMounted, computed, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useSettingsStore } from '../stores/settingsStore'
 import { useSEO } from '../composables/useSEO'
-import SocialShare from '../components/SocialShare.vue'
 import { getOptimizedImageUrl, onImageError } from '../utils/image'
 
 const route = useRoute()
@@ -14,52 +13,47 @@ const article = ref(null)
 const loading = ref(true)
 const relatedArticles = ref([])
 const recommendedProducts = ref([])
-const relatedProducts = ref([])
-const recommendedArticles = ref([])
+const copied = ref(false)
 
 // Utility to transform oembed to iframe
 const transformOembed = (html) => {
-  if (!html) return html;
-  
+  if (!html) return html
+
   const buildYouTubeEmbed = (videoId) => {
-    const embedUrl = `https://www.youtube.com/embed/${videoId}`;
-    return `<div class="yt-embed-wrapper"><div class="yt-embed-inner"><iframe src="${embedUrl}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div></div>`;
-  };
+    const embedUrl = `https://www.youtube.com/embed/${videoId}`
+    return `<div class="aspect-video w-full rounded-2xl overflow-hidden my-6 shadow-xl"><iframe src="${embedUrl}" class="w-full h-full" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div>`
+  }
 
   const extractYouTubeId = (url) => {
-    if (url.startsWith('www.')) url = 'https://' + url;
-    const ytMatch = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|shorts\/|watch\?v=|watch\?.+&v=))([\w-]{11})/i);
-    return ytMatch ? ytMatch[1] : null;
-  };
+    if (url.startsWith('www.')) url = 'https://' + url
+    const ytMatch = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|shorts\/|watch\?v=|watch\?.+&v=))([\w-]{11})/i)
+    return ytMatch ? ytMatch[1] : null
+  }
 
-  // 1. Transform <figure class="media"><oembed>...</oembed></figure> (CKEditor full structure)
   let result = html.replace(/<figure\s+class="media">\s*<oembed\s+url="([^"]+)">\s*<\/oembed>\s*<\/figure>/gi, (match, url) => {
-    const videoId = extractYouTubeId(url);
-    if (videoId) return buildYouTubeEmbed(videoId);
-    return `<div class="yt-embed-wrapper"><div class="yt-embed-inner"><iframe src="${url}" frameborder="0" allowfullscreen></iframe></div></div>`;
-  });
+    const videoId = extractYouTubeId(url)
+    if (videoId) return buildYouTubeEmbed(videoId)
+    return `<div class="aspect-video w-full rounded-2xl overflow-hidden my-6 shadow-xl"><iframe src="${url}" class="w-full h-full" frameborder="0" allowfullscreen></iframe></div>`
+  })
 
-  // 2. Transform standalone <oembed> tags (without figure wrapper)
   result = result.replace(/<oembed\s+url="([^"]+)"><\/oembed>/gi, (match, url) => {
-    const videoId = extractYouTubeId(url);
-    if (videoId) return buildYouTubeEmbed(videoId);
-    return `<div class="yt-embed-wrapper"><div class="yt-embed-inner"><iframe src="${url}" frameborder="0" allowfullscreen></iframe></div></div>`;
-  });
+    const videoId = extractYouTubeId(url)
+    if (videoId) return buildYouTubeEmbed(videoId)
+    return `<div class="aspect-video w-full rounded-2xl overflow-hidden my-6 shadow-xl"><iframe src="${url}" class="w-full h-full" frameborder="0" allowfullscreen></iframe></div>`
+  })
 
-  // 3. Transform <figure class="media"> wrapping an iframe
   result = result.replace(/<figure\s+class="media">\s*(<iframe[^>]*?>[\s\S]*?<\/iframe>)\s*<\/figure>/gi, (match, iframeTag) => {
-    const ytMatch = iframeTag.match(/src="https?:\/\/(?:www\.)?youtube(?:-nocookie)?\.com\/embed\/([\w-]{11})([^"]*)"/i);
-    if (ytMatch) return buildYouTubeEmbed(ytMatch[1]);
-    return `<div class="yt-embed-wrapper"><div class="yt-embed-inner">${iframeTag}</div></div>`;
-  });
+    const ytMatch = iframeTag.match(/src="https?:\/\/(?:www\.)?youtube(?:-nocookie)?\.com\/embed\/([\w-]{11})([^"]*)"/i)
+    if (ytMatch) return buildYouTubeEmbed(ytMatch[1])
+    return `<div class="aspect-video w-full rounded-2xl overflow-hidden my-6 shadow-xl">${iframeTag}</div>`
+  })
 
-  // 4. Fix any remaining standalone youtube iframes not inside figure.media
   result = result.replace(/<iframe([^>]*?)src="https?:\/\/(?:www\.)?youtube(?:-nocookie)?\.com\/embed\/([\w-]{11})([^"]*)"([^>]*?)>(\s*<\/iframe>)?/gi, (match, before, videoId, params, after) => {
-    return buildYouTubeEmbed(videoId);
-  });
+    return buildYouTubeEmbed(videoId)
+  })
 
-  return result;
-};
+  return result
+}
 
 const loadArticle = async () => {
   loading.value = true
@@ -67,9 +61,10 @@ const loadArticle = async () => {
     const param = route.params.slug
     const res = await fetch(`/api/articles/${param}`)
     const data = await res.json()
-    if (data.success) {
+    if (data.success && data.data) {
       article.value = data.data
-      // ถ้าเข้าถึงด้วย numeric ID ให้ redirect ไปยัง slug URL
+      
+      // Redirect numeric ID to slug URL if slug is available
       if (/^\d+$/.test(param) && article.value.slug) {
         router.replace(`/blog/${article.value.slug}`)
         return
@@ -77,108 +72,51 @@ const loadArticle = async () => {
       if (article.value.content) {
         article.value.content = transformOembed(article.value.content)
       }
-      addSchema()
       updateMetaTags()
-      // Load related
       loadRelated()
     }
-  } catch (e) { console.error(e) } finally { loading.value = false }
+  } catch (e) {
+    console.error('Failed to load article:', e)
+  } finally {
+    loading.value = false
+  }
 }
 
 const updateMetaTags = () => {
-    if (!article.value) return
-    const titleText = article.value.seo_title || article.value.title
-    const desc = article.value.seo_description || article.value.excerpt || (article.value.content ? article.value.content.replace(/<[^>]*>?/gm, '').substring(0, 160) : '')
-    const keywords = article.value.seo_keywords || article.value.tags || ''
-    const image = article.value.cover_image || ''
-
-    setMeta({
-      title: titleText,
-      description: desc,
-      image,
-      keywords,
-      llmContext: article.value.llm_context || '',
-      canonicalUrl: window.location.href,
-      type: 'article'
-    })
-}
-
-const loadRelated = async () => {
-  try {
-    // 1. Related articles (same category)
-    const res = await fetch(`/api/articles/published?limit=6&category=${encodeURIComponent(article.value.category)}`)
-    const data = await res.json()
-    if (data.success) {
-      relatedArticles.value = data.data.filter(a => a.id !== article.value.id).slice(0, 3)
-    }
-
-    // 2. Recommended articles (different category or all, excluding current and already-related)
-    const recRes = await fetch(`/api/articles/published?limit=8`)
-    const recData = await recRes.json()
-    if (recData.success) {
-      const excludeIds = new Set([article.value.id, ...relatedArticles.value.map(a => a.id)])
-      recommendedArticles.value = recData.data.filter(a => !excludeIds.has(a.id)).slice(0, 4)
-    }
-
-    // 3. Recommended products (popular / featured)
-    const prodRes = await fetch(`/api/products`)
-    const prodData = await prodRes.json()
-    if (prodData.success) {
-      const allProducts = prodData.data.filter(p => p.is_active && !p.is_out_of_stock)
-      // Exclude the article's linked product if any
-      const excludeProductId = article.value.product_id || null
-      const filtered = allProducts.filter(p => p.id !== excludeProductId)
-      recommendedProducts.value = filtered.slice(0, 4)
-
-      // 4. Related products (same category as article)
-      if (article.value.category) {
-        const catProducts = allProducts.filter(p =>
-          p.category && p.category.includes(article.value.category.split(',')[0]?.trim()) && p.id !== excludeProductId
-        )
-        relatedProducts.value = catProducts.slice(0, 4)
-        // If not enough category matches, fill with others
-        if (relatedProducts.value.length < 2) {
-          const existingIds = new Set(relatedProducts.value.map(p => p.id))
-          const fillers = filtered.filter(p => !existingIds.has(p.id)).slice(0, 4 - relatedProducts.value.length)
-          relatedProducts.value = [...relatedProducts.value, ...fillers]
-        }
-      }
-    }
-  } catch (e) { console.error('loadRelated error:', e) }
-}
-
-const formatPrice = (price) => {
-  if (!price || price <= 0) return 'สอบถามราคา'
-  return Number(price).toLocaleString() + ' บาท'
-}
-
-const addSchema = () => {
   if (!article.value) return
-  const aiDescription = article.value.llm_context
-    ? `${article.value.seo_description || article.value.excerpt || ''} [AI Context: ${article.value.llm_context}]`
-    : (article.value.seo_description || article.value.excerpt || '')
+  const titleText = `${article.value.seo_title || article.value.title} - บริษัท ซีอาร์ ดิสทริบิวชั่น จำกัด`
+  const desc = article.value.seo_description || article.value.excerpt || (article.value.content ? article.value.content.replace(/<[^>]*>?/gm, '').substring(0, 160) : '')
+  const keywords = article.value.seo_keywords || article.value.tags || ''
+  const image = article.value.cover_image || ''
+
+  setMeta({
+    title: titleText,
+    description: desc,
+    image,
+    keywords,
+    canonicalUrl: window.location.href,
+    type: 'article'
+  })
 
   setStructuredData({
     "@context": "https://schema.org",
     "@type": "Article",
     "headline": article.value.title,
-    "description": aiDescription,
-    "image": article.value.cover_image || '',
-    "author": { "@type": "Person", "name": article.value.author || "Admin" },
+    "description": desc,
+    "image": image ? [image] : [],
+    "datePublished": article.value.published_at || article.value.created_at,
+    "dateModified": article.value.updated_at || article.value.published_at || article.value.created_at,
+    "author": {
+      "@type": "Organization",
+      "name": article.value.author || settingsStore.storeName || "บริษัท ซีอาร์ ดิสทริบิวชั่น จำกัด"
+    },
     "publisher": {
       "@type": "Organization",
-      "name": settingsStore.storeName || "",
+      "name": settingsStore.storeName || "บริษัท ซีอาร์ ดิสทริบิวชั่น จำกัด",
       "url": window.location.origin
-    },
-    "datePublished": article.value.created_at,
-    "dateModified": article.value.updated_at,
-    "mainEntityOfPage": {
-      "@type": "WebPage",
-      "@id": window.location.href
     }
-  }, 'dynamic-structured-data')
+  }, 'dynamic-article-data')
 
-  // Breadcrumb Schema
   setStructuredData({
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
@@ -188,851 +126,394 @@ const addSchema = () => {
       { "@type": "ListItem", "position": 3, "name": article.value.title, "item": window.location.href }
     ]
   }, 'dynamic-breadcrumb-data')
+}
 
-  // FAQ Schema
-  if (article.value.faq && article.value.faq.length > 0) {
-    let parsedFaq = []
-    if (typeof article.value.faq === 'string') {
-      try { parsedFaq = JSON.parse(article.value.faq) } catch (e) {}
-    } else {
-      parsedFaq = article.value.faq
+const loadRelated = async () => {
+  try {
+    if (article.value?.category) {
+      const res = await fetch(`/api/articles/published?limit=4&category=${encodeURIComponent(article.value.category)}`)
+      const data = await res.json()
+      if (data.success && Array.isArray(data.data)) {
+        relatedArticles.value = data.data.filter(a => a.id !== article.value.id).slice(0, 3)
+      }
     }
 
-    if (parsedFaq.length > 0) {
-      setStructuredData({
-        "@context": "https://schema.org",
-        "@type": "FAQPage",
-        "mainEntity": parsedFaq.map(item => ({
-          "@type": "Question",
-          "name": item.question,
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": item.answer
-          }
-        }))
-      }, 'dynamic-faq-data')
+    const prodRes = await fetch(`/api/products?limit=4&is_active=true`)
+    const prodData = await prodRes.json()
+    if (prodData.success && Array.isArray(prodData.data)) {
+      const excludeProductId = article.value?.product_id || null
+      recommendedProducts.value = prodData.data.filter(p => p.id !== excludeProductId).slice(0, 4)
     }
+  } catch (e) {
+    console.error('Failed to load related content:', e)
   }
 }
 
-const formatDate = (d) => d ? new Date(d).toLocaleDateString('th-TH', { day: 'numeric', month: 'long', year: 'numeric' }) : ''
-const openFaqIndex = ref(null)
-const toggleFaq = (index) => {
-  openFaqIndex.value = openFaqIndex.value === index ? null : index
-}
-
-// Lightbox state and functions
-const isLightboxOpen = ref(false)
-const currentImageIndex = ref(0)
-
-const openLightbox = (index) => {
-    currentImageIndex.value = index
-    isLightboxOpen.value = true
-    document.body.style.overflow = 'hidden'
-}
-
-const closeLightbox = () => {
-    isLightboxOpen.value = false
-    document.body.style.overflow = ''
-}
-
-const nextImage = () => {
-    if (article.value && article.value.gallery_images) {
-        currentImageIndex.value = (currentImageIndex.value + 1) % article.value.gallery_images.length
-    }
-}
-
-const prevImage = () => {
-    if (article.value && article.value.gallery_images) {
-        currentImageIndex.value = (currentImageIndex.value - 1 + article.value.gallery_images.length) % article.value.gallery_images.length
-    }
-}
-
-const handleKeydown = (e) => {
-    if (!isLightboxOpen.value) return
-    if (e.key === 'Escape') closeLightbox()
-    if (e.key === 'ArrowRight') nextImage()
-    if (e.key === 'ArrowLeft') prevImage()
-}
-
-const parsedFaqList = computed(() => {
-  if (!article.value?.faq) return []
-  if (typeof article.value.faq === 'string') {
-      try { return JSON.parse(article.value.faq) } catch (e) { return [] }
+const formatArticleDate = (dateString) => {
+  if (!dateString) return ''
+  try {
+    const d = new Date(dateString)
+    return d.toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' })
+  } catch(e) {
+    return dateString
   }
-  return article.value.faq || []
+}
+
+const getOptimizedBlogImageUrl = (path, width) => {
+  if (!path) return 'https://images.unsplash.com/photo-1546410531-bb4caa6b424d?q=80&w=1200'
+  if (path.startsWith('http')) return path
+  const fullUrl = `${import.meta.env.VITE_API_URL || ''}${path}`
+  return getOptimizedImageUrl(fullUrl, width)
+}
+
+const getProductImage = (prod) => {
+  if (!prod) return ''
+  if (prod.image_url) return getOptimizedBlogImageUrl(prod.image_url, 400)
+  if (prod.images) {
+    try {
+      const parsed = typeof prod.images === 'string' ? JSON.parse(prod.images) : prod.images
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        return getOptimizedBlogImageUrl(parsed[0], 400)
+      }
+    } catch (e) {}
+  }
+  return ''
+}
+
+const formatPrice = (price) => {
+  if (!price) return '0'
+  return parseFloat(price).toLocaleString('th-TH')
+}
+
+const lineHref = computed(() => {
+  const l = settingsStore.contactLines?.[0]
+  if (!l) return '/contact'
+  if (typeof l === 'string') return `https://line.me/ti/p/~${l.replace(/^@/, '')}`
+  return l.url || (l.value ? `https://line.me/ti/p/~${l.value.replace(/^@/, '')}` : '/contact')
+})
+
+const phoneHref = computed(() => {
+  const p = settingsStore.contactPhones?.[0]
+  if (!p) return '/contact'
+  const num = typeof p === 'string' ? p : (p.value || '')
+  return num ? `tel:${num.replace(/[^0-9+]/g, '')}` : '/contact'
+})
+
+const copyCurrentUrl = () => {
+  if (navigator?.clipboard?.writeText) {
+    navigator.clipboard.writeText(window.location.href)
+    copied.value = true
+    setTimeout(() => { copied.value = false }, 2500)
+  }
+}
+
+const shareToFacebook = () => {
+  window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`, '_blank', 'width=600,height=400')
+}
+
+const shareToLine = () => {
+  window.open(`https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(window.location.href)}`, '_blank', 'width=600,height=400')
+}
+
+watch(() => route.params.slug, (newSlug) => {
+  if (newSlug) {
+    loadArticle()
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
 })
 
 onMounted(() => {
-    loadArticle()
-    window.addEventListener('keydown', handleKeydown)
-})
-
-onUnmounted(() => {
-  ['json-ld-article', 'json-ld-article-bc', 'json-ld-article-faq'].forEach(id => {
-    const s = document.getElementById(id)
-    if (s) document.head.removeChild(s)
-  })
-  
-  const dynTags = document.querySelectorAll('.dynamic-seo-tag')
-  dynTags.forEach(t => document.head.removeChild(t))
-
-  window.removeEventListener('keydown', handleKeydown)
-  document.body.style.overflow = ''
+  loadArticle()
 })
 </script>
 
 <template>
-  <div class="bg-white dark:bg-[#0a0f16] min-h-screen pt-24 md:pt-32 pb-20 transition-colors">
-    
-    <!-- Loading -->
-    <div v-if="loading" class="flex justify-center items-center min-h-[50vh]">
-      <div class="w-12 h-12 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div>
+  <div class="bg-slate-50/50 dark:bg-[#090C12] min-h-screen transition-colors duration-500 font-sans text-slate-800 dark:text-slate-100 pb-20">
+
+    <!-- Loading State -->
+    <div v-if="loading" class="flex flex-col justify-center items-center min-h-[60vh] gap-3">
+      <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-emerald-500"></div>
+      <p class="text-xs text-slate-400 font-medium">กำลังโหลดเนื้อหาบทความ...</p>
     </div>
 
-    <div v-else-if="article" class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-      
-      <!-- Breadcrumb -->
-      <nav class="text-sm text-gray-400 dark:text-gray-500 mb-8 font-medium overflow-hidden" aria-label="Breadcrumb">
-        <ol class="flex items-center min-w-0 gap-2">
-          <li class="flex-shrink-0"><router-link to="/" class="hover:text-indigo-600 transition-colors">หน้าแรก</router-link></li>
-          <li class="flex-shrink-0"><span class="text-gray-300 dark:text-gray-700">/</span></li>
-          <li class="flex-shrink-0"><router-link to="/blog" class="hover:text-indigo-600 transition-colors">บทความ</router-link></li>
-          <li class="flex-shrink-0"><span class="text-gray-300 dark:text-gray-700">/</span></li>
-          <li class="min-w-0"><span class="text-gray-900 dark:text-white block truncate">{{ article.title }}</span></li>
-        </ol>
-      </nav>
+    <!-- Not Found State -->
+    <div v-else-if="!article" class="max-w-md mx-auto my-32 text-center p-8 bg-white dark:bg-[#10141D] rounded-3xl border border-slate-200 dark:border-white/[0.06] shadow-xl">
+      <div class="w-14 h-14 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-400 flex items-center justify-center mx-auto mb-4 font-mono font-black text-xl">
+        404
+      </div>
+      <h2 class="text-lg font-bold text-slate-900 dark:text-white mb-1">ไม่พบบทความที่ต้องการ</h2>
+      <p class="text-xs text-slate-500 dark:text-slate-400 mb-6">บทความนี้อาจถูกลบหรือย้ายออกจากระบบแล้ว</p>
+      <router-link 
+        to="/blog" 
+        class="inline-flex items-center gap-2 h-11 px-6 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-md transition-all active:scale-95"
+      >
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+        </svg>
+        <span>กลับหน้ารวมบทความ</span>
+      </router-link>
+    </div>
 
-      <!-- Article Header -->
-      <header class="mb-10">
-        <div class="flex items-center gap-3 mb-4">
-          <span class="px-3 py-1 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 text-xs font-bold rounded-full">{{ article.category }}</span>
-          <span class="text-sm text-gray-600 dark:text-gray-400">{{ formatDate(article.created_at) }}</span>
-          <span class="text-sm text-gray-600 dark:text-gray-400 flex items-center gap-1">
-            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-            {{ article.view_count || 0 }}
-          </span>
+    <!-- Main Content -->
+    <template v-else>
+      
+      <!-- =========================================================================
+           ARTICLE HEADER HERO (Enterprise Dark Aesthetic)
+           ========================================================================= -->
+      <header class="relative overflow-hidden pt-28 pb-14 bg-[#070A0F] border-b border-white/[0.05]">
+        <!-- Mesh Background -->
+        <div class="absolute inset-0 opacity-[0.035] pointer-events-none"
+          style="background-image: radial-gradient(circle, rgba(255,255,255,0.7) 1px, transparent 1px); background-size: 28px 28px;">
         </div>
-        <h1 class="text-3xl md:text-4xl lg:text-5xl font-black text-gray-900 dark:text-white tracking-tight leading-tight mb-4">{{ article.title }}</h1>
-        <p v-if="article.excerpt" class="text-lg text-gray-500 dark:text-gray-400 font-light leading-relaxed">{{ article.excerpt }}</p>
-        <div class="flex items-center gap-3 mt-6">
-          <div class="w-10 h-10 rounded-full bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center text-indigo-600 dark:text-indigo-400 font-bold">{{ (article.author || 'A')[0] }}</div>
-          <div>
-            <p class="text-sm font-bold text-gray-900 dark:text-white">{{ article.author || 'Admin' }}</p>
-            <p v-if="settingsStore.storeName" class="text-xs text-gray-400">{{ settingsStore.storeName }} Team</p>
+        <div class="absolute inset-0 bg-gradient-to-b from-transparent via-[#070A0F]/60 to-[#070A0F] pointer-events-none"></div>
+
+        <!-- Ambient Glows -->
+        <div class="absolute -top-32 -left-32 w-96 h-96 bg-emerald-500/10 rounded-full blur-[120px] pointer-events-none"></div>
+        <div class="absolute top-1/2 right-0 w-80 h-80 bg-teal-500/10 rounded-full blur-[100px] pointer-events-none"></div>
+
+        <div class="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center sm:text-left">
+          
+          <!-- Breadcrumbs -->
+          <nav class="flex items-center justify-center sm:justify-start gap-2 text-xs font-medium text-slate-400 mb-6 flex-wrap" aria-label="Breadcrumb">
+            <router-link to="/" class="hover:text-emerald-400 transition-colors flex items-center gap-1.5">
+              <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+              </svg>
+              <span>หน้าแรก</span>
+            </router-link>
+            <svg class="w-3 h-3 text-slate-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+            </svg>
+            <router-link to="/blog" class="hover:text-emerald-400 transition-colors">บทความ</router-link>
+            <svg class="w-3 h-3 text-slate-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+            </svg>
+            <span class="text-emerald-400 font-semibold truncate max-w-[180px] sm:max-w-xs">{{ article.title }}</span>
+          </nav>
+
+          <!-- Category Pill -->
+          <div v-if="article.category" class="inline-flex items-center gap-2 mb-4 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 backdrop-blur-md">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+            <span class="text-emerald-400 text-[11px] font-bold tracking-wider uppercase">{{ article.category }}</span>
           </div>
-          <div class="ml-auto">
-            <SocialShare />
+
+          <!-- Main Title -->
+          <h1 class="text-2xl sm:text-3xl lg:text-4xl font-black text-white leading-tight tracking-tight">
+            {{ article.title }}
+          </h1>
+
+          <!-- Meta Bar & Share Buttons -->
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mt-6 pt-6 border-t border-white/[0.06]">
+            <!-- Meta details -->
+            <div class="flex flex-wrap items-center justify-center sm:justify-start gap-4 text-xs text-slate-400">
+              <span class="flex items-center gap-1.5">
+                <svg class="w-3.5 h-3.5 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                </svg>
+                <span>{{ formatArticleDate(article.published_at || article.created_at) }}</span>
+              </span>
+
+              <span class="flex items-center gap-1.5">
+                <svg class="w-3.5 h-3.5 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                </svg>
+                <span>{{ article.view_count || 0 }} ยอดเข้าชม</span>
+              </span>
+
+              <span v-if="article.author || settingsStore.storeName" class="text-slate-400">
+                โดย {{ article.author || settingsStore.storeName }}
+              </span>
+            </div>
+
+            <!-- Share Buttons -->
+            <div class="flex items-center justify-center sm:justify-end gap-2">
+              <button 
+                @click="shareToLine"
+                title="แชร์ไปยัง LINE"
+                class="w-8 h-8 rounded-lg bg-[#06C755] hover:bg-[#05B34C] text-white flex items-center justify-center transition-all active:scale-95 shadow-sm"
+              >
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M24 10.304c0-5.369-5.383-9.738-12-9.738-6.616 0-12 4.369-12 9.738 0 4.814 3.966 8.887 9.539 9.613.385.082.906.262 1.042.6.12.3.05.748.024 1.036l-.16 1.94c-.039.232-.178 1.066.938.595 1.114-.47 6.012-3.542 8.441-6.234 2.802-3.09 4.176-5.834 4.176-7.55z"/>
+                </svg>
+              </button>
+
+              <button 
+                @click="shareToFacebook"
+                title="แชร์ไปยัง Facebook"
+                class="w-8 h-8 rounded-lg bg-[#1877F2] hover:bg-[#0C63D4] text-white flex items-center justify-center transition-all active:scale-95 shadow-sm"
+              >
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                </svg>
+              </button>
+
+              <button 
+                @click="copyCurrentUrl"
+                :title="copied ? 'คัดลอกลิงก์สำเร็จ' : 'คัดลอกลิงก์'"
+                class="h-8 px-3 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center gap-1.5 text-xs font-bold transition-all border border-white/10"
+              >
+                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                </svg>
+                <span>{{ copied ? 'คัดลอกแล้ว' : 'คัดลอก' }}</span>
+              </button>
+            </div>
           </div>
+
         </div>
       </header>
 
-      <!-- Cover Image -->
-      <div v-if="article.cover_image" class="aspect-[16/9] rounded-3xl overflow-hidden mb-8 shadow-2xl shadow-gray-200/50 dark:shadow-none border border-gray-100 dark:border-gray-800">
-        <img :src="getOptimizedImageUrl(article.cover_image, 1200)" :alt="article.title" class="w-full h-full object-cover" @error="onImageError">
-      </div>
+      <!-- =========================================================================
+           BODY SECTION (Two-Column Layout)
+           ========================================================================= -->
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
+          
+          <!-- Left Main Content Column -->
+          <div class="lg:col-span-8 space-y-8">
+            
+            <!-- Cover Image Container -->
+            <div class="rounded-3xl overflow-hidden shadow-2xl border border-slate-200/80 dark:border-white/[0.06] bg-slate-900 aspect-[16/9]">
+              <img
+                :src="getOptimizedBlogImageUrl(article.cover_image, 1200)"
+                :alt="article.title"
+                class="w-full h-full object-cover"
+                @error="onImageError"
+              />
+            </div>
 
-      <!-- ═══════════════════════════════════════════════
-           FEATURED PRODUCT (Linked to Article)
-           ═══════════════════════════════════════════════ -->
-      <div v-if="article.product" class="mb-12">
-        <router-link :to="'/products/' + (article.product.slug || article.product.id)" class="block group">
-          <div class="relative bg-white dark:bg-[#111827] rounded-3xl overflow-hidden border border-gray-100 dark:border-gray-800 shadow-lg hover:shadow-2xl hover:shadow-emerald-500/10 transition-all duration-500">
-            <!-- Top accent bar -->
-            <div class="h-1.5 bg-gradient-to-r from-emerald-400 via-teal-500 to-emerald-600"></div>
+            <!-- Rich Text Body -->
+            <article class="bg-white dark:bg-[#10141D] rounded-3xl p-6 sm:p-10 lg:p-12 border border-slate-200/80 dark:border-white/[0.06] shadow-xl shadow-slate-900/5 dark:shadow-black/20">
+              <div class="prose prose-emerald dark:prose-invert max-w-none text-sm sm:text-base leading-relaxed" v-html="article.content"></div>
+            </article>
 
-            <div class="flex flex-col sm:flex-row">
-              <!-- Product Image -->
-              <div class="sm:w-56 md:w-64 flex-shrink-0 aspect-square sm:aspect-auto overflow-hidden bg-gray-50 dark:bg-gray-800 relative">
-                <img v-if="article.product.image_url" :src="getOptimizedImageUrl(article.product.image_url, 400)" :alt="article.product.name" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" @error="onImageError">
-                <template v-else-if="article.product.images && article.product.images[0]">
-                   <img :src="getOptimizedImageUrl(article.product.images[0], 400)" :alt="article.product.name" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" @error="onImageError">
-                </template>
-                <div v-else class="w-full h-full flex justify-center items-center text-gray-300 dark:text-gray-600 min-h-[200px]">
-                   <svg class="w-16 h-16" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+            <!-- Tags list -->
+            <div v-if="article.tags" class="flex items-center gap-2 flex-wrap pt-2">
+              <span class="text-xs text-slate-400 font-bold uppercase tracking-wider">แท็ก:</span>
+              <span 
+                v-for="tag in article.tags.split(',')" 
+                :key="tag"
+                class="px-3 py-1 rounded-xl bg-white dark:bg-[#10141D] border border-slate-200/80 dark:border-white/[0.06] text-xs text-slate-600 dark:text-slate-400"
+              >
+                #{{ tag.trim() }}
+              </span>
+            </div>
+
+            <!-- Linked Product Box -->
+            <div v-if="article.product" class="bg-white dark:bg-[#10141D] border border-emerald-500/20 rounded-3xl p-6 sm:p-8 shadow-xl">
+              <div class="flex flex-col sm:flex-row items-center gap-6">
+                <div class="w-full sm:w-44 aspect-square rounded-2xl bg-slate-50 dark:bg-slate-900 p-3 flex items-center justify-center shrink-0 border border-slate-200/60 dark:border-white/[0.04]">
+                  <img :src="getProductImage(article.product)" :alt="article.product.name" class="max-h-full max-w-full object-contain" />
                 </div>
-                <!-- Discount badge -->
-                <div v-if="article.product.original_price && Number(article.product.original_price) > Number(article.product.price)" class="absolute top-3 left-3 bg-red-500 text-white text-xs font-black px-3 py-1 rounded-full shadow-lg">
-                  -{{ Math.round((1 - Number(article.product.price) / Number(article.product.original_price)) * 100) }}%
+                <div class="flex-1 text-center sm:text-left space-y-2">
+                  <span class="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">สินค้าที่เกี่ยวข้องในบทความ</span>
+                  <h4 class="text-base sm:text-lg font-bold text-slate-900 dark:text-white">{{ article.product.name }}</h4>
+                  <p class="text-xs text-slate-500 dark:text-slate-400 line-clamp-2">{{ article.product.short_description }}</p>
+                  
+                  <div class="pt-2 flex flex-wrap items-center justify-center sm:justify-start gap-3">
+                    <span v-if="article.product.price" class="text-lg font-black text-emerald-600 dark:text-emerald-400 font-mono">฿{{ formatPrice(article.product.price) }}</span>
+                    <router-link 
+                      :to="'/products/' + (article.product.slug || article.product.id)"
+                      class="h-9 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center transition-all"
+                    >
+                      ดูรายละเอียดสินค้า
+                    </router-link>
+                  </div>
                 </div>
               </div>
+            </div>
 
-              <!-- Product Info -->
-              <div class="flex-1 p-5 sm:p-6 flex flex-col justify-center">
-                <div class="flex items-center gap-2 mb-2">
-                  <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 text-[11px] font-black rounded-full uppercase tracking-wider">
-                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
-                    สินค้าในบทความนี้
-                  </span>
-                  <span v-if="article.product.category" class="text-[10px] font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider">{{ article.product.category }}</span>
+          </div>
+
+          <!-- Right Sidebar Column -->
+          <div class="lg:col-span-4">
+            <aside class="lg:sticky lg:top-[120px] space-y-6">
+              
+              <!-- Quick Contact Widget -->
+              <div class="bg-white dark:bg-[#10141D] border border-slate-200/80 dark:border-white/[0.06] rounded-3xl p-6 shadow-xl shadow-slate-900/5 dark:shadow-black/20">
+                <div class="inline-flex items-center gap-2 mb-3 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-[10px] font-bold tracking-wider uppercase">
+                  <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                  </svg>
+                  <span>EXPERT CONSULTATION</span>
                 </div>
-
-                <h4 class="text-xl md:text-2xl font-black text-gray-900 dark:text-white mb-2 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors leading-tight">{{ article.product.name }}</h4>
-
-                <p v-if="article.product.short_description || article.product.excerpt || article.product.description" class="text-sm text-gray-500 dark:text-gray-400 line-clamp-2 mb-4 leading-relaxed">
-                  {{ article.product.short_description || article.product.excerpt || (article.product.description || '').replace(/<[^>]*>?/gm, '').substring(0, 150) }}
+                
+                <h4 class="text-base font-bold text-slate-900 dark:text-white mb-1.5">ต้องการปรึกษาทีมวิศวกร?</h4>
+                <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mb-5 font-light">
+                  สอบถามข้อมูลเพิ่มเติมเรื่องการจัดเก็บ ขนาดโครงสร้าง และการเตรียมพื้นที่ติดตั้งได้ฟรี
                 </p>
 
-                <div class="flex items-center flex-wrap gap-4">
-                   <div v-if="article.product.price && Number(article.product.price) > 0" class="flex items-baseline gap-2">
-                     <span class="text-2xl font-black text-red-600 dark:text-red-400">฿{{ Number(article.product.price).toLocaleString() }}</span>
-                     <span v-if="article.product.original_price && Number(article.product.original_price) > Number(article.product.price)" class="text-sm text-gray-500 dark:text-gray-400 line-through">฿{{ Number(article.product.original_price).toLocaleString() }}</span>
-                   </div>
-                   <div v-else class="text-lg font-bold text-gray-500">สอบถามราคา</div>
+                <div class="space-y-2.5">
+                  <a 
+                    :href="lineHref"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="flex items-center justify-center gap-2 w-full h-11 rounded-xl bg-[#06C755] hover:bg-[#05B34C] text-white font-bold text-xs transition-all shadow-md active:scale-95"
+                  >
+                    <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M24 10.304c0-5.369-5.383-9.738-12-9.738-6.616 0-12 4.369-12 9.738 0 4.814 3.966 8.887 9.539 9.613.385.082.906.262 1.042.6.12.3.05.748.024 1.036l-.16 1.94c-.039.232-.178 1.066.938.595 1.114-.47 6.012-3.542 8.441-6.234 2.802-3.09 4.176-5.834 4.176-7.55z"/>
+                    </svg>
+                    <span>ปรึกษาผ่าน LINE</span>
+                  </a>
 
-                   <span class="ml-auto inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-600 text-white text-sm font-bold rounded-xl group-hover:bg-emerald-700 transition-colors shadow-lg shadow-emerald-200 dark:shadow-none">
-                     ดูรายละเอียดสินค้า
-                     <svg class="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
-                   </span>
+                  <a 
+                    :href="phoneHref"
+                    class="flex items-center justify-center gap-2 w-full h-11 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold text-xs transition-all active:scale-95"
+                  >
+                    <svg class="w-4 h-4 text-emerald-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
+                    </svg>
+                    <span>โทรติดต่อสอบถาม</span>
+                  </a>
                 </div>
               </div>
-            </div>
-          </div>
-        </router-link>
-      </div>
 
-      <!-- Article Content -->
-      <article class="prose prose-lg prose-gray dark:prose-invert max-w-none mb-16 font-light leading-relaxed ck-content" v-html="article.content"></article>
+              <!-- Related Articles (Same category) -->
+              <div v-if="relatedArticles.length > 0" class="bg-white dark:bg-[#10141D] border border-slate-200/80 dark:border-white/[0.06] rounded-3xl p-6 shadow-xl shadow-slate-900/5 dark:shadow-black/20">
+                <h4 class="text-sm font-bold text-slate-900 dark:text-white mb-4 pb-3 border-b border-slate-100 dark:border-white/[0.04]">
+                  บทความในหมวดหมู่นี้
+                </h4>
 
-
-
-      <!-- FAQ Section -->
-      <div v-if="parsedFaqList.length > 0" class="mb-16">
-        <h3 class="text-2xl font-black text-gray-900 dark:text-white mb-8 flex items-center gap-3">
-          <div class="p-2.5 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-xl">
-             <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-          </div>
-          คำถามที่พบบ่อย (FAQ)
-        </h3>
-        <div class="space-y-4">
-          <div v-for="(faq, index) in parsedFaqList" :key="index" class="bg-gray-50 dark:bg-gray-800/30 rounded-2xl overflow-hidden border border-gray-100 dark:border-gray-800 transition-all duration-300">
-            <button @click="toggleFaq(index)" class="w-full flex items-center justify-between p-5 md:p-6 text-left focus:outline-none focus:ring-2 focus:ring-indigo-500/20 group">
-              <span class="font-bold text-gray-900 dark:text-white text-lg pr-8 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">{{ faq.question }}</span>
-              <span class="w-8 h-8 rounded-full bg-white dark:bg-gray-800 shadow-sm flex items-center justify-center flex-shrink-0 border border-gray-200 dark:border-gray-700 group-hover:border-indigo-300 dark:group-hover:border-indigo-700 transition-colors">
-                 <svg class="w-5 h-5 text-gray-500 dark:text-gray-400 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-transform duration-300" :class="{'rotate-180': openFaqIndex === index}" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-              </span>
-            </button>
-            <div v-show="openFaqIndex === index" class="p-5 md:p-6 pt-0 text-gray-600 dark:text-gray-400 leading-relaxed max-w-3xl">
-              {{ faq.answer }}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Image Gallery -->
-      <div v-if="article.gallery_images && article.gallery_images.length > 0" class="mb-16">
-        <h3 class="text-xl font-black text-gray-900 dark:text-white mb-6 flex items-center gap-2">
-          <svg class="w-6 h-6 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-          แกลเลอรี่ภาพเพิ่มเติม
-        </h3>
-        
-        <!-- Modern Mosaic Grid -->
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 auto-rows-[150px] sm:auto-rows-[200px]">
-            <div 
-                v-for="(img, idx) in article.gallery_images" 
-                :key="idx" 
-                @click="openLightbox(idx)" 
-                :class="[
-                    'relative group rounded-2xl overflow-hidden cursor-pointer shadow-sm border border-gray-100 dark:border-gray-800 transition-all duration-500 hover:shadow-xl hover:-translate-y-1',
-                    idx === 0 && article.gallery_images.length > 2 ? 'col-span-2 row-span-2' : '',
-                    idx === 1 && article.gallery_images.length > 3 ? 'col-span-2 row-span-1' : '',
-                    idx === 2 && article.gallery_images.length > 3 ? 'col-span-1 row-span-1' : '',
-                    idx === 3 && article.gallery_images.length > 4 ? 'col-span-1 row-span-1' : ''
-                ]"
-            >
-                <img :src="getOptimizedImageUrl(img, 600)" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" @error="onImageError">
-                
-                <!-- Hover Overlay -->
-                <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center backdrop-blur-[2px]">
-                    <div class="bg-white/20 text-white rounded-full p-4 transform translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 backdrop-blur-md shadow-lg border border-white/30">
-                        <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"></path></svg>
+                <div class="space-y-4">
+                  <router-link 
+                    v-for="rel in relatedArticles" 
+                    :key="'rel-'+rel.id"
+                    :to="'/blog/' + (rel.slug || rel.id)"
+                    class="group flex gap-3 items-start"
+                  >
+                    <div class="w-16 h-16 rounded-xl overflow-hidden shrink-0 bg-slate-900 border border-slate-200/60 dark:border-white/[0.04]">
+                      <img :src="getOptimizedBlogImageUrl(rel.cover_image, 200)" :alt="rel.title" class="w-full h-full object-cover group-hover:scale-105 transition-transform" />
                     </div>
+                    <div class="flex-1 min-w-0">
+                      <p class="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold mb-0.5">{{ formatArticleDate(rel.published_at || rel.created_at) }}</p>
+                      <h5 class="text-xs font-bold text-slate-800 dark:text-slate-200 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 line-clamp-2 transition-colors">
+                        {{ rel.title }}
+                      </h5>
+                    </div>
+                  </router-link>
                 </div>
-            </div>
-        </div>
-      </div>
+              </div>
 
-      <!-- Tags -->
-      <div v-if="article.tags && article.tags !== '[]'" class="flex flex-wrap gap-2 mb-16 pt-8 border-t border-gray-100 dark:border-gray-800">
-        <span class="text-sm font-bold text-gray-500 mr-2">แท็ก:</span>
-        <span v-for="tag in (typeof article.tags === 'string' ? (article.tags.startsWith('[') ? JSON.parse(article.tags) : article.tags.split(',')) : article.tags)" :key="tag" class="px-3 py-1 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 text-xs font-medium rounded-full">
-          {{ typeof tag === 'string' ? tag.trim() : tag }}
-        </span>
-      </div>
+              <!-- Back to Articles Button -->
+              <div class="text-center pt-2">
+                <router-link 
+                  to="/blog" 
+                  class="inline-flex items-center gap-2 text-xs font-bold text-slate-500 dark:text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
+                >
+                  <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                  </svg>
+                  <span>กลับหน้ารวมบทความทั้งหมด</span>
+                </router-link>
+              </div>
 
-      <!-- Associated Product Block (Bottom) -->
-      <div v-if="article.product" class="mb-16 pt-8 border-t border-gray-100 dark:border-gray-800">
-        <h3 class="text-xl font-black text-gray-900 dark:text-white mb-6 flex items-center gap-2">
-          <svg class="w-6 h-6 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
-          สินค้าที่เกี่ยวข้องในบทความนี้
-        </h3>
-        <div class="bg-emerald-50 dark:bg-emerald-900/20 rounded-3xl p-6 border border-emerald-100 dark:border-emerald-800/50 flex flex-col sm:flex-row items-center gap-6 group hover:shadow-xl hover:shadow-emerald-500/10 transition-all">
-          <div class="w-32 h-32 rounded-2xl overflow-hidden bg-white dark:bg-gray-800 shadow-sm flex-shrink-0 relative">
-            <img v-if="article.product.image_url" :src="getOptimizedImageUrl(article.product.image_url, 400)" class="w-full h-full object-cover" @error="onImageError">
-            <template v-else-if="article.product.images && article.product.images[0]">
-               <img :src="getOptimizedImageUrl(article.product.images[0], 400)" class="w-full h-full object-cover" @error="onImageError">
-            </template>
-            <div v-else class="w-full h-full flex justify-center items-center text-gray-300">
-               <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-            </div>
+            </aside>
           </div>
-          <div class="flex-1 text-center sm:text-left">
-            <span class="text-xs font-bold text-emerald-700 bg-emerald-100 dark:bg-emerald-900/40 dark:text-emerald-400 px-3 py-1 rounded-full mb-3 inline-block">{{ article.product.category }}</span>
-            <h4 class="text-xl font-bold text-gray-900 dark:text-white mb-2 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">{{ article.product.name }}</h4>
-            <p v-if="article.product.excerpt || article.product.description" class="text-sm text-gray-500 dark:text-gray-400 line-clamp-2 mb-4">
-              {{ article.product.excerpt || article.product.description.replace(/<[^>]*>?/gm, '') }}
-            </p>
-            <div class="flex items-center justify-center sm:justify-start flex-wrap gap-4">
-               <div v-if="article.product.price" class="text-lg font-black text-emerald-600 dark:text-emerald-400">
-                 {{ Number(article.product.price).toLocaleString() }} <span class="text-sm font-medium">บาท</span>
-               </div>
-               <router-link :to="'/products/' + (article.product.slug || article.product.id)" class="px-6 py-2.5 bg-emerald-600 text-white text-sm font-bold rounded-xl hover:bg-emerald-700 transition-colors shadow-lg shadow-emerald-200 dark:shadow-none">
-                 ดูรายละเอียดสินค้า →
-               </router-link>
-            </div>
-          </div>
+
         </div>
       </div>
 
-      <!-- ═══════════════════════════════════════════════
-           RECOMMENDED PRODUCTS SECTION
-           ═══════════════════════════════════════════════ -->
-      <div v-if="recommendedProducts.length > 0" class="border-t border-gray-100 dark:border-gray-800 pt-12 mb-16">
-        <div class="flex items-center justify-between mb-8">
-          <h2 class="text-2xl font-black text-gray-900 dark:text-white flex items-center gap-3">
-            <div class="p-2.5 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-xl">
-              <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path></svg>
-            </div>
-            สินค้าแนะนำ
-          </h2>
-          <router-link to="/products" class="text-sm font-bold text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 transition-colors flex items-center gap-1">
-            ดูทั้งหมด
-            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-          </router-link>
-        </div>
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-          <router-link v-for="p in recommendedProducts" :key="p.id" :to="'/products/' + (p.slug || p.id)" class="group bg-white dark:bg-[#111827] rounded-2xl overflow-hidden border border-gray-100 dark:border-gray-800 hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
-            <div class="aspect-square overflow-hidden bg-gray-50 dark:bg-gray-800 relative">
-              <img v-if="p.image_url" :src="getOptimizedImageUrl(p.image_url, 400)" :alt="p.name" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" @error="onImageError">
-              <div v-else class="w-full h-full flex items-center justify-center text-gray-300 dark:text-gray-600">
-                <svg class="w-12 h-12" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-              </div>
-              <div v-if="p.original_price && p.original_price > p.price" class="absolute top-2 right-2 bg-red-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full">
-                -{{ Math.round((1 - p.price / p.original_price) * 100) }}%
-              </div>
-            </div>
-            <div class="p-3 md:p-4">
-              <span class="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">{{ p.category }}</span>
-              <h3 class="font-bold text-gray-900 dark:text-white text-sm line-clamp-2 mt-1 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors leading-snug">{{ p.name }}</h3>
-              <div class="mt-2 flex items-baseline gap-2">
-                <span class="text-base font-black text-red-600 dark:text-red-400">{{ formatPrice(p.price) }}</span>
-                <span v-if="p.original_price && p.original_price > p.price" class="text-xs text-gray-500 dark:text-gray-400 line-through">{{ Number(p.original_price).toLocaleString() }}</span>
-              </div>
-            </div>
-          </router-link>
-        </div>
-      </div>
-
-      <!-- ═══════════════════════════════════════════════
-           RELATED PRODUCTS (Same Category) SECTION
-           ═══════════════════════════════════════════════ -->
-      <div v-if="relatedProducts.length > 0" class="border-t border-gray-100 dark:border-gray-800 pt-12 mb-16">
-        <div class="flex items-center justify-between mb-8">
-          <h2 class="text-2xl font-black text-gray-900 dark:text-white flex items-center gap-3">
-            <div class="p-2.5 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-xl">
-              <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
-            </div>
-            สินค้าที่เกี่ยวข้อง
-          </h2>
-          <router-link to="/products" class="text-sm font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors flex items-center gap-1">
-            ดูสินค้าทั้งหมด
-            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-          </router-link>
-        </div>
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-          <router-link v-for="p in relatedProducts" :key="p.id" :to="'/products/' + (p.slug || p.id)" class="group bg-white dark:bg-[#111827] rounded-2xl overflow-hidden border border-gray-100 dark:border-gray-800 hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
-            <div class="aspect-square overflow-hidden bg-gray-50 dark:bg-gray-800 relative">
-              <img v-if="p.image_url" :src="getOptimizedImageUrl(p.image_url, 400)" :alt="p.name" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" @error="onImageError">
-              <div v-else class="w-full h-full flex items-center justify-center text-gray-300 dark:text-gray-600">
-                <svg class="w-12 h-12" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-              </div>
-            </div>
-            <div class="p-3 md:p-4">
-              <span class="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider">{{ p.category }}</span>
-              <h3 class="font-bold text-gray-900 dark:text-white text-sm line-clamp-2 mt-1 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors leading-snug">{{ p.name }}</h3>
-              <div class="mt-2 flex items-baseline gap-2">
-                <span class="text-base font-black text-red-600 dark:text-red-400">{{ formatPrice(p.price) }}</span>
-                <span v-if="p.original_price && p.original_price > p.price" class="text-xs text-gray-500 dark:text-gray-400 line-through">{{ Number(p.original_price).toLocaleString() }}</span>
-              </div>
-            </div>
-          </router-link>
-        </div>
-      </div>
-
-      <!-- ═══════════════════════════════════════════════
-           RECOMMENDED ARTICLES SECTION
-           ═══════════════════════════════════════════════ -->
-      <div v-if="recommendedArticles.length > 0" class="border-t border-gray-100 dark:border-gray-800 pt-12 mb-16">
-        <div class="flex items-center justify-between mb-8">
-          <h2 class="text-2xl font-black text-gray-900 dark:text-white flex items-center gap-3">
-            <div class="p-2.5 bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 rounded-xl">
-              <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
-            </div>
-            บทความแนะนำ
-          </h2>
-          <router-link to="/blog" class="text-sm font-bold text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 transition-colors flex items-center gap-1">
-            ดูบทความทั้งหมด
-            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-          </router-link>
-        </div>
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-          <router-link v-for="ra in recommendedArticles" :key="ra.id" :to="'/blog/' + (ra.slug || ra.id)" class="group bg-white dark:bg-[#111827] rounded-2xl overflow-hidden border border-gray-100 dark:border-gray-800 hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
-            <div class="w-full aspect-[4/3] overflow-hidden bg-gray-100 dark:bg-gray-800 relative">
-              <img v-if="ra.cover_image" :src="getOptimizedImageUrl(ra.cover_image, 600)" :alt="ra.title" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" @error="onImageError">
-              <div v-else class="w-full h-full bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-900/20 flex items-center justify-center">
-                <svg class="w-10 h-10 text-amber-300 dark:text-amber-700" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"></path></svg>
-              </div>
-              <div class="absolute top-2 left-2">
-                <span class="px-2 py-0.5 bg-white/90 dark:bg-black/70 backdrop-blur-sm text-[10px] font-bold text-gray-700 dark:text-gray-300 rounded-full">{{ ra.category }}</span>
-              </div>
-            </div>
-            <div class="p-3 md:p-4">
-              <h3 class="font-bold text-gray-900 dark:text-white text-sm line-clamp-2 group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors leading-snug">{{ ra.title }}</h3>
-              <p v-if="ra.excerpt" class="text-xs text-gray-600 dark:text-gray-400 mt-1.5 line-clamp-2">{{ ra.excerpt }}</p>
-              <div class="flex items-center gap-2 mt-2 text-[11px] text-gray-600 dark:text-gray-400">
-                <span>{{ formatDate(ra.created_at) }}</span>
-                <span v-if="ra.view_count" class="flex items-center gap-0.5">
-                  <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                  {{ ra.view_count }}
-                </span>
-              </div>
-            </div>
-          </router-link>
-        </div>
-      </div>
-
-      <!-- ═══════════════════════════════════════════════
-           RELATED ARTICLES (Same Category) SECTION
-           ═══════════════════════════════════════════════ -->
-      <div v-if="relatedArticles.length > 0" class="border-t border-gray-100 dark:border-gray-800 pt-12">
-        <h2 class="text-2xl font-black text-gray-900 dark:text-white mb-8 flex items-center gap-3">
-          <div class="p-2.5 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-xl">
-            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"></path></svg>
-          </div>
-          บทความที่เกี่ยวข้อง
-        </h2>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <router-link v-for="ra in relatedArticles" :key="ra.id" :to="'/blog/' + (ra.slug || ra.id)" class="group bg-white dark:bg-[#111827] rounded-2xl overflow-hidden border border-gray-100 dark:border-gray-800 hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
-            <div class="w-full aspect-[4/3] overflow-hidden bg-gray-100 dark:bg-gray-800">
-              <img v-if="ra.cover_image" :src="getOptimizedImageUrl(ra.cover_image, 600)" :alt="ra.title" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" @error="onImageError">
-            </div>
-            <div class="p-4">
-              <span class="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider">{{ ra.category }}</span>
-              <h3 class="font-bold text-gray-900 dark:text-white text-sm line-clamp-2 mt-1 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">{{ ra.title }}</h3>
-              <p class="text-xs text-gray-600 dark:text-gray-400 mt-2">{{ formatDate(ra.created_at) }}</p>
-            </div>
-          </router-link>
-        </div>
-      </div>
-
-      <!-- Back to Blog -->
-      <div class="text-center mt-16">
-        <router-link to="/blog" class="inline-flex items-center gap-2 text-sm font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 transition-colors">
-          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
-          กลับไปหน้าบทความทั้งหมด
-        </router-link>
-      </div>
-    </div>
-
-    <!-- 404 -->
-    <div v-else class="text-center py-20">
-      <p class="text-gray-400 text-lg">ไม่พบบทความนี้</p>
-      <router-link to="/blog" class="inline-block mt-4 text-indigo-600 font-bold hover:underline">กลับหน้าบทความ</router-link>
-    </div>
+    </template>
   </div>
-
-  <!-- Lightbox Modal -->
-  <teleport to="body">
-    <div v-if="isLightboxOpen" class="fixed inset-0 z-[99999] flex items-center justify-center bg-black/95 backdrop-blur-sm" @click="closeLightbox">
-    
-    <!-- Close Button -->
-    <button @click.stop="closeLightbox" class="absolute top-6 right-6 text-white/70 hover:text-white p-2 rounded-full hover:bg-white/10 transition-colors z-[10000] focus:outline-none">
-        <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-    </button>
-
-    <!-- Previous Button -->
-    <button @click.stop="prevImage" class="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 text-white/50 hover:text-white p-3 rounded-full hover:bg-white/10 transition-all z-[10000] focus:outline-none hidden md:block">
-        <svg class="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
-    </button>
-
-    <!-- Next Button -->
-    <button @click.stop="nextImage" class="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 text-white/50 hover:text-white p-3 rounded-full hover:bg-white/10 transition-all z-[10000] focus:outline-none hidden md:block">
-        <svg class="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
-    </button>
-    
-    <!-- Main Image Detail -->
-    <div class="relative max-w-7xl max-h-[90vh] mx-auto px-4 w-full h-full flex items-center justify-center" @click.stop>
-        <img :src="getOptimizedImageUrl(article.gallery_images[currentImageIndex], 1200)" class="max-w-full max-h-[85vh] object-contain rounded-xl shadow-2xl select-none" @error="onImageError" />
-        
-        <!-- Mobile Navigation Area Overlays -->
-        <div class="absolute inset-y-0 left-0 w-1/3 z-40 md:hidden" @click="prevImage"></div>
-        <div class="absolute inset-y-0 right-0 w-1/3 z-40 md:hidden" @click="nextImage"></div>
-    </div>
-
-    <!-- Image Counter -->
-    <div class="absolute bottom-6 left-1/2 -translate-x-1/2 text-white/80 font-medium text-sm px-4 py-2 bg-black/50 rounded-full backdrop-blur-md pointer-events-none">
-        {{ currentImageIndex + 1 }} / {{ article.gallery_images.length }}
-    </div>
-    </div>
-  </teleport>
 </template>
-
-<style scoped>
-/* ══════════════════════════════════════════════════
-   CKEditor Content Styling - BlogDetail
-   ══════════════════════════════════════════════════ */
-
-/* ── Headings ── */
-.ck-content :deep(h2) {
-  font-size: 1.75rem;
-  font-weight: 800;
-  color: #1f2937;
-  margin-top: 2.5rem;
-  margin-bottom: 1rem;
-  line-height: 1.3;
-  letter-spacing: -0.02em;
-  border-left: 4px solid #10b981;
-  padding-left: 1rem;
-}
-
-.ck-content :deep(h3) {
-  font-size: 1.35rem;
-  font-weight: 700;
-  color: #1f2937;
-  margin-top: 2rem;
-  margin-bottom: 0.75rem;
-  line-height: 1.4;
-}
-
-.ck-content :deep(h4) {
-  font-size: 1.15rem;
-  font-weight: 700;
-  color: #374151;
-  margin-top: 1.5rem;
-  margin-bottom: 0.5rem;
-}
-
-:global(.dark) .ck-content :deep(h2) {
-  color: #f3f4f6;
-  border-left-color: #059669;
-}
-:global(.dark) .ck-content :deep(h3) { color: #f3f4f6; }
-:global(.dark) .ck-content :deep(h4) { color: #e5e7eb; }
-
-/* ── Paragraphs ── */
-.ck-content :deep(p) {
-  color: #374151;
-  line-height: 1.9;
-  margin-bottom: 1.25rem;
-  font-weight: 300;
-}
-
-:global(.dark) .ck-content :deep(p) {
-  color: #d1d5db;
-}
-
-/* ── Strong / Bold ── */
-.ck-content :deep(strong) {
-  color: #111827;
-  font-weight: 700;
-}
-
-:global(.dark) .ck-content :deep(strong) {
-  color: #f9fafb;
-}
-
-/* ── Lists ── */
-.ck-content :deep(ul),
-.ck-content :deep(ol) {
-  padding-left: 1.5rem;
-  margin-bottom: 1.5rem;
-}
-
-.ck-content :deep(ul) {
-  list-style-type: disc;
-}
-
-.ck-content :deep(ol) {
-  list-style-type: decimal;
-}
-
-.ck-content :deep(li) {
-  margin-bottom: 0.6rem;
-  line-height: 1.8;
-  color: #374151;
-  padding-left: 0.25rem;
-}
-
-:global(.dark) .ck-content :deep(li) {
-  color: #d1d5db;
-}
-
-.ck-content :deep(li::marker) {
-  color: #10b981;
-  font-weight: 700;
-}
-
-/* ── Links ── */
-.ck-content :deep(a) {
-  color: #059669;
-  text-decoration: underline;
-  text-underline-offset: 3px;
-  text-decoration-color: #a7f3d0;
-  transition: all 0.2s;
-}
-
-.ck-content :deep(a:hover) {
-  color: #047857;
-  text-decoration-color: #059669;
-}
-
-:global(.dark) .ck-content :deep(a) {
-  color: #34d399;
-  text-decoration-color: #065f46;
-}
-
-/* ── Blockquote ── */
-.ck-content :deep(blockquote) {
-  border-left: 4px solid #10b981;
-  background-color: #f9fafb;
-  padding: 1.25rem 1.5rem;
-  margin: 2rem 0;
-  border-radius: 0 12px 12px 0;
-  font-style: italic;
-  color: #374151;
-}
-
-:global(.dark) .ck-content :deep(blockquote) {
-  background-color: #1f2937;
-  border-left-color: #059669;
-  color: #d1d5db;
-}
-
-/* ── Media (Video/YouTube) ── */
-.ck-content :deep(.yt-embed-wrapper) {
-  max-width: 100%;
-  border-radius: 16px;
-  overflow: hidden;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15), 0 1px 4px rgba(0, 0, 0, 0.1);
-
-  transition: box-shadow 0.3s ease, transform 0.3s ease;
-}
-.ck-content :deep(.yt-embed-wrapper:hover) {
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25), 0 2px 8px rgba(0, 0, 0, 0.15);
-  transform: translateY(-2px);
-}
-.ck-content :deep(.yt-embed-inner) {
-  position: relative;
-  width: 100%;
-  padding-bottom: 56.25%; /* 16:9 */
-  height: 0;
-  overflow: hidden;
-}
-.ck-content :deep(.yt-embed-inner iframe) {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  border: 0;
-}
-
-.ck-content :deep(figure.media) {
-  margin: 2rem auto;
-  width: 100%;
-  position: relative;
-  overflow: hidden;
-  border-radius: 16px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15), 0 1px 4px rgba(0, 0, 0, 0.1);
-  padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
-  height: 0;
-
-}
-:global(.dark) .ck-content :deep(figure.media) {
-
-}
-.ck-content :deep(figure.media iframe) {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  border: 0;
-}
-
-/* ── Images ── */
-.ck-content :deep(figure.image) {
-  margin: 2rem auto;
-  text-align: center;
-}
-
-.ck-content :deep(figure.image img) {
-  border-radius: 16px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-  max-width: 100%;
-  height: auto;
-}
-
-.ck-content :deep(figure.image figcaption) {
-  font-size: 0.85rem;
-  color: #6b7280;
-  margin-top: 0.75rem;
-  font-style: italic;
-}
-
-:global(.dark) .ck-content :deep(figure.image figcaption) {
-  color: #9ca3af;
-}
-
-/* ── Horizontal Rule ── */
-.ck-content :deep(hr) {
-  border: none;
-  height: 2px;
-  background: linear-gradient(90deg, transparent, #d1fae5, transparent);
-  margin: 2.5rem 0;
-}
-
-:global(.dark) .ck-content :deep(hr) {
-  background: linear-gradient(90deg, transparent, #064e3b, transparent);
-}
-
-/* ══════════════════════════════════════════════════
-   Tables
-   ══════════════════════════════════════════════════ */
-
-.ck-content :deep(figure.table) {
-  display: flex;
-  justify-content: center;
-  margin: 2rem auto;
-  width: 100%;
-}
-
-.ck-content :deep(table) {
-  width: 100% !important;
-  table-layout: auto;
-  border-collapse: separate !important;
-  border-spacing: 0 !important;
-  border-radius: 16px;
-  overflow: hidden;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 12px rgba(0,0,0,0.04);
-  border: 1px solid #d1fae5 !important;
-  margin: 2rem auto;
-  font-size: 0.95rem;
-}
-
-.ck-content :deep(table thead) {
-  background: linear-gradient(135deg, #059669, #10b981);
-}
-
-.ck-content :deep(table thead th) {
-  color: white;
-  font-weight: 700;
-  padding: 14px 20px;
-  text-align: left;
-  letter-spacing: 0.02em;
-  border-bottom: 2px solid #047857;
-  white-space: nowrap;
-}
-
-.ck-content :deep(table thead th:first-child) {
-  border-top-left-radius: 16px;
-}
-
-.ck-content :deep(table thead th:last-child) {
-  border-top-right-radius: 16px;
-}
-
-.ck-content :deep(table tbody tr) {
-  transition: background-color 0.2s ease;
-}
-
-.ck-content :deep(table tbody tr:nth-child(even)) {
-  background-color: #f0fdf4;
-}
-
-.ck-content :deep(table tbody tr:hover) {
-  background-color: #dcfce7;
-}
-
-.ck-content :deep(table tbody td) {
-  padding: 12px 20px;
-  border-bottom: 1px solid #ecfdf5;
-  color: #374151;
-  line-height: 1.6;
-  vertical-align: top;
-  min-width: 120px;
-}
-
-.ck-content :deep(table tbody td:first-child) {
-  font-weight: 600;
-  color: #065f46;
-  min-width: 160px;
-}
-
-.ck-content :deep(table tbody td:last-child) {
-  /* removed forced width: 100% to prevent squashing other columns */
-}
-
-.ck-content :deep(table tbody tr:last-child td) {
-  border-bottom: none;
-}
-
-.ck-content :deep(table tbody tr:last-child td:first-child) {
-  border-bottom-left-radius: 16px;
-}
-
-.ck-content :deep(table tbody tr:last-child td:last-child) {
-  border-bottom-right-radius: 16px;
-}
-
-/* ── Dark Mode Tables ── */
-:global(.dark) .ck-content :deep(table) {
-  border-color: #064e3b;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.3), 0 4px 12px rgba(0,0,0,0.2);
-}
-
-:global(.dark) .ck-content :deep(table thead) {
-  background: linear-gradient(135deg, #047857, #059669);
-}
-
-:global(.dark) .ck-content :deep(table thead th) {
-  border-bottom-color: #065f46;
-}
-
-:global(.dark) .ck-content :deep(table tbody tr:nth-child(even)) {
-  background-color: #022c22;
-}
-
-:global(.dark) .ck-content :deep(table tbody tr:hover) {
-  background-color: #064e3b;
-}
-
-:global(.dark) .ck-content :deep(table tbody td) {
-  border-bottom-color: #1e293b;
-  color: #cbd5e1;
-}
-
-:global(.dark) .ck-content :deep(table tbody td:first-child) {
-  color: #a7f3d0;
-}
-
-/* ── Responsive ── */
-@media (max-width: 640px) {
-  .ck-content :deep(table) {
-    display: block;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-  }
-}
-</style>
-

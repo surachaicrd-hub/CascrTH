@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { apiFetch } from '../utils/apiFetch'
 import { useSettingsStore } from '../stores/settingsStore'
 import { useSEO } from '../composables/useSEO'
@@ -9,27 +9,104 @@ const { setMeta, setStructuredData } = useSEO()
 const loading = ref(true)
 const visibleSections = ref(new Set())
 
+const heroBg = computed(() => {
+  return settings.value.services_hero_bg || settingsStore.servicesHeroBg || '/images/hero/services-hero.jpg'
+})
+
 // Steps interactive state
 const activeStep = ref(0)
 const activeStepMobile = ref(0)
 const slider = ref(null)
 
-const serviceImages = []
-
 const settings = ref({
-   services_hero_title: '',
-   services_hero_subtitle: '',
-   services_hero_desc: '',
-   services_items: [],
-   services_cta_title: '',
-   services_cta_desc: '',
-   services_content_rich: '',
-   services_hero_bg: ''
- })
+  services_hero_title: '',
+  services_hero_subtitle: '',
+  services_hero_desc: '',
+  services_items: [],
+  services_cta_title: '',
+  services_cta_desc: '',
+  services_content_rich: '',
+  services_hero_bg: ''
+})
 
 const stats = ref([])
-
 let observer = null
+
+// Real default 6-step workflow
+const defaultSteps = [
+  {
+    title: 'ปรึกษาความต้องการและเลือกขนาด',
+    desc: 'พูดคุยกับทีมวิศวกรฝ่ายขาย เพื่อเลือกขนาด ความจุ และรูปแบบโรงเก็บของที่เหมาะสมกับพื้นที่และวัตถุประสงค์การใช้งานจริงของท่าน',
+    icon: 'chat',
+    image: 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=1200&q=80'
+  },
+  {
+    title: 'ประเมินราคาและออกใบเสนอราคาด่วน',
+    desc: 'สรุปรายการสินค้า ค่าบริการจัดส่งติดตั้ง พร้อมออกใบเสนอราคาอย่างเป็นทางการและถูกต้องตามกฎหมายภายใน 1-2 ชั่วโมงทำการ',
+    icon: 'document',
+    image: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=1200&q=80'
+  },
+  {
+    title: 'นัดหมายวันและเตรียมความพร้อมหน้างาน',
+    desc: 'กำหนดวันจัดส่งและติดตั้งที่สะดวก ให้คำแนะนำเรื่องการเตรียมพื้นผิว ระนาบพื้น หรือบริการเตรียมงานฐานรากเพิ่มเติม',
+    icon: 'calendar',
+    image: 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&w=1200&q=80'
+  },
+  {
+    title: 'ขนส่งสินค้าอย่างปลอดภัยถึงสถานที่',
+    desc: 'แพ็คกิ้งสินค้าอย่างแน่นหนาและขนส่งด้วยระบบการจัดส่งมาตรฐาน ถึงหน้างานของท่านตรงตามเวลานัดหมายครอบคลุมทั่วประเทศ',
+    icon: 'truck',
+    image: 'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&w=1200&q=80'
+  },
+  {
+    title: 'ประกอบติดตั้งโดยทีมช่างผู้ชำนาญการ',
+    desc: 'ทีมช่างผู้มีประสบการณ์เข้าประกอบติดตั้งโครงสร้าง ยึดสมอบกและจุดเชื่อมต่ออย่างแน่นหนา ถูกต้องตามคู่มือวิศวกรรมมาตรฐาน',
+    icon: 'wrench',
+    image: 'https://images.unsplash.com/photo-1504917599217-d4dc5ebe6122?auto=format&fit=crop&w=1200&q=80'
+  },
+  {
+    title: 'ตรวจสอบความเรียบร้อยและส่งมอบงาน',
+    desc: 'ทดสอบการเปิด-ปิดประตู การระบายอากาศ และตรวจเช็คความสมบูรณ์รอบตัวอาคาร พร้อมส่งมอบงานและเอกสารรับประกันสินค้า',
+    icon: 'check',
+    image: 'https://images.unsplash.com/photo-1541888086925-920a0eb46de2?auto=format&fit=crop&w=1200&q=80'
+  }
+]
+
+// Fallback real stats
+const defaultStats = [
+  { number: '100%', label: 'มาตรฐานงานติดตั้งและความปลอดภัย' },
+  { number: '77 จังหวัด', label: 'บริการจัดส่งและติดตั้งทั่วประเทศ' },
+  { number: '48 ชม.', label: 'ระยะเวลาประเมินราคาและนัดหมาย' },
+  { number: 'รับประกันจริง', label: 'ดูแลโครงสร้างและบริการหลังการขาย' }
+]
+
+// Core Services Highlights
+const coreServices = [
+  {
+    title: 'บริการสำรวจและให้คำปรึกษา',
+    subtitle: 'Site Survey & Consultation',
+    desc: 'บริการให้คำปรึกษา คำนวณขนาดพื้นที่ และประเมินระนาบหน้างานจริง เพื่อเลือกโรงเก็บของที่ลงตัวและคุ้มค่าที่สุด',
+    icon: 'survey'
+  },
+  {
+    title: 'บริการจัดส่งและประกอบติดตั้งทั่วไทย',
+    subtitle: 'Nationwide Delivery & Assembly',
+    desc: 'ทีมช่างชำนาญการพร้อมเครื่องมือเฉพาะทาง ให้บริการประกอบติดตั้งอย่างประณีตรวดเร็ว ครอบคลุม 77 จังหวัด',
+    icon: 'truck'
+  },
+  {
+    title: 'บริการเตรียมพื้นที่และงานฐานราก',
+    subtitle: 'Groundwork & Foundation',
+    desc: 'ให้คำแนะนำการเทพื้นคอนกรีต ปรับระดับดิน และงานฐานราก เพื่อให้โครงสร้างอาคารมีความมั่นคงแข็งแรงสูงสุด',
+    icon: 'foundation'
+  },
+  {
+    title: 'บริการตรวจรับงานและรับประกัน',
+    subtitle: 'Inspection & Warranty Service',
+    desc: 'ตรวจเช็คความสมบูรณ์ทุกจุดก่อนส่งมอบงาน พร้อมเอกสารรับประกันและทีมงานดูแลช่วยเหลือตลอดอายุการใช้งาน',
+    icon: 'warranty'
+  }
+]
 
 const setupObserver = () => {
   observer = new IntersectionObserver((entries) => {
@@ -48,7 +125,7 @@ const onScroll = () => {
   const children = slider.value.children
   if (children.length === 0) return
   const cardWidth = children[0].offsetWidth
-  const gap = 16 // gap-4 is 16px
+  const gap = 16
   const index = Math.round(scrollLeft / (cardWidth + gap))
   if (index >= 0 && index < children.length) {
     activeStepMobile.value = index
@@ -63,25 +140,39 @@ const loadSettings = async () => {
       if (data.data.services_hero_title !== undefined) settings.value.services_hero_title = data.data.services_hero_title
       if (data.data.services_hero_subtitle !== undefined) settings.value.services_hero_subtitle = data.data.services_hero_subtitle
       if (data.data.services_hero_desc !== undefined) settings.value.services_hero_desc = data.data.services_hero_desc
+      
       if (data.data.services_items) {
-         try {
-            const parsed = typeof data.data.services_items === 'string' ? JSON.parse(data.data.services_items) : data.data.services_items
-            if (Array.isArray(parsed)) settings.value.services_items = parsed
-         } catch(e) {}
+        try {
+          const parsed = typeof data.data.services_items === 'string' ? JSON.parse(data.data.services_items) : data.data.services_items
+          if (Array.isArray(parsed) && parsed.length > 0) settings.value.services_items = parsed
+        } catch(e) {}
       }
+      if (!settings.value.services_items || settings.value.services_items.length === 0) {
+        settings.value.services_items = defaultSteps
+      }
+
       if (data.data.services_stats) {
-         try {
-            const parsed = typeof data.data.services_stats === 'string' ? JSON.parse(data.data.services_stats) : data.data.services_stats
-            if (Array.isArray(parsed)) stats.value = parsed
-         } catch(e) {}
+        try {
+          const parsed = typeof data.data.services_stats === 'string' ? JSON.parse(data.data.services_stats) : data.data.services_stats
+          if (Array.isArray(parsed) && parsed.length > 0) stats.value = parsed
+        } catch(e) {}
       }
+      if (!stats.value || stats.value.length === 0) {
+        stats.value = defaultStats
+      }
+
       if (data.data.services_cta_title !== undefined) settings.value.services_cta_title = data.data.services_cta_title
       if (data.data.services_cta_desc !== undefined) settings.value.services_cta_desc = data.data.services_cta_desc
       if (data.data.services_content_rich !== undefined) settings.value.services_content_rich = data.data.services_content_rich
       if (data.data.services_hero_bg !== undefined) settings.value.services_hero_bg = data.data.services_hero_bg
+    } else {
+      settings.value.services_items = defaultSteps
+      stats.value = defaultStats
     }
   } catch (error) {
-    console.error('Failed to load settings:', error)
+    console.error('Failed to load services settings:', error)
+    settings.value.services_items = defaultSteps
+    stats.value = defaultStats
   } finally {
     loading.value = false
     setTimeout(() => {
@@ -95,11 +186,22 @@ const loadSettings = async () => {
 
 onMounted(() => {
   setMeta({
-    title: 'บริการประกอบและติดตั้ง',
-    description: settingsStore.storeDescription || 'บริการประกอบและติดตั้งสินค้าคุณภาพ โดยทีมช่างผู้เชี่ยวชาญทั่วประเทศ',
+    title: 'บริการจัดส่ง ประกอบและติดตั้ง - บริษัท ซีอาร์ ดิสทริบิวชั่น จำกัด',
+    description: 'บริการจัดส่ง ประกอบและติดตั้งโรงเก็บของสำเร็จรูปพรีเมียม และอุปกรณ์มาตรฐานอุตสาหกรรม โดยทีมช่างผู้เชี่ยวชาญทั่วประเทศไทย',
     canonicalUrl: window.location.href,
     type: 'website'
   })
+
+  setStructuredData({
+    "@context": "https://schema.org",
+    "@type": "Service",
+    "name": "บริการจัดส่งและประกอบติดตั้ง - บริษัท ซีอาร์ ดิสทริบิวชั่น จำกัด",
+    "description": "บริการให้คำปรึกษา สำรวจพื้นที่ จัดส่ง และประกอบติดตั้งโรงเก็บของสำเร็จรูปมาตรฐานสากล",
+    "provider": {
+      "@type": "LocalBusiness",
+      "name": "บริษัท ซีอาร์ ดิสทริบิวชั่น จำกัด"
+    }
+  }, 'dynamic-services-data')
 
   setStructuredData({
     "@context": "https://schema.org",
@@ -112,6 +214,7 @@ onMounted(() => {
 
   loadSettings()
 })
+
 onUnmounted(() => {
   if (observer) observer.disconnect()
   if (slider.value) {
@@ -121,346 +224,472 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="services-page min-h-screen pb-20 transition-colors duration-500">
+  <div class="bg-slate-50/50 dark:bg-[#090C12] min-h-screen transition-colors duration-500 font-sans text-slate-800 dark:text-slate-100 pb-20">
     
-    <div v-if="loading" class="flex justify-center items-center min-h-screen">
+    <!-- Loading State -->
+    <div v-if="loading" class="flex justify-center items-center min-h-[60vh]">
        <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-emerald-500"></div>
     </div>
     
     <div v-else>
 
-      <!-- ══════════════════════════════════════════════
-           COMPACT HEADER SECTION
-      ══════════════════════════════════════════════ -->
-      <header class="relative overflow-hidden pt-28 pb-14 bg-[#080b10] border-b border-white/[0.03]">
-        <!-- Background mesh and radial gradient -->
-        <div class="absolute inset-0 opacity-[0.03] pointer-events-none"
-          style="background-image: radial-gradient(circle, rgba(255,255,255,0.6) 1px, transparent 1px); background-size: 30px 30px;">
+      <!-- =========================================================================
+           HERO HEADER SECTION (Enterprise Dark Aesthetic)
+           ========================================================================= -->
+      <header class="relative overflow-hidden pt-28 pb-16 bg-[#070A0F] border-b border-white/[0.05]">
+        <!-- Hero Background Image (Admin Managed) -->
+        <div 
+          class="absolute inset-0 bg-cover bg-center bg-no-repeat transition-all duration-700 opacity-60 scale-100 pointer-events-none"
+          :style="{ backgroundImage: `url(${heroBg})` }"
+        ></div>
+        <!-- Directional Gradient Overlays: Dark on text area, clear and luminous on image -->
+        <div class="absolute inset-0 bg-gradient-to-r from-[#070A0F] via-[#070A0F]/70 to-[#070A0F]/20 pointer-events-none"></div>
+        <div class="absolute inset-0 bg-gradient-to-t from-[#070A0F] via-transparent to-[#070A0F]/40 pointer-events-none"></div>
+
+        <!-- Background Mesh Pattern -->
+        <div class="absolute inset-0 opacity-[0.035] pointer-events-none"
+          style="background-image: radial-gradient(circle, rgba(255,255,255,0.7) 1px, transparent 1px); background-size: 28px 28px;">
         </div>
-        <div class="absolute inset-0 bg-gradient-to-b from-[#080b10] via-[#090e15]/85 to-[#080b10] pointer-events-none"></div>
         
-        <!-- Subtle glowing blobs for aesthetic warmth -->
-        <div class="absolute -top-40 -left-40 w-96 h-96 bg-emerald-500/10 rounded-full blur-[120px] pointer-events-none"></div>
-        <div class="absolute -bottom-40 -right-40 w-96 h-96 bg-emerald-600/5 rounded-full blur-[120px] pointer-events-none"></div>
+        <!-- Ambient Atmospheric Glows -->
+        <div class="absolute -top-32 -left-32 w-96 h-96 bg-emerald-500/10 rounded-full blur-[120px] pointer-events-none"></div>
+        <div class="absolute top-1/2 right-0 w-80 h-80 bg-teal-500/10 rounded-full blur-[100px] pointer-events-none"></div>
 
         <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
-            <div class="text-center md:text-left">
+          <!-- Breadcrumb Bar -->
+          <nav class="flex items-center gap-2 text-xs font-medium text-slate-400 mb-6" aria-label="Breadcrumb">
+            <router-link to="/" class="hover:text-emerald-400 transition-colors flex items-center gap-1.5">
+              <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+              </svg>
+              <span>หน้าแรก</span>
+            </router-link>
+            <svg class="w-3 h-3 text-slate-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+            </svg>
+            <span class="text-emerald-400 font-semibold">บริการของเรา</span>
+          </nav>
+
+          <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-8">
+            <div class="max-w-3xl">
               <!-- Eyebrow Pill -->
-              <div class="inline-flex items-center gap-2 mb-4 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20">
-                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                <span class="text-emerald-400 text-[10px] font-bold tracking-[0.2em] uppercase">SERVICES & PROCESS</span>
+              <div class="inline-flex items-center gap-2 mb-4 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 backdrop-blur-md">
+                <svg class="w-3.5 h-3.5 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                </svg>
+                <span class="text-emerald-400 text-[11px] font-bold tracking-[0.2em] uppercase">
+                  {{ settings.services_hero_subtitle || 'SERVICES & INSTALLATION' }}
+                </span>
               </div>
               
-              <h1 class="text-3xl sm:text-4xl md:text-5xl font-black text-white leading-tight tracking-tight" v-html="settings.services_hero_title"></h1>
-              <p class="mt-3 text-slate-400 text-sm md:text-base max-w-2xl leading-relaxed">
-                {{ settings.services_hero_desc }}
+              <h1 class="text-3xl sm:text-4xl lg:text-5xl font-black text-white leading-tight tracking-tight">
+                {{ settings.services_hero_title || 'บริการจัดส่ง ประกอบติดตั้ง' }} <br/>
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-300 to-teal-400">
+                  และให้คำปรึกษาครบวงจร
+                </span>
+              </h1>
+              
+              <p class="mt-4 text-slate-400 text-sm sm:text-base leading-relaxed max-w-2xl font-light">
+                {{ settings.services_hero_desc || 'บริการจัดส่งและประกอบติดตั้งโรงเก็บของสำเร็จรูปพรีเมียมโดยทีมช่างผู้ชำนาญการ ให้คำปรึกษาประเมินพื้นที่ จัดส่งตรงเวลา และรับประกันงานติดตั้งครอบคลุมทั่วประเทศไทย' }}
               </p>
             </div>
 
             <!-- Quick Action Buttons -->
-            <div class="flex flex-wrap items-center justify-center md:justify-end gap-3 flex-shrink-0 self-center md:self-auto">
-              <router-link to="/quotation" class="group inline-flex items-center justify-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-white font-bold py-3.5 px-6 rounded-xl shadow-lg shadow-emerald-500/20 transition-all active:scale-95 text-xs">
-                ขอใบเสนอราคาฟรี
-                <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+            <div class="flex flex-wrap items-center gap-3 shrink-0">
+              <router-link 
+                to="/quotation" 
+                class="inline-flex items-center justify-center gap-2 h-12 px-6 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm shadow-lg shadow-emerald-600/25 transition-all duration-200 active:scale-95"
+              >
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                </svg>
+                <span>ขอใบเสนอราคาฟรี</span>
               </router-link>
-              <router-link to="/space-calculator" class="inline-flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white font-bold py-3.5 px-6 rounded-xl border border-white/15 transition-all active:scale-95 text-xs">
-                คำนวณพื้นที่
+
+              <router-link 
+                to="/projects" 
+                class="inline-flex items-center justify-center gap-2 h-12 px-6 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-sm border border-white/15 backdrop-blur-sm transition-all duration-200 active:scale-95"
+              >
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                </svg>
+                <span>ดูผลงานการติดตั้ง</span>
               </router-link>
             </div>
           </div>
         </div>
       </header>
 
-      <!-- ══════════════════════════════════════════════
-           STATS BAR
-      ══════════════════════════════════════════════ -->
-      <section v-if="stats.length > 0" data-section="stats" class="relative -mt-6 z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="bg-white dark:bg-[#111622] rounded-2xl shadow-xl border border-slate-200/50 dark:border-white/[0.04] p-5 md:p-6 grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-          <div v-for="(stat, i) in stats" :key="i" class="text-center border-r border-slate-100 dark:border-white/[0.03] last:border-r-0">
-            <p class="text-2xl md:text-3xl font-black text-emerald-500 dark:text-emerald-400 mb-0.5 tabular-nums">{{ stat.number }}</p>
-            <p class="text-[10px] md:text-xs text-slate-500 dark:text-slate-400 font-bold tracking-wider uppercase">{{ stat.label }}</p>
+      <!-- =========================================================================
+           STATS BAR (Key Highlights)
+           ========================================================================= -->
+      <section data-section="stats" class="relative -mt-8 z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="bg-white dark:bg-[#10141D] rounded-3xl p-6 sm:p-8 border border-slate-200/80 dark:border-white/[0.06] shadow-xl shadow-slate-900/5 dark:shadow-black/20">
+          <div class="grid grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 divide-y sm:divide-y-0 sm:divide-x divide-slate-100 dark:divide-white/[0.06]">
+            <div v-for="(stat, i) in stats" :key="i" class="text-center pt-4 sm:pt-0 first:pt-0 px-2 sm:px-4">
+              <p class="text-3xl sm:text-4xl lg:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 to-teal-400 font-mono tracking-tight mb-1">
+                {{ stat.number || stat.val }}
+              </p>
+              <p class="text-xs sm:text-sm font-bold text-slate-700 dark:text-slate-300">
+                {{ stat.label }}
+              </p>
+            </div>
           </div>
         </div>
       </section>
 
-      <!-- ══════════════════════════════════════════════
-           6-STEP SERVICE PROCESS
-      ══════════════════════════════════════════════ -->
+      <!-- =========================================================================
+           CORE SERVICES SECTION (4 Services Grid)
+           ========================================================================= -->
       <section class="py-16 md:py-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center mb-12">
-          <span class="text-emerald-500 dark:text-emerald-400 text-[10px] font-bold tracking-[0.2em] uppercase">ขั้นตอนการทำงาน</span>
-          <h2 class="text-2xl md:text-4xl font-black text-slate-800 dark:text-white mt-2 tracking-tight">
-            กระบวนการ 6 ขั้นตอนสู่ความสมบูรณ์แบบ
-          </h2>
-          <div class="mt-3 w-12 h-1 bg-emerald-500 rounded-full mx-auto"></div>
-        </div>
-
-        <!-- Responsive layout for steps -->
-        <!-- ─── DESKTOP VIEW (lg:flex, hidden on mobile/tablet) ─── -->
-        <div class="hidden lg:flex gap-12 items-start mt-12">
-          <!-- Sticky left column image showcase -->
-          <div class="w-1/2 sticky top-28">
-            <div class="relative aspect-[4/3] rounded-3xl overflow-hidden shadow-2xl shadow-black/20 border border-slate-200/50 dark:border-white/5 bg-slate-900">
-              <div v-for="(feature, index) in settings.services_items" :key="index"
-                   class="absolute inset-0 transition-all duration-700 ease-in-out"
-                   :class="[ activeStep === index ? 'opacity-100 scale-100 pointer-events-auto' : 'opacity-0 scale-105 pointer-events-none' ]">
-                <img :src="feature.image || serviceImages[index] || serviceImages[0]" :alt="feature.title"
-                     class="w-full h-full object-cover" />
-                <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent"></div>
-                
-                <!-- Badge overlay -->
-                <div class="absolute top-6 left-6 w-14 h-14 rounded-2xl bg-white/90 dark:bg-slate-900/90 backdrop-blur-md flex items-center justify-center shadow-lg border border-white/20">
-                  <span class="text-emerald-500 dark:text-emerald-400 font-black text-xl">{{ String(index + 1).padStart(2, '0') }}</span>
-                </div>
-                
-                <!-- Info overlay -->
-                <div class="absolute bottom-6 left-6 right-6">
-                  <p class="text-xs font-bold text-emerald-400 uppercase tracking-widest mb-1">ขั้นตอนที่ {{ index + 1 }}</p>
-                  <h4 class="text-lg font-bold text-white">{{ feature.title }}</h4>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Right column timeline interactive cards -->
-          <div class="w-1/2 space-y-4">
-            <div v-for="(feature, index) in settings.services_items" :key="index"
-                 @mouseenter="activeStep = index"
-                 @click="activeStep = index"
-                 :class="[
-                   'p-6 rounded-2xl border transition-all duration-300 cursor-pointer flex gap-5 items-start',
-                   activeStep === index
-                     ? 'bg-white dark:bg-[#111622] border-emerald-500/30 shadow-lg shadow-emerald-500/[0.03] translate-x-2'
-                     : 'bg-transparent border-transparent hover:border-slate-200 dark:hover:border-white/5 opacity-70 hover:opacity-100'
-                 ]">
-              <!-- Index Number and Icon -->
-              <div class="flex-shrink-0">
-                <div :class="[
-                  'w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-300 border',
-                  activeStep === index
-                    ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500'
-                    : 'bg-slate-100 dark:bg-slate-900/50 border-slate-200/50 dark:border-white/5 text-slate-400'
-                ]">
-                  <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" :d="feature.icon"></path>
-                  </svg>
-                </div>
-              </div>
-
-              <!-- Content -->
-              <div class="flex-grow">
-                <h3 :class="[
-                  'text-lg font-bold transition-colors duration-300',
-                  activeStep === index ? 'text-slate-800 dark:text-white' : 'text-slate-500 dark:text-slate-400'
-                ]">{{ feature.title }}</h3>
-                <p v-show="activeStep === index" class="mt-2 text-sm text-slate-500 dark:text-slate-400 leading-relaxed transition-all duration-300">
-                  {{ feature.desc }}
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- ─── MOBILE/TABLET VIEW (lg:hidden, horizontal snap-scroll) ─── -->
-        <div class="block lg:hidden mt-8">
-          <div class="flex overflow-x-auto snap-x snap-mandatory scroll-smooth gap-4 pb-6 scrollbar-none" ref="slider">
-            <div v-for="(feature, index) in settings.services_items" :key="index"
-                 class="snap-center shrink-0 w-[85vw] sm:w-[420px] bg-white dark:bg-[#111622] rounded-3xl overflow-hidden border border-slate-200/50 dark:border-white/5 shadow-md flex flex-col">
-              <!-- Image top -->
-              <div class="relative h-48 w-full">
-                <img :src="feature.image || serviceImages[index] || serviceImages[0]" :alt="feature.title" class="w-full h-full object-cover" />
-                <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
-                
-                <!-- Badge -->
-                <div class="absolute top-4 left-4 w-10 h-10 rounded-xl bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm flex items-center justify-center shadow-md">
-                  <span class="text-emerald-500 dark:text-emerald-400 font-black text-sm">{{ String(index + 1).padStart(2, '0') }}</span>
-                </div>
-              </div>
-
-              <!-- Body -->
-              <div class="p-6 flex-grow flex flex-col justify-between">
-                <div>
-                  <div class="flex items-center gap-2 mb-3">
-                    <div class="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-500 border border-emerald-500/10">
-                      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="feature.icon"></path>
-                      </svg>
-                    </div>
-                    <span class="text-xs font-bold text-emerald-500 tracking-wider">ขั้นตอนที่ {{ index + 1 }}</span>
-                  </div>
-                  <h3 class="text-base font-bold text-slate-800 dark:text-white mb-2">{{ feature.title }}</h3>
-                  <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">{{ feature.desc }}</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Swipe Indicator dots -->
-          <div class="flex justify-center gap-1.5 mt-4">
-            <span v-for="(_, i) in settings.services_items" :key="i"
-                  class="w-1.5 h-1.5 rounded-full transition-all duration-300"
-                  :class="[ activeStepMobile === i ? 'w-4 bg-emerald-500' : 'bg-slate-300 dark:bg-slate-700' ]"></span>
-          </div>
-        </div>
-      </section>
-
-      <!-- ══════════════════════════════════════════════
-           CTA BANNER
-      ══════════════════════════════════════════════ -->
-      <section data-section="cta" class="py-16 md:py-24 px-4 sm:px-6 lg:px-8">
-        <div class="max-w-7xl mx-auto cta-card relative rounded-3xl overflow-hidden p-8 sm:p-12 lg:p-14 border border-emerald-500/10">
-          <!-- Glowing blobs -->
-          <div class="absolute -top-12 -right-12 w-72 h-72 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
-          <div class="absolute -bottom-12 -left-12 w-60 h-60 bg-emerald-500/5 rounded-full blur-3xl pointer-events-none"></div>
-          <!-- Grid lines overlay -->
-          <div class="absolute inset-0 opacity-[0.05] pointer-events-none"
-            style="background-image: linear-gradient(rgba(240,113,0,0.12) 1px, transparent 1px), linear-gradient(90deg, rgba(240,113,0,0.12) 1px, transparent 1px); background-size: 48px 48px;">
+        <div class="text-center max-w-2xl mx-auto mb-14">
+          <div class="inline-flex items-center gap-2 mb-3.5 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs font-bold tracking-wider uppercase">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+            </svg>
+            <span>OUR CORE SERVICES</span>
           </div>
           
-          <div class="relative z-10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8">
-            <div class="max-w-2xl text-center lg:text-left">
-              <!-- Eyebrow Pill -->
-              <div class="inline-flex items-center gap-2 mb-4 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20">
-                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                <span class="text-emerald-400 text-[10px] font-bold tracking-[0.2em] uppercase">สนใจติดตั้ง?</span>
+          <h2 class="text-2xl sm:text-3xl lg:text-4xl font-black text-slate-900 dark:text-white tracking-tight leading-tight">
+            บริการหลักที่ครอบคลุมทุกความต้องการ
+          </h2>
+          <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-3 leading-relaxed font-light">
+            ดูแลตั้งแต่เริ่มต้นวางแผน จัดส่ง ประกอบติดตั้ง จนถึงการตรวจรับงานและบริการหลังการขาย
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div 
+            v-for="(srv, idx) in coreServices" 
+            :key="'srv-'+idx"
+            class="bg-white dark:bg-[#10141D] rounded-3xl p-6 sm:p-7 border border-slate-200/80 dark:border-white/[0.06] shadow-lg shadow-slate-900/5 dark:shadow-black/20 hover:border-emerald-500/40 hover:shadow-xl transition-all duration-300 flex flex-col justify-between"
+          >
+            <div>
+              <div class="w-12 h-12 rounded-2xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 flex items-center justify-center mb-5">
+                <!-- Survey Icon -->
+                <svg v-if="srv.icon === 'survey'" class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+                </svg>
+                <!-- Truck Icon -->
+                <svg v-else-if="srv.icon === 'truck'" class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10m10 0H3m10 0a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 11-4 0m4 0H17m-4-6h5l2 5"/>
+                </svg>
+                <!-- Foundation Icon -->
+                <svg v-else-if="srv.icon === 'foundation'" class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+                </svg>
+                <!-- Warranty Icon -->
+                <svg v-else class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                </svg>
               </div>
 
-              <h2 class="text-2xl sm:text-3xl md:text-4xl font-black text-white mb-3 tracking-tight">
-                {{ settings.services_cta_title }}
-              </h2>
-              <p class="text-slate-400 text-sm md:text-base leading-relaxed">
-                {{ settings.services_cta_desc }}
+              <span class="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider block mb-1">
+                {{ srv.subtitle }}
+              </span>
+
+              <h3 class="text-base sm:text-lg font-bold text-slate-900 dark:text-white mb-2.5">
+                {{ srv.title }}
+              </h3>
+
+              <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 leading-relaxed font-light">
+                {{ srv.desc }}
               </p>
             </div>
 
-            <div class="flex flex-col sm:flex-row justify-center lg:justify-end gap-3 flex-shrink-0">
-              <router-link to="/quotation" class="cta-primary-btn group inline-flex items-center justify-center gap-2 py-3.5 px-7 rounded-xl font-bold text-xs active:scale-95 text-white">
-                ขอใบเสนอราคา
-                <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
-              </router-link>
-              
-              <a v-if="settingsStore.contactLines.length > 0"
-                 :href="settingsStore.contactLines[0].url || ('https://line.me/ti/p/~' + (settingsStore.contactLines[0].value || '').replace(/^@/, ''))"
-                 target="_blank"
-                 class="inline-flex items-center justify-center gap-2 bg-[#00B900] hover:bg-[#009900] text-white font-bold py-3.5 px-7 rounded-xl shadow-lg transition-all active:scale-95 text-xs">
-                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M24 10.304c0-5.369-5.383-9.738-12-9.738-6.616 0-12 4.369-12 9.738 0 4.814 3.966 8.887 9.539 9.613.385.082.906.262 1.042.6.12.3.05.748.024 1.036l-.16 1.94c-.039.232-.178 1.066.938.595 1.114-.47 6.012-3.542 8.441-6.234 2.802-3.09 4.176-5.834 4.176-7.55z"/></svg>
-                แชทผ่าน LINE
-              </a>
+            <div class="mt-6 pt-4 border-t border-slate-100 dark:border-white/[0.06] flex items-center justify-between text-xs font-bold text-emerald-600 dark:text-emerald-400">
+              <span>มาตรฐาน ซีอาร์</span>
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+              </svg>
             </div>
           </div>
         </div>
       </section>
 
-      <!-- ══════════════════════════════════════════════
-           RICH CONTENT SECTION
-      ══════════════════════════════════════════════ -->
-      <section v-if="settings.services_content_rich" class="py-16 max-w-4xl mx-auto px-4">
-        <div class="mb-10 text-center">
-          <h2 class="text-2xl md:text-3xl font-black text-slate-800 dark:text-white tracking-tight">รายละเอียดเพิ่มเติม</h2>
-          <div class="mt-3 w-16 h-1 bg-emerald-500 rounded-full mx-auto"></div>
+      <!-- =========================================================================
+           6-STEP SERVICE PROCESS SECTION
+           ========================================================================= -->
+      <section class="py-16 md:py-24 bg-slate-100/60 dark:bg-[#0B0F19] border-t border-b border-slate-200/60 dark:border-white/[0.04]">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          
+          <div class="text-center max-w-2xl mx-auto mb-14">
+            <div class="inline-flex items-center gap-2 mb-3.5 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs font-bold tracking-wider uppercase">
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+              <span>WORKFLOW & PROCESS</span>
+            </div>
+            
+            <h2 class="text-2xl sm:text-3xl lg:text-4xl font-black text-slate-900 dark:text-white tracking-tight leading-tight">
+              กระบวนการทำงาน 6 ขั้นตอนสู่ความสมบูรณ์แบบ
+            </h2>
+            <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-3 leading-relaxed font-light">
+              ขั้นตอนการทำงานที่เป็นระบบและได้มาตรฐาน เพื่อให้ผลงานมีคุณภาพ ตรงเวลา และตอบโจทย์สูงสุด
+            </p>
+          </div>
+
+          <!-- DESKTOP VIEW (lg:flex) -->
+          <div class="hidden lg:flex gap-12 items-start">
+            
+            <!-- Sticky Left: Image Preview -->
+            <div class="w-1/2 sticky top-28">
+              <div class="relative aspect-[4/3] rounded-3xl overflow-hidden shadow-2xl border border-slate-200/80 dark:border-white/[0.08] bg-slate-900">
+                <div 
+                  v-for="(step, index) in settings.services_items" 
+                  :key="'step-img-'+index"
+                  class="absolute inset-0 transition-all duration-700 ease-in-out"
+                  :class="[ activeStep === index ? 'opacity-100 scale-100 pointer-events-auto' : 'opacity-0 scale-105 pointer-events-none' ]"
+                >
+                  <img :src="step.image || defaultSteps[index]?.image || defaultSteps[0].image" :alt="step.title" class="w-full h-full object-cover" />
+                  <div class="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/20 to-transparent"></div>
+                  
+                  <!-- Step Number Badge -->
+                  <div class="absolute top-6 left-6 w-12 h-12 rounded-2xl bg-emerald-500 text-white flex items-center justify-center font-mono font-black text-lg shadow-lg shadow-emerald-500/25">
+                    {{ String(index + 1).padStart(2, '0') }}
+                  </div>
+                  
+                  <!-- Bottom Step Caption -->
+                  <div class="absolute bottom-6 left-6 right-6">
+                    <p class="text-xs font-bold text-emerald-400 uppercase tracking-widest mb-1">ขั้นตอนที่ {{ index + 1 }}</p>
+                    <h4 class="text-xl font-black text-white leading-tight">{{ step.title }}</h4>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right: Interactive Steps List -->
+            <div class="w-1/2 space-y-3.5">
+              <div 
+                v-for="(step, index) in settings.services_items" 
+                :key="'step-list-'+index"
+                @mouseenter="activeStep = index"
+                @click="activeStep = index"
+                class="p-5 sm:p-6 rounded-2xl border transition-all duration-300 cursor-pointer flex gap-4.5 items-start"
+                :class="[
+                  activeStep === index
+                    ? 'bg-white dark:bg-[#10141D] border-emerald-500/40 dark:border-emerald-500/30 shadow-lg shadow-emerald-500/5 translate-x-2'
+                    : 'bg-white/50 dark:bg-white/[0.02] border-slate-200/60 dark:border-white/[0.04] opacity-75 hover:opacity-100 hover:border-slate-300'
+                ]"
+              >
+                <!-- Number Badge / Icon -->
+                <div class="shrink-0">
+                  <div 
+                    class="w-10 h-10 rounded-xl flex items-center justify-center font-mono font-bold text-sm transition-all duration-300"
+                    :class="activeStep === index ? 'bg-emerald-500 text-white shadow-md shadow-emerald-500/25' : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'"
+                  >
+                    {{ String(index + 1).padStart(2, '0') }}
+                  </div>
+                </div>
+
+                <!-- Text Content -->
+                <div class="flex-1 min-w-0">
+                  <h3 
+                    class="text-base font-bold transition-colors duration-300"
+                    :class="activeStep === index ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-800 dark:text-slate-200'"
+                  >
+                    {{ step.title }}
+                  </h3>
+                  <p 
+                    v-show="activeStep === index" 
+                    class="mt-2 text-xs sm:text-sm text-slate-500 dark:text-slate-400 leading-relaxed font-light transition-all duration-300"
+                  >
+                    {{ step.desc }}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- MOBILE / TABLET VIEW (Horizontal Snap Scroll) -->
+          <div class="block lg:hidden">
+            <div class="flex overflow-x-auto snap-x snap-mandatory scroll-smooth gap-4 pb-6 scrollbar-none" ref="slider">
+              <div 
+                v-for="(step, index) in settings.services_items" 
+                :key="'mobile-step-'+index"
+                class="snap-center shrink-0 w-[85vw] sm:w-[400px] bg-white dark:bg-[#10141D] rounded-3xl overflow-hidden border border-slate-200/80 dark:border-white/[0.06] shadow-lg flex flex-col"
+              >
+                <div class="relative h-48 w-full bg-slate-900">
+                  <img :src="step.image || defaultSteps[index]?.image || defaultSteps[0].image" :alt="step.title" class="w-full h-full object-cover" />
+                  <div class="absolute inset-0 bg-gradient-to-t from-slate-950/80 to-transparent"></div>
+                  
+                  <div class="absolute top-4 left-4 w-9 h-9 rounded-xl bg-emerald-500 text-white flex items-center justify-center font-mono font-bold text-sm shadow-md">
+                    {{ String(index + 1).padStart(2, '0') }}
+                  </div>
+                </div>
+
+                <div class="p-6 flex-1 flex flex-col justify-between">
+                  <div>
+                    <span class="text-xs font-bold text-emerald-500 uppercase tracking-wider block mb-1">
+                      ขั้นตอนที่ {{ index + 1 }}
+                    </span>
+                    <h3 class="text-base font-bold text-slate-900 dark:text-white mb-2">{{ step.title }}</h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed font-light">{{ step.desc }}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Indicator Dots -->
+            <div class="flex justify-center gap-1.5 mt-2">
+              <span 
+                v-for="(_, i) in settings.services_items" 
+                :key="'dot-'+i"
+                class="h-1.5 rounded-full transition-all duration-300"
+                :class="[ activeStepMobile === i ? 'w-5 bg-emerald-500' : 'w-1.5 bg-slate-300 dark:bg-slate-700' ]"
+              ></span>
+            </div>
+          </div>
+
         </div>
-        <div class="bg-white dark:bg-[#111622] rounded-3xl p-8 md:p-12 border border-slate-200/50 dark:border-white/[0.04] shadow-sm services-rich-content prose prose-emerald prose-lg dark:prose-invert max-w-none" v-html="settings.services_content_rich"></div>
+      </section>
+
+      <!-- =========================================================================
+           WHY CHOOSE US (Trust & Quality Highlights)
+           ========================================================================= -->
+      <section class="py-16 md:py-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="bg-white dark:bg-[#10141D] rounded-3xl p-8 sm:p-12 border border-slate-200/80 dark:border-white/[0.06] shadow-xl shadow-slate-900/5 dark:shadow-black/20">
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+            
+            <div class="lg:col-span-5 space-y-4 text-center lg:text-left">
+              <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-[11px] font-bold tracking-wider uppercase">
+                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                </svg>
+                <span>WHY CLIENTS TRUST US</span>
+              </div>
+              <h2 class="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
+                เหตุผลที่ลูกค้าทั่วประเทศ <br/>
+                เลือกใช้บริการกับเรา
+              </h2>
+              <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 leading-relaxed font-light">
+                เรามุ่งมั่นรักษามาตรฐานสูงสุดในทุกกระบวนการ เพื่อความมั่นใจ ความปลอดภัย และความคุ้มค่าสูงสุดสำหรับลูกค้าทุกท่าน
+              </p>
+            </div>
+
+            <div class="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div class="p-5 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/60 dark:border-white/[0.04] flex items-start gap-3.5">
+                <div class="w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 mt-0.5">
+                  <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                  </svg>
+                </div>
+                <div>
+                  <h4 class="text-sm font-bold text-slate-900 dark:text-white">ช่างผู้ชำนาญการเฉพาะทาง</h4>
+                  <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 font-light">ผ่านการอบรมการประกอบตามมาตรฐานโครงสร้างอย่างถูกต้อง</p>
+                </div>
+              </div>
+
+              <div class="p-5 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/60 dark:border-white/[0.04] flex items-start gap-3.5">
+                <div class="w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 mt-0.5">
+                  <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                  </svg>
+                </div>
+                <div>
+                  <h4 class="text-sm font-bold text-slate-900 dark:text-white">จัดส่งตรงเวลานัดหมาย</h4>
+                  <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 font-light">ระบบประสานงานและทีมขนส่งมืออาชีพครอบคลุมทุกภูมิภาค</p>
+                </div>
+              </div>
+
+              <div class="p-5 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/60 dark:border-white/[0.04] flex items-start gap-3.5">
+                <div class="w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 mt-0.5">
+                  <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                  </svg>
+                </div>
+                <div>
+                  <h4 class="text-sm font-bold text-slate-900 dark:text-white">เครื่องมือติดตั้งมาตรฐาน</h4>
+                  <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 font-light">ใช้อุปกรณ์ยึดและเครื่องมือติดตั้งเกรดอุตสาหกรรม ปลอดภัย</p>
+                </div>
+              </div>
+
+              <div class="p-5 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/60 dark:border-white/[0.04] flex items-start gap-3.5">
+                <div class="w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 mt-0.5">
+                  <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                  </svg>
+                </div>
+                <div>
+                  <h4 class="text-sm font-bold text-slate-900 dark:text-white">ออกใบกำกับภาษี & ใบรับประกัน</h4>
+                  <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 font-light">เอกสารครบถ้วน ถูกต้องตามกฎหมาย สำหรับบุคคลและนิติบุคคล</p>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      <!-- =========================================================================
+           RICH CONTENT (Optional Admin Extended Details)
+           ========================================================================= -->
+      <section v-if="settings.services_content_rich" class="py-12 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="mb-8 text-center">
+          <h2 class="text-2xl font-black text-slate-900 dark:text-white tracking-tight">รายละเอียดบริการเพิ่มเติม</h2>
+          <div class="mt-2.5 w-12 h-1 bg-emerald-500 rounded-full mx-auto"></div>
+        </div>
+        <div class="bg-white dark:bg-[#10141D] rounded-3xl p-8 sm:p-12 border border-slate-200/80 dark:border-white/[0.06] shadow-xl prose prose-emerald dark:prose-invert max-w-none text-sm leading-relaxed" v-html="settings.services_content_rich"></div>
+      </section>
+
+      <!-- =========================================================================
+           CTA BANNER (Start Your Installation Project)
+           ========================================================================= -->
+      <section data-section="cta" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
+        <div class="rounded-3xl p-8 sm:p-12 lg:p-14 bg-gradient-to-br from-slate-900 via-slate-900 to-slate-950 text-white border border-white/[0.08] shadow-2xl relative overflow-hidden">
+          
+          <!-- Ambient Glows -->
+          <div class="absolute -top-20 -right-20 w-80 h-80 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
+          
+          <div class="relative z-10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8">
+            <div class="max-w-2xl">
+              <div class="inline-flex items-center gap-2 mb-3.5 px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-[11px] font-bold tracking-wider uppercase">
+                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                </svg>
+                <span>START YOUR PROJECT</span>
+              </div>
+
+              <h2 class="text-2xl sm:text-3xl lg:text-4xl font-black text-white tracking-tight leading-tight mb-3">
+                {{ settings.services_cta_title || 'สนใจบริการประกอบและติดตั้ง?' }}
+              </h2>
+              <p class="text-xs sm:text-sm text-slate-400 leading-relaxed font-light">
+                {{ settings.services_cta_desc || 'ส่งรายละเอียดหน้างาน ขนาดพื้นที่ หรือติดต่อทีมวิศวกรเพื่อประเมินราคาและจองคิวติดตั้งได้ทันที' }}
+              </p>
+            </div>
+
+            <!-- Standard CTA Buttons -->
+            <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 shrink-0">
+              <router-link 
+                to="/quotation" 
+                class="inline-flex items-center justify-center gap-2.5 h-12 px-6 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm shadow-lg shadow-emerald-600/25 transition-all duration-200 active:scale-95 min-w-[160px]"
+              >
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                </svg>
+                <span>ขอใบเสนอราคา</span>
+              </router-link>
+
+              <a 
+                v-if="settingsStore.contactLines.length > 0"
+                :href="settingsStore.contactLines[0].url || ('https://line.me/ti/p/~' + (settingsStore.contactLines[0].value || '').replace(/^@/, ''))"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="inline-flex items-center justify-center gap-2.5 h-12 px-6 rounded-xl bg-[#06C755] hover:bg-[#05B34C] text-white font-bold text-sm shadow-lg shadow-[#06C755]/25 transition-all duration-200 active:scale-95 min-w-[160px]"
+              >
+                <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M24 10.304c0-5.369-5.383-9.738-12-9.738-6.616 0-12 4.369-12 9.738 0 4.814 3.966 8.887 9.539 9.613.385.082.906.262 1.042.6.12.3.05.748.024 1.036l-.16 1.94c-.039.232-.178 1.066.938.595 1.114-.47 6.012-3.542 8.441-6.234 2.802-3.09 4.176-5.834 4.176-7.55z"/>
+                </svg>
+                <span>แชทผ่าน LINE</span>
+              </a>
+            </div>
+
+          </div>
+        </div>
       </section>
 
     </div>
   </div>
 </template>
-
-<style scoped>
-/* ─── Page Base styling ─── */
-.services-page {
-  background-color: #0c0e14;
-  color: #f8fafc;
-}
-
-/* ─── Scrollbar Hide ─── */
-.scrollbar-none {
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-}
-.scrollbar-none::-webkit-scrollbar {
-  display: none;
-}
-
-/* ─── CTA Card Custom Styling ─── */
-.cta-card {
-  background: linear-gradient(135deg, rgba(77, 21, 0, 0.2) 0%, rgba(15, 23, 42, 0.95) 50%, rgba(15, 23, 42, 0.98) 100%);
-  border-color: rgba(240, 113, 0, 0.15);
-}
-
-.cta-primary-btn {
-  background-color: #0220A4;
-  box-shadow: 0 8px 24px -4px rgba(2, 32, 164, 0.35);
-  transition: all 0.3s ease;
-}
-.cta-primary-btn:hover {
-  background-color: #01166F;
-  box-shadow: 0 12px 28px -4px rgba(2, 32, 164, 0.45);
-}
-
-/* ─── Rich Content Styles ─── */
-.services-rich-content :deep(h2), .services-rich-content :deep(h3), .services-rich-content :deep(h4) { color: #0220A4; font-weight: 800; margin-top: 2rem; margin-bottom: 0.75rem; }
-.services-rich-content :deep(p) { color: #cbd5e1; line-height: 1.9; margin-bottom: 1rem; }
-.services-rich-content :deep(strong) { color: #5B7CFF; }
-.services-rich-content :deep(ul), .services-rich-content :deep(ol) { padding-left: 1.5rem; margin-bottom: 1rem; }
-.services-rich-content :deep(li) { margin-bottom: 0.5rem; line-height: 1.8; color: #cbd5e1; }
-.services-rich-content :deep(li::marker) { color: #0220A4; }
-.services-rich-content :deep(a) { color: #5B7CFF; text-decoration: underline; }
-.services-rich-content :deep(table) { width: 100% !important; border-collapse: separate !important; border-spacing: 0 !important; border-radius: 16px; overflow: hidden; border: 1px solid rgba(2, 32, 164, 0.15) !important; margin: 2rem auto; }
-.services-rich-content :deep(table thead) { background: linear-gradient(135deg, #01166F, #0220A4); }
-.services-rich-content :deep(table thead th) { color: white; font-weight: 700; padding: 14px 20px; }
-.services-rich-content :deep(table tbody tr:nth-child(even)) { background-color: rgba(2, 32, 164, 0.1); }
-.services-rich-content :deep(table tbody tr:hover) { background-color: rgba(2, 32, 164, 0.2); }
-.services-rich-content :deep(table tbody td) { padding: 12px 20px; border-bottom: 1px solid rgba(2, 32, 164, 0.05); color: #cbd5e1; }
-.services-rich-content :deep(figure.table) { display: flex; justify-content: center; margin: 2rem auto; width: 100%; }
-</style>
-
-<style>
-/* ══════════════════════════════════════════════
-   LIGHT MODE OVERRIDES
-   ══════════════════════════════════════════════ */
-
-html:not(.dark) .services-page {
-  background-color: #F8F9FC;
-  color: #1e293b;
-}
-
-/* Timeline Light Mode overrides */
-html:not(.dark) .services-page .bg-white {
-  background-color: #ffffff;
-}
-
-html:not(.dark) .services-page .prose {
-  color: #334155;
-}
-
-/* Rich Content light mode */
-html:not(.dark) .services-rich-content :deep(h2), 
-html:not(.dark) .services-rich-content :deep(h3), 
-html:not(.dark) .services-rich-content :deep(h4) { color: #01166F; }
-html:not(.dark) .services-rich-content :deep(p) { color: #475569; }
-html:not(.dark) .services-rich-content :deep(strong) { color: #0220A4; }
-html:not(.dark) .services-rich-content :deep(li) { color: #475569; }
-html:not(.dark) .services-rich-content :deep(li::marker) { color: #01166F; }
-html:not(.dark) .services-rich-content :deep(a) { color: #0220A4; }
-html:not(.dark) .services-rich-content :deep(table) { border-color: rgba(2, 32, 164, 0.15) !important; }
-html:not(.dark) .services-rich-content :deep(table tbody tr:nth-child(even)) { background-color: #F3F5FF; }
-html:not(.dark) .services-rich-content :deep(table tbody tr:hover) { background-color: #E8EDFF; }
-html:not(.dark) .services-rich-content :deep(table tbody td) { border-bottom-color: rgba(2, 32, 164, 0.05); color: #475569; }
-
-/* CTA Card Light Mode */
-html:not(.dark) .services-page .cta-card {
-  background: linear-gradient(135deg, rgba(243, 245, 255, 0.8) 0%, #ffffff 50%, #ffffff 100%);
-  border-color: rgba(2, 32, 164, 0.15);
-  box-shadow: 0 10px 40px rgba(240, 113, 0, 0.03);
-}
-
-html:not(.dark) .services-page .cta-card h2 {
-  color: #0f172a;
-}
-
-html:not(.dark) .services-page .cta-card p {
-  color: #475569;
-}
-</style>

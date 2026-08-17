@@ -49,7 +49,7 @@ async function runTest() {
 
         const selectedStyle = stylePrompts[style];
 
-        const systemPrompt = `คุณเป็นนักเขียนบทความมืออาชีพสำหรับ Morespace บริษัทจำหน่ายบ้านเก็บของสำเร็จรูป ตู้เก็บของ และโกดังเก็บของ
+        const systemPrompt = `คุณเป็นนักเขียนบทความมืออาชีพสำหรับบริษัทจำหน่ายบ้านเก็บของสำเร็จรูป ตู้เก็บของ และโกดังเก็บของ
 
 สไตล์การเขียน: ${selectedStyle.name}
 ${selectedStyle.prompt}

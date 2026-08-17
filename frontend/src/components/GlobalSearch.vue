@@ -245,9 +245,9 @@ onUnmounted(() => { window.removeEventListener('keydown', handleKeydown); docume
                 <!-- Quick Links -->
                 <div class="px-5 py-3 border-t border-gray-100 dark:border-gray-800 mt-1">
                   <div class="flex flex-wrap gap-2">
-                    <button @click="router.push('/space-calculator'); close()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-bold bg-emerald-100 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 hover:shadow-md transition-all">
-                      <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
-                      คำนวณพื้นที่
+                    <button @click="router.push('/projects'); close()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-bold bg-blue-100 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 hover:shadow-md transition-all">
+                      <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                      ผลงานการติดตั้ง
                     </button>
                     <button @click="router.push('/quotation'); close()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-bold bg-amber-100 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 hover:shadow-md transition-all">
                       <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>

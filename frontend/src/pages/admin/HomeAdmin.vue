@@ -25,57 +25,75 @@ const tabs = [
 const defaultSlides = [
   {
     id: 1,
-    tag: '★ บ้านเก็บของ PP',
-    titleLine1: 'บ้านเก็บของ.com',
-    titleLine2: 'บ้านเก็บของพลาสติก PP ทนแดด ทนฝน',
-    desc: 'ผลิตด้วยพลาสติก PP (Polypropylene) แข็งแรง ทนแดด',
-    ctaText: 'บ้านเก็บของพลาสติก PP',
-    ctaLink: '/products',
-    ctaText2: 'คำนวณพื้นที่จัดเก็บ',
-    ctaLink2: '/space-calculator',
-    image: '/images/home/hero-slide-1.webp',
-    badgeHighlight: 'เกรดพรีเมียม',
+    image: '/uploads/image-1786691654969-434900526.webp',
+    tag: 'CASTING • KODERA JAPAN',
+    titleLine1: 'KODERA C371G CASTING',
+    titleLine2: 'เครื่องตัดปอกสายไฟอัตโนมัติ รุ่นมาตรฐานยอดนิยม',
+    desc: 'รุ่นมาตรฐาน สามารถติดตั้งออฟฟังก์ชั่นเสริมได้หลายแบบ รองรับขนาดสายไฟ AWG#7 (10sq) ถึง AWG#28 (0.08sq) ตัด ปอก ปั่นเกลียวครบจบในเครื่องเดียว',
+    ctaText: 'ดูสเปก KODERA C371G',
+    ctaLink: '/products/kodera-c371g-casting-wire-stripping-machine',
+    ctaText2: 'ขอใบเสนอราคาด่วน',
+    ctaLink2: '/quotation',
+    badgeHighlight: 'มาตรฐานญี่ปุ่น 100%',
     badgeHighlightIcon: 'trophy',
-    badgeFeature: 'รับประกัน 10 ปี',
-    badgeFeatureIcon: 'wrench',
-    badgeSpecial: 'ดีไซน์สไตล์โมเดิร์น',
-    badgeSpecialIcon: 'house'
+    badgeFeature: 'AWG#7 (10sq) ~ AWG#28 (0.08sq)',
+    badgeFeatureIcon: 'bolt',
+    badgeSpecial: 'ตัด • ปอกปลาย • ปอกกลาง • ปั่นเกลียว',
+    badgeSpecialIcon: 'wrench'
   },
   {
     id: 2,
-    tag: '★ บ้านเก็บของพลาสติก HDPE ลายไม้',
-    titleLine1: 'แข็งแกร่ง ทนทาน',
-    titleLine2: 'สวยงามกลมกลืนกับสวนหลังบ้าน',
-    desc: 'ผลิตจากพลาสติก HDPE หนาสองชั้น ป้องกันรังสี UV 100% ไม่เป็นสนิม ไม่ผุกร่อน ตลอดอายุการใช้งาน',
-    ctaText: 'เลือกดูรุ่นพลาสติก',
-    ctaLink: '/products',
-    ctaText2: 'คำนวณพื้นที่จัดเก็บ',
-    ctaLink2: '/space-calculator',
-    image: '/images/home/hero-slide-2.webp',
-    badgeHighlight: 'ผิวลายไม้ธรรมชาติ',
-    badgeHighlightIcon: 'leaf',
-    badgeFeature: 'กันรังสี UV 100%',
-    badgeFeatureIcon: 'sun',
-    badgeSpecial: 'ทนแดดทนฝน 100%',
-    badgeSpecialIcon: 'rain'
+    image: '/uploads/image-1786691924940-548125460.webp',
+    tag: 'COMPACT HIGH PRECISION • KODERA JAPAN',
+    titleLine1: 'KODERA C370G CASTING',
+    titleLine2: 'เครื่องตัดปอกสายไฟขนาดกะทัดรัด ความแม่นยำสูง',
+    desc: 'ตัวเครื่องขนาดกระทัดรัด ให้ประสิทธิภาพและความแม่นยำสูง รองรับขนาดสายไฟ AWG#10 (5.5sq) ถึง AWG#32 (0.03sq) เหมาะสำหรับไลน์ผลิตที่ต้องการประหยัดพื้นที่',
+    ctaText: 'ดูสเปก KODERA C370G',
+    ctaLink: '/products/kodera-c370g-wire-stripping-machine',
+    ctaText2: 'ขอใบเสนอราคาด่วน',
+    ctaLink2: '/quotation',
+    badgeHighlight: 'ความแม่นยำสูง ±0.1mm',
+    badgeHighlightIcon: 'trophy',
+    badgeFeature: 'AWG#10 (5.5sq) ~ AWG#32 (0.03sq)',
+    badgeFeatureIcon: 'bolt',
+    badgeSpecial: 'ตัด • ปอกปลาย • ปอกกลางสาย',
+    badgeSpecialIcon: 'shield'
   },
   {
     id: 3,
-    tag: '★ บ้านเก็บของโลหะ Galvalume',
-    titleLine1: 'โครงสร้างเหล็กกล้าแข็งแรง',
-    titleLine2: 'ปลอดภัยด้วยระบบล็อกมาตรฐาน',
-    desc: 'ทนลมแรงสูงสุด 120 กม./ชม. อบสีความร้อน 4 ชั้น กันสนิม พร้อมช่องระบายอากาศป้องกันกลิ่นอับชื้น',
-    ctaText: 'เลือกดูรุ่นโลหะ',
-    ctaLink: '/products',
-    ctaText2: 'คำนวณพื้นที่จัดเก็บ',
-    ctaLink2: '/space-calculator',
-    image: '/images/home/hero-slide-3.webp',
-    badgeHighlight: 'เหล็ก Galvalume USA',
-    badgeHighlightIcon: 'shield',
-    badgeFeature: 'ทนลมแรง 120 กม./ชม.',
-    badgeFeatureIcon: 'wind',
-    badgeSpecial: 'ระบบล็อกมาตรฐาน',
-    badgeSpecialIcon: 'lock'
+    image: '/uploads/image-1786691981472-331672943.webp',
+    tag: 'LIGHTWEIGHT & FAST • KODERA JAPAN',
+    titleLine1: 'KODERA C300A CASTING',
+    titleLine2: 'เครื่องตัดปอกสายไฟขนาดเล็ก น้ำหนักเบา คล่องตัว',
+    desc: 'เครื่องตัดปลอกสายไฟที่มีขนาดเล็ก และน้ำหนักเบา ซึ่งพัฒนาจากรุ่น C300 รองรับสายไฟ AWG#16 (1.25sq) ถึง AWG#36 (0.01sq) ทำงานรวดเร็ว เสถียร แม่นยำ',
+    ctaText: 'ดูสเปก KODERA C300A',
+    ctaLink: '/products/automatic-wire-stripper-c300a',
+    ctaText2: 'ขอใบเสนอราคาด่วน',
+    ctaLink2: '/quotation',
+    badgeHighlight: 'ขนาดกะทัดรัด น้ำหนักเบา',
+    badgeHighlightIcon: 'trophy',
+    badgeFeature: 'AWG#16 (1.25sq) ~ AWG#36 (0.01sq)',
+    badgeFeatureIcon: 'bolt',
+    badgeSpecial: 'ตัด • ปอกปลาย • ปอกกลางสาย',
+    badgeSpecialIcon: 'shield'
+  },
+  {
+    id: 4,
+    image: '/uploads/image-1786692728703-131134660.webp',
+    tag: 'FLAT & RIBBON CABLE • KODERA JAPAN',
+    titleLine1: 'KODERA C371AF CASTING',
+    titleLine2: 'เครื่องตัดปอกสายไฟแบบสายแบนและสายแพ',
+    desc: 'เครื่องตัดปลอกสายไฟแบบสายแบนและสายแพ รองรับขนาดสายไฟ AWG#7 (10sq) ถึง AWG#28 (0.08sq) ออกแบบสำหรับงานเฉพาะทางในอุตสาหกรรมอิเล็กทรอนิกส์และยานยนต์',
+    ctaText: 'ดูสเปก KODERA C371AF',
+    ctaLink: '/products/casting-c371ag-wire-stripping-machine',
+    ctaText2: 'ขอใบเสนอราคาด่วน',
+    ctaLink2: '/quotation',
+    badgeHighlight: 'สำหรับสายแบน & สายแพ',
+    badgeHighlightIcon: 'trophy',
+    badgeFeature: 'AWG#7 (10sq) ~ AWG#28 (0.08sq)',
+    badgeFeatureIcon: 'bolt',
+    badgeSpecial: 'ตัด • ปอกปลาย • ปอกกลางสาย',
+    badgeSpecialIcon: 'shield'
   }
 ]
 
@@ -171,21 +189,21 @@ const handleImageUpload = async (event, targetRef) => {
 const addSlide = () => {
   slides.value.push({
     id: Date.now(),
-    tag: '★ สินค้ายอดนิยม',
-    titleLine1: 'บ้านเก็บของพรีเมียม',
-    titleLine2: 'เพื่อบ้านและสวนของคุณ',
-    desc: 'ยกระดับพื้นที่ด้วยบ้านเก็บของและโรงจอดรถคุณภาพสูง ทนทานทุกสภาวะอากาศ',
-    ctaText: 'เลือกชมสินค้า',
+    tag: 'KODERA JAPAN TECHNOLOGY',
+    titleLine1: 'เครื่องตัดปอกสายไฟอัตโนมัติ',
+    titleLine2: 'KODERA CASTING Series มาตรฐานญี่ปุ่น',
+    desc: 'เพิ่มประสิทธิภาพและผลผลิตสูงสุดในไลน์ผลิตสายไฟ ด้วยความเร็วสูงสุด 7,100 ชิ้น/ชม. ความแม่นยำระดับ ±0.1mm รองรับสายไฟ AWG#7 ถึง AWG#36',
+    ctaText: 'เลือกชมเครื่องตัดปอกสายไฟ',
     ctaLink: '/products',
-    ctaText2: 'คำนวณพื้นที่จัดเก็บ',
-    ctaLink2: '/space-calculator',
-    image: '/images/home/hero-slide-1.webp',
-    badgeHighlight: 'เกรดพรีเมียม',
+    ctaText2: 'ขอใบเสนอราคาด่วน',
+    ctaLink2: '/quotation',
+    image: '/uploads/image-1786598541729-737143997.webp',
+    badgeHighlight: 'มาตรฐานญี่ปุ่น 100%',
     badgeHighlightIcon: 'trophy',
-    badgeFeature: 'รับประกัน 10 ปี',
+    badgeFeature: 'ความแม่นยำ ±0.1mm',
     badgeFeatureIcon: 'wrench',
-    badgeSpecial: 'ดีไซน์โมเดิร์น',
-    badgeSpecialIcon: 'house'
+    badgeSpecial: 'รับประกันศูนย์ไทย',
+    badgeSpecialIcon: 'shield'
   })
 }
 
@@ -489,7 +507,7 @@ onMounted(() => {
                         <!-- Tag Badge -->
                         <div>
                           <label class="block text-xs font-bold text-gray-700 mb-1">แท็กป้ายกำกับด้านบน (Tag Badge)</label>
-                          <input type="text" v-model="slide.tag" placeholder="เช่น ★ บ้านเก็บของ PP" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 font-medium">
+                          <input type="text" v-model="slide.tag" placeholder="เช่น KODERA JAPAN TECHNOLOGY" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 font-medium">
                         </div>
 
                         <!-- Image Input & Upload -->
@@ -507,19 +525,19 @@ onMounted(() => {
                         <!-- Title Line 1 -->
                         <div>
                           <label class="block text-xs font-bold text-gray-700 mb-1">หัวข้อหลัก บรรทัดที่ 1 (Title Line 1)</label>
-                          <input type="text" v-model="slide.titleLine1" placeholder="เช่น บ้านเก็บของ.com" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 font-bold">
+                          <input type="text" v-model="slide.titleLine1" placeholder="เช่น เครื่องตัดปอกสายไฟอัตโนมัติ" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 font-bold">
                         </div>
 
                         <!-- Title Line 2 -->
                         <div>
                           <label class="block text-xs font-bold text-gray-700 mb-1">หัวข้อหลัก บรรทัดที่ 2 (Title Line 2)</label>
-                          <input type="text" v-model="slide.titleLine2" placeholder="เช่น บ้านเก็บของพลาสติก PP ทนแดด ทนฝน" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 font-bold text-blue-600">
+                          <input type="text" v-model="slide.titleLine2" placeholder="เช่น KODERA CASTING Series มาตรฐานญี่ปุ่น" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 font-bold text-blue-600">
                         </div>
 
                         <!-- Description -->
                         <div class="md:col-span-2">
                           <label class="block text-xs font-bold text-gray-700 mb-1">คำอธิบายรายละเอียด (Description)</label>
-                          <textarea v-model="slide.desc" rows="2" placeholder="ผลิตด้วยพลาสติก PP (Polypropylene) แข็งแรง ทนแดด" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500"></textarea>
+                          <textarea v-model="slide.desc" rows="2" placeholder="เพิ่มประสิทธิภาพและผลผลิตสูงสุดในไลน์ผลิตสายไฟ ด้วยความเร็วสูงสุด 7,100 ชิ้น/ชม. ความแม่นยำระดับ ±0.1mm" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500"></textarea>
                         </div>
 
                         <!-- Button 1 (Primary CTA) -->
@@ -528,7 +546,7 @@ onMounted(() => {
                           <div class="grid grid-cols-2 gap-2">
                             <div>
                               <label class="block text-[10px] font-bold text-gray-500 mb-1">ข้อความบนปุ่ม</label>
-                              <input type="text" v-model="slide.ctaText" placeholder="บ้านเก็บของพลาสติก PP" class="w-full border border-gray-300 rounded-lg px-2.5 py-1.5 text-xs font-bold">
+                              <input type="text" v-model="slide.ctaText" placeholder="เลือกชมเครื่องตัดปอกสายไฟ" class="w-full border border-gray-300 rounded-lg px-2.5 py-1.5 text-xs font-bold">
                             </div>
                             <div>
                               <label class="block text-[10px] font-bold text-gray-500 mb-1">ลิงก์ปลายทาง</label>
@@ -543,11 +561,11 @@ onMounted(() => {
                           <div class="grid grid-cols-2 gap-2">
                             <div>
                               <label class="block text-[10px] font-bold text-gray-500 mb-1">ข้อความบนปุ่ม</label>
-                              <input type="text" v-model="slide.ctaText2" placeholder="คำนวณพื้นที่จัดเก็บ" class="w-full border border-gray-300 rounded-lg px-2.5 py-1.5 text-xs font-bold">
+                              <input type="text" v-model="slide.ctaText2" placeholder="เช่น ขอใบเสนอราคาด่วน" class="w-full border border-gray-300 rounded-lg px-2.5 py-1.5 text-xs font-bold">
                             </div>
                             <div>
                               <label class="block text-[10px] font-bold text-gray-500 mb-1">ลิงก์ปลายทาง</label>
-                              <input type="text" v-model="slide.ctaLink2" placeholder="/space-calculator" class="w-full border border-gray-300 rounded-lg px-2.5 py-1.5 text-xs">
+                              <input type="text" v-model="slide.ctaLink2" placeholder="เช่น /quotation" class="w-full border border-gray-300 rounded-lg px-2.5 py-1.5 text-xs">
                             </div>
                           </div>
                         </div>
@@ -560,15 +578,15 @@ onMounted(() => {
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
                           <div class="space-y-1">
                             <label class="block text-[10px] font-bold text-gray-500">จุดเด่น 1 (Highlight)</label>
-                            <input type="text" v-model="slide.badgeHighlight" placeholder="เกรดพรีเมียม" class="w-full border border-gray-300 rounded-lg px-2.5 py-1.5 text-xs">
+                            <input type="text" v-model="slide.badgeHighlight" placeholder="เช่น มาตรฐานญี่ปุ่น 100%" class="w-full border border-gray-300 rounded-lg px-2.5 py-1.5 text-xs">
                           </div>
                           <div class="space-y-1">
                             <label class="block text-[10px] font-bold text-gray-500">จุดเด่น 2 (Feature)</label>
-                            <input type="text" v-model="slide.badgeFeature" placeholder="รับประกัน 10 ปี" class="w-full border border-gray-300 rounded-lg px-2.5 py-1.5 text-xs">
+                            <input type="text" v-model="slide.badgeFeature" placeholder="เช่น 7,100 ชิ้น/ชม." class="w-full border border-gray-300 rounded-lg px-2.5 py-1.5 text-xs">
                           </div>
                           <div class="space-y-1">
                             <label class="block text-[10px] font-bold text-gray-500">จุดเด่น 3 (Special)</label>
-                            <input type="text" v-model="slide.badgeSpecial" placeholder="ดีไซน์สไตล์โมเดิร์น" class="w-full border border-gray-300 rounded-lg px-2.5 py-1.5 text-xs">
+                            <input type="text" v-model="slide.badgeSpecial" placeholder="เช่น AWG#7 ~ AWG#36" class="w-full border border-gray-300 rounded-lg px-2.5 py-1.5 text-xs">
                           </div>
                         </div>
                       </div>

@@ -23,97 +23,19 @@ const trackingStore = useTrackingStore()
 const { showToast } = useToast()
 const { setMeta, setStructuredData } = useSEO()
 
-const addToCart = async (product) => {
-  try {
-    await cartStore.addToCart(product, 1);
-    showToast(`เพิ่ม ${product.title} ลงในตะกร้าแล้ว`, 'success');
-    trackingStore.trackEvent({
-      type: 'add_to_cart',
-      productId: product.id,
-      productName: product.title,
-      price: product.price,
-      quantity: 1,
-      source: 'products_grid'
-    });
-  } catch (err) {
-    showToast('ไม่สามารถเพิ่มลงตะกร้าได้', 'error');
-  }
-}
-
-const toggleWishlistItem = async (e, product) => {
-  e.preventDefault();
-  e.stopPropagation();
-  if (!authStore.isAuthenticated) {
-    showToast('กรุณาเข้าสู่ระบบก่อนเพิ่มรายการโปรด', 'warning');
-    return;
-  }
-  const result = await wishlistStore.toggleWishlist(product);
-  if (result.success) {
-    showToast(result.isAdded ? 'เพิ่มในรายการโปรดแล้ว' : 'นำออกจากรายการโปรดแล้ว', result.isAdded ? 'success' : 'info');
-    trackingStore.trackEvent({
-      type: result.isAdded ? 'add_to_wishlist' : 'remove_from_wishlist',
-      productId: product.id,
-      productName: product.title,
-      source: 'products_grid'
-    });
-  }
-}
-
-const toggleCompareItem = (e, product) => {
-  e.preventDefault();
-  e.stopPropagation();
-  const result = compareStore.toggleCompare(product);
-  if (result.success) {
-    showToast(result.isAdded ? 'เพิ่มในรายการเปรียบเทียบแล้ว' : 'นำออกจากรายการเปรียบเทียบแล้ว', result.isAdded ? 'success' : 'info');
-  } else if (result.error === 'max_reached') {
-    showToast('เปรียบเทียบได้สูงสุด 4 ชิ้น', 'warning');
-  }
-}
-
 const allProducts = ref([])
 const activeCategory = ref('ทุกหมวดหมู่')
 const categories = ref(['ทุกหมวดหมู่'])
 const categoryDetails = ref([])
 
 const activeCategoryData = computed(() => {
-  if (activeCategory.value === 'ทุกหมวดหมู่') return null;
-  return categoryDetails.value.find(c => c.name === activeCategory.value) || null;
+  if (activeCategory.value === 'ทุกหมวดหมู่') return null
+  return categoryDetails.value.find(c => c.name === activeCategory.value) || null
 })
 
-const formattedCategoryTitle = computed(() => {
-  if (!activeCategoryData.value) return { part1: '', part2: '', highlight: '' };
-  const name = activeCategoryData.value.name || '';
-  // Try to split on known suffixes for highlight styling
-  const highlightPatterns = [/\s+(PP|HDPE|PE|Metal|Steel|PVC|ABS|WPC)$/i, /\s+(\S+)$/];
-  for (const pattern of highlightPatterns) {
-    const match = name.match(pattern);
-    if (match && match.index > 0) {
-      const before = name.slice(0, match.index).trim();
-      const hl = match[1];
-      // Split 'before' roughly in half by words for two-line display
-      const words = before.split(/\s+/);
-      if (words.length >= 2) {
-        const mid = Math.ceil(words.length / 2);
-        return {
-          part1: words.slice(0, mid).join(' '),
-          part2: words.slice(mid).join(' '),
-          highlight: hl
-        };
-      }
-      return { part1: before, part2: '', highlight: hl };
-    }
-  }
-  // Fallback: split name in half by words
-  const words = name.split(/\s+/);
-  if (words.length >= 2) {
-    const mid = Math.ceil(words.length / 2);
-    return {
-      part1: words.slice(0, mid).join(' '),
-      part2: words.slice(mid).join(' '),
-      highlight: ''
-    };
-  }
-  return { part1: name, part2: '', highlight: '' };
+const activeCategoryProductCount = computed(() => {
+  if (activeCategory.value === 'ทุกหมวดหมู่') return allProducts.value.length
+  return allProducts.value.filter(p => p.categories ? p.categories.includes(activeCategory.value) : p.category === activeCategory.value).length
 })
 
 const searchQuery = ref(route.query.search || '')
@@ -141,16 +63,16 @@ const filteredProducts = computed(() => {
   let result = allProducts.value
 
   if (activeCategory.value !== 'ทุกหมวดหมู่') {
-    const targetCat = categoryDetails.value.find(c => c.name === activeCategory.value || c.id === activeCategory.value);
+    const targetCat = categoryDetails.value.find(c => c.name === activeCategory.value || c.id === activeCategory.value)
     const targetKeys = new Set([
       activeCategory.value,
       targetCat?.id,
       targetCat?.name
-    ].filter(Boolean));
+    ].filter(Boolean))
 
     result = result.filter(p => {
-      const pCats = Array.isArray(p.categories) ? p.categories : [p.category];
-      return pCats.some(c => targetKeys.has(c)) || targetKeys.has(p.category) || (p.category_id && targetKeys.has(p.category_id));
+      const pCats = Array.isArray(p.categories) ? p.categories : [p.category]
+      return pCats.some(c => targetKeys.has(c)) || targetKeys.has(p.category) || (p.category_id && targetKeys.has(p.category_id))
     })
   }
 
@@ -214,7 +136,6 @@ const setupObserver = () => {
     })
   }, { rootMargin: '400px' })
 
-  // Observe immediately if already mounted
   if (loadMoreTrigger.value) {
     observer.observe(loadMoreTrigger.value)
   }
@@ -240,7 +161,6 @@ const setCategory = (cat) => {
   activeCategory.value = cat
   visibleCount.value = 24
 
-  // Update URL without page reload
   if (cat === 'ทุกหมวดหมู่') {
     router.push('/products')
   } else {
@@ -250,10 +170,10 @@ const setCategory = (cat) => {
 
 watch(activeCategory, (cat) => {
   const isAll = !cat || cat === 'ทุกหมวดหมู่'
-  const titleText = isAll ? 'รายการสินค้าทั้งหมด' : `สินค้าหมวดหมู่ ${cat}`
+  const titleText = isAll ? 'รายการสินค้าทั้งหมด - บริษัท ซีอาร์ ดิสทริบิวชั่น จำกัด' : `สินค้าหมวดหมู่ ${cat} - บริษัท ซีอาร์ ดิสทริบิวชั่น จำกัด`
   const descText = isAll 
-    ? (settingsStore.storeDescription || 'รวมรายการสินค้าคุณภาพสูงระดับพรีเมียมทุกประเภท')
-    : `เลือกซื้อ ${cat} คุณภาพพรีเมียม ทนทาน พร้อมบริการประกอบและติดตั้งทั่วประเทศ`
+    ? (settingsStore.storeDescription || 'รวมรายการสินค้าคุณภาพสูงระดับพรีเมียมทุกประเภท โรงเก็บของสำเร็จรูป และอุปกรณ์มาตรฐานอุตสาหกรรม')
+    : `เลือกซื้อ ${cat} คุณภาพพรีเมียม ทนทาน พร้อมบริการประกอบและติดตั้งทั่วประเทศ โดย บริษัท ซีอาร์ ดิสทริบิวชั่น จำกัด`
 
   setMeta({
     title: titleText,
@@ -272,32 +192,11 @@ watch(activeCategory, (cat) => {
   }, 'dynamic-breadcrumb-data')
 }, { immediate: true })
 
-const formatPrice = (price) => {
-  if (!price) return '0'
-  return new Intl.NumberFormat('th-TH').format(price)
-}
-
-const now = ref(Date.now())
-let timerInterval = null
-
-const getTimeRemaining = (endTime) => {
-  if (!endTime) return null
-  const total = Date.parse(endTime) - now.value
-  if (total <= 0) return null
-  const days = Math.floor(total / (1000 * 60 * 60 * 24))
-  const hours = Math.floor((total / (1000 * 60 * 60)) % 24)
-  const minutes = Math.floor((total / 1000 / 60) % 60)
-  
-  if (days > 0) return `จบโปรใน ${days} วัน ${hours} ชม.`
-  if (hours > 0) return `จบโปรใน ${hours} ชม. ${minutes} นาที`
-  return `จบโปรใน ${minutes} นาที`
-}
-
 const fetchCategories = async () => {
   try {
     const res = await fetch('/api/categories')
     const data = await res.json()
-    if (data.success) {
+    if (data.success && Array.isArray(data.data)) {
       categories.value = ['ทุกหมวดหมู่', ...data.data.map(c => c.name)]
       categoryDetails.value = data.data
     }
@@ -310,10 +209,10 @@ const fetchProducts = async () => {
   try {
     const res = await fetch('/api/products')
     const data = await res.json()
-    if (data.success) {
+    if (data.success && Array.isArray(data.data)) {
       allProducts.value = data.data.map(p => {
-        const catDetails = categoryDetails.value.find(c => c.name === p.category || c.id === p.category || c.id === p.category_id);
-        const catSortOrder = catDetails ? (catDetails.sort_order || 0) : 9999;
+        const catDetails = categoryDetails.value.find(c => c.name === p.category || c.id === p.category || c.id === p.category_id)
+        const catSortOrder = catDetails ? (catDetails.sort_order || 0) : 9999
         
         let parsedCategories = []
         if (typeof p.categories === 'string') {
@@ -356,17 +255,13 @@ const fetchProducts = async () => {
 }
 
 const applyCategoryFromRoute = () => {
-  // Support both /products/category/:name and /products?category=name
   const cat = route.params.category 
     ? decodeURIComponent(route.params.category) 
     : (route.query.category ? decodeURIComponent(route.query.category) : null)
   if (cat && categories.value.includes(cat)) {
     activeCategory.value = cat
-    document.title = settingsStore.storeName ? `สินค้าหมวดหมู่ ${cat} - ${settingsStore.storeName}` : `สินค้าหมวดหมู่ ${cat}`
   } else if (cat) {
-    // Category from URL not found yet, try matching
     activeCategory.value = cat
-    document.title = settingsStore.storeName ? `สินค้าหมวดหมู่ ${cat} - ${settingsStore.storeName}` : `สินค้าหมวดหมู่ ${cat}`
   } else {
     activeCategory.value = 'ทุกหมวดหมู่'
   }
@@ -378,9 +273,20 @@ const applyCategoryFromRoute = () => {
   visibleCount.value = 24
 }
 
-// Watch route changes (both params and query)
 watch([() => route.params.category, () => route.query.category, () => route.query.search], () => {
   applyCategoryFromRoute()
+})
+
+const lineHref = computed(() => {
+  const l = settingsStore.contactLines?.[0]
+  if (!l) return '/contact'
+  if (typeof l === 'string') return `https://line.me/ti/p/~${l.replace(/^@/, '')}`
+  return l.url || (l.value ? `https://line.me/ti/p/~${l.value.replace(/^@/, '')}` : '/contact')
+})
+
+const heroBg = computed(() => {
+  if (activeCategoryData.value?.image_url) return activeCategoryData.value.image_url
+  return settingsStore.productsHeroBg || '/images/hero/products-hero.jpg'
 })
 
 onMounted(async () => {
@@ -391,261 +297,337 @@ onMounted(async () => {
     await wishlistStore.fetchWishlist()
   }
   setupObserver()
-  timerInterval = setInterval(() => { now.value = Date.now() }, 60000)
 })
 
 onUnmounted(() => {
-  if (timerInterval) clearInterval(timerInterval)
   if (observer) observer.disconnect()
 })
-
 </script>
 
 <template>
-  <div class="bg-[#f8f9fa] dark:bg-[#0a0f16] min-h-screen pt-24 md:pt-32 pb-10 md:pb-24 transition-colors">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+  <div class="bg-slate-50/50 dark:bg-[#090C12] min-h-screen transition-colors duration-500 font-sans text-slate-800 dark:text-slate-100 pb-20">
+
+    <!-- =========================================================================
+         HERO HEADER SECTION (Enterprise Dark Aesthetic - Redesigned)
+         ========================================================================= -->
+    <header class="relative overflow-hidden pt-28 pb-14 lg:pb-16 bg-[#070A0F] border-b border-white/[0.05]">
+      <!-- Hero Background Image (Admin Managed) -->
+      <div 
+        class="absolute inset-0 bg-cover bg-center bg-no-repeat transition-all duration-700 opacity-60 scale-100 pointer-events-none"
+        :style="{ backgroundImage: `url(${heroBg})` }"
+      ></div>
+      <!-- Directional Gradient Overlays: Dark on text area, clear and luminous on image -->
+      <div class="absolute inset-0 bg-gradient-to-r from-[#070A0F] via-[#070A0F]/70 to-[#070A0F]/20 pointer-events-none"></div>
+      <div class="absolute inset-0 bg-gradient-to-t from-[#070A0F] via-transparent to-[#070A0F]/40 pointer-events-none"></div>
+
+      <!-- Background Mesh Pattern -->
+      <div class="absolute inset-0 opacity-[0.035] pointer-events-none"
+        style="background-image: radial-gradient(circle, rgba(255,255,255,0.7) 1px, transparent 1px); background-size: 28px 28px;">
+      </div>
       
-      <!-- Category Hero Section (Dynamic) -->
-      <div v-if="activeCategoryData" class="category-hero-card mb-16 rounded-[2.5rem] overflow-hidden bg-white dark:bg-[#111827] border border-gray-100 dark:border-white/5 shadow-2xl shadow-gray-200/50 dark:shadow-none relative flex flex-col md:flex-row min-h-[420px]">
+      <!-- Ambient Glows -->
+      <div class="absolute -top-32 -left-32 w-96 h-96 bg-emerald-500/10 rounded-full blur-[120px] pointer-events-none"></div>
+      <div class="absolute top-1/2 right-0 w-80 h-80 bg-teal-500/10 rounded-full blur-[100px] pointer-events-none"></div>
+
+      <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
-        <!-- Wavy Background & Decorative Layers (Desktop) -->
-        <div class="absolute inset-0 z-0 pointer-events-none hidden md:flex flex-row">
-          <!-- Left Side (White/Dark Background) -->
-          <div class="w-[52%] lg:w-[55%] bg-white dark:bg-[#111827] relative">
-            <!-- Dotted Pattern -->
-            <div class="absolute top-8 right-16 w-32 h-32 opacity-30 dark:opacity-15" style="background-image: radial-gradient(#e0a96d 1.5px, transparent 1.5px); background-size: 12px 12px;"></div>
-            
-            <!-- Curved Wave Extender (White Panel) -->
-            <svg class="absolute top-0 bottom-0 -right-[79px] h-full w-[80px] text-white dark:text-[#111827]" viewBox="0 0 100 1000" preserveAspectRatio="none" fill="currentColor">
-              <path d="M 0,0 L 85,0 C 65,150 45,280 45,400 C 45,520 85,640 85,760 C 85,880 50,930 90,1000 L 0,1000 Z" />
+        <!-- Breadcrumb Navigation -->
+        <nav class="flex items-center gap-2 text-xs font-medium text-slate-400 mb-6 flex-wrap" aria-label="Breadcrumb">
+          <router-link to="/" class="hover:text-emerald-400 transition-colors flex items-center gap-1.5">
+            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
             </svg>
-            
-            <!-- Glowing Blue Stroke -->
-            <svg class="absolute top-0 bottom-0 -right-[83px] h-full w-[80px] text-[#5B7CFF]/40 dark:text-[#5B7CFF]/20" viewBox="0 0 100 1000" preserveAspectRatio="none" fill="none" stroke="currentColor" stroke-width="4">
-              <path d="M 83,0 C 63,150 43,280 43,400 C 43,520 83,640 83,760 C 83,880 48,930 88,1000" />
+            <span>หน้าแรก</span>
+          </router-link>
+          
+          <svg class="w-3 h-3 text-slate-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+          </svg>
+          
+          <router-link to="/products" :class="activeCategory === 'ทุกหมวดหมู่' ? 'text-emerald-400 font-semibold' : 'hover:text-emerald-400 transition-colors'">
+            สินค้าทั้งหมด
+          </router-link>
+
+          <template v-if="activeCategory !== 'ทุกหมวดหมู่'">
+            <svg class="w-3 h-3 text-slate-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
             </svg>
+            <span class="text-emerald-400 font-semibold truncate max-w-[200px]">{{ activeCategory }}</span>
+          </template>
+        </nav>
+
+        <!-- Two-Column Balanced Hero Layout -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+          
+          <!-- Left Column: Title, Eyebrow, Description & Actions -->
+          <div class="lg:col-span-7 space-y-5 text-center sm:text-left">
             
-            <!-- Blue Dot Anchor on Curve -->
-            <div class="absolute top-[52%] -right-[3px] w-4 h-4 rounded-full bg-gradient-to-r from-[#0220A4] to-[#8CA4FF] border-[3px] border-white dark:border-[#111827] shadow-md shadow-[#0220A4]/40 z-30 animate-pulse"></div>
-
-            <!-- Bottom Left Blue Arc/Circle -->
-            <div class="absolute -bottom-16 right-0 w-36 h-36 rounded-full bg-gradient-to-tr from-[#0220A4]/80 to-[#8CA4FF]/60 opacity-80 shadow-lg shadow-[#0220A4]/15 z-20"></div>
-          </div>
-          <div class="flex-grow"></div>
-        </div>
-
-        <!-- Mobile Background -->
-        <div class="absolute inset-0 z-0 bg-white dark:bg-[#111827] md:hidden"></div>
-
-        <!-- Left Content Column -->
-        <div class="w-full md:w-[52%] lg:w-[55%] p-8 md:p-12 lg:p-14 xl:p-16 flex flex-col justify-center relative z-10 order-2 md:order-1">
-          <!-- Small Decorative Mobile Blur -->
-          <div class="absolute -top-12 -left-12 w-48 h-48 bg-blue-500/5 rounded-full blur-3xl md:hidden"></div>
-          
-          <!-- Category Badge / Pill -->
-          <div class="flex items-center gap-3 mb-6 relative">
-             <div class="w-14 h-14 rounded-full bg-gradient-to-br from-[#FFEAD6] to-[#FFF8F2] dark:from-[#2e241c] dark:to-[#1a1410] flex items-center justify-center border border-[#E8EDFF]/50 dark:border-[#5c4028]/30 shadow-inner flex-shrink-0">
-                <img v-if="activeCategoryData.icon_url" :src="getOptimizedImageUrl(activeCategoryData.icon_url, 128)" :alt="activeCategoryData.name" class="w-8 h-8 object-contain invert sepia saturate-[20] hue-rotate-[350deg] opacity-70 dark:invert-0 dark:sepia-0 dark:saturate-100 dark:hue-rotate-0 dark:opacity-90" @error="onImageError">
-                <svg v-else class="w-7 h-7 text-[#0220A4]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
-                </svg>
-             </div>
-             <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#F3F5FF] dark:bg-[#0220A4]/10 border border-[#E8EDFF]/60 dark:border-[#0220A4]/25 text-[#01166F] dark:text-[#0220A4] text-xs font-bold tracking-wide">
-               <span class="relative flex h-2 w-2">
-                 <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#0220A4] opacity-75"></span>
-                 <span class="relative inline-flex rounded-full h-2 w-2 bg-[#0220A4]"></span>
-               </span>
-               หมวดหมู่ที่เลือก
-             </div>
-          </div>
-          
-          <!-- Dynamic Formatted Title -->
-          <h1 class="text-3xl md:text-4xl lg:text-[2.75rem] xl:text-[3.25rem] font-black tracking-tight text-slate-900 dark:text-white mb-4 leading-[1.25] relative">
-            <span class="block">{{ formattedCategoryTitle.part1 }}</span>
-            <span v-if="formattedCategoryTitle.part2 || formattedCategoryTitle.highlight" class="block text-slate-800 dark:text-slate-200">
-              {{ formattedCategoryTitle.part2 }}
-              <span v-if="formattedCategoryTitle.highlight" class="text-transparent bg-clip-text bg-gradient-to-r from-[#0220A4] to-[#FF9E00] font-black"> {{ formattedCategoryTitle.highlight }}</span>
-            </span>
-          </h1>
-
-          <!-- Accent Line -->
-          <div class="w-12 h-1 bg-gradient-to-r from-[#0220A4] to-[#8CA4FF] rounded-full mb-6"></div>
-          
-          <!-- Description -->
-          <p class="text-slate-500 dark:text-slate-400 text-sm md:text-base font-light leading-relaxed mb-8 max-w-lg relative">
-            {{ activeCategoryData.description || 'ค้นหาพื้นที่เก็บของในสไตล์คุณ การันตีคุณภาพและความสวยงามระดับพรีเมียม ตอบสนองทุกฟังก์ชันการใช้งาน' }}
-          </p>
-          
-
-        </div>
-
-        <!-- Right Image Column -->
-        <div class="w-full md:w-[48%] lg:w-[45%] min-h-[300px] md:min-h-0 relative order-1 md:order-2 bg-slate-50 dark:bg-slate-900">
-          <img v-if="activeCategoryData.image_url" :src="getOptimizedImageUrl(activeCategoryData.image_url, 800)" :alt="activeCategoryData.name" class="absolute inset-0 w-full h-full object-cover" @error="onImageError">
-          <div v-else class="absolute inset-0 w-full h-full bg-gradient-to-tr from-blue-100 to-blue-50 dark:from-slate-800 dark:to-slate-700 flex items-center justify-center">
-             <svg class="w-20 h-20 text-blue-200 dark:text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-             </svg>
-          </div>
-          
-          <!-- Subtle Inner Overlay Fade (Mobile Only) -->
-          <div class="absolute inset-0 bg-gradient-to-t from-white via-white/20 to-transparent dark:from-[#111827] dark:via-[#111827]/20 md:hidden pointer-events-none"></div>
-        </div>
-      </div>
-
-      <!-- Category Filter (Flex-Wrap Layout for no scroll) -->
-      <div class="relative w-full max-w-7xl mx-auto mb-16 px-4">
-        <!-- Glassmorphic premium container background -->
-        <div class="bg-[#FCFCFC] dark:bg-slate-900/40 backdrop-blur-xl rounded-[2rem] md:rounded-[3rem] p-5 md:p-7 border border-slate-100 dark:border-slate-800/60 shadow-sm shadow-slate-100 dark:shadow-none">
-          
-          <!-- Subtle header to label the section -->
-          <div class="text-center mb-7">
-            <span class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-blue-50 dark:bg-blue-950/40 border border-blue-100/60 dark:border-blue-900/30 text-[#0220A4] text-[11px] font-bold uppercase tracking-wider">
-              <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-              </svg>
-              แยกตามหมวดหมู่สินค้า
-            </span>
-            <h3 class="text-base md:text-lg font-bold text-slate-800 dark:text-slate-100 mt-2">เลือกประเภทสินค้าที่ต้องการ</h3>
-          </div>
-
-          <!-- Flex wrap centered container -->
-          <div class="flex flex-wrap gap-3.5 justify-center">
+            <!-- Eyebrow Pill -->
+            <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 backdrop-blur-md">
+              <div class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></div>
+              <span class="text-emerald-400 text-[11px] font-bold tracking-wider uppercase">
+                {{ activeCategory === 'ทุกหมวดหมู่' ? 'PRODUCT CATALOG' : `หมวดหมู่สินค้า • ${activeCategoryProductCount} รายการ` }}
+              </span>
+            </div>
             
-            <!-- ทุกหมวดหมู่ (All Categories) Card -->
-            <div 
-              @click="setCategory('ทุกหมวดหมู่')"
-              :class="[
-                'relative w-[calc(50%-0.5rem)] sm:w-36 md:w-40 lg:w-[155px] xl:w-[165px] h-28 md:h-32 rounded-3xl p-3.5 flex flex-col items-center justify-between cursor-pointer transition-all duration-300 select-none shadow-sm hover:shadow-lg hover:shadow-blue-500/5 hover:-translate-y-1',
-                activeCategory === 'ทุกหมวดหมู่'
-                  ? 'bg-gradient-to-br from-[#0220A4] to-[#FF9E00] text-white scale-[1.03] shadow-lg shadow-[#0220A4]/25 ring-2 ring-[#0220A4] ring-offset-2 dark:ring-offset-slate-950'
-                  : 'bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800/80 text-slate-800 dark:text-slate-200 hover:border-blue-300 dark:hover:border-blue-950/80'
-              ]"
-            >
-              <!-- Checkmark badge for active state -->
-              <div v-if="activeCategory === 'ทุกหมวดหมู่'" class="absolute -top-1.5 -right-1.5 bg-blue-600 border-2 border-white dark:border-slate-950 rounded-full p-1 text-white shadow z-10">
-                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
-                </svg>
-              </div>
-
-              <!-- Icon -->
-              <div class="w-10 h-10 rounded-full flex items-center justify-center shadow-inner mt-1 flex-shrink-0"
-                   :class="activeCategory === 'ทุกหมวดหมู่' ? 'bg-white/20 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-500'">
-                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-                </svg>
-              </div>
-
-              <!-- Text & Subtitle/badge -->
-              <div class="text-center w-full mb-1">
-                <span class="block text-xs font-extrabold" :class="activeCategory === 'ทุกหมวดหมู่' ? 'text-white' : 'text-slate-800 dark:text-slate-200'">
-                  ทุกหมวดหมู่
+            <!-- Main Headline -->
+            <h1 class="text-3xl sm:text-4xl lg:text-5xl font-black text-white leading-tight tracking-tight">
+              <template v-if="activeCategory === 'ทุกหมวดหมู่'">
+                คลังสินค้าและผลิตภัณฑ์พรีเมียม <br/>
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-300 to-teal-400">
+                  มาตรฐานความปลอดภัยระดับสากล
                 </span>
-                <span 
-                  class="inline-block mt-1 px-3 py-0.5 text-[10px] font-bold rounded-full"
-                  :class="activeCategory === 'ทุกหมวดหมู่' ? 'bg-white/20 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-500'"
-                >
-                  ทั้งหมด
+              </template>
+              <template v-else>
+                สินค้าหมวดหมู่ <br/>
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-300 to-teal-400">
+                  {{ activeCategory }}
                 </span>
-              </div>
+              </template>
+            </h1>
+            
+            <!-- Description -->
+            <p class="text-slate-300 text-sm sm:text-base leading-relaxed max-w-2xl font-light">
+              {{ activeCategoryData?.description || 'เลือกชมและสั่งซื้อโรงเก็บของสำเร็จรูปพรีเมียม โรงจอดรถ ตู้และกล่องเก็บของกลางแจ้ง และอุปกรณ์มาตรฐานอุตสาหกรรม พร้อมบริการจัดส่งและประกอบติดตั้งทั่วประเทศ' }}
+            </p>
+
+            <!-- Quick Action Buttons -->
+            <div class="flex flex-wrap items-center justify-center sm:justify-start gap-3 pt-2">
+              <router-link 
+                to="/quotation" 
+                class="inline-flex items-center justify-center gap-2 h-11 px-6 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-lg shadow-emerald-600/25 transition-all duration-200 active:scale-95"
+              >
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                </svg>
+                <span>ขอใบเสนอราคาด่วน</span>
+              </router-link>
+
+              <a 
+                :href="lineHref"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="inline-flex items-center justify-center gap-2 h-11 px-6 rounded-xl bg-white/10 hover:bg-white/15 text-white font-bold text-xs border border-white/15 backdrop-blur-sm transition-all duration-200 active:scale-95"
+              >
+                <svg class="w-4 h-4 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+                </svg>
+                <span>ปรึกษาผู้เชี่ยวชาญ</span>
+              </a>
             </div>
 
-            <!-- Dynamic Categories Cards -->
-            <div 
-              v-for="cat in categories.filter(c => c !== 'ทุกหมวดหมู่')"
-              :key="cat"
-              @click="setCategory(cat)"
-              :class="[
-                'relative w-[calc(50%-0.5rem)] sm:w-36 md:w-40 lg:w-[155px] xl:w-[165px] h-28 md:h-32 rounded-3xl p-3.5 flex flex-col items-center justify-between cursor-pointer transition-all duration-300 select-none shadow-sm hover:shadow-lg hover:shadow-blue-500/5 hover:-translate-y-1',
-                activeCategory === cat
-                  ? 'bg-gradient-to-br from-[#0220A4] to-[#FF9E00] text-white scale-[1.03] shadow-lg shadow-[#0220A4]/25 ring-2 ring-[#0220A4] ring-offset-2 dark:ring-offset-slate-950'
-                  : 'bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800/80 text-slate-800 dark:text-slate-200 hover:border-blue-300 dark:hover:border-blue-950/80'
-              ]"
-            >
-              <!-- Checkmark badge for active state -->
-              <div v-if="activeCategory === cat" class="absolute -top-1.5 -right-1.5 bg-blue-600 border-2 border-white dark:border-slate-950 rounded-full p-1 text-white shadow z-10">
-                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
-                </svg>
+          </div>
+
+          <!-- Right Column: Visual Feature Showcase & Stats Card -->
+          <div class="lg:col-span-5">
+            <div class="relative rounded-3xl overflow-hidden bg-gradient-to-br from-slate-900/90 to-slate-950/90 border border-white/10 shadow-2xl p-6 sm:p-7 backdrop-blur-md">
+              
+              <!-- Ambient card glow -->
+              <div class="absolute -top-12 -right-12 w-40 h-40 bg-emerald-500/15 rounded-full blur-3xl pointer-events-none"></div>
+
+              <!-- Top Visual / Badge Row -->
+              <div class="flex items-center justify-between gap-4 mb-6">
+                <div class="flex items-center gap-3">
+                  <div class="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
+                    <img 
+                      v-if="activeCategoryData?.icon_url" 
+                      :src="getOptimizedImageUrl(activeCategoryData.icon_url, 128)" 
+                      :alt="activeCategory" 
+                      class="w-6 h-6 object-contain"
+                      @error="onImageError"
+                    />
+                    <svg v-else class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                    </svg>
+                  </div>
+                  <div>
+                    <p class="text-[10px] font-bold text-emerald-400 uppercase tracking-widest leading-tight">หมวดหมู่</p>
+                    <h3 class="text-base font-bold text-white leading-snug truncate max-w-[180px]">{{ activeCategory }}</h3>
+                  </div>
+                </div>
+
+                <span class="px-3 py-1 rounded-full text-xs font-mono font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                  {{ activeCategoryProductCount }} รายการ
+                </span>
               </div>
 
-              <!-- Image Thumbnail -->
-              <div class="h-10 md:h-12 flex items-center justify-center mt-1 flex-shrink-0">
+              <!-- Category Cover Image (if present) -->
+              <div v-if="activeCategoryData?.image_url" class="relative aspect-[16/9] rounded-2xl overflow-hidden mb-6 border border-white/5 bg-slate-950">
                 <img 
-                  v-if="categoryDetails.find(c => c.name === cat)?.icon_url" 
-                  :src="getOptimizedImageUrl(categoryDetails.find(c => c.name === cat).icon_url, 128)" 
-                  :alt="cat" 
+                  :src="getOptimizedImageUrl(activeCategoryData.image_url, 600)" 
+                  :alt="activeCategory" 
+                  class="w-full h-full object-cover"
                   @error="onImageError"
-                  :class="[
-                    'max-h-full max-w-full object-contain hover:scale-110 transition-all duration-300',
-                    activeCategory === cat 
-                      ? 'brightness-100 opacity-100' 
-                      : 'brightness-0 opacity-50 dark:brightness-100 dark:opacity-80'
-                  ]"
                 />
-                <svg v-else class="w-7 h-7" :class="activeCategory === cat ? 'text-white' : 'text-slate-400'" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                </svg>
+                <div class="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent"></div>
               </div>
 
-              <!-- Text & Subtitle/badge -->
-              <div class="text-center w-full mb-1">
-                <span class="block text-[11px] md:text-xs font-extrabold truncate px-1" :class="activeCategory === cat ? 'text-white' : 'text-slate-800 dark:text-slate-200'">
-                  {{ cat }}
-                </span>
-                <span 
-                  class="inline-block mt-1 px-2.5 py-0.5 text-[9px] md:text-[10px] font-bold rounded-full"
-                  :class="activeCategory === cat ? 'bg-white/20 text-white' : 'bg-blue-50 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400'"
-                >
-                  {{ allProducts.filter(p => p.categories ? p.categories.includes(cat) : p.category === cat).length }} แบบ
-                </span>
+              <!-- 3-Column Stats Strip inside Card -->
+              <div class="grid grid-cols-3 gap-2 pt-2 border-t border-white/[0.08] text-center">
+                <div class="p-2.5 rounded-xl bg-white/[0.03]">
+                  <p class="text-lg sm:text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-300 font-mono">
+                    {{ activeCategoryProductCount }}
+                  </p>
+                  <p class="text-[10px] text-slate-400 font-medium mt-0.5">สินค้าในหมวด</p>
+                </div>
+                
+                <div class="p-2.5 rounded-xl bg-white/[0.03]">
+                  <p class="text-lg sm:text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-300 font-mono">
+                    {{ categories.length - 1 }}
+                  </p>
+                  <p class="text-[10px] text-slate-400 font-medium mt-0.5">หมวดหมู่รวม</p>
+                </div>
+
+                <div class="p-2.5 rounded-xl bg-white/[0.03]">
+                  <p class="text-lg sm:text-xl font-black text-emerald-400 font-mono">
+                    100%
+                  </p>
+                  <p class="text-[10px] text-slate-400 font-medium mt-0.5">รับประกันสินค้า</p>
+                </div>
               </div>
+
             </div>
+          </div>
 
+        </div>
+
+      </div>
+    </header>
+
+    <!-- =========================================================================
+         CATEGORY CARDS SELECTOR & SEARCH
+         ========================================================================= -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-10">
+      
+      <!-- Category Grid Cards -->
+      <div class="bg-white dark:bg-[#10141D] rounded-3xl p-6 sm:p-8 border border-slate-200/80 dark:border-white/[0.06] shadow-xl shadow-slate-900/5 dark:shadow-black/20 mb-10">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 pb-4 border-b border-slate-100 dark:border-white/[0.04]">
+          <div class="flex items-center gap-2.5">
+            <div class="w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
+              </svg>
+            </div>
+            <h3 class="text-base font-bold text-slate-900 dark:text-white">เลือกหมวดหมู่สินค้าที่ต้องการ</h3>
+          </div>
+
+          <!-- Search Bar -->
+          <div class="relative w-full sm:w-64">
+            <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+              <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+              </svg>
+            </span>
+            <input
+              v-model="searchQuery"
+              type="text"
+              placeholder="ค้นหาชื่อสินค้า, รหัส SKU..."
+              class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200/80 dark:border-white/[0.08] rounded-xl pl-9 pr-8 py-2 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all"
+            />
+            <button
+              v-if="searchQuery"
+              @click="searchQuery = ''"
+              class="absolute inset-y-0 right-0 pr-2.5 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-white"
+            >
+              <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Horizontal Scrollable / Flex Wrap Category Badges -->
+        <div class="flex flex-wrap gap-3">
+          <!-- All Categories Badge -->
+          <button
+            @click="setCategory('ทุกหมวดหมู่')"
+            :class="[
+              'px-4 py-2.5 rounded-2xl text-xs font-bold transition-all duration-200 flex items-center gap-2 border',
+              activeCategory === 'ทุกหมวดหมู่'
+                ? 'bg-emerald-600 text-white border-emerald-600 shadow-md shadow-emerald-600/25'
+                : 'bg-slate-50 dark:bg-slate-900 text-slate-700 dark:text-slate-300 border-slate-200/80 dark:border-white/[0.06] hover:bg-slate-100 dark:hover:bg-slate-800'
+            ]"
+          >
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
+            </svg>
+            <span>ทุกหมวดหมู่</span>
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-mono" :class="activeCategory === 'ทุกหมวดหมู่' ? 'bg-white/20 text-white' : 'bg-slate-200 dark:bg-slate-800 text-slate-500'">
+              {{ allProducts.length }}
+            </span>
+          </button>
+
+          <!-- Dynamic Category Badges -->
+          <button
+            v-for="cat in categories.filter(c => c !== 'ทุกหมวดหมู่')"
+            :key="cat"
+            @click="setCategory(cat)"
+            :class="[
+              'px-4 py-2.5 rounded-2xl text-xs font-bold transition-all duration-200 flex items-center gap-2 border',
+              activeCategory === cat
+                ? 'bg-emerald-600 text-white border-emerald-600 shadow-md shadow-emerald-600/25'
+                : 'bg-slate-50 dark:bg-slate-900 text-slate-700 dark:text-slate-300 border-slate-200/80 dark:border-white/[0.06] hover:bg-slate-100 dark:hover:bg-slate-800'
+            ]"
+          >
+            <span>{{ cat }}</span>
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-mono" :class="activeCategory === cat ? 'bg-white/20 text-white' : 'bg-slate-200 dark:bg-slate-800 text-slate-500'">
+              {{ allProducts.filter(p => p.categories ? p.categories.includes(cat) : p.category === cat).length }}
+            </span>
+          </button>
+        </div>
+      </div>
+
+      <!-- =========================================================================
+           PRODUCTS LIST / GRID
+           ========================================================================= -->
+      
+      <!-- Loading State -->
+      <div v-if="loading" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+        <div v-for="i in 6" :key="'skel-'+i" class="bg-white dark:bg-[#10141D] rounded-3xl overflow-hidden border border-slate-200/80 dark:border-white/[0.06] shadow-sm animate-pulse flex flex-col">
+          <div class="aspect-square bg-slate-200 dark:bg-slate-800"></div>
+          <div class="p-6 space-y-4 flex-1 flex flex-col justify-between">
+            <div class="space-y-2.5">
+              <div class="h-4 bg-slate-200 dark:bg-slate-800 rounded w-3/4"></div>
+              <div class="h-3 bg-slate-200 dark:bg-slate-800 rounded w-1/2"></div>
+            </div>
+            <div class="h-5 bg-slate-200 dark:bg-slate-800 rounded w-1/3"></div>
           </div>
         </div>
       </div>
 
-      <!-- Loading Skeleton (3 columns on desktop) -->
-      <div v-if="loading" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-        <div v-for="i in 8" :key="'skeleton-' + i" class="bg-white dark:bg-[#111827] rounded-3xl overflow-hidden border border-gray-100 dark:border-gray-800 flex flex-col h-full animate-pulse">
-          <div class="aspect-square bg-gray-200 dark:bg-gray-800"></div>
-          <div class="p-6 flex flex-col flex-grow">
-            <div class="h-5 bg-gray-200 dark:bg-gray-800 rounded-md w-3/4 mb-3"></div>
-            <div class="h-3 bg-gray-200 dark:bg-gray-800 rounded-md w-1/2 mb-6"></div>
-            <div class="mt-auto flex justify-between items-end pt-4 border-t border-gray-50 dark:border-gray-800">
-              <div>
-                <div class="h-3 bg-gray-200 dark:bg-gray-800 rounded-md w-12 mb-2"></div>
-                <div class="h-6 bg-gray-200 dark:bg-gray-800 rounded-md w-24"></div>
-              </div>
-              <div class="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-800"></div>
-            </div>
-          </div>
+      <!-- Empty State -->
+      <div v-else-if="filteredProducts.length === 0" class="text-center py-20 bg-white dark:bg-[#10141D] border border-slate-200/80 dark:border-white/[0.06] rounded-3xl p-8 max-w-lg mx-auto shadow-sm">
+        <div class="w-14 h-14 rounded-2xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mx-auto mb-4">
+          <svg class="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+          </svg>
         </div>
+        <h3 class="text-base font-bold text-slate-800 dark:text-slate-200 mb-1">ไม่พบสินค้าที่คุณค้นหา</h3>
+        <p class="text-xs text-slate-500 dark:text-slate-400 mb-6 font-light">ลองเปลี่ยนคำค้นหาหรือเลือกหมวดหมู่อื่นเพื่อดูสินค้า</p>
+        <button
+          @click="setCategory('ทุกหมวดหมู่'); searchQuery = ''"
+          class="h-10 px-6 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl transition-all"
+        >
+          แสดงสินค้าทั้งหมด
+        </button>
       </div>
 
-      <!-- State: No Results -->
-      <div v-else-if="filteredProducts.length === 0" class="py-20 text-center">
-         <div class="mb-4 text-gray-300 dark:text-gray-700"><svg class="w-16 h-16 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg></div>
-         <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">ไม่พบสินค้าที่คุณค้นหา</h3>
-         <p class="text-gray-500 dark:text-gray-400 mb-6">ลองเปลี่ยนคำค้นหาหรือเลือกหมวดหมู่ใหม่อีกครั้ง</p>
-         <button @click="setCategory('ทุกหมวดหมู่')" class="text-blue-600 dark:text-blue-500 font-bold hover:underline">ดูสินค้าทั้งหมด</button>
-      </div>
-
-      <!-- Grouped Products -->
+      <!-- Grouped Products Grid (Using existing ProductCard component untouched) -->
       <div v-else class="space-y-16">
         <div v-for="group in groupedDisplayedProducts" :key="group.category" class="space-y-6">
-          <!-- Category Header -->
-          <div v-if="activeCategory === 'ทุกหมวดหมู่'" class="flex items-center gap-4 pb-4 border-b border-gray-100 dark:border-gray-800">
-             <h2 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">{{ group.category }}</h2>
-             <span class="px-3 py-1 text-sm font-medium bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400 rounded-full">
-              {{ allProducts.filter(p => p.categories ? p.categories.includes(group.category) : p.category === group.category).length }} รายการ
-             </span>
+          <!-- Category Section Header -->
+          <div class="flex items-center justify-between pb-4 border-b border-slate-200/80 dark:border-white/[0.06]">
+            <div class="flex items-center gap-3">
+              <span class="w-1.5 h-6 bg-emerald-500 rounded-full"></span>
+              <h2 class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white">{{ group.category }}</h2>
+            </div>
+            <span class="text-xs font-bold text-slate-500 dark:text-slate-400 px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-800 font-mono">
+              {{ group.products.length }} รายการ
+            </span>
           </div>
 
-          <!-- Products Grid (3 items per row on desktop) -->
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+          <!-- Products Grid (Using original ProductCard component untouched) -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
             <ProductCard 
               v-for="product in group.products" 
               :key="product.id"
@@ -655,36 +637,76 @@ onUnmounted(() => {
         </div>
       </div>
 
-      <!-- Infinite Scroll Trigger -->
+      <!-- Infinite Scroll Trigger / End Notice -->
       <div v-if="visibleCount < filteredProducts.length" ref="loadMoreTrigger" class="h-20 flex flex-col items-center justify-center mt-12 gap-3 opacity-70">
-        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
-        <span class="text-sm text-gray-500 font-medium">กำลังโหลดเพิ่ม...</span>
+        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-500"></div>
+        <span class="text-xs text-slate-500 font-medium">กำลังโหลดสินค้าเพิ่มเติม...</span>
       </div>
-      <div v-else-if="filteredProducts.length > 0" class="mt-16 text-center pb-8">
-        <div class="inline-flex items-center justify-center gap-2 px-4 py-2 bg-gray-50 dark:bg-gray-800/50 rounded-full text-sm text-gray-400 dark:text-gray-500 border border-gray-100 dark:border-gray-800">
-          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-          แสดงสินค้าครบทั้งหมด {{ filteredProducts.length }} รายการ
+      <div v-else-if="filteredProducts.length > 0" class="mt-16 text-center">
+        <div class="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-white dark:bg-[#10141D] rounded-full text-xs text-slate-500 dark:text-slate-400 border border-slate-200/80 dark:border-white/[0.06] shadow-sm">
+          <svg class="w-4 h-4 text-emerald-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+          </svg>
+          <span>แสดงสินค้าครบทั้งหมด {{ filteredProducts.length }} รายการแล้ว</span>
         </div>
       </div>
 
     </div>
+
+    <!-- =========================================================================
+         CTA BANNER (Start Your Project)
+         ========================================================================= -->
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16">
+      <div class="rounded-3xl p-8 sm:p-12 lg:p-14 bg-gradient-to-br from-slate-900 via-slate-900 to-slate-950 text-white border border-white/[0.08] shadow-2xl relative overflow-hidden">
+        
+        <!-- Ambient Glows -->
+        <div class="absolute -top-20 -right-20 w-80 h-80 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
+        
+        <div class="relative z-10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8">
+          <div class="max-w-2xl">
+            <div class="inline-flex items-center gap-2 mb-3.5 px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-[11px] font-bold tracking-wider uppercase">
+              <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+              </svg>
+              <span>NEED CUSTOM SIZING?</span>
+            </div>
+
+            <h2 class="text-2xl sm:text-3xl lg:text-4xl font-black text-white tracking-tight leading-tight mb-3">
+              ต้องการขนาดพิเศษ หรือสั่งผลิตตามพื้นที่?
+            </h2>
+            <p class="text-xs sm:text-sm text-slate-400 leading-relaxed font-light">
+              ส่งแบบร่าง ขนาดพื้นที่ หรือติดต่อทีมวิศวกรฝ่ายขาย เพื่อประเมินราคาและรับข้อเสนอพิเศษสำหรับโครงการของคุณ
+            </p>
+          </div>
+
+          <!-- Standard CTA Buttons -->
+          <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 shrink-0">
+            <router-link 
+              to="/quotation" 
+              class="inline-flex items-center justify-center gap-2.5 h-12 px-6 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm shadow-lg shadow-emerald-600/25 transition-all duration-200 active:scale-95 min-w-[160px]"
+            >
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+              </svg>
+              <span>ขอใบเสนอราคา</span>
+            </router-link>
+
+            <a 
+              :href="lineHref"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="inline-flex items-center justify-center gap-2.5 h-12 px-6 rounded-xl bg-[#06C755] hover:bg-[#05B34C] text-white font-bold text-sm shadow-lg shadow-[#06C755]/25 transition-all duration-200 active:scale-95 min-w-[160px]"
+            >
+              <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M24 10.304c0-5.369-5.383-9.738-12-9.738-6.616 0-12 4.369-12 9.738 0 4.814 3.966 8.887 9.539 9.613.385.082.906.262 1.042.6.12.3.05.748.024 1.036l-.16 1.94c-.039.232-.178 1.066.938.595 1.114-.47 6.012-3.542 8.441-6.234 2.802-3.09 4.176-5.834 4.176-7.55z"/>
+              </svg>
+              <span>ปรึกษาผ่าน LINE</span>
+            </a>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
   </div>
 </template>
-
-<style scoped>
-/* Hide scrollbar for horizontal scroll on mobile */
-.scrollbar-hide::-webkit-scrollbar {
-    display: none;
-}
-.scrollbar-hide {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-}
-@keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-8px); }
-}
-.animate-float {
-  animation: float 4s ease-in-out infinite;
-}
-</style>

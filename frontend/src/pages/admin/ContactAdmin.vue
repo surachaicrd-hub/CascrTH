@@ -16,8 +16,39 @@ const form = ref({
   contact_tiktok_url: '',
   contact_youtube_url: '',
   contact_map_embed: '',
-  contact_working_hours: ''
+  contact_working_hours: '',
+  contact_hero_bg: ''
 })
+
+const uploadingHeroBg = ref(false)
+
+const handleHeroBgUpload = async (event) => {
+  const file = event.target.files[0]
+  if (!file) return
+
+  const formData = new FormData()
+  formData.append('image', file)
+
+  uploadingHeroBg.value = true
+  try {
+    const res = await apiFetch('/api/upload', {
+      method: 'POST',
+      body: formData
+    })
+    const data = await res.json()
+    if (data.success) {
+      form.value.contact_hero_bg = data.url
+      showToast('อัปโหลดรูปภาพส่วนหัวสำเร็จ', 'success')
+    } else {
+      showToast(data.error || 'ไม่สามารถอัปโหลดรูปภาพได้', 'error')
+    }
+  } catch (err) {
+    showToast('เกิดข้อผิดพลาดในการเชื่อมต่อ', 'error')
+  } finally {
+    uploadingHeroBg.value = false
+    event.target.value = ''
+  }
+}
 
 // Dynamic lists for multi-entry contact info
 const phones = ref([{ name: '', value: '' }])
@@ -110,6 +141,75 @@ onMounted(() => {
 
     <div v-else class="w-full">
       <form @submit.prevent="saveSettings" class="space-y-6">
+
+        <!-- Hero Header Background -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+          <div class="p-6 border-b border-gray-100 flex items-center justify-between">
+            <h2 class="text-lg font-bold text-gray-900 flex items-center gap-2">
+              <svg class="w-5 h-5 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+              </svg>
+              ภาพพื้นหลังส่วนหัว (Hero Header Background)
+            </h2>
+            <span class="text-xs text-gray-400">ขนาดแนะนำ 1920 × 600 px (16:9)</span>
+          </div>
+          <div class="p-6">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
+              <div class="relative h-36 rounded-xl overflow-hidden bg-slate-950 border border-slate-800 flex items-center justify-center shadow-inner">
+                <img 
+                  v-if="form.contact_hero_bg" 
+                  :src="form.contact_hero_bg" 
+                  class="absolute inset-0 w-full h-full object-cover opacity-60 mix-blend-luminosity" 
+                  alt="Contact Hero Preview"
+                />
+                <img 
+                  v-else 
+                  src="https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=1920" 
+                  class="absolute inset-0 w-full h-full object-cover opacity-40 mix-blend-luminosity" 
+                  alt="Default Contact Hero"
+                />
+                <div class="absolute inset-0 bg-gradient-to-t from-[#070A0F] via-[#070A0F]/60 to-[#070A0F]/80"></div>
+                <div class="relative z-10 text-center px-4">
+                  <span class="text-[10px] font-bold text-indigo-400 uppercase tracking-widest block">CONTACT US</span>
+                  <p class="text-xs font-bold text-white mt-1">ติดต่อเรา / ฝ่ายบริการลูกค้า</p>
+                </div>
+              </div>
+
+              <div class="md:col-span-2 space-y-3">
+                <div class="flex items-center gap-3">
+                  <label class="flex-1">
+                    <input 
+                      type="file" 
+                      accept="image/*" 
+                      class="hidden" 
+                      @change="handleHeroBgUpload($event)" 
+                      :disabled="uploadingHeroBg"
+                    />
+                    <span class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-50 text-indigo-700 hover:bg-indigo-100 text-xs font-bold cursor-pointer transition-colors border border-indigo-200">
+                      <svg v-if="uploadingHeroBg" class="w-4 h-4 animate-spin text-indigo-600" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                      <svg v-else class="w-4 h-4 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                      <span>{{ uploadingHeroBg ? 'กำลังอัปโหลด...' : 'เลือกรูปภาพใหม่' }}</span>
+                    </span>
+                  </label>
+                  <button 
+                    v-if="form.contact_hero_bg" 
+                    type="button" 
+                    @click="form.contact_hero_bg = ''" 
+                    class="px-3.5 py-2.5 rounded-xl border border-rose-200 text-rose-600 hover:bg-rose-50 text-xs font-bold transition-colors"
+                  >
+                    รีเซ็ต
+                  </button>
+                </div>
+                <input 
+                  v-model="form.contact_hero_bg" 
+                  type="text" 
+                  placeholder="หรือวาง URL รูปภาพ (https://...)" 
+                  class="w-full border border-gray-300 rounded-xl px-3.5 py-2 text-xs text-gray-700 font-mono focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
 
         <!-- Company Info -->
         <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">

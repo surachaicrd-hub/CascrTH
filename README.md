@@ -1,6 +1,6 @@
-# Morespace - Premium Storage Shed eCommerce & AI-Powered CMS Platform
+# Premium Storage Shed eCommerce & AI-Powered CMS Platform
 
-Morespace เป็นแพลตฟอร์มระบบจัดการเนื้อหา (CMS) และร้านค้าออนไลน์ (eCommerce) แบบครบวงจร พัฒนาขึ้นสำหรับธุรกิจจัดจำหน่ายบ้านเก็บของสำเร็จรูป ตู้เก็บของกลางแจ้ง และโกดังสำเร็จรูป โดยมีจุดเด่นคือการผสานการทำงานร่วมกับ **Google Gemini AI** สำหรับระบบช่วยเขียนบทความและวิเคราะห์ข้อมูลเพื่อทำ SEO/GEO (Generative Engine Optimization) รวมถึงแชตบอตตอบคำถามลูกค้าผ่าน LINE Messaging API และหน้าเว็บ
+แพลตฟอร์มระบบจัดการเนื้อหา (CMS) และร้านค้าออนไลน์ (eCommerce) แบบครบวงจร พัฒนาขึ้นสำหรับธุรกิจจัดจำหน่ายบ้านเก็บของสำเร็จรูป ตู้เก็บของกลางแจ้ง และโกดังสำเร็จรูป โดยมีจุดเด่นคือการผสานการทำงานร่วมกับ **Google Gemini AI** สำหรับระบบช่วยเขียนบทความและวิเคราะห์ข้อมูลเพื่อทำ SEO/GEO (Generative Engine Optimization) รวมถึงแชตบอตตอบคำถามลูกค้าผ่าน LINE Messaging API และหน้าเว็บ
 
 ---
 
@@ -185,13 +185,13 @@ pm2 start ecosystem.config.js --env production
 pm2 status
 
 # ดูบันทึก Logs การทำงานแบบ Real-time
-pm2 logs morespace-api
+pm2 logs cascr-api
 
 # หยุดการทำงานชั่วคราว
-pm2 stop morespace-api
+pm2 stop cascr-api
 
 # รีสตาร์ตระบบหลังอัปเดตโค้ด
-pm2 restart morespace-api
+pm2 restart cascr-api
 ```
 
 ---
@@ -203,4 +203,4 @@ pm2 restart morespace-api
 - **API Model Fallback:** หากคุณเจอปัญหา Quota เกินกำหนด (Error 503) ในโมดูลหลัก ระบบจะทำการสับเปลี่ยนไปใช้งานคีย์สำรอง หรือโมดูล `gemini-2.5-pro` ในโมเดลถัดไปของลิสต์อัตโนมัติ
 
 ---
-*จัดทำขึ้นโดยทีมพัฒนาของบริษัท ซีอาร์ ดิสทริบิวชั่น จำกัด (ผู้ดูแลแบรนด์ Morespace)*
+*จัดทำขึ้นโดยทีมพัฒนาระบบ eCommerce & AI Platform*

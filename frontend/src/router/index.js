@@ -116,11 +116,6 @@ const routes = [
         component: () => import('../pages/Compare.vue'),
         meta: { title: 'เปรียบเทียบสินค้า' }
     },
-    {
-        path: '/space-calculator',
-        component: () => import('../pages/SpaceCalculator.vue'),
-        meta: { title: 'ประเมินพื้นที่และราคา' }
-    },
 
     // Legal & Utilities
     {
@@ -130,6 +125,7 @@ const routes = [
     },
     {
         path: '/terms',
+        alias: '/terms-of-service',
         component: () => import('../pages/TermsOfService.vue'),
         meta: { title: 'เงื่อนไขการให้บริการ' }
     },
@@ -142,6 +138,11 @@ const routes = [
         path: '/warranty',
         component: () => import('../pages/WarrantyPolicy.vue'),
         meta: { title: 'นโยบายการรับประกัน' }
+    },
+    {
+        path: '/sitemap',
+        component: () => import('../pages/Sitemap.vue'),
+        meta: { title: 'แผนผังเว็บไซต์' }
     },
     {
         path: '/blog',

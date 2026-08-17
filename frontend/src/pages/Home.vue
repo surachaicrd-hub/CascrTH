@@ -26,10 +26,10 @@ const heroAiMessages = ref([])
 const isHeroAiTyping = ref(false)
 
 const heroAiSuggestions = [
-  { text: 'แนะนำสินค้าที่น่าสนใจ', reply: 'เรามีสินค้าหลากหลายรุ่นที่ตอบโจทย์ทุกการใช้งานและพื้นที่ของคุณ\n\nคุณสนใจสินค้าสไตล์ไหนหรือขนาดใดเป็นพิเศษไหมครับ?' },
-  { text: 'คำนวณราคาเบื้องต้น', reply: 'เรามีโปรแกรมคำนวณพื้นที่และราคาเบื้องต้นให้คุณเลือกขนาดที่เหมาะสมได้ทันที พร้อมบริการจัดส่งและติดตั้งฟรีทั่วประเทศครับ!' },
-  { text: 'เปรียบเทียบประเภทสินค้า', reply: 'เรามีสินค้าหลายเกรดวัสดุคุณภาพสูง ทนทาน ทนแดดทนฝน ผ่านมาตรฐานการทดสอบระดับสากล พร้อมรับประกันคุณภาพ\n\nต้องการทราบรายละเอียดของวัสดุใดเพิ่มเติมไหมครับ?' },
-  { text: 'สอบถามการจัดส่งและติดตั้ง', reply: 'เรามีบริการจัดส่งและประกอบติดตั้งโดยทีมช่างผู้เชี่ยวชาญทั่วประเทศครับ โดยสินค้าจะจัดส่งถึงหน้าบ้านและประกอบตามมาตรฐานอย่างมืออาชีพครับ' }
+  { text: 'แนะนำเครื่องตัดปอกสายไฟ KODERA', reply: 'เรามีเครื่องตัดปอกสายไฟ KODERA ครบทุกซีรีส์ ทั้ง C371G, C370G, C300A และ C371AF ที่ตอบสนองความเร็วและความแม่นยำสูงระดับมาตรฐานญี่ปุ่นครับ\n\nต้องการให้แนะนำรุ่นสำหรับประเภทสายไฟใดเป็นพิเศษไหมครับ?' },
+  { text: 'ขอใบเสนอราคาด่วน', reply: 'คุณสามารถคลิกเมนู "ขอใบเสนอราคา" หรือส่งข้อมูลสายไฟตัวอย่างเพื่อให้ฝ่ายวิศวกรรมประเมินราคาและสเปกอย่างเป็นทางการได้ฟรีครับ!' },
+  { text: 'เปรียบเทียบสเปกแต่ละรุ่น', reply: 'เครื่องจักร KODERA มีความสามารถตัดปอกสายไฟขนาดตั้งแต่ 0.08 ถึง 38 mm² มีระบบใบมีดตัด 4 ด้านและการปอกสายแบบ Step Stripping\n\nสามารถเปิดดูหน้า "เปรียบเทียบสเปก" เพื่อดูรายละเอียดได้ทันทีครับ' },
+  { text: 'บริการติดตั้งและบำรุงรักษา', reply: 'เรามีทีมวิศวกรและช่างผู้เชี่ยวชาญพร้อมส่งมอบ ติดตั้ง และฝึกอบรมการใช้งานถึงโรงงาน พร้อมบริการหลังการขายและอะไหล่แท้ครบวงจรครับ' }
 ]
 
 const sendHeroAiMessage = (suggestion) => {
@@ -303,9 +303,9 @@ const loadHomepageSettings = async () => {
             ctaText: safeString(slide.ctaText, 'ดูสินค้าทั้งหมด'),
             ctaLink: safeString(slide.ctaLink, '/products'),
             ctaAction: safeString(slide.ctaAction, 'view_products'),
-            ctaText2: safeString(slide.ctaText2, 'คำนวณพื้นที่'),
-            ctaLink2: safeString(slide.ctaLink2, '/space-calculator'),
-            ctaAction2: safeString(slide.ctaAction2, 'space_calc'),
+            ctaText2: safeString(slide.ctaText2, 'ขอใบเสนอราคา'),
+            ctaLink2: safeString(slide.ctaLink2, '/quotation'),
+            ctaAction2: safeString(slide.ctaAction2, 'quotation'),
             badgeHighlight: safeString(slide.badgeHighlight),
             badgeHighlightIcon: safeString(slide.badgeHighlightIcon, 'trophy'),
             badgeHighlightLabel: safeString(slide.badgeHighlightLabel, 'จุดเด่น'),
@@ -434,31 +434,31 @@ const loadHomepageSettings = async () => {
     if (slides.value.length === 0) {
       slides.value = [
         {
-          image: '/images/home/hero-slide-1.webp',
-          tag: 'นวัตกรรมพื้นที่ระดับพรีเมียม',
-          titleLine1: 'เนรมิตพื้นที่ของคุณ',
-          titleLine2: 'ด้วยคุณภาพและดีไซน์ระดับพรีเมียม',
-          desc: 'ตอบสนองความต้องการด้านการจัดสรรพื้นที่ ยกระดับภาพลักษณ์และช่วยจัดระเบียบให้พื้นที่ของคุณ',
-          ctaText: 'ดูสินค้าทั้งหมด',
+          image: '/uploads/image-1786598541729-737143997.webp',
+          tag: 'KODERA JAPAN TECHNOLOGY',
+          titleLine1: 'เครื่องตัดปอกสายไฟอัตโนมัติ',
+          titleLine2: 'KODERA CASTING Series มาตรฐานญี่ปุ่น',
+          desc: 'เพิ่มประสิทธิภาพและผลผลิตสูงสุดในไลน์ผลิตสายไฟ ด้วยความเร็วสูงสุด 7,100 ชิ้น/ชม. ความแม่นยำระดับ ±0.1mm รองรับสายไฟ AWG#7 ถึง AWG#36',
+          ctaText: 'เลือกชมเครื่องตัดปอกสายไฟ',
           ctaLink: '/products',
           ctaAction: 'view_products',
-          ctaText2: 'คำนวณพื้นที่',
-          ctaLink2: '/space-calculator',
-          ctaAction2: 'space_calc',
-          badgeHighlight: 'เกรดพรีเมียม',
+          ctaText2: 'ขอใบเสนอราคาด่วน',
+          ctaLink2: '/quotation',
+          ctaAction2: 'quotation',
+          badgeHighlight: 'มาตรฐานญี่ปุ่น 100%',
           badgeHighlightIcon: 'trophy',
-          badgeFeature: 'รับประกัน 10 ปี',
+          badgeFeature: 'ความแม่นยำ ±0.1mm',
           badgeFeatureIcon: 'wrench',
-          badgeSpecial: 'ดีไซน์สไตล์โมเดิร์น',
-          badgeSpecialIcon: 'house'
+          badgeSpecial: 'รับประกันศูนย์ไทย',
+          badgeSpecialIcon: 'shield'
         }
       ]
     }
     if (heroFeatureBadges.value.length === 0) {
       heroFeatureBadges.value = [
-        { icon: 'shield', title: 'วัสดุคุณภาพ', desc: 'แข็งแรง ทนทาน' },
-        { icon: 'sun', title: 'กันแดด กันฝน', desc: 'ทนทุกสภาพอากาศ' },
-        { icon: 'wrench', title: 'ประกอบง่าย', desc: 'รวดเร็ว ไม่ยุ่งยาก' }
+        { icon: 'shield', title: 'มาตรฐานญี่ปุ่น 100%', desc: 'แบรนด์ KODERA แท้ นำเข้าโดยตรง' },
+        { icon: 'trophy', title: 'ความแม่นยำ ±0.1mm', desc: 'ระบบขับเคลื่อน Stepping Motor ความเร็วสูง' },
+        { icon: 'wrench', title: 'บริการติดตั้ง & อะไหล่แท้', desc: 'ทีมวิศวกรดูแลและมีอะไหล่พร้อมส่ง' }
       ]
     }
     if (stats.value.length === 0) {
@@ -1574,260 +1574,383 @@ onUnmounted(() => {
     <template v-else>
     <div class="dark text-white">
       <section ref="heroRef" @mousemove="onMouseMove" @mouseenter="isHoveringHero = true" @mouseleave="mouse.x = 0; mouse.y = 0; isHoveringHero = false" 
-        class="relative h-screen min-h-[600px] flex items-center overflow-hidden bg-[#0a0c10]"
-        style="background: linear-gradient(135deg, #080A0F, #0C0E14 50%, #121622);"
+        class="relative min-h-[760px] lg:h-screen lg:max-h-[960px] flex items-center overflow-hidden bg-gradient-to-b from-[#070C18] via-[#0A1226] to-[#080E1E]"
       >
-      <!-- Orange accent line at top -->
-      <div class="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-[#0220A4] via-[#2B4FD4] to-[#0220A4] z-30"></div>
+      <!-- High-Tech Ambient Studio Lighting & Grid -->
+      <div class="absolute -top-32 left-1/4 w-[650px] h-[650px] bg-blue-600/15 rounded-full blur-[170px] pointer-events-none"></div>
+      <div class="absolute top-1/3 -right-20 w-[600px] h-[600px] bg-cyan-500/12 rounded-full blur-[160px] pointer-events-none"></div>
+      <div class="absolute -bottom-20 left-10 w-[500px] h-[500px] bg-indigo-600/10 rounded-full blur-[150px] pointer-events-none"></div>
 
-      <!-- Full-Bleed Background Slideshow -->
-      <div class="absolute inset-0 z-0 overflow-hidden select-none pointer-events-none">
-        <div v-for="(slide, idx) in slides" :key="idx"
-          class="absolute inset-0 transition-all duration-[1500ms] ease-in-out"
-          :class="currentSlide === idx ? 'opacity-100 scale-100' : 'opacity-0 scale-105 pointer-events-none'"
-        >
-          <img 
-            :src="getOptimizedImageUrl(slide.image, 1200)" 
-            :alt="slide.tag || 'Background'"
-            class="w-full h-full object-cover object-center"
-            @error="(e) => { 
-              onImageError(e); 
-              if (e.target.src.includes('placeholder') || e.target.dataset.fallbackAttempted === 'original') {
-                e.target.src = `/images/home/hero-slide-${(idx % 3) + 1}.webp`;
-              }
-            }"
-          />
-        </div>
+      <!-- Precision Tech Dot Grid -->
+      <div class="absolute inset-0 opacity-[0.04] pointer-events-none"
+        style="background-image: radial-gradient(circle, rgba(56, 189, 248, 0.8) 1px, transparent 1px); background-size: 32px 32px;">
       </div>
 
-      <!-- Mobile Overlay — full dark cover on mobile for maximum text readability -->
-      <div class="absolute inset-0 z-10 pointer-events-none md:hidden bg-gradient-to-b from-[#080a0f]/90 via-[#080a0f]/75 to-[#080a0f]/85"></div>
-      <!-- Desktop Overlay — strong left for text readability, clear on right -->
-      <div class="absolute inset-0 z-10 pointer-events-none hidden md:block" style="background: linear-gradient(90deg, rgba(8,10,15,0.96) 0%, rgba(8,10,15,0.85) 35%, rgba(8,10,15,0.2) 55%, rgba(0,0,0,0) 75%);"></div>
-      <!-- Bottom fade -->
-      <div class="absolute bottom-0 left-0 right-0 h-24 z-10 pointer-events-none bg-gradient-to-t from-[#0c0e14] via-[#0c0e14]/80 to-transparent"></div>
+      <!-- Top Header Accent Line -->
+      <div class="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-cyan-400/50 to-transparent z-30"></div>
 
-      <!-- Main Content Container -->
-      <div class="relative z-20 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 md:pt-32 pb-24 md:pb-40">
-        <div class="max-w-2xl">
-          <transition name="hero-stagger" mode="out-in">
-            <div :key="currentSlide" class="flex flex-col text-left">
-              <!-- Brand Tag -->
-              <div class="hero-stagger-1 inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-[#0c0e14]/65 border border-[#0220A4]/30 mb-4 w-fit select-none backdrop-blur-md shadow-inner">
-                <!-- Gold Star (No circle background, just clean gold star) -->
-                <svg class="w-4 h-4 text-[#0220A4] shrink-0 fill-current" viewBox="0 0 24 24">
-                  <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
-                </svg>
-                <span class="text-xs font-black tracking-wider text-[#0220A4] uppercase font-['IBM_Plex_Sans_Thai']">{{ slides[currentSlide]?.tag || 'PREMIUM STORAGE SHED' }}</span>
-              </div>
-              
-              <!-- Heading (compact & solid orange) -->
-              <h1 class="hero-stagger-2 hero-heading text-[1.85rem] xs:text-[2.2rem] sm:text-[2.6rem] md:text-[3.2rem] lg:text-[3.8rem] font-black text-white tracking-normal leading-[1.15] mb-4 font-['IBM_Plex_Sans_Thai'] break-words">
-                <span class="block tracking-normal" v-html="formatThaiText(slides[currentSlide]?.titleLine1 || 'เปลี่ยนพื้นที่หลังบ้านให้หรูหรา')"></span>
-                <span class="text-[#0220A4] block mt-1 tracking-normal" v-html="formatThaiText(slides[currentSlide]?.titleLine2 || 'ด้วยห้องเก็บของพรีเมียมสไตล์อเมริกัน')"></span>
-              </h1>
-              
-              <!-- Description -->
-              <p class="hero-stagger-3 text-gray-300/90 text-sm md:text-[15px] font-normal leading-relaxed mb-6 max-w-lg">
-                {{ slides[currentSlide]?.desc || 'จัดระเบียบสิ่งของอย่างมีระดับ ด้วยดีไซน์มินิมอลที่แข็งแรง ทนทานทุกสภาพอากาศ' }}
-              </p>
-              
-              <!-- CTA Buttons -->
-              <div class="hero-stagger-4 flex flex-row flex-wrap items-center gap-4 mb-6">
-                <!-- Solid Blue CTA Button -->
-                <router-link :to="slides[currentSlide]?.ctaLink || '/products'" @click="trackCTA(slides[currentSlide]?.ctaAction || 'view_products')" 
-                  class="group relative inline-flex items-center justify-center px-7 py-3.5 text-sm font-bold tracking-wide text-white transition-all bg-[#01166F] hover:bg-[#011055] rounded-full overflow-hidden shadow-lg shadow-[#01166F]/30 hover:shadow-xl hover:shadow-[#01166F]/50 hover:scale-[1.03] active:scale-95 whitespace-nowrap duration-300"
-                >
-                  <span class="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out"></span>
-                  <span class="relative z-10">{{ slides[currentSlide]?.ctaText || 'เลือกชมรุ่นยอดนิยม' }}</span>
-                  <svg class="w-4 h-4 ml-2 transform group-hover:translate-x-1 transition-transform relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
-                  </svg>
-                </router-link>
+      <!-- Top Header Protection Gradient (Protects Navbar contrast while keeping hero stage bright) -->
+      <div class="absolute top-0 left-0 right-0 h-32 z-10 pointer-events-none bg-gradient-to-b from-[#070C18]/95 via-[#070C18]/60 to-transparent"></div>
 
-                <!-- Dark Translucent Secondary Button -->
-                <router-link v-if="slides[currentSlide]?.ctaLink2 && slides[currentSlide]?.ctaLink2 !== '/ai-consultant'" :to="slides[currentSlide]?.ctaLink2" @click="trackCTA(slides[currentSlide]?.ctaAction2 || 'click_secondary')" 
-                  class="group inline-flex items-center justify-center px-6 py-3.5 text-sm font-bold tracking-wide text-white bg-black/45 hover:bg-black/60 border border-white/10 hover:border-[#0220A4]/40 rounded-full shadow-[0_4px_20px_rgba(0,0,0,0.15)] hover:shadow-[0_4px_25px_rgba(2,32,164,0.15)] hover:scale-[1.03] active:scale-95 gap-2.5 backdrop-blur-md transition-all duration-300 whitespace-nowrap"
-                >
-                  <!-- Calculator / Action Icon -->
-                  <div class="w-5 h-5 rounded-full bg-[#0220A4]/10 border border-[#0220A4]/25 flex items-center justify-center shrink-0 p-0.5 group-hover:bg-[#0220A4]/20 transition-colors">
-                    <svg class="w-full h-full text-[#0220A4]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+      <!-- Main Enterprise Split Stage Container -->
+      <div class="relative z-20 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 sm:pt-28 md:pt-32 pb-24 sm:pb-28 lg:pb-36">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+          
+          <!-- ================= LEFT COLUMN: Value Proposition & Information Hierarchy ================= -->
+          <div class="lg:col-span-7 flex flex-col text-left">
+            <transition name="hero-stagger" mode="out-in">
+              <div :key="currentSlide" class="flex flex-col text-left">
+                
+                <!-- Category / Brand Tag Badge (Glowing Modern Pill) -->
+                <div class="hero-stagger-1 inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-white/[0.06] hover:bg-white/[0.12] border border-cyan-500/30 backdrop-blur-xl shadow-lg mb-4 w-fit select-none transition-all duration-300">
+                  <span class="flex h-2 w-2 relative">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-2 w-2 bg-cyan-400"></span>
+                  </span>
+                  <span class="text-xs font-bold tracking-wider text-cyan-300 uppercase">
+                    {{ slides[currentSlide]?.tag || 'KODERA JAPAN TECHNOLOGY' }}
+                  </span>
+                </div>
+                
+                <!-- Headline (Crisp, High Contrast, Radiant Gradient) -->
+                <h1 class="hero-stagger-2 hero-heading text-[2.2rem] xs:text-[2.6rem] sm:text-[3.2rem] md:text-[3.6rem] lg:text-[3.9rem] font-black text-white tracking-tight leading-[1.12] mb-4 font-['IBM_Plex_Sans_Thai'] break-words">
+                  <span class="block text-white drop-shadow-md" v-html="formatThaiText(slides[currentSlide]?.titleLine1 || 'เครื่องตัดปอกสายไฟอัตโนมัติ')"></span>
+                  <span class="block mt-1 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-cyan-300 to-teal-300 drop-shadow-md" v-html="formatThaiText(slides[currentSlide]?.titleLine2 || 'KODERA CASTING Series มาตรฐานญี่ปุ่น')"></span>
+                </h1>
+                
+                <!-- Description -->
+                <p class="hero-stagger-3 text-slate-300 text-sm sm:text-base md:text-lg font-light leading-relaxed mb-6 max-w-xl text-balance">
+                  {{ slides[currentSlide]?.desc || 'เพิ่มประสิทธิภาพและผลผลิตสูงสุดในไลน์ผลิตสายไฟ ด้วยความเร็วสูงสุด 7,100 ชิ้น/ชม. ความแม่นยำระดับ ±0.1mm รองรับสายไฟ AWG#7 ถึง AWG#36' }}
+                </p>
+
+                <!-- Core Capability Badges (What the machines do - Clear & Professional) -->
+                <div class="hero-stagger-3 flex flex-wrap items-center gap-2 sm:gap-2.5 mb-7">
+                  <template v-if="slides[currentSlide]?.capabilities && slides[currentSlide]?.capabilities.length > 0">
+                    <div v-for="(cap, capIdx) in slides[currentSlide].capabilities" :key="capIdx"
+                      class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-semibold backdrop-blur-md transition-all duration-300"
+                      :class="cap.icon === 'twist' ? 'bg-indigo-950/60 border-indigo-500/30 text-indigo-300' : (cap.icon === 'strip_mid' ? 'bg-teal-950/60 border-teal-500/30 text-teal-300' : (cap.icon === 'strip_end' ? 'bg-cyan-950/60 border-cyan-500/30 text-cyan-300' : 'bg-blue-950/60 border-blue-500/30 text-blue-300'))"
+                    >
+                      <svg v-if="cap.icon === 'twist'" class="w-3.5 h-3.5 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                      </svg>
+                      <svg v-else-if="cap.icon === 'strip_mid'" class="w-3.5 h-3.5 text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                      </svg>
+                      <svg v-else-if="cap.icon === 'strip_end'" class="w-3.5 h-3.5 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                      </svg>
+                      <svg v-else class="w-3.5 h-3.5 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M14.121 14.121L19 19m-7-7l7-7m-7 7l-2.879 2.879M12 12L9.121 9.121m0 5.758a3 3 0 10-4.243 4.243 3 3 0 004.243-4.243zm0-5.758a3 3 0 10-4.243-4.243 3 3 0 004.243 4.243z"/>
+                      </svg>
+                      <span>{{ cap.label }}</span>
+                    </div>
+                  </template>
+                  <template v-else>
+                    <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-950/60 border border-blue-500/30 text-blue-300 text-xs font-semibold backdrop-blur-md">
+                      <svg class="w-3.5 h-3.5 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M14.121 14.121L19 19m-7-7l7-7m-7 7l-2.879 2.879M12 12L9.121 9.121m0 5.758a3 3 0 10-4.243 4.243 3 3 0 004.243-4.243zm0-5.758a3 3 0 10-4.243-4.243 3 3 0 004.243 4.243z"/>
+                      </svg>
+                      <span>ตัดสายไฟ (Cut)</span>
+                    </div>
+                    <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-cyan-950/60 border border-cyan-500/30 text-cyan-300 text-xs font-semibold backdrop-blur-md">
+                      <svg class="w-3.5 h-3.5 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                      </svg>
+                      <span>ปอกหัว-ท้าย (Strip)</span>
+                    </div>
+                    <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-950/60 border border-indigo-500/30 text-indigo-300 text-xs font-semibold backdrop-blur-md">
+                      <svg class="w-3.5 h-3.5 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                      </svg>
+                      <span>ปั่นเกลียว (Twist)</span>
+                    </div>
+                    <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-teal-950/60 border border-teal-500/30 text-teal-300 text-xs font-semibold backdrop-blur-md">
+                      <svg class="w-3.5 h-3.5 text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                      </svg>
+                      <span>ย้ำเทอร์มินอล (Crimp)</span>
+                    </div>
+                  </template>
+                </div>
+                
+                <!-- CTA Action Buttons -->
+                <div class="hero-stagger-4 flex flex-row flex-wrap items-center gap-4 mb-6">
+                  <!-- Primary Glowing Button -->
+                  <router-link :to="slides[currentSlide]?.ctaLink || '/products'" @click="trackCTA(slides[currentSlide]?.ctaAction || 'view_products')" 
+                    class="group relative inline-flex items-center justify-center gap-3 px-8 py-4 text-sm font-bold tracking-wide text-white transition-all duration-300 bg-gradient-to-r from-[#0220A4] via-[#1D4ED8] to-[#2563EB] hover:from-[#1E40AF] hover:to-[#3B82F6] rounded-full shadow-xl shadow-blue-500/25 hover:shadow-blue-500/40 hover:scale-[1.03] active:scale-95 overflow-hidden whitespace-nowrap"
+                  >
+                    <span class="relative z-10">{{ slides[currentSlide]?.ctaText || 'เลือกชมเครื่องตัดปอกสายไฟ' }}</span>
+                    <svg class="w-4 h-4 transform group-hover:translate-x-1.5 transition-transform duration-300 relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
                     </svg>
-                  </div>
-                  <span>{{ slides[currentSlide]?.ctaText2 || 'คำนวณพื้นที่จัดเก็บ' }}</span>
-                </router-link>
+                    <span class="absolute inset-0 -translate-x-full group-hover:translate-x-full bg-gradient-to-r from-transparent via-white/25 to-transparent transition-transform duration-1000 ease-out"></span>
+                  </router-link>
+
+                  <!-- Frosted Glass Secondary Button -->
+                  <router-link :to="slides[currentSlide]?.ctaLink2 || '/quotation'" @click="trackCTA(slides[currentSlide]?.ctaAction2 || 'quotation')" 
+                    class="group inline-flex items-center justify-center gap-2.5 px-7 py-4 text-sm font-semibold tracking-wide text-slate-200 hover:text-white bg-white/[0.07] hover:bg-white/[0.14] border border-white/[0.15] hover:border-cyan-400/40 rounded-full shadow-lg backdrop-blur-xl hover:scale-[1.03] active:scale-95 transition-all duration-300 whitespace-nowrap"
+                  >
+                    <div class="w-6 h-6 rounded-lg bg-cyan-500/10 flex items-center justify-center text-cyan-400 group-hover:bg-cyan-500/20 group-hover:text-cyan-300 transition-colors">
+                      <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                      </svg>
+                    </div>
+                    <span>{{ slides[currentSlide]?.ctaText2 || 'ขอใบเสนอราคาด่วน' }}</span>
+                  </router-link>
+                </div>
+
+                <!-- Trust Micro-Bar -->
+                <div class="hero-stagger-4 flex items-center gap-4 text-xs text-slate-400 font-medium pt-2 border-t border-white/[0.08]">
+                  <span class="flex items-center gap-1.5">
+                    <svg class="w-4 h-4 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                    </svg>
+                    มาตรฐานญี่ปุ่น 100%
+                  </span>
+                  <span class="w-1 h-1 rounded-full bg-slate-600"></span>
+                  <span class="flex items-center gap-1.5">
+                    <svg class="w-4 h-4 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                    </svg>
+                    ความแม่นยำสูง ±0.1mm
+                  </span>
+                  <span class="w-1 h-1 rounded-full bg-slate-600 hidden sm:inline-block"></span>
+                  <span class="hidden sm:flex items-center gap-1.5">
+                    <svg class="w-4 h-4 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                    </svg>
+                    รับประกันศูนย์ไทย
+                  </span>
+                </div>
+
+              </div>
+            </transition>
+          </div>
+
+          <!-- ================= RIGHT COLUMN: 1:1 Full-Frame Product Studio Stage ================= -->
+          <div class="lg:col-span-5 relative flex items-center justify-center">
+            
+            <!-- 1:1 Aspect Ratio Precision Studio Stage Container -->
+            <div class="relative w-full max-w-[460px] sm:max-w-[500px] lg:max-w-[520px] aspect-square mx-auto flex items-center justify-center group">
+              
+              <!-- Ambient Backlight Glow -->
+              <div class="absolute -inset-4 bg-gradient-to-r from-blue-600/30 via-cyan-500/20 to-teal-500/20 rounded-[36px] blur-2xl opacity-75 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"></div>
+
+              <!-- Full-Frame 1:1 Image Canvas (Edge-to-Edge Image without inner margins) -->
+              <div class="relative w-full h-full rounded-3xl overflow-hidden border border-white/25 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.8)] bg-white flex items-center justify-center">
+                
+                <transition name="fade" mode="out-in">
+                  <img :key="currentSlide"
+                    :src="getOptimizedImageUrl(slides[currentSlide]?.image, 1200)" 
+                    :alt="slides[currentSlide]?.tag || 'KODERA Wire Processing Machine'"
+                    class="w-full h-full object-cover object-center group-hover:scale-105 transition-all duration-700 select-none"
+                    @error="(e) => { 
+                      onImageError(e); 
+                      if (e.target.src.includes('placeholder') || e.target.dataset.fallbackAttempted === 'original') {
+                        e.target.src = '/uploads/image-1786598541729-737143997.webp';
+                      }
+                    }"
+                  />
+                </transition>
+
               </div>
 
-              <!-- Mobile Feature Badges fallback (inline list below buttons) -->
-              <div v-if="heroFeatureBadges && heroFeatureBadges.length > 0" 
-                class="flex flex-col gap-2 mt-5 md:hidden"
+              <!-- Top-Right Floating Japan / Precision Badge -->
+              <div v-if="slides[currentSlide]?.badgeHighlight" 
+                class="absolute -top-3.5 -right-2 sm:-right-4 z-30 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-slate-900/95 border border-cyan-400/50 shadow-2xl backdrop-blur-xl text-white pointer-events-none transition-all duration-300"
               >
-                <div v-for="(badge, index) in heroFeatureBadges.slice(0, 3)" :key="index"
-                  class="flex items-center gap-3 p-3 rounded-xl bg-white/[0.04] border border-white/[0.08]"
-                >
-                  <div class="w-8 h-8 rounded-lg bg-[#0220A4]/10 flex items-center justify-center shrink-0">
-                    <svg class="w-4 h-4 text-[#0220A4]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                      <path v-if="badge.icon === 'sun'" stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-                      <path v-else-if="badge.icon === 'wrench'" stroke-linecap="round" stroke-linejoin="round" d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z" />
-                      <path v-else-if="badge.icon === 'lock'" stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                      <path v-else stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                    </svg>
-                  </div>
-                  <div class="text-left">
-                    <div class="text-xs font-bold text-white font-['IBM_Plex_Sans_Thai']">{{ badge.title }}</div>
-                    <div class="text-[10px] text-gray-400 font-normal mt-0.5 font-['IBM_Plex_Sans_Thai']">{{ badge.desc }}</div>
-                  </div>
+                <div class="w-5 h-5 rounded-full bg-cyan-500/20 text-cyan-300 flex items-center justify-center font-black text-[10px]">
+                  JP
+                </div>
+                <span class="text-xs font-bold text-cyan-300">
+                  {{ slides[currentSlide]?.badgeHighlight || 'มาตรฐานญี่ปุ่น 100%' }}
+                </span>
+              </div>
+
+              <!-- Bottom Floating Spec Ribbon -->
+              <div class="absolute -bottom-3 sm:-bottom-4 inset-x-4 sm:inset-x-8 z-30 py-2.5 px-4 rounded-2xl bg-slate-900/95 border border-blue-400/40 shadow-2xl backdrop-blur-xl flex items-center justify-around text-center pointer-events-none transition-all duration-300">
+                <!-- Spec 1 -->
+                <div class="flex items-center gap-1.5">
+                  <svg class="w-3.5 h-3.5 text-cyan-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                  </svg>
+                  <span class="text-[11px] sm:text-xs font-bold text-white">
+                    {{ slides[currentSlide]?.badgeFeature || '7,100 ชิ้น/ชม.' }}
+                  </span>
+                </div>
+
+                <!-- Divider -->
+                <div class="w-px h-3.5 bg-slate-700"></div>
+
+                <!-- Spec 2 -->
+                <div class="flex items-center gap-1.5">
+                  <svg class="w-3.5 h-3.5 text-emerald-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                  </svg>
+                  <span class="text-[11px] sm:text-xs font-bold text-slate-200">
+                    {{ slides[currentSlide]?.badgeSpecial || 'AWG#7 ~ AWG#36' }}
+                  </span>
                 </div>
               </div>
+
             </div>
-          </transition>
+
+          </div>
+
         </div>
       </div>
 
-      <!-- Bottom container holding BOTH Feature Cards and Pagination Indicators on desktop (Overlapping Style) -->
+      <!-- ================= BOTTOM DESKTOP BAR: Feature Cards & Capsule Hub ================= -->
       <div class="absolute bottom-0 left-0 right-0 z-20 pointer-events-none hidden md:block">
         <div class="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div class="flex items-end justify-between pointer-events-auto pb-6">
-            <!-- Left Side: Bento Feature Cards -->
+            
+            <!-- Left Side: Bento Value Cards -->
             <div v-if="heroFeatureBadges && heroFeatureBadges.length > 0" class="flex items-end gap-3.5">
               <div v-for="(badge, index) in heroFeatureBadges.slice(0, 3)" :key="index"
-                class="w-56 bg-[#12141c]/75 backdrop-blur-xl border border-white/10 rounded-2xl p-4 transition-all duration-500 hover:bg-[#12141c]/90 hover:border-[#0220A4]/40 hover:-translate-y-1 group/fbadge shadow-[0_-8px_30px_rgba(0,0,0,0.3)]"
+                class="w-60 bg-slate-900/70 hover:bg-slate-900/90 backdrop-blur-2xl border border-white/[0.08] hover:border-cyan-500/40 rounded-2xl p-3.5 transition-all duration-300 hover:-translate-y-1 group shadow-2xl"
               >
                 <div class="flex items-center gap-3">
                   <!-- Icon Box -->
-                  <div class="w-10 h-10 rounded-xl bg-[#0220A4]/10 border border-[#0220A4]/20 flex items-center justify-center shrink-0 group-hover/fbadge:bg-[#0220A4]/20 transition-all duration-300">
-                    <svg class="w-5 h-5 text-[#0220A4] group-hover/fbadge:scale-110 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <div class="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 text-cyan-400 group-hover:bg-blue-600 group-hover:text-white flex items-center justify-center shrink-0 transition-all duration-300 shadow-sm">
+                    <svg class="w-5 h-5 group-hover:scale-110 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                       <path v-if="badge.icon === 'sun'" stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-                      <path v-else-if="badge.icon === 'wrench'" stroke-linecap="round" stroke-linejoin="round" d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z" />
+                      <path v-else-if="badge.icon === 'wrench'" stroke-linecap="round" stroke-linejoin="round" d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z" />
                       <path v-else-if="badge.icon === 'trophy'" stroke-linecap="round" stroke-linejoin="round" d="M6 9H4.5a2.5 2.5 0 010-5H6M18 9h1.5a2.5 2.5 0 000-5H18M4 22h16M12 2a7 7 0 00-7 7v3.5a1.5 1.5 0 001.5 1.5h11a1.5 1.5 0 001.5-1.5V9a7 7 0 00-7-7z" />
                       <path v-else-if="badge.icon === 'leaf'" stroke-linecap="round" stroke-linejoin="round" d="M12 3c-5 0-8 3-8 8 0 5 4 7 8 10 4-3 8-5 8-10 0-5-3-8-8-8zM12 3v18M12 11c3-2 5-2 5-2" />
                       <path v-else-if="badge.icon === 'wind'" stroke-linecap="round" stroke-linejoin="round" d="M2 10h15a2.5 2.5 0 10-2.5-2.5M2 14h18a2.5 2.5 0 11-2.5 2.5M2 18h12a2.5 2.5 0 10-2.5-2.5" />
                       <path v-else-if="badge.icon === 'house'" stroke-linecap="round" stroke-linejoin="round" d="M3 12l9-9 9 9M5 10v10a1 1 0 001 1h12a1 1 0 001-1V10M9 21v-6a1 1 0 011-1h4a1 1 0 011 1v6" />
-                      <path v-else-if="badge.icon === 'rain'" stroke-linecap="round" stroke-linejoin="round" d="M20 16.58A5 5 0 0018 7h-1.26A8 8 0 104 15.25M8 19l-1 2M12 19l-1 2M16 19l-1 2" />
+                      <path v-else-if="badge.icon === 'bolt'" stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
                       <path v-else-if="badge.icon === 'lock'" stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                       <path v-else stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                     </svg>
                   </div>
                   <div class="text-left flex-1 min-w-0">
-                    <div class="text-[13px] font-bold text-white leading-tight font-['IBM_Plex_Sans_Thai'] truncate">{{ badge.title }}</div>
-                    <p class="text-[10px] text-gray-400 font-normal leading-tight mt-1 font-['IBM_Plex_Sans_Thai'] truncate">{{ badge.desc }}</p>
+                    <div class="text-xs font-bold text-white group-hover:text-cyan-300 transition-colors truncate">{{ badge.title }}</div>
+                    <p class="text-[10px] text-slate-400 font-light mt-0.5 truncate">{{ badge.desc }}</p>
                   </div>
                 </div>
               </div>
             </div>
 
-            <!-- Right Side: Navigation controls -->
+            <!-- Right Side: Unified Capsule Slider Control Hub -->
             <div class="flex items-center gap-3 select-none mb-1">
-              <!-- Prev Button -->
-              <button @click="prevSlide" aria-label="สไลด์ก่อนหน้า"
-                class="w-12 h-12 rounded-full flex items-center justify-center bg-white/5 backdrop-blur-md border border-white/10 text-gray-300 hover:bg-[#0220A4] hover:text-white hover:border-[#0220A4]/50 hover:scale-105 active:scale-95 transition-all duration-300 cursor-pointer flex-shrink-0"
-              >
-                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
-                </svg>
-              </button>
-              
-              <!-- Indicator Dots -->
-              <div class="flex items-center gap-2">
-                <button v-for="(slide, idx) in slides" :key="idx" 
-                  @click="goToSlide(idx)"
-                  :aria-label="`ดูสไลด์ที่ ${idx + 1}`"
-                  class="flex items-center justify-center w-12 h-12 transition-all duration-500 ease-out cursor-pointer focus:outline-none flex-shrink-0"
+              <div class="flex items-center gap-3 px-4 py-2 rounded-full bg-slate-900/80 backdrop-blur-2xl border border-white/[0.1] shadow-2xl">
+                <!-- Prev Button -->
+                <button @click="prevSlide" aria-label="สไลด์ก่อนหน้า"
+                  class="w-9 h-9 rounded-full flex items-center justify-center bg-white/5 hover:bg-blue-600 text-slate-300 hover:text-white border border-white/10 hover:border-blue-400 hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer flex-shrink-0"
                 >
-                  <div 
-                    class="relative overflow-hidden rounded-full h-2 transition-all duration-500 ease-out"
-                    :class="currentSlide === idx ? 'bg-white/10 w-10 border border-white/10' : 'bg-white/20 w-2 hover:bg-white/40'"
-                  >
-                    <div v-if="currentSlide === idx" 
-                      class="absolute left-0 top-0 bottom-0 bg-[#0220A4] rounded-full transition-all duration-[30ms] ease-linear"
-                      :style="{ width: `${slideProgress}%` }"
-                    ></div>
+                  <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+                  </svg>
+                </button>
+                
+                <!-- Slide Progress Indicator -->
+                <div class="flex items-center gap-2 px-1">
+                  <span class="text-xs font-mono font-bold text-cyan-400">
+                    {{ String(currentSlide + 1).padStart(2, '0') }}
+                  </span>
+                  
+                  <div class="flex items-center gap-1.5">
+                    <button v-for="(slide, idx) in slides" :key="idx" 
+                      @click="goToSlide(idx)"
+                      :aria-label="`ดูสไลด์ที่ ${idx + 1}`"
+                      class="relative h-2 rounded-full transition-all duration-500 overflow-hidden cursor-pointer focus:outline-none"
+                      :class="currentSlide === idx ? 'w-8 bg-white/15' : 'w-2 bg-white/20 hover:bg-white/40'"
+                    >
+                      <div v-if="currentSlide === idx" 
+                        class="absolute inset-0 bg-gradient-to-r from-blue-400 to-cyan-400 rounded-full transition-all duration-[30ms] ease-linear"
+                        :style="{ width: `${slideProgress}%` }"
+                      ></div>
+                    </button>
                   </div>
+
+                  <span class="text-xs font-mono text-slate-500">
+                    {{ String(slides.length || 1).padStart(2, '0') }}
+                  </span>
+                </div>
+
+                <!-- Next Button -->
+                <button @click="nextSlide" aria-label="สไลด์ถัดไป"
+                  class="w-9 h-9 rounded-full flex items-center justify-center bg-white/5 hover:bg-blue-600 text-slate-300 hover:text-white border border-white/10 hover:border-blue-400 hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer flex-shrink-0"
+                >
+                  <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                  </svg>
                 </button>
               </div>
-
-              <!-- Next Button -->
-              <button @click="nextSlide" aria-label="สไลด์ถัดไป"
-                class="w-12 h-12 rounded-full flex items-center justify-center bg-white/5 backdrop-blur-md border border-white/10 text-gray-300 hover:bg-[#0220A4] hover:text-white hover:border-[#0220A4]/50 hover:scale-105 active:scale-95 transition-all duration-300 cursor-pointer flex-shrink-0"
-              >
-                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
-                </svg>
-              </button>
             </div>
+
           </div>
         </div>
       </div>
 
-      <!-- Mobile fallback for pagination controls -->
-      <div class="absolute bottom-5 left-1/2 -translate-x-1/2 z-20 flex items-center gap-3 select-none md:hidden">
-        <button @click="prevSlide" aria-label="สไลด์ก่อนหน้า"
-          class="w-12 h-12 rounded-full flex items-center justify-center bg-white/10 backdrop-blur-md border border-white/15 text-gray-300 hover:bg-[#0220A4] hover:text-white hover:scale-110 active:scale-95 transition-all duration-300 cursor-pointer flex-shrink-0"
-        >
-          <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
-          </svg>
-        </button>
-        <div class="flex items-center gap-1.5">
-          <button v-for="(slide, idx) in slides" :key="idx" 
-            @click="goToSlide(idx)"
-            :aria-label="`ดูสไลด์ที่ ${idx + 1}`"
-            class="flex items-center justify-center w-12 h-12 transition-all duration-500 ease-out cursor-pointer focus:outline-none flex-shrink-0"
+      <!-- ================= MOBILE FALLBACK CONTROLS ================= -->
+      <div class="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex items-center gap-3 select-none md:hidden">
+        <div class="flex items-center gap-2.5 px-3 py-1.5 rounded-full bg-slate-900/90 backdrop-blur-xl border border-white/10 shadow-2xl">
+          <button @click="prevSlide" aria-label="สไลด์ก่อนหน้า"
+            class="w-8 h-8 rounded-full flex items-center justify-center bg-white/10 text-white hover:bg-blue-600 active:scale-95 transition-all"
           >
-            <div 
-              class="relative overflow-hidden rounded-full h-1.5 transition-all duration-500 ease-out"
-              :class="currentSlide === idx ? 'bg-white/10 w-8' : 'bg-white/20 w-1.5 hover:bg-white/40'"
+            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+          <div class="flex items-center gap-1">
+            <button v-for="(slide, idx) in slides" :key="idx" 
+              @click="goToSlide(idx)"
+              :aria-label="`ดูสไลด์ที่ ${idx + 1}`"
+              class="relative h-1.5 rounded-full transition-all duration-300 overflow-hidden"
+              :class="currentSlide === idx ? 'w-6 bg-white/20' : 'w-1.5 bg-white/30'"
             >
               <div v-if="currentSlide === idx" 
-                class="absolute left-0 top-0 bottom-0 bg-[#0220A4] rounded-full transition-all duration-[30ms] ease-linear"
+                class="absolute inset-0 bg-cyan-400 rounded-full"
                 :style="{ width: `${slideProgress}%` }"
               ></div>
-            </div>
+            </button>
+          </div>
+          <button @click="nextSlide" aria-label="สไลด์ถัดไป"
+            class="w-8 h-8 rounded-full flex items-center justify-center bg-white/10 text-white hover:bg-blue-600 active:scale-95 transition-all"
+          >
+            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+            </svg>
           </button>
         </div>
-        <button @click="nextSlide" aria-label="สไลด์ถัดไป"
-          class="w-12 h-12 rounded-full flex items-center justify-center bg-white/10 backdrop-blur-md border border-white/15 text-gray-300 hover:bg-[#0220A4] hover:text-white hover:scale-110 active:scale-95 transition-all duration-300 cursor-pointer flex-shrink-0"
-        >
-          <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
-          </svg>
-        </button>
       </div>
     </section>
     </div>
 
-    <!-- Holiday / Campaign Banner Section (Sleek, Modern & Compact Announcement Bar) -->
-    <section v-if="settingsStore.isHolidayActive" class="relative w-full overflow-hidden bg-[#070C1E] dark:bg-[#050712] border-y border-amber-500/30 shadow-xl py-3 sm:py-3.5">
-      <!-- Background Ambient Light & Mesh -->
+    <!-- Holiday / Campaign Banner Section (Light & Luxurious Enterprise Announcement Bar) -->
+    <section v-if="settingsStore.isHolidayActive" class="relative w-full overflow-hidden bg-gradient-to-r from-amber-50/90 via-orange-50/60 to-amber-50/90 dark:from-slate-900 dark:via-slate-900/95 dark:to-slate-900 border-y border-amber-200/80 dark:border-amber-500/20 shadow-sm py-3 sm:py-3.5">
+      <!-- Background Ambient Light & Warm Luminous Glow -->
       <div class="absolute inset-0 pointer-events-none overflow-hidden">
-        <div class="absolute top-1/2 left-1/3 -translate-y-1/2 w-[350px] h-[150px] bg-[#0220A4]/30 blur-[60px] rounded-full"></div>
-        <div class="absolute top-1/2 right-1/3 -translate-y-1/2 w-[300px] h-[150px] bg-[#FF7A00]/20 blur-[50px] rounded-full"></div>
-        <div class="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-[#FF7A00] to-transparent opacity-90"></div>
+        <div class="absolute top-1/2 left-1/4 -translate-y-1/2 w-[380px] h-[120px] bg-amber-300/25 blur-[50px] rounded-full"></div>
+        <div class="absolute top-1/2 right-1/4 -translate-y-1/2 w-[320px] h-[120px] bg-orange-300/20 blur-[50px] rounded-full"></div>
+        <div class="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-amber-400 to-transparent opacity-80"></div>
       </div>
 
       <!-- Background Custom Image Overlay if present -->
-      <div v-if="settingsStore.holidayImage" class="absolute inset-0 bg-cover bg-center opacity-10 mix-blend-luminosity pointer-events-none" :style="{ backgroundImage: `url(${settingsStore.holidayImage})` }"></div>
+      <div v-if="settingsStore.holidayImage" class="absolute inset-0 bg-cover bg-center opacity-[0.06] mix-blend-multiply pointer-events-none" :style="{ backgroundImage: `url(${settingsStore.holidayImage})` }"></div>
 
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <div class="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-6 bg-white/[0.04] backdrop-blur-md border border-white/10 rounded-2xl px-4 py-2.5 sm:px-6 sm:py-3 shadow-lg">
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-6 bg-white/95 dark:bg-slate-800/90 backdrop-blur-md border border-amber-200/70 dark:border-amber-500/20 rounded-2xl px-4 py-2.5 sm:px-6 sm:py-3 shadow-md shadow-amber-500/5">
           
           <!-- Notice Icon/Badge & Text Content -->
           <div class="flex flex-col sm:flex-row items-center gap-2.5 sm:gap-3.5 text-center sm:text-left flex-1 min-w-0">
-            <!-- Badge Pill -->
-            <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gradient-to-r from-[#FF7A00]/20 to-[#FF9E00]/15 border border-[#FF7A00]/40 text-amber-300 text-xs font-extrabold tracking-wide uppercase shrink-0 shadow-[0_0_12px_rgba(255,122,0,0.2)]">
+            <!-- Badge Pill (Light Tone with Elegant Amber Gradient) -->
+            <div class="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 text-white text-xs font-bold tracking-wide uppercase shrink-0 shadow-md shadow-amber-500/25">
               <span class="relative flex h-2 w-2">
-                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
-                <span class="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
               </span>
-              <svg class="w-3.5 h-3.5 text-amber-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg class="w-3.5 h-3.5 text-amber-100 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
               </svg>
               <span>{{ settingsStore.holidayName || 'ประกาศพิเศษ' }}</span>
             </div>
 
-            <!-- Message Text -->
-            <p class="text-white text-xs sm:text-sm md:text-base font-semibold leading-normal">
+            <!-- Message Text (Crisp Dark Text on Light Surface) -->
+            <p class="text-slate-800 dark:text-slate-100 text-xs sm:text-sm md:text-base font-semibold leading-normal">
               {{ settingsStore.holidayMessage || 'สิทธิพิเศษและโปรโมชั่นสุดคุ้มวันนี้' }}
             </p>
           </div>
@@ -1835,11 +1958,11 @@ onUnmounted(() => {
           <!-- Right Action Button -->
           <div class="flex items-center gap-3 shrink-0 w-full sm:w-auto justify-center">
             <!-- Custom Image Thumbnail if present -->
-            <div v-if="settingsStore.holidayImage" class="w-9 h-9 rounded-lg overflow-hidden border border-white/20 shadow shrink-0 hidden md:block">
+            <div v-if="settingsStore.holidayImage" class="w-9 h-9 rounded-lg overflow-hidden border border-amber-200 shadow shrink-0 hidden md:block">
               <img :src="settingsStore.holidayImage" alt="Campaign Thumbnail" class="w-full h-full object-cover">
             </div>
 
-            <router-link :to="settingsStore.holidayBtnLink || '/products'" class="group relative inline-flex items-center justify-center gap-2 px-5 py-2 sm:py-2.5 rounded-full text-xs sm:text-sm font-black tracking-wide text-white bg-gradient-to-r from-[#FF7A00] via-[#FF8C2A] to-[#FF9E00] hover:from-[#E66E00] hover:to-[#FF8C2A] shadow-[0_4px_15px_rgba(255,122,0,0.35)] hover:shadow-[0_6px_20px_rgba(255,122,0,0.5)] hover:scale-[1.03] active:scale-95 transition-all duration-300 overflow-hidden shrink-0 whitespace-nowrap">
+            <router-link :to="settingsStore.holidayBtnLink || '/products'" class="group relative inline-flex items-center justify-center gap-2 px-5 py-2 sm:py-2.5 rounded-full text-xs sm:text-sm font-bold tracking-wide text-white bg-gradient-to-r from-orange-500 via-amber-500 to-orange-500 hover:from-orange-600 hover:to-amber-600 shadow-md shadow-orange-500/25 hover:shadow-lg hover:shadow-orange-500/40 hover:scale-[1.03] active:scale-95 transition-all duration-300 overflow-hidden shrink-0 whitespace-nowrap">
               <span class="absolute inset-0 bg-gradient-to-r from-transparent via-white/25 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out"></span>
               <span class="relative z-10">{{ settingsStore.holidayBtnText || 'ดูรายละเอียด' }}</span>
               <svg class="w-3.5 h-3.5 text-white relative z-10 transform group-hover:translate-x-1 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">

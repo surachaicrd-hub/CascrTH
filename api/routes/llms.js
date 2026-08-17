@@ -36,7 +36,7 @@ async function getSettingsMap() {
 router.get('/', async (req, res) => {
     try {
         const protocol = req.headers['x-forwarded-proto'] || req.protocol || 'https';
-        const host = req.headers['x-forwarded-host'] || req.headers.host || 'morespace.co.th';
+        const host = req.headers['x-forwarded-host'] || req.headers.host || 'localhost';
         const siteUrl = (process.env.SITE_URL || `${protocol}://${host}`).replace(/\/$/, '');
 
         const sMap = await getSettingsMap();
@@ -112,11 +112,9 @@ router.get('/', async (req, res) => {
         md += `## Important Pages & Tools\n`;
         md += `- [หน้าหลัก / Home](${siteUrl}/)\n`;
         md += `- [รายการสินค้า / All Products](${siteUrl}/products)\n`;
-        md += `- [คำนวณพื้นที่จัดเก็บ / Space Calculator](${siteUrl}/space-calculator)\n`;
         md += `- [ขอใบเสนอราคา / Request Quotation](${siteUrl}/quotation)\n`;
         md += `- [ผลงานติดตั้ง / Projects & Portfolio](${siteUrl}/projects)\n`;
-        md += `- [บริการประกอบและติดตั้ง / Services](${siteUrl}/services)\n`;
-        md += `- [คู่มือการติดตั้ง / Installation Guide](${siteUrl}/installation-guide)\n`;
+        md += `- [บริการส่งมอบและบำรุงรักษา / Services](${siteUrl}/services)\n`;
         md += `- [เกี่ยวกับเรา / About Us](${siteUrl}/about)\n`;
         md += `- [ติดต่อเรา / Contact Us](${siteUrl}/contact)\n`;
         md += `\n`;
@@ -140,7 +138,7 @@ router.get('/', async (req, res) => {
 router.get('/full', async (req, res) => {
     try {
         const protocol = req.headers['x-forwarded-proto'] || req.protocol || 'https';
-        const host = req.headers['x-forwarded-host'] || req.headers.host || 'morespace.co.th';
+        const host = req.headers['x-forwarded-host'] || req.headers.host || 'localhost';
         const siteUrl = (process.env.SITE_URL || `${protocol}://${host}`).replace(/\/$/, '');
 
         const sMap = await getSettingsMap();

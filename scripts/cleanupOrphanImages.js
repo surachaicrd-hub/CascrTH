@@ -92,7 +92,7 @@ async function run() {
     const args = process.argv.slice(2);
     const executeDelete = args.includes('--execute');
 
-    console.log(`=== Morespace Orphan Image Cleanup Worker ===`);
+    console.log(`=== Orphan Image Cleanup Worker ===`);
     console.log(`Mode: ${executeDelete ? 'EXECUTE (Files will be deleted)' : 'DRY-RUN (Only simulating)'}`);
 
     try {
