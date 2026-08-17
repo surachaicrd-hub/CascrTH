@@ -266,7 +266,6 @@ app.use('/api/line', require('./routes/line'));
 
 // Serve Static Uploads
 const imageService = require('./services/imageService');
-const fs = require('fs');
 
 const uploadsDir = (process.env.NODE_ENV !== 'production' && fs.existsSync(path.join(__dirname, '../public/uploads')))
     ? path.join(__dirname, '../public/uploads')
