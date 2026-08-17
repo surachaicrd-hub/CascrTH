@@ -73,9 +73,22 @@ try {
     console.log('\n[4/5] Pre-installing Linux dependencies for cPanel (Bypassing NPM limits)...');
     
     const nodeModulesDir = path.join(apiDir, 'node_modules');
+    function safeRemoveDir(targetDir) {
+        if (!fs.existsSync(targetDir)) return;
+        try {
+            fs.rmSync(targetDir, { recursive: true, force: true, maxRetries: 3, retryDelay: 500 });
+        } catch (e) {
+            try {
+                if (process.platform === 'win32') {
+                    execSync(`powershell -Command "Remove-Item -LiteralPath '${targetDir}' -Recurse -Force -ErrorAction SilentlyContinue"`, { stdio: 'ignore' });
+                }
+            } catch (err) {}
+        }
+    }
+
     if (fs.existsSync(nodeModulesDir)) {
         console.log('Clearing old node_modules to guarantee clean Linux binary builds...');
-        fs.rmSync(nodeModulesDir, { recursive: true, force: true });
+        safeRemoveDir(nodeModulesDir);
     }
     
     console.log('Running npm install --cpu=x64 --os=linux --omit=dev in api folder...');
@@ -83,7 +96,7 @@ try {
     
     const binPath = path.join(nodeModulesDir, '.bin');
     if (fs.existsSync(binPath)) {
-        fs.rmSync(binPath, { recursive: true, force: true });
+        safeRemoveDir(binPath);
         console.log('Removed .bin to prevent symlink corruption on Windows -> Linux transfer.');
     }
 
@@ -138,7 +151,7 @@ try {
     // Restore Windows dev dependencies automatically
     console.log('Restoring local Windows dependencies for development...');
     if (fs.existsSync(nodeModulesDir)) {
-        fs.rmSync(nodeModulesDir, { recursive: true, force: true });
+        safeRemoveDir(nodeModulesDir);
     }
     execSync('npm install', { cwd: apiDir, stdio: 'ignore' });
 

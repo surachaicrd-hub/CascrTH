@@ -12,7 +12,13 @@ echo.
 
 cd /d "%ROOT_DIR%"
 
-echo Cleaning up ports 8080 and 8000 to unlock files...
+echo Cleaning up ports 8201, 8200, 8080, 8000 to unlock files...
+FOR /F "tokens=5" %%T IN ('netstat -a -n -o 2^>nul ^| findstr ":8201 "') DO (
+    IF NOT "%%T"=="0" IF NOT "%%T"=="" taskkill /PID %%T /F >nul 2>&1
+)
+FOR /F "tokens=5" %%T IN ('netstat -a -n -o 2^>nul ^| findstr ":8200 "') DO (
+    IF NOT "%%T"=="0" IF NOT "%%T"=="" taskkill /PID %%T /F >nul 2>&1
+)
 FOR /F "tokens=5" %%T IN ('netstat -a -n -o 2^>nul ^| findstr ":8080 "') DO (
     IF NOT "%%T"=="0" IF NOT "%%T"=="" taskkill /PID %%T /F >nul 2>&1
 )
