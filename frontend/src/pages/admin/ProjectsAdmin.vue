@@ -499,7 +499,7 @@ const getProductImage = (prod) => {
                   <label class="block text-sm font-bold text-indigo-900 mb-2">
                     ข้อมูลจากช่างหน้างาน (พิมพ์สั้นๆ ได้เลย)
                   </label>
-                  <textarea v-model="aiPrompt" rows="3" placeholder="เช่น '18 ก.พ. 2569 / เขตปากเกร็ด นนทบุรี บ้านเก็บของเมทัลชีท รุ่น MS-M003 พร้อมพื้นภายใน'" class="w-full border border-indigo-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white mb-4"></textarea>
+                  <textarea v-model="aiPrompt" rows="3" placeholder="เช่น '18 ก.พ. 2569 / นิคมอุตสาหกรรมบางปะอิน จ.อยุธยา ส่งมอบและติดตั้งเครื่องตัดปอกสายไฟ KODERA C371G พร้อมทดสอบการทำงาน'" class="w-full border border-indigo-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white mb-4"></textarea>
 
                   <label class="block text-sm font-bold text-indigo-900 mb-2">
                     สไตล์การเขียนเนื้อหา

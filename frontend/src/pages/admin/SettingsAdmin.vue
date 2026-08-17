@@ -166,7 +166,7 @@ const storeDescription = ref('')
 const storeKeywords = ref('')
 const storeOgTitle = ref('')
 const storeOgDescription = ref('')
-const seoDefaultLlmContext = ref('ผู้เชี่ยวชาญด้านบ้านเก็บของ โกดังสำเร็จรูป และตู้เก็บของกลางแจ้ง ทนแดด ทนฝน พร้อมบริการประกอบและติดตั้งทั่วประเทศ')
+const seoDefaultLlmContext = ref('ผู้นำเข้าและจัดจำหน่ายเครื่องตัดปอกสายไฟอัตโนมัติ KODERA จากญี่ปุ่น เครื่องย้ำคอนเนคเตอร์ และอุปกรณ์สำหรับงาน Wire Harness ครบวงจร พร้อมบริการติดตั้ง ฝึกอบรม และบริการหลังการขายทั่วประเทศไทย')
 const seoAiCrawlingEnabled = ref(true)
 
 // SEO & GEO Real-Data Previewer State
@@ -1362,17 +1362,17 @@ onMounted(() => {
               </div>
               <div>
                 <label class="block text-xs font-bold text-gray-700 mb-1">คำค้นหาหลัก (Site Meta Keywords)</label>
-                <textarea v-model="storeKeywords" rows="3" placeholder="เช่น บ้านเก็บของ, ตู้เก็บของกลางแจ้ง, โกดังเก็บของ, ห้องเก็บของ" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-xs focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"></textarea>
+                <textarea v-model="storeKeywords" rows="3" placeholder="เช่น เครื่องตัดปอกสายไฟ, เครื่องตัดสายไฟอัตโนมัติ, KODERA, Wire Stripping Machine, เครื่องย้ำคอนเนคเตอร์" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-xs focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"></textarea>
               </div>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
               <div>
                 <label class="block text-xs font-bold text-gray-700 mb-1">หัวข้อแสดงผลบนโซเชียล (OG / Social Title)</label>
-                <input v-model="storeOgTitle" type="text" placeholder="เช่น STORAGE HOUSE - บ้านเก็บของและโรงเรือนสำเร็จรูประดับพรีเมียม" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-xs focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500">
+                <input v-model="storeOgTitle" type="text" placeholder="เช่น CR Distribution | เครื่องตัดปอกสายไฟ KODERA และ Wire Harness Automation" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-xs focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500">
               </div>
               <div>
                 <label class="block text-xs font-bold text-gray-700 mb-1">คำอธิบายบนโซเชียล (OG / Social Description)</label>
-                <input v-model="storeOgDescription" type="text" placeholder="เช่น จำหน่ายและติดตั้งบ้านเก็บของ โรงเรือนสำเร็จรูป คุณภาพพรีเมียม" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-xs focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500">
+                <input v-model="storeOgDescription" type="text" placeholder="เช่น ผู้นำเข้าและจำหน่ายเครื่องตัดปอกสายไฟอัตโนมัติ KODERA คุณภาพสูงจากญี่ปุ่น" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-xs focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500">
               </div>
             </div>
           </div>
@@ -3079,7 +3079,7 @@ onMounted(() => {
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label class="block text-xs font-bold text-gray-700 mb-1">ชื่อแสดงผล Meta Title บนโซเชียลและ Search</label>
-                <input v-model="storeOgTitle" type="text" placeholder="เช่น STORAGE HOUSE - บ้านเก็บของและโรงเรือนสำเร็จรูประดับพรีเมียม" class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-xs focus:ring-2 focus:ring-indigo-500">
+                <input v-model="storeOgTitle" type="text" placeholder="เช่น CR Distribution | เครื่องตัดปอกสายไฟ KODERA และ Wire Harness Automation" class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-xs focus:ring-2 focus:ring-indigo-500">
               </div>
               <div>
                 <label class="block text-xs font-bold text-gray-700 mb-1">คำอธิบายหลัก (Site Meta Description)</label>
@@ -3087,7 +3087,7 @@ onMounted(() => {
               </div>
               <div>
                 <label class="block text-xs font-bold text-gray-700 mb-1">คำค้นหาหลัก (Meta Keywords)</label>
-                <input v-model="storeKeywords" type="text" placeholder="เช่น บ้านเก็บของ, ตู้เก็บของกลางแจ้ง, โกดังสำเร็จรูป" class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-xs focus:ring-2 focus:ring-indigo-500">
+                <input v-model="storeKeywords" type="text" placeholder="เช่น เครื่องตัดปอกสายไฟ, KODERA, Wire Stripping Machine, เครื่องย้ำคอนเนคเตอร์" class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-xs focus:ring-2 focus:ring-indigo-500">
               </div>
               <div>
                 <label class="block text-xs font-bold text-gray-700 mb-1">บริบทสำหรับ AI Search (Default LLM Context)</label>
@@ -3338,7 +3338,7 @@ onMounted(() => {
                     <!-- Simulated Hero Typography -->
                     <div class="relative z-10 text-left px-5 w-full">
                       <span class="text-[10px] font-bold text-emerald-400 uppercase tracking-widest block mb-1">PRO-SERIES CATALOG</span>
-                      <h4 class="text-lg font-black text-white leading-tight">บ้านเก็บของ และคลังสำเร็จรูป</h4>
+                      <h4 class="text-lg font-black text-white leading-tight">เครื่องตัดปอกสายไฟ KODERA</h4>
                       <p class="text-[11px] text-slate-300 mt-1 font-light">ตัวอย่างการแสดงผลส่วนหัวหน้าสินค้า</p>
                     </div>
 

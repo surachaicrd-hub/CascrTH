@@ -3270,7 +3270,7 @@ const generateDescriptionWithAI = async () => {
               v-model="aiModelParams.keywords" 
               type="text"
               class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-950 dark:text-white text-sm rounded-xl px-4 py-3 hover:border-slate-300 dark:hover:border-slate-600 focus:ring-4 focus:ring-violet-500/[0.07] focus:border-violet-500 transition-all font-medium outline-none placeholder:text-slate-300 dark:placeholder:text-slate-600"
-              placeholder="เช่น บ้านเก็บของ, โรงเก็บของกันฝน, ตู้เก็บของพลาสติก"
+              placeholder="เช่น เครื่องตัดปอกสายไฟ, KODERA, Wire Stripping Machine, ใบมีดตัดสายไฟ"
             >
           </div>
 

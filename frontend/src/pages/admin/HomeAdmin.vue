@@ -107,23 +107,30 @@ const slides = ref([...defaultSlides])
 const heroFeatureBadges = ref([...defaultHeroFeatureBadges])
 
 // TAB 2: Promos & Featured Banner Data
-const bannerTag = ref('คัดสรรสินค้าคุณภาพ')
-const bannerTitle = ref('บ้านเก็บของ ที่แข็งแรง ทนทาน')
-const bannerSubtitle = ref('ใช้งานได้ยาวนาน คุ้มค่าคุ้มราคา')
-const bannerImage = ref('/images/home/banner-sheds.webp')
-const bannerBadgeText = ref('สินค้าขายดี')
-const bannerBadgeSub = ref('อันดับ 1')
-const bannerBullets = ref(['กันแดด กันฝน', 'วัสดุแข็งแรง', 'ประกอบง่าย', 'ดีไซน์สวย'])
+const bannerTag = ref('JAPANESE ENGINEERING')
+const bannerTitle = ref('เครื่องตัดปอกสายไฟ KODERA แท้จากประเทศญี่ปุ่น')
+const bannerSubtitle = ref('ความแม่นยำสูง ทนทาน คุ้มค่าการลงทุนระยะยาว')
+const bannerImage = ref('/logo.webp')
+const bannerBadgeText = ref('มาตรฐานสากล')
+const bannerBadgeSub = ref('JAPAN QUALITY')
+const bannerBullets = ref(['ความแม่นยำสูง ±0.1mm', 'มาตรฐานญี่ปุ่น 100%', 'รองรับสายไฟหลากหลายขนาด', 'บริการ On-site และฝึกอบรม'])
 
-const promoTag = ref('Premium Quality')
-const promoTitle = ref('โซลูชันจัดเก็บ ครบจบในที่เดียว')
-const promoDesc = ref('แข็งแรง ทนทาน ใช้งานได้นาน ดีไซน์สไตล์โมเดิร์น')
-const promoBtnText = ref('ดูเพิ่มเติม')
+const promoTag = ref('Wire Harness Solutions')
+const promoTitle = ref('โซลูชันระบบตัดปอกและย้ำสายไฟ ครบวงจรในที่เดียว')
+const promoDesc = ref('ยกระดับประสิทธิภาพการผลิตด้วยเครื่องจักรคุณภาพสูง')
+const promoBtnText = ref('ดูสินค้าทั้งหมด')
 const promoBtnLink = ref('/products')
-const promoImage = ref('/images/home/hdpe-shed-promo.webp')
+const promoImage = ref('/logo.webp')
 
-const whyChooseUsTitle = ref('ทำไมต้องเลือกเรา?')
-const whyChooseUsBullets = ref(['ดีไซน์สวย ทันสมัย', 'วัสดุแข็งแรง ทนทาน', 'กันแดด กันฝน 100%', 'ประกอบง่าย รวดเร็ว', 'เพิ่มพื้นที่ใช้บ้านเป็นระเบียบ', 'คุ้มค่า คุ้มราคา'])
+const whyChooseUsTitle = ref('ทำไมโรงงานชั้นนำถึงเลือก KODERA จาก CR Distribution?')
+const whyChooseUsBullets = ref([
+  'ผู้นำเข้าแบรนด์ KODERA แท้จากประเทศญี่ปุ่น',
+  'ความเร็วและความแม่นยำระดับไมครอน',
+  'บริการส่งมอบ ติดตั้ง และฝึกอบรมถึงหน้างาน',
+  'สต็อกอะไหล่แท้และใบมีดครบวงจร',
+  'ทีมวิศวกรผู้เชี่ยวชาญให้คำปรึกษาตลอดอายุการใช้งาน',
+  'รับประกันคุณภาพและบริการหลังการขาย'
+])
 
 // TAB 3: Category Showcase Settings & Product Selector Data
 const allCategories = ref([])

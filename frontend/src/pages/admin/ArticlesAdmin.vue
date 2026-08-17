@@ -73,7 +73,7 @@ const aiStyles = [
     { id: 'review', name: 'รีวิวกรณีศึกษา', desc: 'เล่าจากการใช้งานจริง น่าเชื่อถือ', badgeColor: 'bg-rose-50 text-rose-700 border-rose-200', svg: '<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>' }
 ]
 
-const categories = ['ทั่วไป', 'บ้านเก็บของ', 'เคล็ดลับ', 'การดูแลรักษา', 'ข่าวสาร', 'โปรโมชั่น']
+const categories = ['ทั่วไป', 'เทคโนโลยีตัดปอกสายไฟ', 'คู่มือและเทคนิค', 'การบำรุงรักษา', 'ข่าวสารอุตสาหกรรม', 'โปรโมชั่น']
 
 const form = ref({
     title: '', excerpt: '', content: '', cover_image: '',
@@ -921,7 +921,7 @@ onMounted(() => { loadArticles(); loadProducts(); fetchAutoArticleConfig() })
             <div class="relative">
               <label class="block text-xs font-bold text-indigo-100 mb-2">เลือกสินค้าอ้างอิง (ระบบจะดึงสเปกและราคาไปเขียนอัตโนมัติ)</label>
               <div @click="showProductDropdown = !showProductDropdown" class="w-full border border-white/20 rounded-2xl px-4 py-3 bg-white/10 hover:bg-white/20 backdrop-blur-md cursor-pointer flex items-center justify-between transition-all text-white text-xs font-bold shadow-inner">
-                <div v-if="!currentAiProduct" class="text-indigo-200">— ไม่เลือก (เขียนเกี่ยวกับบ้านเก็บของ/ตู้เก็บของทั่วไป) —</div>
+                <div v-if="!currentAiProduct" class="text-indigo-200">— ไม่เลือก (เขียนเกี่ยวกับเครื่องตัดปอกสายไฟ/เทคโนโลยีทั่วไป) —</div>
                 <div v-else class="flex items-center gap-3">
                   <div class="w-7 h-7 rounded-lg bg-white/20 overflow-hidden flex-shrink-0">
                     <img v-if="currentAiProduct.image_url" :src="currentAiProduct.image_url" class="w-full h-full object-cover">
@@ -996,7 +996,7 @@ onMounted(() => { loadArticles(); loadProducts(); fetchAutoArticleConfig() })
             <!-- Title -->
             <div>
               <label class="block text-xs font-bold text-slate-700 mb-1.5">หัวข้อบทความ (Article Title) *</label>
-              <input v-model="form.title" placeholder="เช่น วิธีเลือกบ้านเก็บของสำเร็จรูป ให้คุ้มค่าและทนแดดทนฝน" class="w-full border border-slate-200 rounded-2xl px-4 py-3 text-sm font-bold text-slate-900 bg-slate-50/50 focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all">
+              <input v-model="form.title" placeholder="เช่น เทคนิคการตัดปอกสายไฟให้ได้มาตรฐาน แม่นยำระดับไมครอนด้วยเครื่อง KODERA" class="w-full border border-slate-200 rounded-2xl px-4 py-3 text-sm font-bold text-slate-900 bg-slate-50/50 focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all">
             </div>
 
             <!-- Category & Author Grid -->
@@ -1198,7 +1198,7 @@ onMounted(() => { loadArticles(); loadProducts(); fetchAutoArticleConfig() })
               <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label class="block text-xs font-bold text-slate-700 mb-1">SEO Keywords</label>
-                  <input v-model="form.seo_keywords" placeholder="เช่น บ้านเก็บของสำเร็จรูป, ตู้เก็บของกลางแจ้ง (คั่นด้วย comma)" class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-medium text-slate-800">
+                  <input v-model="form.seo_keywords" placeholder="เช่น เครื่องตัดปอกสายไฟ, KODERA, Wire Stripping Machine, เครื่องย้ำคอนเนคเตอร์" class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-medium text-slate-800">
                 </div>
                 <div>
                   <label class="block text-xs font-bold text-slate-700 mb-1">Article Tags</label>

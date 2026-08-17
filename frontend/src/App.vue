@@ -77,50 +77,43 @@ const isSearchOpen = ref(false)
 const navCategories = ref([])
 
 const categoryThemes = {
-  "บ้านเก็บของพลาสติก HDPE": {
+  "CASTING": {
     hexBorderGradient: "from-blue-500 to-blue-400",
     bgClass: "bg-white hover:bg-blue-50/10 dark:bg-[#111827] dark:hover:bg-blue-950/10 border-gray-100 hover:border-blue-200 dark:border-gray-800 dark:hover:border-blue-900/30",
     shadowClass: "hover:shadow-[0_15px_30px_-5px_rgba(2,32,164,0.08)]",
     arrowClass: "text-blue-500 border border-blue-100 dark:border-blue-950 bg-blue-50/50 dark:bg-blue-950/20 group-hover:bg-blue-500 group-hover:text-white group-hover:border-blue-500",
     accentText: "group-hover:text-blue-500 dark:group-hover:text-blue-400",
   },
-  "บ้านเก็บของพลาสติก PP": {
-    hexBorderGradient: "from-green-500 to-emerald-400",
-    bgClass: "bg-white hover:bg-green-50/10 dark:bg-[#111827] dark:hover:bg-green-950/10 border-gray-100 hover:border-green-200 dark:border-gray-800 dark:hover:border-green-900/30",
-    shadowClass: "hover:shadow-[0_15px_30px_-5px_rgba(34,197,94,0.08)]",
-    arrowClass: "text-green-600 border border-green-100 dark:border-green-950 bg-green-50/50 dark:bg-green-950/20 group-hover:bg-green-600 group-hover:text-white group-hover:border-green-600",
-    accentText: "group-hover:text-green-600 dark:group-hover:text-green-400",
+  "CRIMPING MACHINE": {
+    hexBorderGradient: "from-indigo-500 to-blue-400",
+    bgClass: "bg-white hover:bg-indigo-50/10 dark:bg-[#111827] dark:hover:bg-indigo-950/10 border-gray-100 hover:border-indigo-200 dark:border-gray-800 dark:hover:border-indigo-900/30",
+    shadowClass: "hover:shadow-[0_15px_30px_-5px_rgba(99,102,241,0.08)]",
+    arrowClass: "text-indigo-600 border border-indigo-100 dark:border-indigo-950 bg-indigo-50/50 dark:bg-indigo-950/20 group-hover:bg-indigo-600 group-hover:text-white group-hover:border-indigo-600",
+    accentText: "group-hover:text-indigo-600 dark:group-hover:text-indigo-400",
   },
-  "บ้านเก็บของโลหะ": {
-    hexBorderGradient: "from-blue-500 to-cyan-400",
+  "SEMI CRIMPING MACHINE": {
+    hexBorderGradient: "from-blue-600 to-cyan-400",
     bgClass: "bg-white hover:bg-blue-50/10 dark:bg-[#111827] dark:hover:bg-blue-950/10 border-gray-100 hover:border-blue-200 dark:border-gray-800 dark:hover:border-blue-900/30",
     shadowClass: "hover:shadow-[0_15px_30px_-5px_rgba(59,130,246,0.08)]",
     arrowClass: "text-blue-600 border border-blue-100 dark:border-blue-950 bg-blue-50/50 dark:bg-blue-950/20 group-hover:bg-blue-600 group-hover:text-white group-hover:border-blue-600",
     accentText: "group-hover:text-blue-600 dark:group-hover:text-blue-400",
   },
-  "ตูและกล่องเก็บของกลางแจ้ง": {
-    hexBorderGradient: "from-indigo-500 to-purple-400",
-    bgClass: "bg-white hover:bg-purple-50/10 dark:bg-[#111827] dark:hover:bg-purple-950/10 border-gray-100 hover:border-purple-200 dark:border-gray-800 dark:hover:border-purple-900/30",
-    shadowClass: "hover:shadow-[0_15px_30px_-5px_rgba(168,85,247,0.08)]",
-    arrowClass: "text-purple-600 border border-purple-100 dark:border-purple-950 bg-purple-50/50 dark:bg-purple-950/20 group-hover:bg-purple-600 group-hover:text-white group-hover:border-purple-600",
-    accentText: "group-hover:text-purple-600 dark:group-hover:text-purple-400",
+  "DIGITAL CUTTING MACHINE": {
+    hexBorderGradient: "from-cyan-500 to-teal-400",
+    bgClass: "bg-white hover:bg-cyan-50/10 dark:bg-[#111827] dark:hover:bg-cyan-950/10 border-gray-100 hover:border-cyan-200 dark:border-gray-800 dark:hover:border-cyan-900/30",
+    shadowClass: "hover:shadow-[0_15px_30px_-5px_rgba(6,182,212,0.08)]",
+    arrowClass: "text-cyan-600 border border-cyan-100 dark:border-cyan-950 bg-cyan-50/50 dark:bg-cyan-950/20 group-hover:bg-cyan-600 group-hover:text-white group-hover:border-cyan-600",
+    accentText: "group-hover:text-cyan-600 dark:group-hover:text-cyan-400",
   },
-  "กล่องเก็บเครื่องมือช่าง เกรดพรีเมี่ยม": {
-    hexBorderGradient: "from-rose-500 to-pink-400",
-    bgClass: "bg-white hover:bg-rose-50/10 dark:bg-[#111827] dark:hover:bg-rose-950/10 border-gray-100 hover:border-rose-200 dark:border-gray-800 dark:hover:border-rose-900/30",
-    shadowClass: "hover:shadow-[0_15px_30px_-5px_rgba(244,63,94,0.08)]",
-    arrowClass: "text-rose-600 border border-rose-100 dark:border-rose-950 bg-rose-50/50 dark:bg-rose-950/20 group-hover:bg-rose-600 group-hover:text-white group-hover:border-rose-600",
-    accentText: "group-hover:text-rose-600 dark:group-hover:text-rose-400",
+  "CABLE AND WIRE STRIPPER": {
+    hexBorderGradient: "from-sky-500 to-blue-400",
+    bgClass: "bg-white hover:bg-sky-50/10 dark:bg-[#111827] dark:hover:bg-sky-950/10 border-gray-100 hover:border-sky-200 dark:border-gray-800 dark:hover:border-sky-900/30",
+    shadowClass: "hover:shadow-[0_15px_30px_-5px_rgba(14,165,233,0.08)]",
+    arrowClass: "text-sky-600 border border-sky-100 dark:border-sky-950 bg-sky-50/50 dark:bg-sky-950/20 group-hover:bg-sky-600 group-hover:text-white group-hover:border-sky-600",
+    accentText: "group-hover:text-sky-600 dark:group-hover:text-sky-400",
   },
-  "โรงจอดรถ": {
-    hexBorderGradient: "from-amber-500 to-yellow-400",
-    bgClass: "bg-white hover:bg-amber-50/10 dark:bg-[#111827] dark:hover:bg-amber-950/10 border-gray-100 hover:border-amber-200 dark:border-gray-800 dark:hover:border-amber-900/30",
-    shadowClass: "hover:shadow-[0_15px_30px_-5px_rgba(245,158,11,0.08)]",
-    arrowClass: "text-amber-600 border border-amber-100 dark:border-amber-950 bg-amber-50/50 dark:bg-amber-950/20 group-hover:bg-amber-600 group-hover:text-white group-hover:border-amber-600",
-    accentText: "group-hover:text-amber-600 dark:group-hover:text-amber-400",
-  },
-  "ซุ้มศาลานั่งเล่นและเต็นท์อุปกรณ์เดินป่า": {
-    hexBorderGradient: "from-teal-500 to-cyan-400",
+  "PERIPHERAL": {
+    hexBorderGradient: "from-teal-500 to-emerald-400",
     bgClass: "bg-white hover:bg-teal-50/10 dark:bg-[#111827] dark:hover:bg-teal-950/10 border-gray-100 hover:border-teal-200 dark:border-gray-800 dark:hover:border-teal-900/30",
     shadowClass: "hover:shadow-[0_15px_30px_-5px_rgba(20,184,166,0.08)]",
     arrowClass: "text-teal-600 border border-teal-100 dark:border-teal-950 bg-teal-50/50 dark:bg-teal-950/20 group-hover:bg-teal-600 group-hover:text-white group-hover:border-teal-600",
@@ -481,19 +474,17 @@ onUnmounted(() => {
           </template>
           <template v-else>
             <div class="w-8 h-8 md:w-10 md:h-10 border border-[#0220A4]/80 bg-white dark:bg-gray-900 text-[#0220A4] rounded-lg md:rounded-xl flex items-center justify-center shadow-sm group-hover:shadow-lg group-hover:shadow-blue-500/10 group-hover:border-[#0220A4] transition-all duration-300 transform group-hover:-translate-y-0.5 overflow-hidden shrink-0">
-              <!-- House Icon with Chimney -->
+              <!-- High-precision Machine / Automation Icon -->
               <svg class="w-4 h-4 md:w-5 md:h-5 transition-transform duration-300 group-hover:scale-110" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l9-9 9 9M5 10v10a1 1 0 001 1h12a1 1 0 001-1V10" />
-                <path stroke-linecap="round" stroke-linejoin="round" d="M9 21v-6a1 1 0 011-1h4a1 1 0 011 1v6" />
-                <path stroke-linecap="round" stroke-linejoin="round" d="M17 5.5V8M16.5 5.5h2" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 3v2m6-2v2M9 19v2m6-2v2M3 9h2m-2 6h2m16-6h2m-2 6h2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
               </svg>
             </div>
             <div class="flex flex-col leading-none">
               <span :class="['text-lg md:text-xl font-black tracking-wider uppercase transition-colors duration-300 group-hover:text-[#0220A4]', isDarkHeader ? 'text-white' : 'text-[#111827] dark:text-white']">
-                {{ (settingsStore.storeName || 'STORAGE').split(' ')[0] }}
+                {{ (settingsStore.storeName || 'CR DISTRIBUTION').split(' ')[0] }}
               </span>
-              <span v-if="(settingsStore.storeName || 'STORAGE HOUSE').split(' ').slice(1).join(' ')" :class="['text-[10px] md:text-xs font-black tracking-[0.2em] uppercase transition-colors duration-300', isDarkHeader ? 'text-[#5B7CFF]' : 'text-[#0220A4] dark:text-[#5B7CFF]']">
-                {{ (settingsStore.storeName || 'STORAGE HOUSE').split(' ').slice(1).join(' ') }}
+              <span v-if="(settingsStore.storeName || 'CR DISTRIBUTION THAILAND').split(' ').slice(1).join(' ')" :class="['text-[10px] md:text-xs font-black tracking-[0.2em] uppercase transition-colors duration-300', isDarkHeader ? 'text-[#5B7CFF]' : 'text-[#0220A4] dark:text-[#5B7CFF]']">
+                {{ (settingsStore.storeName || 'CR DISTRIBUTION THAILAND').split(' ').slice(1).join(' ') }}
               </span>
             </div>
           </template>
@@ -1018,7 +1009,7 @@ onUnmounted(() => {
             </router-link>
             
             <p class="text-xs sm:text-sm leading-relaxed text-slate-400 mb-5 font-light">
-              {{ settingsStore.storeDescription || 'ผู้จัดจำหน่ายและให้บริการติดตั้งบ้านเก็บของ โรงเก็บของสำเร็จรูปพรีเมียม และอุปกรณ์จัดเก็บมาตรฐานสากล' }}
+              {{ settingsStore.storeDescription || 'ผู้นำเข้าและจัดจำหน่ายเครื่องตัดปอกสายไฟ KODERA จากประเทศญี่ปุ่น และโซลูชันระบบ Wire Harness มาตรฐานสากล พร้อมบริการติดตั้งและบำรุงรักษาทั่วประเทศ' }}
             </p>
 
             <!-- Company Legal & Tax Details -->
