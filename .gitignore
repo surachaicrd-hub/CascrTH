@@ -16,6 +16,9 @@ build/
 logs/
 *.log
 *.sql
+*.zip
+deploy_api.zip
+deploy_api_update.zip
 cascr_th_compatible.sql
 npm-debug.log*
 yarn-debug.log*
