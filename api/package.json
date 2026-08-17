@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
+    "build": "echo 'API build OK'",
     "test": "jest --forceExit",
     "migrate": "node -e \"require('./services/migrationService').runMigrations().then(() => process.exit(0)).catch(() => process.exit(1))\"",
     "migrate:status": "node -e \"require('./services/migrationService').getMigrationStatus().then(console.table).then(() => process.exit(0)).catch(() => process.exit(1))\""
