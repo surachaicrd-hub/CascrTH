@@ -15,6 +15,13 @@ const s = ref({
   about_hero_subtitle: '', 
   about_hero_desc: '', 
   about_hero_bg: '',
+  about_story_title: '',
+  about_story_p1: '',
+  about_story_p2: '',
+  about_story_check_1: '',
+  about_story_check_2: '',
+  about_story_check_3: '',
+  about_story_check_4: '',
   about_main_img: '', 
   about_quote_title: '', 
   about_quote_text: '',
@@ -89,12 +96,12 @@ const defaultCoreValues = [
   }
 ]
 
-// Fallback real stats
+// Fallback real stats for Wire Harness / KODERA
 const defaultStats = [
-  { val: '20+', label: 'ปีแห่งประสบการณ์ความเชี่ยวชาญ' },
-  { val: '1,000+', label: 'โครงการและงานติดตั้งสำเร็จ' },
-  { val: '100%', label: 'มาตรฐานสินค้าและการรับประกัน' },
-  { val: 'ทั่วไทย', label: 'บริการจัดส่งและประกอบติดตั้ง' }
+  { val: '20+', label: 'ปีแห่งความเชี่ยวชาญด้าน Wire Harness' },
+  { val: '500+', label: 'เครื่องจักรที่ส่งมอบสู่โรงงานอุตสาหกรรม' },
+  { val: '±0.1mm', label: 'ความแม่นยำสูงมาตรฐานญี่ปุ่น' },
+  { val: '100%', label: 'รับประกันศูนย์ไทยและ On-site Service' }
 ]
 
 const buildComputed = () => {
@@ -385,19 +392,14 @@ onUnmounted(() => {
                 </svg>
                 <span>COMPANY BACKGROUND</span>
               </div>
-              <h2 class="text-2xl sm:text-3xl lg:text-4xl font-black text-slate-900 dark:text-white tracking-tight leading-tight">
-                มุ่งมั่นส่งมอบโซลูชั่นที่ดีที่สุด <br class="hidden sm:inline" />
-                เพื่อความคุ้มค่าและความปลอดภัย
+              <h2 class="text-2xl sm:text-3xl lg:text-4xl font-black text-slate-900 dark:text-white tracking-tight leading-tight whitespace-pre-line">
+                {{ s.about_story_title || 'มุ่งมั่นส่งมอบโซลูชั่นที่ดีที่สุด เพื่อความคุ้มค่าและความแม่นยำสูงสุด' }}
               </h2>
             </div>
 
-            <p class="text-sm sm:text-base text-slate-600 dark:text-slate-300 leading-relaxed font-light">
-              <strong>บริษัท ซีอาร์ ดิสทริบิวชั่น จำกัด</strong> ดำเนินธุรกิจด้วยความมุ่งมั่นในการเป็นผู้นำด้านการจัดจำหน่ายและให้บริการโซลูชั่นจัดเก็บสินค้าและโรงเก็บของมาตรฐานระดับพรีเมียม รวมถึงเครื่องจักรและอุปกรณ์อุตสาหกรรมเฉพาะทาง โดยให้ความสำคัญสูงสุดกับคุณภาพของวัสดุ ความแข็งแรงทนทาน และความปลอดภัยของผู้ใช้งาน
-            </p>
+            <p class="text-sm sm:text-base text-slate-600 dark:text-slate-300 leading-relaxed font-light whitespace-pre-line" v-html="s.about_story_p1 || '<strong>บริษัท ซีอาร์ ดิสทริบิวชั่น จำกัด</strong> ดำเนินธุรกิจด้วยความมุ่งมั่นในการเป็นผู้นำด้านการจัดจำหน่ายและให้บริการเครื่องตัดปอกสายไฟอัตโนมัติ เครื่องย้ำคอร์เนคเตอร์ และอุปกรณ์ Wire Harness Processing คุณภาพสูงมาตรฐานญี่ปุ่น แบรนด์ KODERA โดยให้ความสำคัญสูงสุดกับความแม่นยำ ประสิทธิภาพ และความคุ้มค่าในการผลิตของลูกค้า'"></p>
 
-            <p class="text-sm sm:text-base text-slate-600 dark:text-slate-300 leading-relaxed font-light">
-              ด้วยประสบการณ์ในแวดวงอุตสาหกรรมกว่า 20 ปี เรามีทีมงานผู้เชี่ยวชาญพร้อมให้คำปรึกษาตั้งแต่ขั้นตอนการเลือกขนาด ประเมินหน้างานจริง ไปจนถึงบริการจัดส่งและประกอบติดตั้งอย่างมืออาชีพ พร้อมดูแลหลังการขายอย่างต่อเนื่อง
-            </p>
+            <p class="text-sm sm:text-base text-slate-600 dark:text-slate-300 leading-relaxed font-light whitespace-pre-line" v-html="s.about_story_p2 || 'ด้วยประสบการณ์และความเชี่ยวชาญในอุตสาหกรรมสายไฟกว่า 20 ปี เรามีทีมวิศวกรและช่างผู้ชำนาญพร้อมให้คำปรึกษา ทดสอบตัดปอกชิ้นงานตัวอย่าง สาธิตการทำงานจริง ไปจนถึงบริการติดตั้ง ฝึกอบรมการใช้งาน และการดูแลซ่อมบำรุงหลังการขายอย่างครบวงจร'"></p>
 
             <!-- Feature Checkpoints -->
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-2">
@@ -405,28 +407,36 @@ onUnmounted(() => {
                 <svg class="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
                 </svg>
-                <span class="text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-200">จดทะเบียนถูกต้อง ออกใบกำกับภาษีได้</span>
+                <span class="text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-200">
+                  {{ s.about_story_check_1 || 'ตัวแทนจำหน่ายมาตรฐาน KODERA Japan แท้ 100%' }}
+                </span>
               </div>
 
               <div class="flex items-start gap-2.5 p-3 rounded-xl bg-white dark:bg-[#10141D] border border-slate-200/60 dark:border-white/[0.04]">
                 <svg class="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
                 </svg>
-                <span class="text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-200">มีโชว์รูมและคลังสินค้าจริงในไทย</span>
+                <span class="text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-200">
+                  {{ s.about_story_check_2 || 'มีศูนย์บริการและคลังเครื่องจักร/อะไหล่ในไทย' }}
+                </span>
               </div>
 
               <div class="flex items-start gap-2.5 p-3 rounded-xl bg-white dark:bg-[#10141D] border border-slate-200/60 dark:border-white/[0.04]">
                 <svg class="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
                 </svg>
-                <span class="text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-200">ทีมช่างชำนาญการติดตั้งทั่วประเทศ</span>
+                <span class="text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-200">
+                  {{ s.about_story_check_3 || 'ทีมวิศวกรผู้เชี่ยวชาญ On-site Service ทั่วประเทศ' }}
+                </span>
               </div>
 
               <div class="flex items-start gap-2.5 p-3 rounded-xl bg-white dark:bg-[#10141D] border border-slate-200/60 dark:border-white/[0.04]">
                 <svg class="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
                 </svg>
-                <span class="text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-200">การรับประกันและบริการหลังการขายจริง</span>
+                <span class="text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-200">
+                  {{ s.about_story_check_4 || 'รับประกันตัวเครื่อง 1 ปีเต็ม พร้อมบริการตรวจเช็ก' }}
+                </span>
               </div>
             </div>
 

@@ -57,6 +57,8 @@ router.get('/public', async (req, res) => {
             'home_promo_tag', 'home_promo_title', 'home_promo_desc', 
             'home_promo_btn_text', 'home_promo_btn_link', 'home_promo_image',
             'about_hero_title', 'about_hero_subtitle', 'about_hero_desc', 'about_hero_bg',
+            'about_story_title', 'about_story_p1', 'about_story_p2',
+            'about_story_check_1', 'about_story_check_2', 'about_story_check_3', 'about_story_check_4',
             'about_main_img', 'about_quote_title', 'about_quote_text',
             'about_core_1_title', 'about_core_1_desc', 'about_core_1_img',
             'about_core_2_title', 'about_core_2_desc', 'about_core_2_img',

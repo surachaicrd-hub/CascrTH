@@ -54,6 +54,15 @@ const about_hero_subtitle = ref('')
 const about_hero_desc = ref('')
 const about_hero_bg = ref('')
 
+// Company Story & Background
+const about_story_title = ref('')
+const about_story_p1 = ref('')
+const about_story_p2 = ref('')
+const about_story_check_1 = ref('')
+const about_story_check_2 = ref('')
+const about_story_check_3 = ref('')
+const about_story_check_4 = ref('')
+
 // Main Visual
 const about_main_img = ref('')
 const about_quote_title = ref('')
@@ -131,6 +140,14 @@ const loadSettings = async () => {
       if (data.data.about_hero_subtitle) about_hero_subtitle.value = data.data.about_hero_subtitle
       if (data.data.about_hero_desc) about_hero_desc.value = data.data.about_hero_desc
       if (data.data.about_hero_bg) about_hero_bg.value = data.data.about_hero_bg
+
+      if (data.data.about_story_title) about_story_title.value = data.data.about_story_title
+      if (data.data.about_story_p1) about_story_p1.value = data.data.about_story_p1
+      if (data.data.about_story_p2) about_story_p2.value = data.data.about_story_p2
+      if (data.data.about_story_check_1) about_story_check_1.value = data.data.about_story_check_1
+      if (data.data.about_story_check_2) about_story_check_2.value = data.data.about_story_check_2
+      if (data.data.about_story_check_3) about_story_check_3.value = data.data.about_story_check_3
+      if (data.data.about_story_check_4) about_story_check_4.value = data.data.about_story_check_4
       
       if (data.data.about_main_img) about_main_img.value = data.data.about_main_img
       if (data.data.about_quote_title) about_quote_title.value = data.data.about_quote_title
@@ -269,6 +286,14 @@ const saveSettings = async () => {
       { key: 'about_hero_subtitle', value: about_hero_subtitle.value },
       { key: 'about_hero_desc', value: about_hero_desc.value },
       { key: 'about_hero_bg', value: about_hero_bg.value },
+
+      { key: 'about_story_title', value: about_story_title.value },
+      { key: 'about_story_p1', value: about_story_p1.value },
+      { key: 'about_story_p2', value: about_story_p2.value },
+      { key: 'about_story_check_1', value: about_story_check_1.value },
+      { key: 'about_story_check_2', value: about_story_check_2.value },
+      { key: 'about_story_check_3', value: about_story_check_3.value },
+      { key: 'about_story_check_4', value: about_story_check_4.value },
       
       { key: 'about_main_img', value: about_main_img.value },
       { key: 'about_quote_title', value: about_quote_title.value },
@@ -426,11 +451,11 @@ onMounted(() => {
           <button type="button" @click="activeTab = 'hero'" :class="activeTab === 'hero' ? 'bg-gray-900 text-white shadow-md' : 'bg-white text-gray-600 hover:bg-gray-50 border border-gray-200'" class="px-5 py-2.5 rounded-xl font-bold text-sm whitespace-nowrap transition-all flex items-center gap-2">
             ส่วนหัว & สถิติ
           </button>
+          <button type="button" @click="activeTab = 'main'" :class="activeTab === 'main' ? 'bg-gray-900 text-white shadow-md' : 'bg-white text-gray-600 hover:bg-gray-50 border border-gray-200'" class="px-5 py-2.5 rounded-xl font-bold text-sm whitespace-nowrap transition-all flex items-center gap-2">
+            ประวัติบริษัท & จุดเด่น
+          </button>
           <button type="button" @click="activeTab = 'core'" :class="activeTab === 'core' ? 'bg-gray-900 text-white shadow-md' : 'bg-white text-gray-600 hover:bg-gray-50 border border-gray-200'" class="px-5 py-2.5 rounded-xl font-bold text-sm whitespace-nowrap transition-all flex items-center gap-2">
             ค่านิยมหลัก
-          </button>
-          <button type="button" @click="activeTab = 'main'" :class="activeTab === 'main' ? 'bg-gray-900 text-white shadow-md' : 'bg-white text-gray-600 hover:bg-gray-50 border border-gray-200'" class="px-5 py-2.5 rounded-xl font-bold text-sm whitespace-nowrap transition-all flex items-center gap-2">
-            ภาพหลักและคำคม
           </button>
           <button type="button" @click="activeTab = 'vision'" :class="activeTab === 'vision' ? 'bg-gray-900 text-white shadow-md' : 'bg-white text-gray-600 hover:bg-gray-50 border border-gray-200'" class="px-5 py-2.5 rounded-xl font-bold text-sm whitespace-nowrap transition-all flex items-center gap-2">
             วิสัยทัศน์ & พันธกิจ
@@ -454,19 +479,19 @@ onMounted(() => {
           <div class="p-6 space-y-4">
             <div>
               <label class="block text-sm font-bold text-gray-700 mb-1">หัวข้อย่อย (Subtitle)</label>
-              <input v-model="about_hero_subtitle" type="text" class="w-full border border-gray-300 rounded-xl px-4 py-2 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" placeholder="เช่น Premium Storage Solutions">
+              <input v-model="about_hero_subtitle" type="text" class="w-full border border-gray-300 rounded-xl px-4 py-2 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" placeholder="เช่น ผู้เชี่ยวชาญด้าน Wire Harness">
             </div>
             <div>
               <label class="block text-sm font-bold text-gray-700 mb-1">หัวข้อหลัก (Title)</label>
-              <input v-model="about_hero_title" type="text" class="w-full border border-gray-300 rounded-xl px-4 py-2 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" placeholder="ค่าเริ่มต้น: ผู้เชี่ยวชาญด้านโรงเก็บของพรีเมียม">
-              <p class="text-[10px] text-gray-400 mt-1">สามารถใช้แท็ก &lt;br/&gt; เพื่อขึ้นบรรทัดใหม่ได้ | ถ้าปล่อยว่าง จะแสดง "ผู้เชี่ยวชาญด้าน โรงเก็บของพรีเมียม"</p>
+              <input v-model="about_hero_title" type="text" class="w-full border border-gray-300 rounded-xl px-4 py-2 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" placeholder="ค่าเริ่มต้น: ประวัติความเป็นมาของ CR Distribution - เครื่องตัดปอกสายไฟ KODERA">
+              <p class="text-[10px] text-gray-400 mt-1">สามารถใช้แท็ก &lt;br/&gt; เพื่อขึ้นบรรทัดใหม่ได้</p>
             </div>
             <div>
               <label class="block text-sm font-bold text-gray-700 mb-1">รายละเอียด (Description)</label>
-              <textarea v-model="about_hero_desc" rows="3" class="w-full border border-gray-300 rounded-xl px-4 py-2 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" placeholder="ค่าเริ่มต้น: เราคือผู้นำในการรังสรรค์และติดตั้งโรงเก็บของพรีเมียมคุณภาพสูง..."></textarea>
+              <textarea v-model="about_hero_desc" rows="3" class="w-full border border-gray-300 rounded-xl px-4 py-2 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" placeholder="ค่าเริ่มต้น: เราคือผู้นำเข้าและตัวแทนจำหน่ายเครื่องตัดปอกสายไฟอัตโนมัติ KODERA ประเทศญี่ปุ่น..."></textarea>
             </div>
             <div>
-              <label class="block text-sm font-bold text-gray-700 mb-1">ภาพพื้นหลัง (Hero Background)</label>
+              <label class="block text-sm font-bold text-gray-700 mb-1">ภาพพื้นหลังส่วนหัว (Hero Background Image)</label>
               <div class="flex items-center gap-4">
                 <div v-if="about_hero_bg" class="w-40 h-20 rounded-xl overflow-hidden border border-gray-200 bg-gray-50 cursor-pointer hover:ring-2 hover:ring-emerald-400 transition-all" @click="lightboxImage = about_hero_bg">
                   <img :src="about_hero_bg" class="w-full h-full object-cover" />
@@ -487,32 +512,32 @@ onMounted(() => {
 
             <hr class="border-gray-200 my-6" />
 
-            <!-- Stats -->
+            <!-- Stats Bar -->
             <div class="space-y-4">
-              <h3 class="font-bold text-gray-800 border-b border-gray-100 pb-2">ตัวเลขสถิติ (Stats)</h3>
+              <h3 class="font-bold text-gray-800 border-b border-gray-100 pb-2">แถบตัวเลขสถิติความสำเร็จ (Stats Bar ใต้ Header)</h3>
               
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <!-- Stat 1 -->
                 <div class="p-3 border border-gray-200 rounded-xl bg-emerald-50/30">
                   <div class="mb-2">
-                    <label class="block text-xs font-bold text-gray-700 mb-1">ตัวเลข 1</label>
-                    <input v-model="about_stat_1_val" type="text" class="w-full border border-gray-300 rounded-lg px-3 py-1.5 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 font-bold" placeholder="เช่น 20+">
+                    <label class="block text-xs font-bold text-gray-700 mb-1">ตัวเลขที่ 1</label>
+                    <input v-model="about_stat_1_val" type="text" class="w-full border border-gray-300 rounded-lg px-3 py-1.5 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 font-bold" placeholder="ค่าเริ่มต้น: 20+">
                   </div>
                   <div>
-                    <label class="block text-xs font-bold text-gray-700 mb-1">คำอธิบาย 1</label>
-                    <input v-model="about_stat_1_label" type="text" class="w-full border border-gray-300 rounded-lg px-3 py-1.5 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm" placeholder="เช่น ปีแห่งประสบการณ์">
+                    <label class="block text-xs font-bold text-gray-700 mb-1">คำอธิบายที่ 1</label>
+                    <input v-model="about_stat_1_label" type="text" class="w-full border border-gray-300 rounded-lg px-3 py-1.5 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm" placeholder="ค่าเริ่มต้น: ปีแห่งความเชี่ยวชาญด้าน Wire Harness">
                   </div>
                 </div>
 
                 <!-- Stat 2 -->
                 <div class="p-3 border border-gray-200 rounded-xl bg-emerald-50/30">
                   <div class="mb-2">
-                    <label class="block text-xs font-bold text-gray-700 mb-1">ตัวเลข 2</label>
-                    <input v-model="about_stat_2_val" type="text" class="w-full border border-gray-300 rounded-lg px-3 py-1.5 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 font-bold" placeholder="เช่น 100%">
+                    <label class="block text-xs font-bold text-gray-700 mb-1">ตัวเลขที่ 2</label>
+                    <input v-model="about_stat_2_val" type="text" class="w-full border border-gray-300 rounded-lg px-3 py-1.5 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 font-bold" placeholder="ค่าเริ่มต้น: 500+">
                   </div>
                   <div>
-                    <label class="block text-xs font-bold text-gray-700 mb-1">คำอธิบาย 2</label>
-                    <input v-model="about_stat_2_label" type="text" class="w-full border border-gray-300 rounded-lg px-3 py-1.5 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm" placeholder="เช่น คัดสรรคุณภาพ">
+                    <label class="block text-xs font-bold text-gray-700 mb-1">คำอธิบายที่ 2</label>
+                    <input v-model="about_stat_2_label" type="text" class="w-full border border-gray-300 rounded-lg px-3 py-1.5 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm" placeholder="ค่าเริ่มต้น: เครื่องจักรที่ส่งมอบสู่โรงงานอุตสาหกรรม">
                   </div>
                 </div>
               </div>
@@ -521,61 +546,97 @@ onMounted(() => {
                 <!-- Stat 3 -->
                 <div class="p-3 border border-gray-200 rounded-xl bg-emerald-50/30">
                   <div class="mb-2">
-                    <label class="block text-xs font-bold text-gray-700 mb-1">ตัวเลข 3</label>
-                    <input v-model="about_stat_3_val" type="text" class="w-full border border-gray-300 rounded-lg px-3 py-1.5 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 font-bold" placeholder="ค่าเริ่มต้น: 7 วัน">
+                    <label class="block text-xs font-bold text-gray-700 mb-1">ตัวเลขที่ 3</label>
+                    <input v-model="about_stat_3_val" type="text" class="w-full border border-gray-300 rounded-lg px-3 py-1.5 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 font-bold" placeholder="ค่าเริ่มต้น: ±0.1mm">
                   </div>
                   <div>
-                    <label class="block text-xs font-bold text-gray-700 mb-1">คำอธิบาย 3</label>
-                    <input v-model="about_stat_3_label" type="text" class="w-full border border-gray-300 rounded-lg px-3 py-1.5 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm" placeholder="ค่าเริ่มต้น: ระยะเวลาเริ่มต้นในการติดตั้ง...">
+                    <label class="block text-xs font-bold text-gray-700 mb-1">คำอธิบายที่ 3</label>
+                    <input v-model="about_stat_3_label" type="text" class="w-full border border-gray-300 rounded-lg px-3 py-1.5 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm" placeholder="ค่าเริ่มต้น: ความแม่นยำสูงมาตรฐานญี่ปุ่น">
                   </div>
                 </div>
 
                 <!-- Stat 4 -->
                 <div class="p-3 border border-gray-200 rounded-xl bg-emerald-50/30">
                   <div class="mb-2">
-                    <label class="block text-xs font-bold text-gray-700 mb-1">ตัวเลข 4</label>
+                    <label class="block text-xs font-bold text-gray-700 mb-1">ตัวเลขที่ 4</label>
                     <input v-model="about_stat_4_val" type="text" class="w-full border border-gray-300 rounded-lg px-3 py-1.5 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 font-bold" placeholder="ค่าเริ่มต้น: 100%">
                   </div>
                   <div>
-                    <label class="block text-xs font-bold text-gray-700 mb-1">คำอธิบาย 4</label>
-                    <input v-model="about_stat_4_label" type="text" class="w-full border border-gray-300 rounded-lg px-3 py-1.5 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm" placeholder="ค่าเริ่มต้น: วัสดุคุณภาพสูง นำเข้าจากสหรัฐอเมริกา...">
+                    <label class="block text-xs font-bold text-gray-700 mb-1">คำอธิบายที่ 4</label>
+                    <input v-model="about_stat_4_label" type="text" class="w-full border border-gray-300 rounded-lg px-3 py-1.5 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm" placeholder="ค่าเริ่มต้น: รับประกันศูนย์ไทยและ On-site Service">
                   </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
-        <!-- Main Visual Section -->
+        <!-- Company Story & Highlights Section -->
         <div v-show="activeTab === 'main'" class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden mb-6 animate-fade-in-up">
           <div class="p-6 border-b border-gray-100 bg-gray-50">
             <h2 class="text-lg font-bold text-gray-900 flex items-center gap-2">
-              <svg class="w-5 h-5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-              ภาพหลักและคำคม (Main Visual & Quote)
+              <svg class="w-5 h-5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+              ประวัติบริษัทและจุดเด่น (Company Story & Highlights)
             </h2>
           </div>
-          <div class="p-6 space-y-4">
+          <div class="p-6 space-y-6">
             <div>
-              <label class="block text-sm font-bold text-gray-700 mb-1">รูปภาพหลักหน้า About Us (สัดส่วน 21:9)</label>
+              <label class="block text-sm font-bold text-gray-700 mb-1">หัวข้อประวัติความเป็นมา (Story Heading)</label>
+              <input v-model="about_story_title" type="text" class="w-full border border-gray-300 rounded-xl px-4 py-2 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" placeholder="ค่าเริ่มต้น: มุ่งมั่นส่งมอบโซลูชั่นที่ดีที่สุด เพื่อความคุ้มค่าและความแม่นยำสูงสุด">
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-bold text-gray-700 mb-1">เนื้อหาประวัติ ย่อหน้าที่ 1 (Story Paragraph 1)</label>
+                <textarea v-model="about_story_p1" rows="5" class="w-full border border-gray-300 rounded-xl px-4 py-2 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm leading-relaxed" placeholder="ค่าเริ่มต้น: บริษัท ซีอาร์ ดิสทริบิวชั่น จำกัด ดำเนินธุรกิจด้วยความมุ่งมั่นในการเป็นผู้นำด้านการจัดจำหน่ายเครื่องตัดปอกสายไฟ KODERA..."></textarea>
+              </div>
+              <div>
+                <label class="block text-sm font-bold text-gray-700 mb-1">เนื้อหาประวัติ ย่อหน้าที่ 2 (Story Paragraph 2)</label>
+                <textarea v-model="about_story_p2" rows="5" class="w-full border border-gray-300 rounded-xl px-4 py-2 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm leading-relaxed" placeholder="ค่าเริ่มต้น: ด้วยประสบการณ์และความเชี่ยวชาญในอุตสาหกรรมสายไฟกว่า 20 ปี เรามีทีมวิศวกรและช่างผู้ชำนาญพร้อมให้คำปรึกษา..."></textarea>
+              </div>
+            </div>
+
+            <!-- Checkpoints 4 items -->
+            <div class="space-y-3 pt-2">
+              <label class="block text-sm font-bold text-gray-700">จุดเด่น 4 รายการ (Checkpoints)</label>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-xs font-semibold text-gray-600 mb-1">จุดเด่นที่ 1</label>
+                  <input v-model="about_story_check_1" type="text" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" placeholder="ค่าเริ่มต้น: ตัวแทนจำหน่ายมาตรฐาน KODERA Japan แท้ 100%">
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-gray-600 mb-1">จุดเด่นที่ 2</label>
+                  <input v-model="about_story_check_2" type="text" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" placeholder="ค่าเริ่มต้น: มีศูนย์บริการและคลังเครื่องจักร/อะไหล่ในไทย">
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-gray-600 mb-1">จุดเด่นที่ 3</label>
+                  <input v-model="about_story_check_3" type="text" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" placeholder="ค่าเริ่มต้น: ทีมวิศวกรผู้เชี่ยวชาญ On-site Service ทั่วประเทศ">
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-gray-600 mb-1">จุดเด่นที่ 4</label>
+                  <input v-model="about_story_check_4" type="text" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" placeholder="ค่าเริ่มต้น: รับประกันตัวเครื่อง 1 ปีเต็ม พร้อมบริการตรวจเช็ก">
+                </div>
+              </div>
+            </div>
+
+            <hr class="border-gray-200 my-4" />
+
+            <div>
+              <label class="block text-sm font-bold text-gray-700 mb-1">รูปภาพสำนักงานใหญ่ / คลังสินค้า (Main Facility Image)</label>
               
               <!-- Image Upload Area -->
               <div class="mt-2 w-full">
-                <!-- Dropzone Style -->
                 <label v-if="!about_main_img"
                   class="flex justify-center w-full h-32 px-4 transition bg-white border-2 border-gray-300 border-dashed rounded-md appearance-none cursor-pointer hover:border-emerald-400 focus:outline-none hover:bg-emerald-50 relative"
                   :class="{'opacity-50 cursor-not-allowed': uploadingImage}">
                   <span class="flex items-center space-x-2">
-                    <svg v-if="uploadingImage" class="animate-spin h-6 w-6 text-gray-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    <svg v-else xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                       <path stroke-linecap="round" stroke-linejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                     </svg>
                     <span class="font-medium text-gray-600">
-                      {{ uploadingImage ? 'กำลังอัปโหลด...' : 'คลิกเพื่อเลือกรูปภาพและปรับสัดส่วน' }}
+                      คลิกเพื่อเลือกรูปภาพสถานที่/คลังสินค้า
                     </span>
                   </span>
-                  <input type="file" name="file_upload" class="hidden" accept="image/*" @change="uploadImage" :disabled="uploadingImage">
+                  <input type="file" class="hidden" accept="image/*" @change="uploadSectionImage('about_main_img', $event)">
                 </label>
 
                 <!-- Preview Area -->
@@ -585,7 +646,7 @@ onMounted(() => {
                   <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4">
                     <label class="px-4 py-2 bg-white text-gray-900 rounded-lg shadow cursor-pointer hover:bg-gray-100 transition font-medium text-sm">
                       เปลี่ยนรูปภาพ
-                      <input type="file" class="hidden" accept="image/*" @change="uploadImage" :disabled="uploadingImage" />
+                      <input type="file" class="hidden" accept="image/*" @change="uploadSectionImage('about_main_img', $event)" />
                     </label>
                     <button type="button" @click="about_main_img = ''" class="px-4 py-2 bg-red-500 text-white rounded-lg shadow cursor-pointer hover:bg-red-600 transition font-medium text-sm">
                       ลบรูปภาพ
@@ -593,16 +654,16 @@ onMounted(() => {
                   </div>
                 </div>
               </div>
-              <input v-model="about_main_img" type="text" class="mt-3 w-full border border-gray-300 rounded-xl px-4 py-2 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm bg-gray-50/50" placeholder="หรือวางลิงก์รูปที่นี่ https://...">
             </div>
+
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label class="block text-sm font-bold text-gray-700 mb-1">หัวข้อคำคม (Quote Title)</label>
-                <input v-model="about_quote_title" type="text" class="w-full border border-gray-300 rounded-xl px-4 py-2 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" placeholder="เช่น แรงบันดาลใจที่ส่งต่อสู่พันธกิจ">
+                <input v-model="about_quote_title" type="text" class="w-full border border-gray-300 rounded-xl px-4 py-2 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" placeholder="เช่น มุ่งมั่นส่งมอบเทคโนโลยีความแม่นยำสูง">
               </div>
               <div>
                 <label class="block text-sm font-bold text-gray-700 mb-1">คำคม (Quote Text)</label>
-                <textarea v-model="about_quote_text" rows="2" class="w-full border border-gray-300 rounded-xl px-4 py-2 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" placeholder="เช่น &quot;เราเชื่อว่าทุกตารางเมตรมีความหมาย...&quot;"></textarea>
+                <textarea v-model="about_quote_text" rows="2" class="w-full border border-gray-300 rounded-xl px-4 py-2 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" placeholder="เช่น &quot;ความแม่นยำและประสิทธิภาพของลูกค้า คืองานบริการอันดับหนึ่งของเรา&quot;"></textarea>
               </div>
             </div>
           </div>
