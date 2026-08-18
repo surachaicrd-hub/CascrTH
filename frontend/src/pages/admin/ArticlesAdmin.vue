@@ -663,7 +663,7 @@ onMounted(() => {
               </h1>
               <p class="text-xs sm:text-sm text-slate-500 font-medium mt-0.5 flex items-center gap-1.5">
                 สร้างบทความด้วย AI ยกระดับการค้นหาบน Google & GEO Search Engine
-                <InfoTooltip title="คำแนะนำระบบจัดการบทความ" description="บทความช่วยเพิ่ม SEO และดึงดูดลูกค้าบน Google &amp; AI Search Engine&lt;ul class='mt-2 space-y-1 text-xs'&gt;&lt;li&gt;⚡ &lt;strong&gt;สร้างบทความด้วย AI:&lt;/strong&gt; วิเคราะห์สินค้า + สเปกบทความอัตโนมัติ&lt;/li&gt;&lt;li&gt;⏰ &lt;strong&gt;ตั้งเวลาเผยแพร่:&lt;/strong&gt; สร้างบทความล่วงหน้าและทยอยเผยแพร่&lt;/li&gt;&lt;li&gt;🤖 &lt;strong&gt;AI Auto-Pilot:&lt;/strong&gt; ตั้งเวลาให้ AI สร้างบทความวันละ 1 บทความอัตโนมัติ&lt;/li&gt;&lt;/ul&gt;" />
+                <InfoTooltip title="คำแนะนำระบบจัดการบทความ" description="บทความช่วยเพิ่ม SEO และดึงดูดลูกค้าบน Google &amp; AI Search Engine&lt;ul class='mt-2 space-y-1 text-xs'&gt;&lt;li&gt;&lt;strong&gt;สร้างบทความด้วย AI:&lt;/strong&gt; วิเคราะห์สินค้า + สเปกบทความอัตโนมัติ&lt;/li&gt;&lt;li&gt;&lt;strong&gt;ตั้งเวลาเผยแพร่:&lt;/strong&gt; สร้างบทความล่วงหน้าและทยอยเผยแพร่&lt;/li&gt;&lt;li&gt;&lt;strong&gt;AI Auto-Pilot:&lt;/strong&gt; ตั้งเวลาให้ AI สร้างบทความวันละ 1 บทความอัตโนมัติ&lt;/li&gt;&lt;/ul&gt;" />
               </p>
             </div>
           </div>
@@ -738,7 +738,7 @@ onMounted(() => {
           </button>
           <button @click="activeMainTab='header'" class="flex-1 sm:flex-none px-5 py-2.5 rounded-lg text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-2" :class="activeMainTab==='header'?'bg-white text-indigo-700 shadow-sm':'text-slate-500 hover:text-slate-700'">
             <svg class="w-4 h-4 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-            🎨 ส่วนหัว & แบนเนอร์หน้าบทความ
+            ส่วนหัว & แบนเนอร์หน้าบทความ
           </button>
         </div>
       </div>
@@ -758,9 +758,9 @@ onMounted(() => {
         <div class="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0">
           <button v-for="status in [
             { id: 'all', label: 'ทั้งหมด' },
-            { id: 'published', label: '🚀 เผยแพร่แล้ว' },
-            { id: 'scheduled', label: '⏰ ตั้งเวลาเผยแพร่' },
-            { id: 'draft', label: '📁 ฉบับร่าง' }
+            { id: 'published', label: 'เผยแพร่แล้ว' },
+            { id: 'scheduled', label: 'ตั้งเวลาเผยแพร่' },
+            { id: 'draft', label: 'ฉบับร่าง' }
           ]" :key="status.id" @click="filterStatus = status.id; onFilterChange()"
           class="px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all border"
           :class="filterStatus === status.id ? 'bg-indigo-600 text-white border-indigo-600 shadow-md shadow-indigo-100' : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'">
@@ -860,7 +860,8 @@ onMounted(() => {
               <p class="text-xs text-indigo-100 mb-5 leading-relaxed">ระบบจะสุ่มสินค้า 1 รายการ ให้ AI เขียนบทความและวาดรูปปกแล้วบันทึกเข้าสู่ระบบทันที</p>
               <button @click="testAutoArticle" :disabled="testingAutoArticle" class="w-full py-3 bg-white text-indigo-800 rounded-xl text-xs font-bold hover:bg-indigo-50 transition-all disabled:opacity-50 shadow-md flex items-center justify-center gap-2">
                 <svg v-if="testingAutoArticle" class="animate-spin h-4 w-4 text-indigo-600" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
-                {{ testingAutoArticle ? 'กำลังสุ่มสร้างบทความ... (30-60 วินาที)' : '🚀 ทดสอบสร้าง 1 บทความเลย' }}
+                <svg v-else class="w-4 h-4 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                {{ testingAutoArticle ? 'กำลังสุ่มสร้างบทความ... (30-60 วินาที)' : 'ทดสอบสร้าง 1 บทความ' }}
               </button>
             </div>
           </div>
@@ -938,7 +939,8 @@ onMounted(() => {
                 class="px-6 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold text-sm rounded-xl shadow-lg shadow-emerald-200 transition-all flex items-center gap-2 disabled:opacity-50 active:scale-95"
               >
                 <svg v-if="savingBlogHero" class="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
-                <span>{{ savingBlogHero ? 'กำลังบันทึก...' : '💾 บันทึกการตั้งค่าส่วนหัว' }}</span>
+                <svg v-else class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/></svg>
+                <span>{{ savingBlogHero ? 'กำลังบันทึก...' : 'บันทึกการตั้งค่าส่วนหัว' }}</span>
               </button>
             </div>
 
@@ -949,7 +951,8 @@ onMounted(() => {
                 <!-- Tag Badge -->
                 <div>
                   <label class="block text-xs font-bold text-slate-700 mb-1.5 flex items-center gap-1.5">
-                    🏷️ ป้ายกำกับด้านบน (Eyebrow Tag)
+                    <svg class="w-3.5 h-3.5 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
+                    ป้ายกำกับด้านบน (Eyebrow Tag)
                     <InfoTooltip title="ป้ายกำกับ" description="ข้อความตัวพิมพ์เล็ก/ใหญ่บนกรอบสีเขียว เช่น KNOWLEDGE & ARTICLES หรือ สาระน่ารู้ & เทคนิคช่าง" />
                   </label>
                   <input 
@@ -963,7 +966,8 @@ onMounted(() => {
                 <!-- Main Title -->
                 <div>
                   <label class="block text-xs font-bold text-slate-700 mb-1.5 flex items-center gap-1.5">
-                    📌 หัวข้อหลักแถวที่ 1 (Main Title)
+                    <svg class="w-3.5 h-3.5 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"/></svg>
+                    หัวข้อหลักแถวที่ 1 (Main Title)
                   </label>
                   <input 
                     v-model="blog_hero_title" 
@@ -976,7 +980,8 @@ onMounted(() => {
                 <!-- Subtitle Highlight -->
                 <div>
                   <label class="block text-xs font-bold text-slate-700 mb-1.5 flex items-center gap-1.5">
-                    ✨ ข้อความเน้นสีแถวที่ 2 (Highlight Subtitle)
+                    <svg class="w-3.5 h-3.5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                    ข้อความเน้นสีแถวที่ 2 (Highlight Subtitle)
                     <InfoTooltip title="ข้อความไฮไลท์" description="ข้อความแถวที่ 2 จะแสดงผลด้วยสี Gradient เขียว-ฟ้า สว่างโดดเด่น" />
                   </label>
                   <input 
@@ -990,7 +995,8 @@ onMounted(() => {
                 <!-- Description -->
                 <div>
                   <label class="block text-xs font-bold text-slate-700 mb-1.5 flex items-center gap-1.5">
-                    📝 คำอธิบายส่วนหัว (Description)
+                    <svg class="w-3.5 h-3.5 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"/></svg>
+                    คำอธิบายส่วนหัว (Description)
                   </label>
                   <textarea 
                     v-model="blog_hero_desc" 
@@ -1005,7 +1011,8 @@ onMounted(() => {
               <div class="space-y-5">
                 <div>
                   <label class="block text-xs font-bold text-slate-700 mb-1.5 flex items-center gap-1.5">
-                    🖼️ ภาพพื้นหลังส่วนหัว (Hero Background Image)
+                    <svg class="w-3.5 h-3.5 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                    ภาพพื้นหลังส่วนหัว (Hero Background Image)
                   </label>
                   
                   <div class="border-2 border-dashed border-slate-200 rounded-2xl p-6 text-center hover:border-indigo-300 transition-all bg-slate-50/50">
@@ -1066,7 +1073,8 @@ onMounted(() => {
                 class="px-8 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold text-sm rounded-xl shadow-lg shadow-emerald-200 transition-all flex items-center gap-2 disabled:opacity-50 active:scale-95"
               >
                 <svg v-if="savingBlogHero" class="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
-                <span>{{ savingBlogHero ? 'กำลังบันทึกข้อมูล...' : '💾 บันทึกการตั้งค่าส่วนหัว' }}</span>
+                <svg v-else class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/></svg>
+                <span>{{ savingBlogHero ? 'กำลังบันทึกข้อมูล...' : 'บันทึกการตั้งค่าส่วนหัว' }}</span>
               </button>
             </div>
           </div>
@@ -1384,7 +1392,7 @@ onMounted(() => {
                   <div v-if="form.is_published && !form.published_at" class="w-2 h-2 rounded-full bg-white"></div>
                 </div>
                 <div>
-                  <div class="text-xs font-bold text-slate-900">🚀 เผยแพร่ทันที</div>
+                  <div class="text-xs font-bold text-slate-900">เผยแพร่ทันที</div>
                   <div class="text-[11px] text-slate-500 mt-0.5">แสดงผลต่อผู้ใช้งานบนหน้าเว็บไซต์ทันที</div>
                 </div>
               </div>
@@ -1396,7 +1404,7 @@ onMounted(() => {
                     <div v-if="form.published_at" class="w-2 h-2 rounded-full bg-white"></div>
                   </div>
                   <div>
-                    <div class="text-xs font-bold text-slate-900">⏰ ตั้งเวลาเผยแพร่</div>
+                    <div class="text-xs font-bold text-slate-900">ตั้งเวลาเผยแพร่</div>
                     <div class="text-[11px] text-slate-500 mt-0.5">เปิดอ่านได้เมื่อถึงเวลาที่กำหนด</div>
                   </div>
                 </div>
@@ -1409,7 +1417,7 @@ onMounted(() => {
                   <div v-if="!form.is_published && !form.published_at" class="w-2 h-2 rounded-full bg-white"></div>
                 </div>
                 <div>
-                  <div class="text-xs font-bold text-slate-900">📁 บันทึกเป็นฉบับร่าง</div>
+                  <div class="text-xs font-bold text-slate-900">บันทึกเป็นฉบับร่าง</div>
                   <div class="text-[11px] text-slate-500 mt-0.5">ซ่อนบทความไว้เฉพาะแอดมิน</div>
                 </div>
               </div>

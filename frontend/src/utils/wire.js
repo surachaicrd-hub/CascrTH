@@ -30,66 +30,66 @@ export const svgTemplateOptions = [
   { value: 'crimp_single_tin_single', name: 'ย้ำหัว 1 ด้าน + จุ่มตะกั่ว 1 ด้าน (C550SZe)' },
   { value: 'crimp_single_seal_twist_tin', name: 'ย้ำ 1 ด้าน ซีลยาง + ปั่นเกลียวจุ่มตะกั่ว (C556SZe)' },
   { value: 'tin_solder_both', name: 'ปั่นเกลียวจุ่มตะกั่ว 2 ด้าน (Solder Dipping)' },
-  { value: 'custom_image', name: '🖼️ อัปโหลดรูปภาพกำหนดเอง' }
+  { value: 'custom_image', name: 'อัปโหลดรูปภาพกำหนดเอง' }
 ]
 
 export const defaultWireTypeGroups = [
   {
     group: 'สายเดี่ยวปอกปลาย 2 ด้าน (Single Wire Stripping)',
     options: [
-      { value: 'single_black', label: '⬛ สายเดี่ยว สีดำ (ปอก 2 ด้าน)', defaultTitle: 'สายเดี่ยวสีดำ ปอก 2 ด้าน', template: 'single_black' },
-      { value: 'single_blue', label: '🟦 สายเดี่ยว สีน้ำเงิน (ปอก 2 ด้าน)', defaultTitle: 'สายเดี่ยวสีน้ำเงิน ปอก 2 ด้าน', template: 'single_blue' },
-      { value: 'single_red', label: '🟥 สายเดี่ยว สีแดง (ปอก 2 ด้าน)', defaultTitle: 'สายเดี่ยวสีแดง ปอก 2 ด้าน', template: 'single_red' },
-      { value: 'single_grey', label: '⬜ สายเดี่ยว สีเทา (ปอก 2 ด้าน)', defaultTitle: 'สายเดี่ยวสีเทา ปอก 2 ด้าน', template: 'single_grey' },
-      { value: 'single_yellow', label: '🟨 สายเดี่ยว สีเหลือง (ปอก 2 ด้าน)', defaultTitle: 'สายเดี่ยวสีเหลือง ปอก 2 ด้าน', template: 'single_yellow' },
-      { value: 'single_green', label: '🟩 สายเดี่ยว สีเขียว (ปอก 2 ด้าน)', defaultTitle: 'สายเดี่ยวสีเขียว ปอก 2 ด้าน', template: 'single_green' },
-      { value: 'single_white', label: '⚪ สายเดี่ยว สีขาว (ปอก 2 ด้าน)', defaultTitle: 'สายเดี่ยวสีขาว ปอก 2 ด้าน', template: 'single_white' },
-      { value: 'ground_yellow_green', label: '🔰 สายดิน เขียว-เหลือง (ปอก 2 ด้าน)', defaultTitle: 'สายดินเขียว-เหลือง', template: 'ground_yellow_green' }
+      { value: 'single_black', label: 'สายเดี่ยว สีดำ (ปอก 2 ด้าน)', defaultTitle: 'สายเดี่ยวสีดำ ปอก 2 ด้าน', template: 'single_black' },
+      { value: 'single_blue', label: 'สายเดี่ยว สีน้ำเงิน (ปอก 2 ด้าน)', defaultTitle: 'สายเดี่ยวสีน้ำเงิน ปอก 2 ด้าน', template: 'single_blue' },
+      { value: 'single_red', label: 'สายเดี่ยว สีแดง (ปอก 2 ด้าน)', defaultTitle: 'สายเดี่ยวสีแดง ปอก 2 ด้าน', template: 'single_red' },
+      { value: 'single_grey', label: 'สายเดี่ยว สีเทา (ปอก 2 ด้าน)', defaultTitle: 'สายเดี่ยวสีเทา ปอก 2 ด้าน', template: 'single_grey' },
+      { value: 'single_yellow', label: 'สายเดี่ยว สีเหลือง (ปอก 2 ด้าน)', defaultTitle: 'สายเดี่ยวสีเหลือง ปอก 2 ด้าน', template: 'single_yellow' },
+      { value: 'single_green', label: 'สายเดี่ยว สีเขียว (ปอก 2 ด้าน)', defaultTitle: 'สายเดี่ยวสีเขียว ปอก 2 ด้าน', template: 'single_green' },
+      { value: 'single_white', label: 'สายเดี่ยว สีขาว (ปอก 2 ด้าน)', defaultTitle: 'สายเดี่ยวสีขาว ปอก 2 ด้าน', template: 'single_white' },
+      { value: 'ground_yellow_green', label: 'สายดิน เขียว-เหลือง (ปอก 2 ด้าน)', defaultTitle: 'สายดินเขียว-เหลือง', template: 'ground_yellow_green' }
     ]
   },
   {
     group: 'การปอกกลางสาย & สายแยก & 2-Core (Mid-Strip, Split & 2-Core)',
     options: [
-      { value: 'mid_strip_multi', label: '🔲 ปอกกลางสายหลายช่วง (Multi-Window Strip)', defaultTitle: 'ปอกกลางสายหลายตำแหน่ง', template: 'mid_strip_multi' },
-      { value: 'twocore_sheath_strip', label: '⚯ สายคู่ 2 คอร์ ปอกเปลือกนอก + ปอกสายใน', defaultTitle: 'สายคู่ 2 คอร์ ปอกเปลือกนอก', template: 'twocore_sheath_strip' },
-      { value: 'twocore_split_y', label: '🌿 สายแยก 2 แฉก (Y-Branch Split Wire)', defaultTitle: 'สายแยก 2 แฉก (Y-Branch)', template: 'twocore_split_y' },
-      { value: 'twisted_pair', label: '🧬 สายไฟคู่ตีเกลียว (Twisted Pair)', defaultTitle: 'สายไฟคู่ตีเกลียว', template: 'twisted_pair' }
+      { value: 'mid_strip_multi', label: 'ปอกกลางสายหลายช่วง (Multi-Window Strip)', defaultTitle: 'ปอกกลางสายหลายตำแหน่ง', template: 'mid_strip_multi' },
+      { value: 'twocore_sheath_strip', label: 'สายคู่ 2 คอร์ ปอกเปลือกนอก + ปอกสายใน', defaultTitle: 'สายคู่ 2 คอร์ ปอกเปลือกนอก', template: 'twocore_sheath_strip' },
+      { value: 'twocore_split_y', label: 'สายแยก 2 แฉก (Y-Branch Split Wire)', defaultTitle: 'สายแยก 2 แฉก (Y-Branch)', template: 'twocore_split_y' },
+      { value: 'twisted_pair', label: 'สายไฟคู่ตีเกลียว (Twisted Pair)', defaultTitle: 'สายไฟคู่ตีเกลียว', template: 'twisted_pair' }
     ]
   },
   {
     group: 'สายแพ & ท่อร้อยสายไฟ (Flat Ribbon & Conduit Tube)',
     options: [
-      { value: 'flat_ribbon_split', label: '📑 สายแพแบน แยกเส้นหลายสาย (Fanned Out)', defaultTitle: 'สายแพแบนแยกเส้นหลายสาย', template: 'flat_ribbon_split' },
-      { value: 'flat_ribbon_grey', label: '📏 สายแพแบน สีเทา (ปอกปลาย 2 ด้าน)', defaultTitle: 'สายแพแบนสีเทา (ปอกปลาย 2 ด้าน)', template: 'flat_ribbon_grey' },
-      { value: 'flat_ribbon_rainbow', label: '🌈 สายแพแบน สีรุ้ง (ปอกปลาย 2 ด้าน)', defaultTitle: 'สายแพแบนสีรุ้ง (ปอกปลาย 2 ด้าน)', template: 'flat_ribbon_rainbow' },
-      { value: 'corrugated_tube', label: '🔘 ท่อร้อยสายไฟลูกฟูก (Corrugated Tube)', defaultTitle: 'ท่อร้อยสายไฟลูกฟูก (Corrugated Tube)', template: 'corrugated_tube' }
+      { value: 'flat_ribbon_split', label: 'สายแพแบน แยกเส้นหลายสาย (Fanned Out)', defaultTitle: 'สายแพแบนแยกเส้นหลายสาย', template: 'flat_ribbon_split' },
+      { value: 'flat_ribbon_grey', label: 'สายแพแบน สีเทา (ปอกปลาย 2 ด้าน)', defaultTitle: 'สายแพแบนสีเทา (ปอกปลาย 2 ด้าน)', template: 'flat_ribbon_grey' },
+      { value: 'flat_ribbon_rainbow', label: 'สายแพแบน สีรุ้ง (ปอกปลาย 2 ด้าน)', defaultTitle: 'สายแพแบนสีรุ้ง (ปอกปลาย 2 ด้าน)', template: 'flat_ribbon_rainbow' },
+      { value: 'corrugated_tube', label: 'ท่อร้อยสายไฟลูกฟูก (Corrugated Tube)', defaultTitle: 'ท่อร้อยสายไฟลูกฟูก (Corrugated Tube)', template: 'corrugated_tube' }
     ]
   },
   {
     group: 'สายไฟขนาดใหญ่ & มัลติคอร์ (Heavy Duty & Multi-Core)',
     options: [
-      { value: 'thick_cable_50sq', label: '⚡ สายไฟขนาดใหญ่ 50 SQ', defaultTitle: 'สายไฟขนาดใหญ่ 50 SQ', template: 'thick_cable_50sq' },
-      { value: 'thick_cable_80sq', label: '⚡ สายไฟขนาดใหญ่ 80 SQ', defaultTitle: 'สายไฟขนาดใหญ่ 80 SQ', template: 'thick_cable_80sq' },
-      { value: 'thick_cable_200sq', label: '⚡ สายไฟขนาดใหญ่พิเศษ 200 SQ', defaultTitle: 'สายไฟขนาดใหญ่พิเศษ 200 SQ', template: 'thick_cable_200sq' },
-      { value: 'multicore_cable', label: '🌐 สายมัลติคอร์ (MULTI CORE)', defaultTitle: 'สายมัลติคอร์ MULTI CORE', template: 'multicore_cable' },
-      { value: 'coaxial', label: '📡 สายสัญญาณโคแอกเชียล (Coaxial)', defaultTitle: 'สายสัญญาณโคแอกเชียล', template: 'coaxial' }
+      { value: 'thick_cable_50sq', label: 'สายไฟขนาดใหญ่ 50 SQ', defaultTitle: 'สายไฟขนาดใหญ่ 50 SQ', template: 'thick_cable_50sq' },
+      { value: 'thick_cable_80sq', label: 'สายไฟขนาดใหญ่ 80 SQ', defaultTitle: 'สายไฟขนาดใหญ่ 80 SQ', template: 'thick_cable_80sq' },
+      { value: 'thick_cable_200sq', label: 'สายไฟขนาดใหญ่พิเศษ 200 SQ', defaultTitle: 'สายไฟขนาดใหญ่พิเศษ 200 SQ', template: 'thick_cable_200sq' },
+      { value: 'multicore_cable', label: 'สายมัลติคอร์ (MULTI CORE)', defaultTitle: 'สายมัลติคอร์ MULTI CORE', template: 'multicore_cable' },
+      { value: 'coaxial', label: 'สายสัญญาณโคแอกเชียล (Coaxial)', defaultTitle: 'สายสัญญาณโคแอกเชียล', template: 'coaxial' }
     ]
   },
   {
     group: 'การเข้าหัวย้ำเทอร์มินอล, ใส่ซีลยาง & บัดกรี (Crimping & Soldering)',
     options: [
-      { value: 'crimp_double_seal', label: '🏷️ ย้ำหัว 2 ด้าน + ใส่ซีลยางกันน้ำ 2 ด้าน (C558SSA)', defaultTitle: 'ย้ำ 2 ด้าน + ซีลยาง 2 ด้าน', template: 'crimp_double_seal' },
-      { value: 'crimp_double', label: '🏷️ ย้ำหัวเทอร์มินอล 2 ด้าน (C511e / C551HXG)', defaultTitle: 'ย้ำหัวเทอร์มินอล 2 ด้าน', template: 'crimp_double' },
-      { value: 'crimp_double_single_seal', label: '🏷️ ย้ำหัว 2 ด้าน + ใส่ซีลยาง 1 ด้าน (C515e)', defaultTitle: 'ย้ำ 2 ด้าน + ซีลยาง 1 ด้าน', template: 'crimp_double_single_seal' },
-      { value: 'crimp_single_tin_single', label: '🏷️ ย้ำหัว 1 ด้าน + จุ่มตะกั่ว 1 ด้าน (C550SZe)', defaultTitle: 'ย้ำ 1 ด้าน + จุ่มตะกั่ว 1 ด้าน', template: 'crimp_single_tin_single' },
-      { value: 'crimp_single_seal_twist_tin', label: '🏷️ ย้ำหัว 1 ด้าน + ซีลยาง + ปั่นเกลียวจุ่มตะกั่ว (C556SZe)', defaultTitle: 'ย้ำ 1 ด้าน ซีลยาง + ปั่นเกลียวจุ่มตะกั่ว', template: 'crimp_single_seal_twist_tin' },
-      { value: 'tin_solder_both', label: '💧 ปั่นเกลียวจุ่มตะกั่ว 2 ด้าน (Solder Dipping)', defaultTitle: 'ปั่นเกลียวจุ่มตะกั่ว 2 ด้าน', template: 'tin_solder_both' }
+      { value: 'crimp_double_seal', label: 'ย้ำหัว 2 ด้าน + ใส่ซีลยางกันน้ำ 2 ด้าน (C558SSA)', defaultTitle: 'ย้ำ 2 ด้าน + ซีลยาง 2 ด้าน', template: 'crimp_double_seal' },
+      { value: 'crimp_double', label: 'ย้ำหัวเทอร์มินอล 2 ด้าน (C511e / C551HXG)', defaultTitle: 'ย้ำหัวเทอร์มินอล 2 ด้าน', template: 'crimp_double' },
+      { value: 'crimp_double_single_seal', label: 'ย้ำหัว 2 ด้าน + ใส่ซีลยาง 1 ด้าน (C515e)', defaultTitle: 'ย้ำ 2 ด้าน + ซีลยาง 1 ด้าน', template: 'crimp_double_single_seal' },
+      { value: 'crimp_single_tin_single', label: 'ย้ำหัว 1 ด้าน + จุ่มตะกั่ว 1 ด้าน (C550SZe)', defaultTitle: 'ย้ำ 1 ด้าน + จุ่มตะกั่ว 1 ด้าน', template: 'crimp_single_tin_single' },
+      { value: 'crimp_single_seal_twist_tin', label: 'ย้ำหัว 1 ด้าน + ซีลยาง + ปั่นเกลียวจุ่มตะกั่ว (C556SZe)', defaultTitle: 'ย้ำ 1 ด้าน ซีลยาง + ปั่นเกลียวจุ่มตะกั่ว', template: 'crimp_single_seal_twist_tin' },
+      { value: 'tin_solder_both', label: 'ปั่นเกลียวจุ่มตะกั่ว 2 ด้าน (Solder Dipping)', defaultTitle: 'ปั่นเกลียวจุ่มตะกั่ว 2 ด้าน', template: 'tin_solder_both' }
     ]
   },
   {
     group: 'รูปภาพกำหนดเอง (Custom Image)',
     options: [
-      { value: 'custom_image', label: '🖼️ อัปโหลดรูปภาพสายไฟเอง', defaultTitle: 'สายไฟชนิดพิเศษ', template: 'custom_image' }
+      { value: 'custom_image', label: 'อัปโหลดรูปภาพสายไฟเอง', defaultTitle: 'สายไฟชนิดพิเศษ', template: 'custom_image' }
     ]
   }
 ]

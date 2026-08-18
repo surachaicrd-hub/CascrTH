@@ -711,8 +711,8 @@ onMounted(() => {
                   <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     <div v-for="(bullet, idx) in bannerBullets" :key="idx" class="flex items-center gap-2">
                       <input type="text" v-model="bannerBullets[idx]" class="flex-1 border border-gray-300 rounded-lg px-2.5 py-1.5 text-xs font-medium">
-                      <button type="button" @click="removeBannerBullet(idx)" class="text-red-500 hover:text-red-700 text-xs px-2 py-1 font-bold bg-red-50 rounded">
-                        ✕
+                      <button type="button" @click="removeBannerBullet(idx)" class="text-red-500 hover:text-red-700 text-xs p-1.5 font-bold bg-red-50 rounded-lg">
+                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                       </button>
                     </div>
                   </div>
@@ -784,15 +784,17 @@ onMounted(() => {
                   <input type="text" v-model="whyChooseUsTitle" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm font-bold">
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  <div v-for="(bullet, idx) in whyChooseUsBullets" :key="idx" class="flex items-center gap-2">
-                    <span class="w-6 h-6 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-xs font-bold shrink-0">✓</span>
-                    <input type="text" v-model="whyChooseUsBullets[idx]" class="flex-1 border border-gray-300 rounded-lg px-3 py-1.5 text-xs font-medium">
-                    <button type="button" @click="removeWhyBullet(idx)" class="text-red-500 hover:text-red-700 text-xs px-2 py-1 font-bold bg-red-50 rounded">
-                      ✕
-                    </button>
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div v-for="(bullet, idx) in whyChooseUsBullets" :key="idx" class="flex items-center gap-2">
+                      <span class="w-6 h-6 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-xs font-bold shrink-0">
+                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                      </span>
+                      <input type="text" v-model="whyChooseUsBullets[idx]" class="flex-1 border border-gray-300 rounded-lg px-3 py-1.5 text-xs font-medium">
+                      <button type="button" @click="removeWhyBullet(idx)" class="text-red-500 hover:text-red-700 text-xs p-1.5 font-bold bg-red-50 rounded-lg">
+                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                      </button>
+                    </div>
                   </div>
-                </div>
               </div>
             </div>
 

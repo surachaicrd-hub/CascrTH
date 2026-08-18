@@ -234,7 +234,7 @@ const openAddTypeModal = (defaultGroup = '') => {
   typeForm.value = {
     groupName: defaultGroupName,
     value: 'wire_' + Date.now().toString(36),
-    label: '⚡ สายไฟกำหนดเอง',
+    label: 'สายไฟกำหนดเอง',
     defaultTitle: 'สายไฟกำหนดเอง',
     template: 'single_black',
     image: ''
@@ -529,7 +529,8 @@ onMounted(() => {
           @click="activeTab = 'types'"
           :class="['px-4 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition-all cursor-pointer flex items-center gap-1.5', activeTab === 'types' ? 'bg-white dark:bg-slate-900 text-blue-600 dark:text-blue-400 shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white']"
         >
-          <span>⚡ ชนิดสายไฟมาตรฐาน</span>
+          <svg class="w-4 h-4 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+          <span>ชนิดสายไฟมาตรฐาน</span>
           <span class="px-1.5 py-0.2 rounded-full text-[10px] bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700">{{ totalTypesCount }}</span>
         </button>
 
@@ -538,7 +539,8 @@ onMounted(() => {
           @click="activeTab = 'presets'"
           :class="['px-4 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition-all cursor-pointer flex items-center gap-1.5', activeTab === 'presets' ? 'bg-white dark:bg-slate-900 text-blue-600 dark:text-blue-400 shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white']"
         >
-          <span>📦 ชุดสำเร็จรูป (Presets)</span>
+          <svg class="w-4 h-4 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+          <span>ชุดสำเร็จรูป (Presets)</span>
           <span class="px-1.5 py-0.2 rounded-full text-[10px] bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700">{{ wirePresets.length }}</span>
         </button>
 
@@ -547,7 +549,8 @@ onMounted(() => {
           @click="activeTab = 'preview'"
           :class="['px-4 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition-all cursor-pointer flex items-center gap-1.5', activeTab === 'preview' ? 'bg-white dark:bg-slate-900 text-blue-600 dark:text-blue-400 shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white']"
         >
-          <span>👁️ พรีวิวการแสดงผลจริง</span>
+          <svg class="w-4 h-4 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+          <span>พรีวิวการแสดงผลจริง</span>
         </button>
       </div>
 
@@ -886,8 +889,10 @@ onMounted(() => {
       <div class="bg-white dark:bg-[#111827] rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xl max-w-lg w-full overflow-hidden flex flex-col max-h-[90vh]">
         <!-- Modal Header -->
         <div class="px-6 py-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
-          <h3 class="text-base font-black text-slate-900 dark:text-white">
-            {{ isEditingType ? '✏️ แก้ไขข้อมูลชนิดสายไฟ' : '⚡ เพิ่มชนิดสายไฟใหม่' }}
+          <h3 class="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
+            <svg v-if="isEditingType" class="w-4 h-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+            <svg v-else class="w-4 h-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+            {{ isEditingType ? 'แก้ไขข้อมูลชนิดสายไฟ' : 'เพิ่มชนิดสายไฟใหม่' }}
           </h3>
           <button @click="showTypeModal = false" class="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-white cursor-pointer">
             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
@@ -924,7 +929,7 @@ onMounted(() => {
                 class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2.5 text-xs font-semibold text-slate-800 dark:text-slate-200 outline-none focus:border-blue-500 cursor-pointer appearance-none pr-8"
               >
                 <option v-for="(g, idx) in wireGroups" :key="idx" :value="g.group">
-                  📁 {{ g.group }}
+                  {{ g.group }}
                 </option>
               </select>
               <div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
@@ -946,12 +951,12 @@ onMounted(() => {
           <!-- Label (with icon) -->
           <div class="space-y-1.5">
             <label class="block text-xs font-bold text-slate-700 dark:text-slate-300">
-              ป้ายกำกับแสดงในเมนูตัวเลือก (Dropdown Label with Emoji)
+              ป้ายกำกับแสดงในเมนูตัวเลือก (Dropdown Label)
             </label>
             <input
               v-model="typeForm.label"
               type="text"
-              placeholder="เช่น 🔰 สายดิน เขียว-เหลือง (ปอก 2 ด้าน)"
+              placeholder="เช่น สายดิน เขียว-เหลือง (ปอก 2 ด้าน)"
               class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800 dark:text-slate-200 outline-none focus:border-blue-500"
             />
           </div>
@@ -1021,8 +1026,9 @@ onMounted(() => {
       <div class="bg-white dark:bg-[#111827] rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xl max-w-xl w-full overflow-hidden flex flex-col max-h-[90vh]">
         <!-- Header -->
         <div class="px-6 py-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
-          <h3 class="text-base font-black text-slate-900 dark:text-white">
-            {{ isEditingPreset ? '📦 แก้ไขชุดพรีเซ็ตสำเร็จรูป' : '📦 เพิ่มชุดพรีเซ็ตสำเร็จรูปใหม่' }}
+          <h3 class="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
+            <svg class="w-4 h-4 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+            {{ isEditingPreset ? 'แก้ไขชุดพรีเซ็ตสำเร็จรูป' : 'เพิ่มชุดพรีเซ็ตสำเร็จรูปใหม่' }}
           </h3>
           <button @click="showPresetModal = false" class="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-white cursor-pointer">
             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>

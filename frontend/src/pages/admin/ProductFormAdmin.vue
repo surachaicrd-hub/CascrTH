@@ -2412,7 +2412,8 @@ const generateDescriptionWithAI = async () => {
                   class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 border"
                   :class="isCapabilityEnabled(std.id) ? 'bg-[#002855] text-white border-[#002855] shadow-xs' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-100'"
                 >
-                  <span>{{ isCapabilityEnabled(std.id) ? '✓' : '+' }}</span>
+                  <svg v-if="isCapabilityEnabled(std.id)" class="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                  <svg v-else class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
                   <span>{{ std.label }}</span>
                 </button>
               </div>
@@ -2567,49 +2568,49 @@ const generateDescriptionWithAI = async () => {
                     <span class="w-2 h-2 rounded-full bg-emerald-500"></span> + สายดิน
                   </button>
                   <button type="button" @click.prevent="addWireSample('mid_strip_multi', 'ปอกกลางสายหลายตำแหน่ง')" class="px-2 py-1 bg-white hover:bg-indigo-50 text-indigo-700 rounded-lg text-[11px] font-semibold border border-indigo-200 transition-colors flex items-center gap-1 cursor-pointer">
-                    🔲 + ปอกกลางสายหลายช่วง
+                    + ปอกกลางสายหลายช่วง
                   </button>
 
                   <!-- สายคู่, สายแยก, สายแพ -->
                   <button type="button" @click.prevent="addWireSample('twocore_sheath_strip', 'สายคู่ 2 คอร์ ปอกเปลือกนอก')" class="px-2 py-1 bg-white hover:bg-slate-50 text-slate-700 rounded-lg text-[11px] font-semibold border border-slate-200 transition-colors flex items-center gap-1 cursor-pointer">
-                    ⚯ + สายคู่ 2 คอร์
+                    + สายคู่ 2 คอร์
                   </button>
                   <button type="button" @click.prevent="addWireSample('twocore_split_y', 'สายแยก 2 แฉก (Y-Branch)')" class="px-2 py-1 bg-white hover:bg-amber-50 text-amber-700 rounded-lg text-[11px] font-semibold border border-amber-200 transition-colors flex items-center gap-1 cursor-pointer">
-                    🌿 + สายแยก 2 แฉก
+                    + สายแยก 2 แฉก
                   </button>
                   <button type="button" @click.prevent="addWireSample('flat_ribbon_split', 'สายแพแบนแยกเส้นหลายสาย')" class="px-2 py-1 bg-white hover:bg-slate-50 text-slate-700 rounded-lg text-[11px] font-semibold border border-slate-200 transition-colors flex items-center gap-1 cursor-pointer">
-                    📑 + สายแพแยกเส้น
+                    + สายแพแยกเส้น
                   </button>
                   <button type="button" @click.prevent="addWireSample('flat_ribbon_grey', 'สายแพแบนสีเทา (ปอกปลาย 2 ด้าน)')" class="px-2 py-1 bg-white hover:bg-slate-50 text-slate-700 rounded-lg text-[11px] font-semibold border border-slate-200 transition-colors flex items-center gap-1 cursor-pointer">
-                    📏 + สายแพสีเทา
+                    + สายแพสีเทา
                   </button>
                   <button type="button" @click.prevent="addWireSample('flat_ribbon_rainbow', 'สายแพแบนสีรุ้ง (ปอกปลาย 2 ด้าน)')" class="px-2 py-1 bg-white hover:bg-amber-50 text-amber-800 rounded-lg text-[11px] font-semibold border border-amber-200 transition-colors flex items-center gap-1 cursor-pointer">
-                    🌈 + สายแพสีรุ้ง
+                    + สายแพสีรุ้ง
                   </button>
                   <button type="button" @click.prevent="addWireSample('corrugated_tube', 'ท่อร้อยสายไฟลูกฟูก (Corrugated Tube)')" class="px-2 py-1 bg-white hover:bg-slate-50 text-slate-700 rounded-lg text-[11px] font-semibold border border-slate-200 transition-colors flex items-center gap-1 cursor-pointer">
-                    🔘 + ท่อลูกฟูก
+                    + ท่อลูกฟูก
                   </button>
 
                   <!-- สายไฟขนาดใหญ่ & มัลติคอร์ -->
                   <button type="button" @click.prevent="addWireSample('thick_cable_50sq', 'สายไฟขนาดใหญ่ 50 SQ')" class="px-2 py-1 bg-white hover:bg-purple-50 text-purple-700 rounded-lg text-[11px] font-semibold border border-purple-200 transition-colors flex items-center gap-1 cursor-pointer">
-                    ⚡ + 50 SQ
+                    + 50 SQ
                   </button>
                   <button type="button" @click.prevent="addWireSample('thick_cable_80sq', 'สายไฟขนาดใหญ่ 80 SQ')" class="px-2 py-1 bg-white hover:bg-purple-50 text-purple-700 rounded-lg text-[11px] font-semibold border border-purple-200 transition-colors flex items-center gap-1 cursor-pointer">
-                    ⚡ + 80 SQ
+                    + 80 SQ
                   </button>
                   <button type="button" @click.prevent="addWireSample('multicore_cable', 'สายมัลติคอร์ MULTI CORE')" class="px-2 py-1 bg-white hover:bg-cyan-50 text-cyan-700 rounded-lg text-[11px] font-semibold border border-cyan-200 transition-colors flex items-center gap-1 cursor-pointer">
-                    🌐 + MULTI CORE
+                    + MULTI CORE
                   </button>
 
                   <!-- เข้าหัวย้ำเทอร์มินอล, ใส่ซีลยาง & บัดกรี -->
                   <button type="button" @click.prevent="addWireSample('crimp_double_seal', 'ย้ำหัว 2 ด้าน พร้อมใส่ซีลยาง 2 ด้าน')" class="px-2 py-1 bg-white hover:bg-amber-50 text-amber-800 rounded-lg text-[11px] font-semibold border border-amber-300 transition-colors flex items-center gap-1 cursor-pointer">
-                    🏷️ + ย้ำ 2 ด้าน + ซีลยาง (C558SSA)
+                    + ย้ำ 2 ด้าน + ซีลยาง (C558SSA)
                   </button>
                   <button type="button" @click.prevent="addWireSample('crimp_double', 'ย้ำหัวเทอร์มินอล 2 ด้าน')" class="px-2 py-1 bg-white hover:bg-amber-50 text-amber-800 rounded-lg text-[11px] font-semibold border border-amber-300 transition-colors flex items-center gap-1 cursor-pointer">
-                    🏷️ + ย้ำหัว 2 ด้าน (C511e)
+                    + ย้ำหัว 2 ด้าน (C511e)
                   </button>
                   <button type="button" @click.prevent="addWireSample('crimp_single_tin_single', 'ย้ำหัว 1 ด้าน + จุ่มตะกั่ว 1 ด้าน')" class="px-2 py-1 bg-white hover:bg-amber-50 text-amber-800 rounded-lg text-[11px] font-semibold border border-amber-300 transition-colors flex items-center gap-1 cursor-pointer">
-                    🏷️ + ย้ำ 1 ด้าน + จุ่มตะกั่ว (C550SZe)
+                    + ย้ำ 1 ด้าน + จุ่มตะกั่ว (C550SZe)
                   </button>
                 </div>
               </div>
@@ -2846,7 +2847,7 @@ const generateDescriptionWithAI = async () => {
           <button type="button" @click="handleFullSeoGeoAutoFix" :disabled="generatingFullSeo" class="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl shadow-md transition-all flex items-center gap-2 disabled:opacity-50">
             <svg v-if="generatingFullSeo" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
             <svg v-else class="w-4 h-4 text-amber-300" fill="currentColor" viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-            {{ generatingFullSeo ? 'กำลังประมวลผล 12-Layers...' : '⚡ AI Auto-Generate SEO' }}
+            <span>{{ generatingFullSeo ? 'กำลังประมวลผล 12-Layers...' : 'AI Auto-Generate SEO' }}</span>
           </button>
         </div>
 
@@ -2962,7 +2963,10 @@ const generateDescriptionWithAI = async () => {
             <div class="text-[11px] font-mono text-[#006621]">yoursite.com > product > {{ form.slug || 'product' }}</div>
             <h4 class="text-base font-bold text-[#1a0dab]">{{ form.seo_title || form.name }}</h4>
             <div class="flex items-center gap-3 text-xs text-amber-600 font-bold">
-              <span>★ 5.0 ({{ form.review_count || 12 }} reviews)</span>
+              <span class="flex items-center gap-1">
+                <svg class="w-3.5 h-3.5 text-amber-500 fill-amber-500" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                5.0 ({{ form.review_count || 12 }} reviews)
+              </span>
               <span class="text-slate-700 font-bold">฿{{ Number(form.price || 0).toLocaleString() }}</span>
               <span class="text-emerald-600 font-bold">In stock</span>
             </div>
