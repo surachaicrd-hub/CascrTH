@@ -258,21 +258,19 @@ onMounted(() => {
     <template v-else>
       
       <!-- =========================================================================
-           ARTICLE HEADER HERO (Cover Image Background + Enterprise Dark Aesthetic)
+           ARTICLE HEADER HERO (Enterprise Cover Image Backdrop)
            ========================================================================= -->
-      <header class="relative overflow-hidden pt-28 pb-16 sm:pb-20 bg-[#070A0F] border-b border-white/[0.08]">
+      <header class="relative overflow-hidden pt-32 pb-20 sm:pt-40 sm:pb-24 bg-[#070A0F] border-b border-white/[0.08]">
         
-        <!-- Cover Image Backdrop -->
-        <div v-if="article.cover_image" class="absolute inset-0 z-0 overflow-hidden pointer-events-none">
-          <img 
-            :src="getOptimizedBlogImageUrl(article.cover_image, 1600)" 
-            :alt="article.title" 
-            class="w-full h-full object-cover object-center scale-105 filter blur-[2px] opacity-25 dark:opacity-20 transform-gpu"
-          />
-          <!-- Multi-gradient overlays for maximum text legibility and aesthetic depth -->
-          <div class="absolute inset-0 bg-gradient-to-t from-[#070A0F] via-[#070A0F]/80 to-[#070A0F]/70"></div>
-          <div class="absolute inset-0 bg-gradient-to-r from-[#070A0F]/90 via-transparent to-[#070A0F]/90"></div>
-        </div>
+        <!-- Cover Image Backdrop (Crisp, High-Impact & Radiant) -->
+        <div 
+          v-if="article.cover_image"
+          class="absolute inset-0 bg-cover bg-center bg-no-repeat transition-all duration-700 opacity-65 scale-100 pointer-events-none"
+          :style="{ backgroundImage: `url(${getOptimizedBlogImageUrl(article.cover_image, 1600)})` }"
+        ></div>
+        <!-- Directional Gradient Overlays: Rich dark on text area, luminous & clear on photo -->
+        <div class="absolute inset-0 bg-gradient-to-r from-[#070A0F] via-[#070A0F]/75 to-[#070A0F]/30 pointer-events-none"></div>
+        <div class="absolute inset-0 bg-gradient-to-t from-[#070A0F] via-transparent to-[#070A0F]/50 pointer-events-none"></div>
 
         <!-- Ambient Glows -->
         <div class="absolute -top-32 -left-32 w-96 h-96 bg-emerald-500/10 rounded-full blur-[120px] pointer-events-none"></div>
@@ -281,54 +279,54 @@ onMounted(() => {
         <div class="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center sm:text-left">
           
           <!-- Breadcrumbs -->
-          <nav class="flex items-center justify-center sm:justify-start gap-2 text-xs font-medium text-slate-400 mb-6 flex-wrap" aria-label="Breadcrumb">
-            <router-link to="/" class="hover:text-emerald-400 transition-colors flex items-center gap-1.5">
+          <nav class="flex items-center justify-center sm:justify-start gap-2 text-xs font-medium text-slate-300 mb-6 flex-wrap" aria-label="Breadcrumb">
+            <router-link to="/" class="hover:text-emerald-400 transition-colors flex items-center gap-1.5 drop-shadow-sm">
               <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
               </svg>
               <span>หน้าแรก</span>
             </router-link>
-            <svg class="w-3 h-3 text-slate-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <svg class="w-3 h-3 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
             </svg>
-            <router-link to="/blog" class="hover:text-emerald-400 transition-colors">บทความ</router-link>
-            <svg class="w-3 h-3 text-slate-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <router-link to="/blog" class="hover:text-emerald-400 transition-colors drop-shadow-sm">บทความ</router-link>
+            <svg class="w-3 h-3 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
             </svg>
-            <span class="text-emerald-400 font-semibold truncate max-w-[180px] sm:max-w-xs">{{ article.title }}</span>
+            <span class="text-emerald-400 font-semibold truncate max-w-[180px] sm:max-w-xs drop-shadow-sm">{{ article.title }}</span>
           </nav>
 
           <!-- Category Pill -->
-          <div v-if="article.category" class="inline-flex items-center gap-2 mb-4 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 backdrop-blur-md">
-            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-            <span class="text-emerald-400 text-[11px] font-bold tracking-wider uppercase">{{ article.category }}</span>
+          <div v-if="article.category" class="inline-flex items-center gap-2 mb-4 px-3.5 py-1.5 rounded-full bg-emerald-500/20 border border-emerald-500/30 backdrop-blur-md shadow-sm">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span class="text-emerald-300 text-[11px] font-bold tracking-wider uppercase">{{ article.category }}</span>
           </div>
 
           <!-- Main Title -->
-          <h1 class="text-2xl sm:text-3xl lg:text-4xl font-black text-white leading-tight tracking-tight">
+          <h1 class="text-2xl sm:text-3xl lg:text-4xl font-black text-white leading-tight tracking-tight drop-shadow-lg">
             {{ article.title }}
           </h1>
 
           <!-- Meta Bar & Share Buttons -->
-          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mt-6 pt-6 border-t border-white/[0.06]">
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mt-6 pt-6 border-t border-white/[0.1]">
             <!-- Meta details -->
-            <div class="flex flex-wrap items-center justify-center sm:justify-start gap-4 text-xs text-slate-400">
-              <span class="flex items-center gap-1.5">
+            <div class="flex flex-wrap items-center justify-center sm:justify-start gap-4 text-xs text-slate-300">
+              <span class="flex items-center gap-1.5 drop-shadow-sm">
                 <svg class="w-3.5 h-3.5 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                 </svg>
                 <span>{{ formatArticleDate(article.published_at || article.created_at) }}</span>
               </span>
 
-              <span class="flex items-center gap-1.5">
-                <svg class="w-3.5 h-3.5 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <span class="flex items-center gap-1.5 drop-shadow-sm">
+                <svg class="w-3.5 h-3.5 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                   <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
                 </svg>
                 <span>{{ article.view_count || 0 }} ยอดเข้าชม</span>
               </span>
 
-              <span v-if="article.author || settingsStore.storeName" class="text-slate-400">
+              <span v-if="article.author || settingsStore.storeName" class="text-slate-300 drop-shadow-sm">
                 โดย {{ article.author || settingsStore.storeName }}
               </span>
             </div>
@@ -379,16 +377,6 @@ onMounted(() => {
           
           <!-- Left Main Content Column -->
           <div class="lg:col-span-8 space-y-8">
-            
-            <!-- Cover Image Container -->
-            <div class="rounded-3xl overflow-hidden shadow-2xl border border-slate-200/80 dark:border-white/[0.06] bg-slate-900 aspect-[16/9]">
-              <img
-                :src="getOptimizedBlogImageUrl(article.cover_image, 1200)"
-                :alt="article.title"
-                class="w-full h-full object-cover"
-                @error="onImageError"
-              />
-            </div>
 
             <!-- Rich Text Body -->
             <article class="bg-white dark:bg-[#10141D] rounded-3xl p-6 sm:p-10 lg:p-12 border border-slate-200/80 dark:border-white/[0.06] shadow-xl shadow-slate-900/5 dark:shadow-black/20">
