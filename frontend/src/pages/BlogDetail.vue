@@ -390,7 +390,7 @@ onMounted(() => {
 
             <!-- Rich Text Body -->
             <article class="bg-white dark:bg-[#10141D] rounded-3xl p-6 sm:p-10 lg:p-12 border border-slate-200/80 dark:border-white/[0.06] shadow-xl shadow-slate-900/5 dark:shadow-black/20">
-              <div class="prose prose-emerald dark:prose-invert max-w-none text-sm sm:text-base leading-relaxed" v-html="article.content"></div>
+              <div class="ck-content prose prose-emerald dark:prose-invert max-w-none text-sm sm:text-base leading-relaxed" v-html="article.content"></div>
             </article>
 
             <!-- Tags list -->

@@ -213,77 +213,97 @@
   color: theme('colors.white') !important;
 }
 
-/* 7. Technical Specification Table (Ultra-Compact & Premium) */
+/* 7. Technical Specification Table (Ultra-Compact & Premium Universal Styling) */
 .ck-content figure.table,
-.prose.ck-content figure.table {
-  @apply overflow-x-auto w-full my-3.5 block rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 bg-white dark:bg-[#111827] !important;
+.prose figure.table,
+figure.table,
+article figure.table {
+  @apply overflow-x-auto w-full my-6 block rounded-2xl shadow-md border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#111827] !important;
 }
 
 .ck-content figure.table table,
-.ck-content > table,
-.prose.ck-content figure.table table,
-.prose.ck-content > table {
-  @apply w-full min-w-[460px] border-separate border-spacing-0 m-0 bg-transparent !important;
+.ck-content table,
+.prose figure.table table,
+.prose table,
+article table {
+  @apply w-full border-separate border-spacing-0 m-0 bg-transparent !important;
+  display: table !important;
+  min-width: 100% !important;
 }
 
+/* Standalone tables not wrapped in figure.table */
+.prose > table,
 .ck-content > table,
-.prose.ck-content > table {
-  @apply rounded-xl overflow-x-auto block shadow-sm border border-gray-200 dark:border-gray-800 my-3.5 bg-white dark:bg-[#111827] !important;
+article > table,
+.prose-emerald table,
+.prose-blue table {
+  @apply rounded-2xl overflow-hidden block overflow-x-auto shadow-md border border-slate-200 dark:border-slate-800 my-6 bg-white dark:bg-[#111827] !important;
 }
 
 .ck-content thead,
-.prose.ck-content thead {
-  @apply bg-emerald-50/80 dark:bg-emerald-950/30 text-emerald-900 dark:text-emerald-400 !important;
+.prose thead,
+article thead {
+  @apply bg-slate-100/90 dark:bg-slate-800/80 text-slate-900 dark:text-slate-100 !important;
 }
 
 .ck-content th,
-.prose.ck-content th {
-  @apply px-3 py-2 md:px-3.5 md:py-2 text-left text-xs md:text-sm font-bold tracking-wider border-b border-emerald-100 dark:border-emerald-900/40 !important;
-  line-height: 1.45 !important;
+.prose th,
+article th {
+  @apply px-4 py-3 md:px-5 md:py-3.5 text-left text-xs md:text-sm font-black tracking-wide border-b-2 border-slate-200 dark:border-slate-700/80 text-slate-900 dark:text-emerald-400 !important;
+  line-height: 1.5 !important;
 }
 
 .ck-content td,
-.prose.ck-content td {
-  @apply px-3 py-2 md:px-3.5 md:py-2 text-xs md:text-sm text-gray-700 dark:text-gray-300 align-middle border-b border-gray-100 dark:border-gray-800/80 break-words !important;
-  line-height: 1.45 !important;
+.prose td,
+article td {
+  @apply px-4 py-3 md:px-5 md:py-3.5 text-xs md:text-sm text-slate-700 dark:text-slate-300 align-middle border-b border-slate-100 dark:border-slate-800/80 break-words !important;
+  line-height: 1.5 !important;
 }
 
 .ck-content tbody tr,
-.prose.ck-content tbody tr {
-  @apply transition-colors duration-200 hover:bg-emerald-50/40 dark:hover:bg-emerald-900/10 !important;
+.prose tbody tr,
+article tbody tr {
+  @apply transition-colors duration-150 hover:bg-slate-50/80 dark:hover:bg-slate-800/40 !important;
 }
 
-/* For tables where the first column acts as a header (28% - 30% width) */
+/* For tables where the first column acts as a key/label (e.g. Specification Table) */
 .ck-content tbody td:first-child,
 .ck-content tbody th:first-child,
-.prose.ck-content tbody td:first-child,
-.prose.ck-content tbody th:first-child {
-  @apply font-bold text-gray-900 dark:text-gray-100 w-[30%] md:w-[28%] bg-gray-50/60 dark:bg-gray-800/40 border-r border-gray-100 dark:border-gray-800/80 !important;
+.prose tbody td:first-child,
+.prose tbody th:first-child,
+article tbody td:first-child,
+article tbody th:first-child {
+  @apply font-bold text-slate-900 dark:text-slate-100 bg-slate-50/50 dark:bg-slate-800/30 border-r border-slate-100 dark:border-slate-800/80 !important;
 }
 
 /* Remove bottom border on last row */
 .ck-content tbody tr:last-child td,
 .ck-content tbody tr:last-child th,
-.prose.ck-content tbody tr:last-child td,
-.prose.ck-content tbody tr:last-child th {
+.prose tbody tr:last-child td,
+.prose tbody tr:last-child th,
+article tbody tr:last-child td,
+article tbody tr:last-child th {
   @apply border-b-0 !important;
 }
 
 /* Custom Scrollbar for tables */
 .ck-content figure.table::-webkit-scrollbar,
-.ck-content > table::-webkit-scrollbar {
-  height: 4px;
+.prose figure.table::-webkit-scrollbar,
+.prose table::-webkit-scrollbar,
+.ck-content table::-webkit-scrollbar,
+article table::-webkit-scrollbar {
+  height: 6px;
 }
 .ck-content figure.table::-webkit-scrollbar-track,
-.ck-content > table::-webkit-scrollbar-track {
+.prose table::-webkit-scrollbar-track {
   background: transparent;
 }
 .ck-content figure.table::-webkit-scrollbar-thumb,
-.ck-content > table::-webkit-scrollbar-thumb {
+.prose table::-webkit-scrollbar-thumb {
   background: #cbd5e1;
   border-radius: 10px;
 }
 .dark .ck-content figure.table::-webkit-scrollbar-thumb,
-.dark .ck-content > table::-webkit-scrollbar-thumb {
-  background: #4b5563;
+.dark .prose table::-webkit-scrollbar-thumb {
+  background: #475569;
 }

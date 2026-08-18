@@ -416,7 +416,7 @@ onUnmounted(() => {
                 </div>
                 <h2 class="text-base sm:text-lg font-bold text-slate-900 dark:text-white">รายละเอียดโครงการและข้อมูลการติดตั้ง</h2>
               </div>
-              <div class="prose prose-blue dark:prose-invert max-w-none text-sm sm:text-base leading-relaxed" v-html="project.content_rich || project.description"></div>
+              <div class="ck-content prose prose-blue dark:prose-invert max-w-none text-sm sm:text-base leading-relaxed" v-html="project.content_rich || project.description"></div>
             </article>
 
             <!-- Image Gallery Grid -->
