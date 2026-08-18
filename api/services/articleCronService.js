@@ -4,6 +4,31 @@ const gemini = require('./geminiService');
 
 let currentTask = null;
 
+// Helper function to safely parse AI JSON responses
+function parseAiJson(rawText) {
+    if (!rawText) return null;
+    let cleaned = rawText.trim();
+    cleaned = cleaned.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
+    try {
+        return JSON.parse(cleaned);
+    } catch (e1) {
+        const jsonMatch = cleaned.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+            try {
+                return JSON.parse(jsonMatch[0]);
+            } catch (e2) {
+                const sanitized = jsonMatch[0].replace(/"([^"\\]*(\\.[^"\\]*)*)"/g, (match) => {
+                    return match.replace(/[\r\n]+/g, '\\n').replace(/\t/g, '\\t');
+                });
+                try {
+                    return JSON.parse(sanitized);
+                } catch (e3) { }
+            }
+        }
+        return null;
+    }
+}
+
 /**
  * Auto-generate an article from a product using AI
  */
@@ -13,35 +38,36 @@ const processArticleGeneration = async (isTest = false) => {
 
         // 1. Get config
         const [settings] = await db.query("SELECT setting_value FROM settings WHERE setting_key = 'article_automation_config'");
-        if (!settings || settings.length === 0) return { success: false, error: 'No config found' };
-
-        let config = {};
-        try { config = JSON.parse(settings[0].setting_value); } catch (e) { return { success: false, error: 'Invalid config' }; }
-
-        if (!config.enabled && !isTest) return { success: false, error: 'Disabled' };
-
-        const productIds = config.product_ids || [];
-        if (productIds.length === 0) {
-            // Fallback: pick random active product
-            const [randProducts] = await db.query('SELECT id FROM products WHERE is_active = 1 ORDER BY RAND() LIMIT 1');
-            if (randProducts.length === 0) return { success: false, error: 'No active products' };
-            productIds.push(randProducts[0].id);
+        let config = { enabled: false, time: '08:00', style: 'educational', product_ids: [], last_sent_index: -1, last_generated_date: null };
+        if (settings && settings.length > 0) {
+            try { config = { ...config, ...JSON.parse(settings[0].setting_value) }; } catch (e) {}
         }
 
-        // 2. Pick next product (round-robin, no repeat until all used)
-        let nextIndex = (config.last_sent_index !== undefined ? config.last_sent_index + 1 : 0) % productIds.length;
-        const selectedId = productIds[nextIndex];
+        if (!config.enabled && !isTest) return { success: false, error: 'ระบบ AI Auto-Pilot ปิดใช้งานอยู่' };
 
-        const [products] = await db.query('SELECT * FROM products WHERE id = ? AND is_active = 1', [selectedId]);
-        if (products.length === 0) return { success: false, error: 'Product not found or inactive' };
+        // 2. Fetch all active products
+        const [allActiveProducts] = await db.query('SELECT * FROM products WHERE is_active = 1');
+        if (allActiveProducts.length === 0) return { success: false, error: 'ไม่พบรายการสินค้าที่เปิดใช้งานในระบบ' };
 
-        const product = products[0];
-        console.log(`[Article Cron] Selected product: ${product.name}`);
+        // Match config.product_ids with actual active products
+        let eligibleProducts = [];
+        if (Array.isArray(config.product_ids) && config.product_ids.length > 0) {
+            eligibleProducts = allActiveProducts.filter(p => config.product_ids.includes(p.id));
+        }
+        // If none of the selected IDs exist in active products, use all active products
+        if (eligibleProducts.length === 0) {
+            eligibleProducts = allActiveProducts;
+        }
 
-        // 3. Generate article with AI
+        // 3. Pick next product (round-robin)
+        let nextIndex = (config.last_sent_index !== undefined ? config.last_sent_index + 1 : 0) % eligibleProducts.length;
+        const product = eligibleProducts[nextIndex];
+        console.log(`[Article Cron] Selected product: "${product.name}" (ID: ${product.id})`);
+
+        // 4. Generate article with AI
         const style = config.style || 'educational';
         const stylePrompts = {
-            educational: 'เขียนบทความให้ความรู้แบบเชิงลึก อธิบายอย่างละเอียด ใช้ภาษาเข้าใจง่าย มีหัวข้อย่อยชัดเจน ความยาว 800-1200 คำ',
+            educational: 'เขียนบทความให้ความรู้เชิงลึก อธิบายละเอียด ใช้ภาษาเข้าใจง่าย มีหัวข้อย่อยชัดเจน ความยาว 800-1200 คำ',
             sales: 'เขียนบทความโปรโมตสินค้า เน้นจุดเด่น คุณสมบัติ ความคุ้มค่า มี Call-to-Action กระตุ้นการตัดสินใจ ความยาว 600-800 คำ',
             howto: 'เขียนบทความแนว How-to / Tips เป็นขั้นตอน มี checklist มีเคล็ดลับ ใช้ numbered list ความยาว 800-1000 คำ',
             review: 'เขียนในสไตล์รีวิวประสบการณ์ใช้งานจริง บอกข้อดี-ข้อจำกัด ให้คะแนน ความยาว 600-800 คำ'
@@ -50,50 +76,49 @@ const processArticleGeneration = async (isTest = false) => {
         let attrText = '';
         try { const attrs = JSON.parse(product.attributes || '[]'); attrText = attrs.map(a => `${a.key}: ${a.value}`).join(', '); } catch (e) {}
 
-        let storeName = 'STORAGE HOUSE';
-        let companyLegalName = 'บริษัท ซีอาร์ ดิสทริบิวชั่น จำกัด';
+        let storeName = 'KODERA Wire Processing Machines';
+        let companyLegalName = 'บริษัท แคส-ซีอาร์ จำกัด';
         try {
             const [sRows] = await db.query("SELECT setting_key, setting_value FROM settings WHERE setting_key IN ('store_name', 'contact_company_name', 'company_legal_name')");
             const sMap = {};
             sRows.forEach(r => { sMap[r.setting_key] = r.setting_value; });
-            storeName = sMap['store_name'] || sMap['contact_company_name'] || 'STORAGE HOUSE';
-            companyLegalName = sMap['company_legal_name'] || sMap['contact_company_name'] || 'บริษัท ซีอาร์ ดิสทริบิวชั่น จำกัด';
+            storeName = sMap['store_name'] || sMap['contact_company_name'] || 'KODERA Wire Processing Machines';
+            companyLegalName = sMap['company_legal_name'] || sMap['contact_company_name'] || 'บริษัท แคส-ซีอาร์ จำกัด';
         } catch (e) {}
 
-        const prompt = `คุณเป็นนักเขียนบทความมืออาชีพและผู้เชี่ยวชาญด้าน SEO/GEO (Generative Engine Optimization) สำหรับ ${storeName} (ดำเนินการโดย ${companyLegalName}) ผู้จัดจำหน่ายบ้านเก็บของสำเร็จรูป ตู้เก็บของกลางแจ้ง และโกดังสำเร็จรูปคุณภาพพรีเมียมในไทย
+        const prompt = `คุณเป็นนักเขียนบทความวิศวกรรมอุตสาหการและผู้เชี่ยวชาญด้าน SEO/GEO (Generative Engine Optimization) สำหรับ ${storeName} (ดำเนินการโดย ${companyLegalName}) ผู้นำเข้าและจัดจำหน่ายเครื่องตัดปอกสายไฟอัตโนมัติ (Automatic Wire Stripping & Crimping Machine), เครื่องย้ำหัวสายไฟ, เครื่องเข้าหัวเทอร์มินอล แบรนด์ KODERA (CASTING) คุณภาพมาตรฐานญี่ปุ่นชั้นนำในประเทศไทย
 
-สไตล์: ${stylePrompts[style] || stylePrompts.educational}
+สไตล์การเขียน: ${stylePrompts[style] || stylePrompts.educational}
 
 ข้อมูลสินค้าอ้างอิง:
-- ชื่อ: ${product.name}
-- หมวดหมู่: ${product.category || '-'}
-- ราคา: ${product.price ? Number(product.price).toLocaleString() + ' บาท' : 'สอบถาม'}
+- ชื่อรุ่น/สินค้า: ${product.name}
+- หมวดหมู่: ${product.category || 'เครื่องตัดปอกสายไฟอัตโนมัติ'}
+- ราคา: ${product.price ? Number(product.price).toLocaleString() + ' บาท' : 'ติดต่อสอบถามราคาพิเศษ'}
 - คำอธิบาย: ${product.short_description || product.description?.substring(0, 500) || '-'}
-- คุณสมบัติ: ${attrText || '-'}
+- คุณสมบัติ/สเปกทางเทคนิค: ${attrText || '-'}
 - ข้อมูลเพิ่มเติม: ${product.llm_context || '-'}
 
 กฎการเขียนบทความสำหรับการค้นหาด้วย AI (GEO Rules):
-1. ใช้โทนเสียงที่น่าเชื่อถือ เป็นทางการ และเน้นข้อมูลเชิงเท็จจริงจริง (Objective & Factual) มากกว่าการใช้คำโฆษณาชวนเชื่อทั่วไป หลีกเลี่ยงคำอวยเกินจริง
-2. ใส่ข้อมูลเชิงตัวเลขและข้อมูลจำเพาะทางเทคนิค เช่น ความหนาของเหล็ก (เช่น เหล็กกัลวาไนซ์หนา 0.5 มม.), ขนาดที่แท้จริง, น้ำหนัก, ความสูง และการรับประกันโครงสร้าง (เช่น รับประกัน 10 ปี)
-3. จัดระเบียบเนื้อหาให้มีโครงสร้างชัดเจน: ใช้ <h2> และ <h3> ในการแบ่งกลุ่มเนื้อหา, ใช้ <ul> และ <li> สำหรับข้อดี/คุณสมบัติเด่น และบังคับให้เขียนสรุปตารางคุณสมบัติจำเพาะทางเทคนิคโดยใช้แท็ก <table> ในเนื้อหาอย่างน้อย 1 ตาราง เพื่อให้บอท AI (เช่น Perplexity, ChatGPT) ดึงไปแสดงเปรียบเทียบได้ง่าย
-4. สร้างความเชื่อมโยงของชื่อแบรนด์ "${storeName}" และบริษัทผู้ดูแลคือ "${companyLegalName}" เข้ากับข้อมูลการส่งมอบสินค้าและบริการติดตั้งทั่วประเทศ (โดยเฉพาะกรุงเทพฯ และปริมณฑล)
+1. ใช้ภาษาเชิงเทคนิคที่แม่นยำ น่าเชื่อถือ เข้าใจง่าย เน้นข้อมูลที่เป็นประโยชน์ต่อโรงงานอุตสาหกรรม การประกอบสายไฟรถยนต์ (Automotive Wire Harness), เครื่องใช้ไฟฟ้า และแผงวงจรควบคุม
+2. ใส่ข้อมูลเชิงตัวเลขและข้อมูลจำเพาะ เช่น ขนาดสายไฟที่รองรับ (sq mm / AWG), ความยาวตัด, ความยาวปอกหัว-ท้าย, ความเร็วรอบการผลิต, ความแม่นยำของใบมีดทังสเตนคาร์ไบด์
+3. จัดระเบียบเนื้อหาให้มีโครงสร้างชัดเจน: ใช้ <h2> และ <h3> ในการแบ่งหัวข้อ, ใช้ <ul> และ <li> สำหรับข้อดี/จุดเด่น และสร้างตารางสรุปข้อมูลจำเพาะทางเทคนิคโดยใช้แท็ก <table> ในเนื้อหาอย่างน้อย 1 ตาราง
+4. สร้างความเชื่อมโยงของชื่อสินค้า แบรนด์ KODERA และ ${storeName} (${companyLegalName}) ในฐานะศูนย์รวมเครื่องจักรและอะไหล่แท้ พร้อมทีมวิศวกรผู้เชี่ยวชาญดูแลติดตั้งและบริการหลังการขายทั่วประเทศไทย
 
 กรุณาตอบเป็น JSON เท่านั้น ไม่ต้องมี markdown code block:
 {
-  "title": "หัวข้อบทความ (SEO & GEO friendly น่าดึงดูดและเน้นความต้องการของผู้ใช้งาน)",
-  "excerpt": "สรุปเนื้อหาสั้นๆ 2-3 บรรทัด สำหรับใช้แสดงเป็นเกริ่นนำ",
-  "content": "เนื้อหา HTML เต็มรูปแบบ ใช้ <p>, <h2>, <h3>, <ul><li>, <table> ห้ามใช้ \\n ให้ใช้แท็ก HTML แบ่งย่อหน้าอย่างสวยงาม",
-  "seo_title": "SEO Title (ยาวไม่เกิน 60 ตัวอักษรสำหรับการแสดงผลของ Google)",
-  "seo_description": "SEO Meta Description (ยาวไม่เกิน 160 ตัวอักษร สรุปเนื้อหาที่กระชับได้ใจความ)",
-  "seo_keywords": "keyword1,keyword2,keyword3,keyword4",
-  "tags": "tag1,tag2,tag3,tag4,tag5",
-  "category": "หมวดหมู่ (เลือกจาก: ทั่วไป, บ้านเก็บของ, เคล็ดลับ, การดูแลรักษา, ข่าวสาร)",
-  "llm_context": "ข้อความอธิบายบริบทเชิงลึกแบบย่อเพื่อวัตถุประสงค์ GEO เขียนสำหรับบอท AI/LLM อ่านโดยเฉพาะ (ความยาว 3-4 ประโยค เน้นสรุปคุณสมบัติทางเทคนิค วัสดุ แบรนด์ ${storeName} และบริการจัดส่งติดตั้งในไทย หลีกเลี่ยงคำบรรยายเชิงโฆษณา)",
-  "image_prompt": "English prompt for cover image, photorealistic, under 30 words",
+  "title": "หัวข้อบทความ (SEO & GEO friendly ดึงดูดและเน้นชื่อรุ่นสินค้า)",
+  "excerpt": "สรุปเนื้อหา 2-3 บรรทัด สำหรับบทนำ",
+  "content": "เนื้อหา HTML เต็มรูปแบบ ใช้ <p>, <h2>, <h3>, <ul><li>, <table> อย่างสวยงาม",
+  "seo_title": "SEO Title (ยาวไม่เกิน 60 ตัวอักษร)",
+  "seo_description": "SEO Meta Description (ยาวไม่เกิน 160 ตัวอักษร)",
+  "seo_keywords": "เครื่องตัดปอกสายไฟ,KODERA,ตัดปอกสายไฟอัตโนมัติ,wire harness,ย้ำเทอร์มินอล",
+  "tags": "เครื่องตัดปอกสายไฟ,KODERA,Wire Harness,เครื่องจักรโรงงาน",
+  "category": "เทคโนโลยี & นวัตกรรม",
+  "llm_context": "ข้อความสรุปบริบทเชิงลึก 3-4 ประโยคสำหรับ AI/LLM เกี่ยวกับสเปกเครื่องรุ่นนี้ การใช้งานในโรงงาน และการจัดจำหน่ายโดย ${companyLegalName}",
   "faq": [
-    { "question": "คำถามเชิงโครงสร้างเสียง/คำถามยาวๆ ที่ลูกค้ามักถาม AI (เช่น บ้านเก็บของ ${storeName} กันสนิมได้นานแค่ไหน?)", "answer": "คำตอบที่ระบุข้อเท็จจริงและสถิติอ้างอิงชัดเจน ตรงประเด็น" },
-    { "question": "คำถามที่ 2", "answer": "คำตอบที่ 2" },
-    { "question": "คำถามที่ 3", "answer": "คำตอบที่ 3" }
+    { "question": "เครื่องรุ่นนี้เหมาะกับสายไฟประเภทใดบ้าง?", "answer": "..." },
+    { "question": "ความแม่นยำในการตัดและปอกสายไฟอยู่ที่เท่าไหร่?", "answer": "..." },
+    { "question": "มีบริการทดสอบชิ้นงานสายไฟ (Sample Test) ก่อนสั่งซื้อหรือไม่?", "answer": "..." }
   ]
 }`;
 
@@ -103,17 +128,19 @@ const processArticleGeneration = async (isTest = false) => {
                 prompt: prompt,
                 label: 'Auto Article Generate'
             });
-            let aiText = (response.text || '').replace(/```json\s*/g, '').replace(/```\s*/g, '').trim().replace(/[\n\r\t]+/g, ' ');
-            articleData = JSON.parse(aiText);
+            articleData = parseAiJson(response.text);
+            if (!articleData || !articleData.title || !articleData.content) {
+                throw new Error('ไม่สามารถแยกโครงสร้าง JSON จากการตอบกลับของ AI ได้');
+            }
         } catch (err) {
             console.error('[Article Cron] AI generation failed:', err.message);
             return { success: false, error: 'AI generation failed: ' + err.message };
         }
 
-        // 4. Set cover image from product directly (AI image generation removed to save cost)
+        // 5. Set cover image from product directly
         const coverImageUrl = product.image_url || '';
 
-        // 5. Generate slug
+        // 6. Generate slug
         const slug = (articleData.title || product.name)
             .toLowerCase().replace(/[^\u0E00-\u0E7Fa-z0-9\s-]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-').substring(0, 200);
         let finalSlug = slug;
@@ -124,14 +151,11 @@ const processArticleGeneration = async (isTest = false) => {
             finalSlug = `${slug}-${counter++}`;
         }
 
-        // 6. Save article to DB (auto-publish)
-        // Tags: ensure proper comma-separated string format
+        // 7. Save article to DB (auto-publish)
         let tagsValue = articleData.tags || '';
         if (Array.isArray(tagsValue)) tagsValue = tagsValue.join(',');
-        // Remove any JSON array brackets if AI returned them
-        tagsValue = tagsValue.replace(/^\[|\]$/g, '').replace(/"/g, '');
+        tagsValue = String(tagsValue).replace(/^\[|\]$/g, '').replace(/"/g, '');
 
-        // FAQ: ensure proper JSON
         let faqJson = '[]';
         try {
             if (Array.isArray(articleData.faq) && articleData.faq.length > 0) {
@@ -140,8 +164,8 @@ const processArticleGeneration = async (isTest = false) => {
         } catch (e) {}
 
         const [result] = await db.query(`
-            INSERT INTO articles (title, slug, excerpt, content, cover_image, category, tags, seo_title, seo_description, seo_keywords, llm_context, faq, is_published, is_featured, author, product_id, image_prompt)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, 0, 'AI Auto', ?, ?)
+            INSERT INTO articles (title, slug, excerpt, content, cover_image, category, tags, seo_title, seo_description, seo_keywords, llm_context, faq, is_published, is_featured, author, product_id)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, 0, 'AI Auto', ?)
         `, [
             articleData.title || product.name,
             finalSlug,
@@ -155,20 +179,25 @@ const processArticleGeneration = async (isTest = false) => {
             articleData.seo_keywords || '',
             articleData.llm_context || '',
             faqJson,
-            product.id,
-            articleData.image_prompt || ''
+            product.id
         ]);
 
         console.log(`[Article Cron] Article saved: ID=${result.insertId}, slug=${finalSlug}`);
 
-        // 7. Update config index
+        // 8. Update config index
         if (!isTest) {
             config.last_sent_index = nextIndex;
             config.last_generated_date = new Date().toISOString().slice(0, 10);
             await db.query("UPDATE settings SET setting_value = ? WHERE setting_key = 'article_automation_config'", [JSON.stringify(config)]);
         }
 
-        return { success: true, articleId: result.insertId, slug: finalSlug, product: product.name, title: articleData.title };
+        return { 
+            success: true, 
+            articleId: result.insertId, 
+            slug: finalSlug, 
+            product: product.name, 
+            title: articleData.title 
+        };
 
     } catch (error) {
         console.error('[Article Cron] Error:', error);

@@ -520,11 +520,26 @@ const filteredAutoProducts = computed(() => {
   return productsList.value.filter(p => p.name.toLowerCase().includes(s) || p.sku?.toLowerCase().includes(s))
 })
 
+const selectedAutoProductsCount = computed(() => {
+  if (!autoArticleConfig.value.product_ids || !productsList.value) return 0
+  const activeIds = new Set(productsList.value.map(p => p.id))
+  return autoArticleConfig.value.product_ids.filter(id => activeIds.has(id)).length
+})
+
 async function fetchAutoArticleConfig() {
   loadingAutoArticle.value = true
   try {
     const r = await (await apiFetch('/api/articles/admin/article-automation')).json()
-    if (r.success && r.config) autoArticleConfig.value = r.config
+    if (r.success && r.config) {
+      autoArticleConfig.value = r.config
+      if (productsList.value.length > 0) {
+        const activeIds = new Set(productsList.value.map(p => p.id))
+        autoArticleConfig.value.product_ids = (autoArticleConfig.value.product_ids || []).filter(id => activeIds.has(id))
+        if (autoArticleConfig.value.product_ids.length === 0) {
+          autoArticleConfig.value.product_ids = productsList.value.map(p => p.id)
+        }
+      }
+    }
   } catch(e) { console.error(e) }
   finally { loadingAutoArticle.value = false }
 }
@@ -563,6 +578,14 @@ function toggleAutoProduct(id) {
   const idx = autoArticleConfig.value.product_ids.indexOf(id)
   if (idx > -1) autoArticleConfig.value.product_ids.splice(idx, 1)
   else autoArticleConfig.value.product_ids.push(id)
+}
+
+function selectAllAutoProducts() {
+  autoArticleConfig.value.product_ids = productsList.value.map(p => p.id)
+}
+
+function deselectAllAutoProducts() {
+  autoArticleConfig.value.product_ids = []
 }
 
 // Blog Hero Header Management
@@ -817,14 +840,22 @@ onMounted(() => {
 
             <!-- Product Selector -->
             <div class="bg-white border border-slate-200/80 shadow-sm rounded-3xl p-6 flex-1 flex flex-col min-h-[400px]">
-              <div class="flex items-center justify-between mb-4">
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
                 <div>
-                  <h3 class="text-base font-bold text-slate-900">สินค้าสำหรับให้ AI นำไปสุ่มสร้าง (เลือกไว้ {{ (autoArticleConfig.product_ids||[]).length }} รายการ)</h3>
-                  <p class="text-xs text-slate-500 mt-0.5">คลิกสินค้าที่ต้องการเลือกหรือยกเลิก</p>
+                  <h3 class="text-base font-bold text-slate-900">สินค้าสำหรับให้ AI นำไปสุ่มสร้าง (เลือกไว้ {{ selectedAutoProductsCount }} จาก {{ productsList.length }} รายการ)</h3>
+                  <p class="text-xs text-slate-500 mt-0.5">คลิกสินค้าที่ต้องการเลือกหรือยกเลิก หรือกดเลือกทั้งหมด</p>
                 </div>
-                <button @click="saveAutoArticleConfig" :disabled="savingAutoArticle" class="px-4 py-2 bg-indigo-600 text-white rounded-xl text-xs font-bold hover:bg-indigo-700 transition-colors">
-                  บันทึกสินค้า
-                </button>
+                <div class="flex items-center gap-2">
+                  <button type="button" @click="selectAllAutoProducts" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-colors">
+                    เลือกทั้งหมด
+                  </button>
+                  <button type="button" @click="deselectAllAutoProducts" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-colors">
+                    ยกเลิกทั้งหมด
+                  </button>
+                  <button @click="saveAutoArticleConfig" :disabled="savingAutoArticle" class="px-4 py-2 bg-indigo-600 text-white rounded-xl text-xs font-bold hover:bg-indigo-700 transition-colors">
+                    บันทึกสินค้า
+                  </button>
+                </div>
               </div>
 
               <div class="relative mb-4">

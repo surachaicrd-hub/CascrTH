@@ -663,6 +663,17 @@ router.get('/admin/article-automation', verifyAdmin, async (req, res) => {
         if (rows.length > 0) {
             try { config = { ...config, ...JSON.parse(rows[0].setting_value) }; } catch (e) {}
         }
+
+        // Clean out stale non-existent product IDs from config
+        const [allProds] = await db.query("SELECT id FROM products WHERE is_active = 1");
+        const activeIds = allProds.map(p => p.id);
+        if (Array.isArray(config.product_ids)) {
+            config.product_ids = config.product_ids.filter(id => activeIds.includes(id));
+            if (config.product_ids.length === 0) {
+                config.product_ids = activeIds;
+            }
+        }
+
         res.json({ success: true, config });
     } catch (error) {
         console.error('Get article automation config error:', error);
