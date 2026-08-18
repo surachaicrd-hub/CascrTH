@@ -42,12 +42,29 @@ async function processAndSaveImage(inputBufferOrPath, outputPath, options = {}) 
         }
     }
 
-    // Fallback: direct write
-    if (Buffer.isBuffer(inputBufferOrPath)) {
-        await fs.promises.writeFile(outputPath, inputBufferOrPath);
-    } else if (typeof inputBufferOrPath === 'string' && fs.existsSync(inputBufferOrPath)) {
-        await fs.promises.copyFile(inputBufferOrPath, outputPath);
+    // Mirror write to alternate uploads directory if available
+    try {
+        const rootUploads = path.resolve(__dirname, '../../public/uploads');
+        const apiUploads = path.resolve(__dirname, '../public/uploads');
+        const resolvedOut = path.resolve(outputPath);
+
+        if (resolvedOut.startsWith(rootUploads) && fs.existsSync(apiUploads)) {
+            const rel = path.relative(rootUploads, resolvedOut);
+            const mirrorPath = path.join(apiUploads, rel);
+            const mirrorDir = path.dirname(mirrorPath);
+            if (!fs.existsSync(mirrorDir)) fs.mkdirSync(mirrorDir, { recursive: true });
+            if (fs.existsSync(outputPath)) await fs.promises.copyFile(outputPath, mirrorPath);
+        } else if (resolvedOut.startsWith(apiUploads) && fs.existsSync(rootUploads)) {
+            const rel = path.relative(apiUploads, resolvedOut);
+            const mirrorPath = path.join(rootUploads, rel);
+            const mirrorDir = path.dirname(mirrorPath);
+            if (!fs.existsSync(mirrorDir)) fs.mkdirSync(mirrorDir, { recursive: true });
+            if (fs.existsSync(outputPath)) await fs.promises.copyFile(outputPath, mirrorPath);
+        }
+    } catch (mirrorErr) {
+        // Non-fatal mirror error
     }
+
     return true;
 }
 

@@ -126,6 +126,7 @@ async function generateAllThumbnails() {
  * Pre-generate all thumbnails for a single file (useful on upload)
  */
 async function generateThumbnailsForFile(filePath) {
+    if (!imageService.isAvailable) return;
     const ext = path.extname(filePath).toLowerCase();
     if (!['.webp', '.jpg', '.jpeg', '.png'].includes(ext)) return;
 
@@ -143,19 +144,7 @@ async function generateThumbnailsForFile(filePath) {
         
         try {
             if (!fs.existsSync(cachedFilePath)) {
-                let transform = sharp(filePath)
-                    .rotate()
-                    .resize({ width: w, withoutEnlargement: true, kernel: 'lanczos3' });
-
-                if (ext === '.webp') {
-                    transform = transform.webp({ quality: 90, effort: 4, smartSubsample: true });
-                } else if (ext === '.png') {
-                    transform = transform.png({ compressionLevel: 8, quality: 95 });
-                } else if (ext === '.jpg' || ext === '.jpeg') {
-                    transform = transform.jpeg({ quality: 90, mozjpeg: true });
-                }
-
-                await transform.toFile(cachedFilePath);
+                await imageService.resizeFile(filePath, cachedFilePath, w, null, ext.replace('.', ''));
             }
         } catch (err) {
             console.error(`Error generating thumbnail for ${filePath} at width ${w}:`, err.message);

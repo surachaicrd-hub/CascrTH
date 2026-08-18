@@ -121,21 +121,25 @@ router.post('/', verifyAdmin, (req, res, next) => {
             return res.status(400).json({ success: false, error: 'No image provided' });
         }
 
+        const originalExt = path.extname(req.file.originalname || '').toLowerCase();
+        const ext = imageService.isAvailable ? '.webp' : (originalExt || '.png');
         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        const filename = 'image-' + uniqueSuffix + '.webp';
+        const filename = 'image-' + uniqueSuffix + ext;
         const filepath = path.join(uploadDir, filename);
 
-        // Process and save image with max 2560px
+        // Process and save image
         await imageService.processAndSaveImage(req.file.buffer, filepath, {
             width: 2560,
             height: 2560,
-            format: 'webp',
+            format: imageService.isAvailable ? 'webp' : (ext.replace('.', '') || 'png'),
             quality: 92
         });
 
-        // Pre-generate responsive thumbnails in cache
-        const { generateThumbnailsForFile } = require('../services/thumbnailService');
-        await generateThumbnailsForFile(filepath);
+        // Pre-generate responsive thumbnails in cache if service available
+        try {
+            const { generateThumbnailsForFile } = require('../services/thumbnailService');
+            await generateThumbnailsForFile(filepath);
+        } catch (e) {}
 
         // Return relative URL
         const fileUrl = `/uploads/${filename}`;
@@ -162,21 +166,25 @@ router.post('/ckeditor', verifyAdmin, (req, res, next) => {
             return res.status(400).json({ error: { message: 'No image provided' } });
         }
 
+        const originalExt = path.extname(req.file.originalname || '').toLowerCase();
+        const ext = imageService.isAvailable ? '.webp' : (originalExt || '.png');
         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        const filename = 'ck-image-' + uniqueSuffix + '.webp';
+        const filename = 'ck-image-' + uniqueSuffix + ext;
         const filepath = path.join(uploadDir, filename);
 
-        // Process and save image with max 2560px
+        // Process and save image
         await imageService.processAndSaveImage(req.file.buffer, filepath, {
             width: 2560,
             height: 2560,
-            format: 'webp',
+            format: imageService.isAvailable ? 'webp' : (ext.replace('.', '') || 'png'),
             quality: 92
         });
 
-        // Pre-generate responsive thumbnails in cache
-        const { generateThumbnailsForFile } = require('../services/thumbnailService');
-        await generateThumbnailsForFile(filepath);
+        // Pre-generate responsive thumbnails in cache if service available
+        try {
+            const { generateThumbnailsForFile } = require('../services/thumbnailService');
+            await generateThumbnailsForFile(filepath);
+        } catch (e) {}
 
         // CKEditor expects { url: 'http://...' } or relative
         const fileUrl = `/uploads/${filename}`;
