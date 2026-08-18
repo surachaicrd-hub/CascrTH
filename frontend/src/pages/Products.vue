@@ -170,10 +170,10 @@ const setCategory = (cat) => {
 
 watch(activeCategory, (cat) => {
   const isAll = !cat || cat === 'ทุกหมวดหมู่'
-  const titleText = isAll ? 'รายการสินค้าทั้งหมด - บริษัท ซีอาร์ ดิสทริบิวชั่น จำกัด' : `สินค้าหมวดหมู่ ${cat} - บริษัท ซีอาร์ ดิสทริบิวชั่น จำกัด`
+  const titleText = isAll ? 'รายการสินค้าทั้งหมด - ' + (settingsStore.storeName || 'KODERA Machines') : `สินค้าหมวดหมู่ ${cat} - ` + (settingsStore.storeName || 'KODERA Machines')
   const descText = isAll 
-    ? (settingsStore.storeDescription || 'รวมรายการสินค้าคุณภาพสูงระดับพรีเมียมทุกประเภท โรงเก็บของสำเร็จรูป และอุปกรณ์มาตรฐานอุตสาหกรรม')
-    : `เลือกซื้อ ${cat} คุณภาพพรีเมียม ทนทาน พร้อมบริการประกอบและติดตั้งทั่วประเทศ โดย บริษัท ซีอาร์ ดิสทริบิวชั่น จำกัด`
+    ? (settingsStore.storeDescription || 'รวมรายการเครื่องตัดปอกสายไฟอัตโนมัติ เครื่องย้ำคอร์เนคเตอร์ และอุปกรณ์ Wire Harness Processing คุณภาพมาตรฐานญี่ปุ่น')
+    : `เลือกซื้อ ${cat} คุณภาพมาตรฐานญี่ปุ่น แม่นยำ ทนทาน พร้อมบริการหลังการขายและอะไหล่แท้ โดย ` + (settingsStore.storeName || 'บริษัท แคส-ซีอาร์ จำกัด')
 
   setMeta({
     title: titleText,
@@ -388,7 +388,7 @@ onUnmounted(() => {
             
             <!-- Description -->
             <p class="text-slate-300 text-sm sm:text-base leading-relaxed max-w-2xl font-light">
-              {{ activeCategoryData?.description || 'เลือกชมและสั่งซื้อโรงเก็บของสำเร็จรูปพรีเมียม โรงจอดรถ ตู้และกล่องเก็บของกลางแจ้ง และอุปกรณ์มาตรฐานอุตสาหกรรม พร้อมบริการจัดส่งและประกอบติดตั้งทั่วประเทศ' }}
+              {{ activeCategoryData?.description || 'เลือกชมและสั่งซื้อเครื่องตัดปอกสายไฟอัตโนมัติ KODERA เครื่องย้ำเทอร์มินอล เครื่องปอกสายไฟ และอุปกรณ์แปรรูปสายไฟมาตรฐานสากล พร้อมบริการ On-site Service ทั่วประเทศ' }}
             </p>
 
             <!-- Quick Action Buttons -->

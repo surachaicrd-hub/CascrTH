@@ -138,13 +138,10 @@ const lineHref = computed(() => {
 
 // Schema
 const addSchema = () => {
-  const storeName = settingsStore.storeName || 'บริษัท ซีอาร์ ดิสทริบิวชั่น จำกัด'
-  const baseUrl = window.location.origin
-  
   setMeta({
-    title: 'บทความและสาระน่ารู้ - บริษัท ซีอาร์ ดิสทริบิวชั่น จำกัด',
-    description: settingsStore.storeDescription || 'รวบรวมบทความน่ารู้ คู่มือการเลือกซื้อโรงเก็บของสำเร็จรูป การเตรียมงานฐานราก และเคล็ดลับการจัดระเบียบพื้นที่มาตรฐานสากล',
-    canonicalUrl: `${baseUrl}/blog`,
+    title: 'คลังบทความและสาระน่ารู้ - ' + (settingsStore.storeName || 'KODERA Wire Processing Machines'),
+    description: settingsStore.storeDescription || 'รวบรวมบทความน่ารู้ คู่มือการใช้งานเครื่องตัดปอกสายไฟอัตโนมัติ เทคนิค Wire Harness และเคล็ดลับการเพิ่มผลผลิตในโรงงานอุตสาหกรรม',
+    canonicalUrl: window.location.href,
     type: 'website'
   })
 
@@ -237,12 +234,12 @@ onMounted(() => {
             <h1 class="text-3xl sm:text-4xl lg:text-5xl font-black text-white leading-tight tracking-tight">
               คลังบทความและสาระน่ารู้ <br/>
               <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-300 to-teal-400">
-                คู่มือการเลือกใช้และดูแลรักษาพื้นที่
+                คู่มือเทคโนโลยีเครื่องตัดปอกย้ำสายไฟและ Wire Harness
               </span>
             </h1>
             
             <p class="mt-4 text-slate-400 text-sm sm:text-base leading-relaxed max-w-2xl font-light">
-              เจาะลึกเทคนิคการเลือกซื้อโรงเก็บของสำเร็จรูป การเตรียมความพร้อมงานฐานราก การบำรุงรักษาโครงสร้าง และเกร็ดความรู้มาตรฐานอุตสาหกรรมจากทีมวิศวกรผู้เชี่ยวชาญ
+              เจาะลึกเทคนิคการเลือกใช้เครื่องตัดปอกสายไฟอัตโนมัติ การตั้งค่าความแม่นยำใบมีด การบำรุงรักษาเครื่องจักร และเกร็ดความรู้มาตรฐานอุตสาหกรรมจากทีมวิศวกรผู้เชี่ยวชาญ KODERA
             </p>
           </div>
 
