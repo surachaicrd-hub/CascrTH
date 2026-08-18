@@ -565,7 +565,84 @@ function toggleAutoProduct(id) {
   else autoArticleConfig.value.product_ids.push(id)
 }
 
-onMounted(() => { loadArticles(); loadProducts(); fetchAutoArticleConfig() })
+// Blog Hero Header Management
+const blog_hero_tag = ref('KNOWLEDGE & ARTICLES')
+const blog_hero_title = ref('คลังบทความและสาระน่ารู้')
+const blog_hero_subtitle = ref('คู่มือเทคโนโลยีเครื่องตัดปอกย้ำสายไฟ และ Wire Harness')
+const blog_hero_desc = ref('เจาะลึกเทคนิคการเลือกใช้เครื่องตัดปอกสายไฟอัตโนมัติ การตั้งค่าความแม่นยำใบมีด การบำรุงรักษาเครื่องจักร และเกร็ดความรู้มาตรฐานอุตสาหกรรมจากทีมวิศวกรผู้เชี่ยวชาญ KODERA')
+const blog_hero_bg = ref('')
+const savingBlogHero = ref(false)
+const loadingBlogHero = ref(false)
+
+async function fetchBlogHeroSettings() {
+  loadingBlogHero.value = true
+  try {
+    const res = await (await apiFetch('/api/settings')).json()
+    if (res.success && res.data) {
+      if (res.data.blog_hero_tag) blog_hero_tag.value = res.data.blog_hero_tag
+      if (res.data.blog_hero_title) blog_hero_title.value = res.data.blog_hero_title
+      if (res.data.blog_hero_subtitle) blog_hero_subtitle.value = res.data.blog_hero_subtitle
+      if (res.data.blog_hero_desc) blog_hero_desc.value = res.data.blog_hero_desc
+      if (res.data.blog_hero_bg) blog_hero_bg.value = res.data.blog_hero_bg
+    }
+  } catch (e) {
+    console.error('Failed to load blog hero settings:', e)
+  } finally {
+    loadingBlogHero.value = false
+  }
+}
+
+async function saveBlogHeroSettings() {
+  savingBlogHero.value = true
+  try {
+    const payload = [
+      { key: 'blog_hero_tag', value: blog_hero_tag.value },
+      { key: 'blog_hero_title', value: blog_hero_title.value },
+      { key: 'blog_hero_subtitle', value: blog_hero_subtitle.value },
+      { key: 'blog_hero_desc', value: blog_hero_desc.value },
+      { key: 'blog_hero_bg', value: blog_hero_bg.value }
+    ]
+    const res = await (await apiFetch('/api/settings/batch', {
+      method: 'POST',
+      body: JSON.stringify({ settings: payload })
+    })).json()
+    if (res.success) {
+      showToast('บันทึกการตั้งค่าส่วนหัวหน้าบทความสำเร็จ', 'success')
+    } else {
+      showToast(res.error || 'บันทึกไม่สำเร็จ', 'error')
+    }
+  } catch (e) {
+    showToast('เกิดข้อผิดพลาดในการบันทึก', 'error')
+  } finally {
+    savingBlogHero.value = false
+  }
+}
+
+async function uploadBlogHeroBg(e) {
+  const file = e.target.files[0]
+  if (!file) return
+  const formData = new FormData()
+  formData.append('image', file)
+  try {
+    const res = await (await apiFetch('/api/upload', { method: 'POST', body: formData })).json()
+    if (res.success && res.url) {
+      blog_hero_bg.value = res.url
+      showToast('อัปโหลดรูปพื้นหลังสำเร็จ', 'success')
+    } else {
+      showToast('อัปโหลดรูปภาพไม่สำเร็จ', 'error')
+    }
+  } catch (err) {
+    showToast('เกิดข้อผิดพลาดในการอัปโหลด', 'error')
+  }
+  e.target.value = ''
+}
+
+onMounted(() => { 
+  loadArticles()
+  loadProducts()
+  fetchAutoArticleConfig()
+  fetchBlogHeroSettings()
+})
 </script>
 
 <template>
@@ -648,8 +725,8 @@ onMounted(() => { loadArticles(); loadProducts(); fetchAutoArticleConfig() })
       </div>
 
       <!-- Segmented Navigation Tabs -->
-      <div v-show="!showEditor" class="bg-white p-2 rounded-2xl border border-slate-200/80 shadow-sm flex items-center justify-between gap-4">
-        <div class="flex items-center gap-1.5 p-1 bg-slate-100/80 rounded-xl w-full sm:w-auto">
+      <div v-show="!showEditor" class="bg-white p-2 rounded-2xl border border-slate-200/80 shadow-sm flex flex-wrap items-center justify-between gap-4">
+        <div class="flex flex-wrap items-center gap-1.5 p-1 bg-slate-100/80 rounded-xl w-full sm:w-auto">
           <button @click="activeMainTab='list'" class="flex-1 sm:flex-none px-5 py-2.5 rounded-lg text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-2" :class="activeMainTab==='list'?'bg-white text-indigo-700 shadow-sm':'text-slate-500 hover:text-slate-700'">
             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
             รายการบทความทั้งหมด
@@ -658,6 +735,10 @@ onMounted(() => { loadArticles(); loadProducts(); fetchAutoArticleConfig() })
             <svg class="w-4 h-4 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
             สร้างอัตโนมัติ (AI Auto-Pilot)
             <span v-if="autoArticleConfig.enabled" class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          </button>
+          <button @click="activeMainTab='header'" class="flex-1 sm:flex-none px-5 py-2.5 rounded-lg text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-2" :class="activeMainTab==='header'?'bg-white text-indigo-700 shadow-sm':'text-slate-500 hover:text-slate-700'">
+            <svg class="w-4 h-4 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+            🎨 ส่วนหัว & แบนเนอร์หน้าบทความ
           </button>
         </div>
       </div>
@@ -783,6 +864,213 @@ onMounted(() => { loadArticles(); loadProducts(); fetchAutoArticleConfig() })
               </button>
             </div>
           </div>
+        </div>
+      </template>
+
+      <!-- TAB: BLOG HERO HEADER & BANNER MANAGEMENT -->
+      <template v-if="activeMainTab==='header' && !showEditor">
+        <div v-if="loadingBlogHero" class="flex items-center justify-center py-20 bg-white rounded-3xl border border-slate-200">
+          <div class="w-10 h-10 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div>
+        </div>
+        <div v-else class="space-y-6">
+
+          <!-- LIVE PREVIEW CARD -->
+          <div class="bg-white rounded-3xl border border-slate-200/80 shadow-sm p-6 overflow-hidden">
+            <div class="flex items-center justify-between mb-4">
+              <div class="flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></span>
+                <h3 class="text-sm font-black text-slate-800 uppercase tracking-wider">ตัวอย่างการแสดงผลจริงบนหน้าเว็บ (Live Preview)</h3>
+              </div>
+              <span class="text-xs text-slate-400 font-medium">แสดงผลแบบทันทีตามที่คุณพิมพ์</span>
+            </div>
+
+            <!-- Mimic of Blog.vue Hero -->
+            <div class="relative overflow-hidden rounded-2xl p-6 sm:p-10 bg-[#070A0F] border border-white/10 text-white min-h-[220px] flex flex-col justify-center">
+              <!-- Background Image Preview -->
+              <div 
+                v-if="blog_hero_bg" 
+                class="absolute inset-0 bg-cover bg-center opacity-40 transition-all duration-500 pointer-events-none"
+                :style="{ backgroundImage: `url(${blog_hero_bg})` }"
+              ></div>
+              <div class="absolute inset-0 bg-gradient-to-r from-[#070A0F] via-[#070A0F]/80 to-transparent pointer-events-none"></div>
+
+              <div class="relative z-10 max-w-3xl">
+                <!-- Eyebrow Pill -->
+                <div class="inline-flex items-center gap-2 mb-3 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 backdrop-blur-md">
+                  <svg class="w-3 h-3 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                  </svg>
+                  <span class="text-emerald-400 text-[10px] font-bold tracking-[0.2em] uppercase">
+                    {{ blog_hero_tag || 'KNOWLEDGE & ARTICLES' }}
+                  </span>
+                </div>
+
+                <!-- Title & Subtitle Highlight -->
+                <h2 class="text-2xl sm:text-3xl lg:text-4xl font-black text-white leading-tight tracking-tight">
+                  {{ blog_hero_title || 'คลังบทความและสาระน่ารู้' }} <br/>
+                  <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-300 to-teal-400">
+                    {{ blog_hero_subtitle || 'คู่มือเทคโนโลยีเครื่องตัดปอกย้ำสายไฟและ Wire Harness' }}
+                  </span>
+                </h2>
+
+                <!-- Description -->
+                <p class="mt-3 text-slate-300 text-xs sm:text-sm leading-relaxed max-w-2xl font-light whitespace-pre-line">
+                  {{ blog_hero_desc || 'เจาะลึกเทคนิคการเลือกใช้เครื่องตัดปอกสายไฟอัตโนมัติ การตั้งค่าความแม่นยำใบมีด การบำรุงรักษาเครื่องจักร และเกร็ดความรู้มาตรฐานอุตสาหกรรมจากทีมวิศวกรผู้เชี่ยวชาญ KODERA' }}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- SETTINGS FORM CARD -->
+          <div class="bg-white rounded-3xl border border-slate-200/80 shadow-sm p-6 sm:p-8">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-5 mb-6">
+              <div>
+                <h3 class="text-lg font-black text-slate-900 flex items-center gap-2">
+                  <svg class="w-5 h-5 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                  ปรับแต่งข้อความ & รูปภาพส่วนหัว (Blog Hero Settings)
+                </h3>
+                <p class="text-xs text-slate-500 mt-1">กำหนดข้อความหัวข้อ คำอธิบาย และภาพแบนเนอร์ที่จะแสดงบนหน้า /blog</p>
+              </div>
+
+              <button 
+                @click="saveBlogHeroSettings" 
+                :disabled="savingBlogHero"
+                class="px-6 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold text-sm rounded-xl shadow-lg shadow-emerald-200 transition-all flex items-center gap-2 disabled:opacity-50 active:scale-95"
+              >
+                <svg v-if="savingBlogHero" class="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                <span>{{ savingBlogHero ? 'กำลังบันทึก...' : '💾 บันทึกการตั้งค่าส่วนหัว' }}</span>
+              </button>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+              <!-- Left Column: Texts -->
+              <div class="space-y-5">
+                <!-- Tag Badge -->
+                <div>
+                  <label class="block text-xs font-bold text-slate-700 mb-1.5 flex items-center gap-1.5">
+                    🏷️ ป้ายกำกับด้านบน (Eyebrow Tag)
+                    <InfoTooltip title="ป้ายกำกับ" description="ข้อความตัวพิมพ์เล็ก/ใหญ่บนกรอบสีเขียว เช่น KNOWLEDGE & ARTICLES หรือ สาระน่ารู้ & เทคนิคช่าง" />
+                  </label>
+                  <input 
+                    v-model="blog_hero_tag" 
+                    type="text" 
+                    placeholder="เช่น KNOWLEDGE & ARTICLES" 
+                    class="w-full px-4 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all font-medium"
+                  />
+                </div>
+
+                <!-- Main Title -->
+                <div>
+                  <label class="block text-xs font-bold text-slate-700 mb-1.5 flex items-center gap-1.5">
+                    📌 หัวข้อหลักแถวที่ 1 (Main Title)
+                  </label>
+                  <input 
+                    v-model="blog_hero_title" 
+                    type="text" 
+                    placeholder="เช่น คลังบทความและสาระน่ารู้" 
+                    class="w-full px-4 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all font-bold text-slate-800"
+                  />
+                </div>
+
+                <!-- Subtitle Highlight -->
+                <div>
+                  <label class="block text-xs font-bold text-slate-700 mb-1.5 flex items-center gap-1.5">
+                    ✨ ข้อความเน้นสีแถวที่ 2 (Highlight Subtitle)
+                    <InfoTooltip title="ข้อความไฮไลท์" description="ข้อความแถวที่ 2 จะแสดงผลด้วยสี Gradient เขียว-ฟ้า สว่างโดดเด่น" />
+                  </label>
+                  <input 
+                    v-model="blog_hero_subtitle" 
+                    type="text" 
+                    placeholder="เช่น คู่มือเทคโนโลยีเครื่องตัดปอกย้ำสายไฟ และ Wire Harness" 
+                    class="w-full px-4 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all font-bold text-emerald-700"
+                  />
+                </div>
+
+                <!-- Description -->
+                <div>
+                  <label class="block text-xs font-bold text-slate-700 mb-1.5 flex items-center gap-1.5">
+                    📝 คำอธิบายส่วนหัว (Description)
+                  </label>
+                  <textarea 
+                    v-model="blog_hero_desc" 
+                    rows="4" 
+                    placeholder="ใส่คำอธิบายแนะนำคลังบทความและเกร็ดความรู้..." 
+                    class="w-full px-4 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all font-normal leading-relaxed"
+                  ></textarea>
+                </div>
+              </div>
+
+              <!-- Right Column: Image Management -->
+              <div class="space-y-5">
+                <div>
+                  <label class="block text-xs font-bold text-slate-700 mb-1.5 flex items-center gap-1.5">
+                    🖼️ ภาพพื้นหลังส่วนหัว (Hero Background Image)
+                  </label>
+                  
+                  <div class="border-2 border-dashed border-slate-200 rounded-2xl p-6 text-center hover:border-indigo-300 transition-all bg-slate-50/50">
+                    <div v-if="blog_hero_bg" class="space-y-4">
+                      <div class="relative w-full h-44 rounded-xl overflow-hidden shadow-md group">
+                        <img :src="blog_hero_bg" class="w-full h-full object-cover" />
+                        <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
+                          <button 
+                            @click="blog_hero_bg = ''" 
+                            class="p-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all text-xs font-bold flex items-center gap-1 shadow-lg"
+                          >
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                            ลบรูปภาพ
+                          </button>
+                        </div>
+                      </div>
+                      <p class="text-[11px] text-slate-400 font-mono break-all">{{ blog_hero_bg }}</p>
+                    </div>
+
+                    <div v-else class="py-6">
+                      <div class="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center mx-auto mb-3">
+                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                      </div>
+                      <p class="text-xs font-bold text-slate-700">อัปโหลดภาพพื้นหลังส่วนหัว</p>
+                      <p class="text-[11px] text-slate-400 mt-1">แนะนำขนาด 1920x600px หรืออัตราส่วน 16:9 (WebP / JPG / PNG)</p>
+                    </div>
+
+                    <div class="mt-4 flex items-center justify-center gap-3">
+                      <label class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold cursor-pointer transition-all shadow-md flex items-center gap-1.5">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                        เลือกไฟล์รูปภาพ
+                        <input type="file" accept="image/*" class="hidden" @change="uploadBlogHeroBg" />
+                      </label>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Or URL Input -->
+                <div>
+                  <label class="block text-xs font-bold text-slate-700 mb-1.5">
+                    หรือระบุ URL รูปภาพโดยตรง
+                  </label>
+                  <input 
+                    v-model="blog_hero_bg" 
+                    type="text" 
+                    placeholder="https://... หรือ /images/hero/blog-hero.jpg" 
+                    class="w-full px-4 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 font-mono text-slate-600"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <!-- Bottom Save Bar -->
+            <div class="mt-8 pt-5 border-t border-slate-100 flex items-center justify-end">
+              <button 
+                @click="saveBlogHeroSettings" 
+                :disabled="savingBlogHero"
+                class="px-8 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold text-sm rounded-xl shadow-lg shadow-emerald-200 transition-all flex items-center gap-2 disabled:opacity-50 active:scale-95"
+              >
+                <svg v-if="savingBlogHero" class="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                <span>{{ savingBlogHero ? 'กำลังบันทึกข้อมูล...' : '💾 บันทึกการตั้งค่าส่วนหัว' }}</span>
+              </button>
+            </div>
+          </div>
+
         </div>
       </template>
 

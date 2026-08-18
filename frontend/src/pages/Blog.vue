@@ -168,8 +168,12 @@ const addSchema = () => {
   }, 'dynamic-breadcrumb-data')
 }
 
+const blogHeroTag = computed(() => settingsStore.publicSettings?.blog_hero_tag || 'KNOWLEDGE & ARTICLES')
+const blogHeroTitle = computed(() => settingsStore.publicSettings?.blog_hero_title || 'คลังบทความและสาระน่ารู้')
+const blogHeroSubtitle = computed(() => settingsStore.publicSettings?.blog_hero_subtitle || 'คู่มือเทคโนโลยีเครื่องตัดปอกย้ำสายไฟและ Wire Harness')
+const blogHeroDesc = computed(() => settingsStore.publicSettings?.blog_hero_desc || 'เจาะลึกเทคนิคการเลือกใช้เครื่องตัดปอกสายไฟอัตโนมัติ การตั้งค่าความแม่นยำใบมีด การบำรุงรักษาเครื่องจักร และเกร็ดความรู้มาตรฐานอุตสาหกรรมจากทีมวิศวกรผู้เชี่ยวชาญ KODERA')
 const heroBg = computed(() => {
-  return settingsStore.blogHeroBg || '/images/hero/blog-hero.jpg'
+  return settingsStore.publicSettings?.blog_hero_bg || settingsStore.blogHeroBg || '/images/hero/blog-hero.jpg'
 })
 
 onMounted(() => {
@@ -227,19 +231,19 @@ onMounted(() => {
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
               </svg>
               <span class="text-emerald-400 text-[11px] font-bold tracking-[0.2em] uppercase">
-                KNOWLEDGE & ARTICLES
+                {{ blogHeroTag }}
               </span>
             </div>
             
             <h1 class="text-3xl sm:text-4xl lg:text-5xl font-black text-white leading-tight tracking-tight">
-              คลังบทความและสาระน่ารู้ <br/>
+              {{ blogHeroTitle }} <br/>
               <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-300 to-teal-400">
-                คู่มือเทคโนโลยีเครื่องตัดปอกย้ำสายไฟและ Wire Harness
+                {{ blogHeroSubtitle }}
               </span>
             </h1>
             
-            <p class="mt-4 text-slate-400 text-sm sm:text-base leading-relaxed max-w-2xl font-light">
-              เจาะลึกเทคนิคการเลือกใช้เครื่องตัดปอกสายไฟอัตโนมัติ การตั้งค่าความแม่นยำใบมีด การบำรุงรักษาเครื่องจักร และเกร็ดความรู้มาตรฐานอุตสาหกรรมจากทีมวิศวกรผู้เชี่ยวชาญ KODERA
+            <p class="mt-4 text-slate-400 text-sm sm:text-base leading-relaxed max-w-2xl font-light whitespace-pre-line">
+              {{ blogHeroDesc }}
             </p>
           </div>
 
