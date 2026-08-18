@@ -16,7 +16,8 @@ const upload = multer({
 });
 
 // Create avatars directory if it doesn't exist
-const avatarsDir = path.join(__dirname, '../public/uploads/avatars');
+const { primaryUploadsDir } = require('../config/uploadConfig');
+const avatarsDir = path.join(primaryUploadsDir, 'avatars');
 if (!fs.existsSync(avatarsDir)) {
     fs.mkdirSync(avatarsDir, { recursive: true });
 }

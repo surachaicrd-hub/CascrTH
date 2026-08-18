@@ -266,16 +266,9 @@ app.use('/api/line', require('./routes/line'));
 
 // Serve Static Uploads
 const imageService = require('./services/imageService');
+const { rootUploadsDir, apiUploadsDir, findUploadFile } = require('./config/uploadConfig');
 
-// Resolve uploads directory: check root public/uploads first, then api/public/uploads, then cwd
-let uploadsDir = path.join(__dirname, '../public/uploads');
-if (!fs.existsSync(uploadsDir) || fs.readdirSync(uploadsDir).length <= 2) {
-    if (fs.existsSync(path.join(__dirname, 'public/uploads')) && fs.readdirSync(path.join(__dirname, 'public/uploads')).length > 2) {
-        uploadsDir = path.join(__dirname, 'public/uploads');
-    } else if (fs.existsSync(path.join(process.cwd(), 'public/uploads'))) {
-        uploadsDir = path.join(process.cwd(), 'public/uploads');
-    }
-}
+const uploadsDir = rootUploadsDir;
 const cacheDir = path.join(uploadsDir, 'cache');
 
 // Ensure cache directory exists
@@ -290,31 +283,24 @@ app.get(['/uploads/cache/:filename', '/uploads/:subfolder/cache/:filename'], asy
     const currentCacheDir = path.join(currentUploadsDir, 'cache');
     const cachedFilePath = path.join(currentCacheDir, filename);
 
-    // Security: Prevent path traversal attacks
-    const resolvedCachedPath = path.resolve(cachedFilePath);
-    const resolvedUploadsDir = path.resolve(uploadsDir);
-    if (!resolvedCachedPath.startsWith(resolvedUploadsDir)) {
-        return res.status(403).json({ success: false, error: 'Access denied' });
-    }
-
-    // If cached file already exists, let static middleware serve it
+    // If cached file already exists, serve it
     if (fs.existsSync(cachedFilePath)) {
-        return next();
+        res.setHeader('Cache-Control', 'public, max-age=2592000');
+        return res.sendFile(cachedFilePath);
     }
 
     // Parse original filename and target width from cache filename pattern: base-WIDTH.ext
     const ext = path.extname(filename);
     const nameWithoutExt = path.basename(filename, ext);
-    // Match pattern: "originalname-WIDTH" where WIDTH is digits at the end
     const match = nameWithoutExt.match(/^(.+)-(\d+)$/);
     if (!match) {
-        return next(); // Not a valid cache filename pattern
+        return next();
     }
 
     const originalBase = match[1];
     const targetWidth = parseInt(match[2]);
     const originalFilename = `${originalBase}${ext}`;
-    const originalFilePath = path.join(currentUploadsDir, originalFilename);
+    const originalFilePath = findUploadFile(originalFilename, subfolder || '') || path.join(currentUploadsDir, originalFilename);
 
     if (!fs.existsSync(originalFilePath) || isNaN(targetWidth) || targetWidth <= 0) {
         res.setHeader('Content-Type', 'image/svg+xml');
@@ -325,21 +311,19 @@ app.get(['/uploads/cache/:filename', '/uploads/:subfolder/cache/:filename'], asy
     }
 
     try {
-        // Ensure cache directory exists
         if (!fs.existsSync(currentCacheDir)) {
             fs.mkdirSync(currentCacheDir, { recursive: true });
         }
 
         await imageService.resizeFile(originalFilePath, cachedFilePath, targetWidth, null, ext.replace('.', ''));
-        res.setHeader('Cache-Control', 'public, max-age=2592000'); // 30 days
+        res.setHeader('Cache-Control', 'public, max-age=2592000');
         return res.sendFile(cachedFilePath);
     } catch (err) {
         console.error('On-demand cache generation error:', err);
         if (fs.existsSync(originalFilePath)) {
-            return res.redirect(`/uploads/${subfolder ? subfolder + '/' : ''}${originalFilename}`);
+            return res.sendFile(originalFilePath);
         }
-        res.setHeader('Content-Type', 'image/svg+xml');
-        return res.status(200).send(`<svg xmlns="http://www.w3.org/2000/svg" width="600" height="400" viewBox="0 0 600 400"><rect width="100%" height="100%" fill="#f1f5f9"/><text x="50%" y="50%" font-family="sans-serif" font-size="14" fill="#64748b" text-anchor="middle">Image Not Found</text></svg>`);
+        return next();
     }
 });
 
@@ -349,16 +333,17 @@ app.get('/uploads/:filename', async (req, res, next) => {
     const { w, width } = req.query;
     const targetWidth = parseInt(w || width);
 
-    const originalFilePath = path.join(uploadsDir, filename);
+    const originalFilePath = findUploadFile(filename) || path.join(uploadsDir, filename);
 
     // If file doesn't exist, let standard static middleware handle it (next())
     if (!fs.existsSync(originalFilePath) || fs.statSync(originalFilePath).isDirectory()) {
         return next();
     }
 
-    // If no width query, or if it is invalid, let next() serve the original file
+    // If no width query, or if it is invalid, serve original file directly
     if (!targetWidth || isNaN(targetWidth) || targetWidth <= 0) {
-        return next();
+        res.setHeader('Cache-Control', 'public, max-age=2592000');
+        return res.sendFile(originalFilePath);
     }
 
     // Build cached file path: cache/[filename]-[width][ext]
@@ -367,10 +352,8 @@ app.get('/uploads/:filename', async (req, res, next) => {
     const cachedFilename = `${base}-${targetWidth}${ext}`;
     const cachedFilePath = path.join(cacheDir, cachedFilename);
 
-    // Set caching headers for optimized image
-    res.setHeader('Cache-Control', 'public, max-age=2592000'); // 30 days
+    res.setHeader('Cache-Control', 'public, max-age=2592000');
 
-    // If cached version exists, serve it
     if (fs.existsSync(cachedFilePath)) {
         return res.sendFile(cachedFilePath);
     }
@@ -380,14 +363,13 @@ app.get('/uploads/:filename', async (req, res, next) => {
         return res.sendFile(cachedFilePath);
     } catch (err) {
         console.error('Image resizing error:', err);
-        // Fallback to original file on error
-        return next();
+        return res.sendFile(originalFilePath);
     }
 });
 
-app.use('/uploads', express.static(uploadsDir, {
-    maxAge: '30d' // Cache uploads for 30 days
-}));
+// Dual static mounts: check root public/uploads first, then api/public/uploads
+app.use('/uploads', express.static(rootUploadsDir, { maxAge: '30d' }));
+app.use('/uploads', express.static(apiUploadsDir, { maxAge: '30d' }));
 
 // Serve Frontend Static Files
 app.use(express.static(path.join(__dirname, 'public'), {

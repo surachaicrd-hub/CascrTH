@@ -663,7 +663,8 @@ const imageService = require('../services/imageService');
 const path = require('path');
 const fs = require('fs');
 
-const slipUploadDir = path.join(__dirname, '../public/uploads/slips');
+const { primaryUploadsDir } = require('../config/uploadConfig');
+const slipUploadDir = path.join(primaryUploadsDir, 'slips');
 if (!fs.existsSync(slipUploadDir)) {
     fs.mkdirSync(slipUploadDir, { recursive: true });
 }

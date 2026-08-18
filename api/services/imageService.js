@@ -19,6 +19,8 @@ async function processAndSaveImage(inputBufferOrPath, outputPath, options = {}) 
         fs.mkdirSync(dir, { recursive: true });
     }
 
+    let saved = false;
+
     if (sharp) {
         try {
             let transform = sharp(inputBufferOrPath);
@@ -36,9 +38,20 @@ async function processAndSaveImage(inputBufferOrPath, outputPath, options = {}) 
                 transform = transform.jpeg({ quality });
             }
             await transform.toFile(outputPath);
-            return true;
+            saved = true;
         } catch (e) {
             console.warn('[imageService] Sharp transform error, falling back to direct write:', e.message);
+        }
+    }
+
+    if (!saved) {
+        // Direct write fallback
+        if (Buffer.isBuffer(inputBufferOrPath)) {
+            await fs.promises.writeFile(outputPath, inputBufferOrPath);
+            saved = true;
+        } else if (typeof inputBufferOrPath === 'string' && fs.existsSync(inputBufferOrPath)) {
+            await fs.promises.copyFile(inputBufferOrPath, outputPath);
+            saved = true;
         }
     }
 
@@ -48,24 +61,25 @@ async function processAndSaveImage(inputBufferOrPath, outputPath, options = {}) 
         const apiUploads = path.resolve(__dirname, '../public/uploads');
         const resolvedOut = path.resolve(outputPath);
 
+        let mirrorPath = null;
         if (resolvedOut.startsWith(rootUploads) && fs.existsSync(apiUploads)) {
             const rel = path.relative(rootUploads, resolvedOut);
-            const mirrorPath = path.join(apiUploads, rel);
-            const mirrorDir = path.dirname(mirrorPath);
-            if (!fs.existsSync(mirrorDir)) fs.mkdirSync(mirrorDir, { recursive: true });
-            if (fs.existsSync(outputPath)) await fs.promises.copyFile(outputPath, mirrorPath);
+            mirrorPath = path.join(apiUploads, rel);
         } else if (resolvedOut.startsWith(apiUploads) && fs.existsSync(rootUploads)) {
             const rel = path.relative(apiUploads, resolvedOut);
-            const mirrorPath = path.join(rootUploads, rel);
+            mirrorPath = path.join(rootUploads, rel);
+        }
+
+        if (mirrorPath && fs.existsSync(outputPath)) {
             const mirrorDir = path.dirname(mirrorPath);
             if (!fs.existsSync(mirrorDir)) fs.mkdirSync(mirrorDir, { recursive: true });
-            if (fs.existsSync(outputPath)) await fs.promises.copyFile(outputPath, mirrorPath);
+            await fs.promises.copyFile(outputPath, mirrorPath);
         }
     } catch (mirrorErr) {
         // Non-fatal mirror error
     }
 
-    return true;
+    return saved;
 }
 
 /**

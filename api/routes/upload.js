@@ -6,13 +6,7 @@ const fs = require('fs');
 const imageService = require('../services/imageService');
 const { verifyAdmin } = require('./auth');
 
-// Create uploads directory if it doesn't exist
-const uploadDir = (process.env.NODE_ENV !== 'production' && fs.existsSync(path.join(__dirname, '../../public/uploads')))
-    ? path.join(__dirname, '../../public/uploads')
-    : path.join(__dirname, '../public/uploads');
-if (!fs.existsSync(uploadDir)) {
-    fs.mkdirSync(uploadDir, { recursive: true });
-}
+const { primaryUploadsDir: uploadDir } = require('../config/uploadConfig');
 
 // Config multer to use memory storage so we can process with sharp before saving
 const storage = multer.memoryStorage();
