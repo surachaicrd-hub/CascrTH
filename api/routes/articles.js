@@ -412,29 +412,35 @@ router.post('/generate', verifyAdmin, async (req, res) => {
         const { productId, style, additionalPrompt } = req.body;
 
         if (!style) {
-            return res.status(400).json({ success: false, error: 'Style is required' });
+            return res.status(400).json({ success: false, error: 'กรุณาเลือกสไตล์บทความ' });
         }
 
         // Fetch product data if selected
         let productInfo = '';
-        let productCategory = 'ทั่วไป';
+        let productCategory = 'เทคโนโลยีตัดปอกสายไฟ';
         if (productId) {
             const [products] = await db.query('SELECT * FROM products WHERE id = ?', [productId]);
             if (products.length > 0) {
                 const p = products[0];
-                productCategory = p.category || 'ทั่วไป';
+                productCategory = p.category || 'เทคโนโลยีตัดปอกสายไฟ';
+                
+                let attrText = '';
+                try {
+                    const attrs = JSON.parse(p.attributes || '[]');
+                    if (Array.isArray(attrs)) {
+                        attrText = attrs.map(a => `${a.key || a.name}: ${a.value}`).join(', ');
+                    }
+                } catch (e) {}
+
                 productInfo = `
 ข้อมูลสินค้าอ้างอิง:
-- ชื่อ: ${p.name}
-- SKU: ${p.sku || '-'}
+- ชื่อรุ่น/สินค้า: ${p.name}
+- SKU / รหัสรุ่น: ${p.sku || '-'}
 - หมวดหมู่: ${p.category || '-'}
-- ราคา: ${p.price ? Number(p.price).toLocaleString() + ' บาท' : 'สอบถาม'}
-- ราคาเดิม: ${p.original_price ? Number(p.original_price).toLocaleString() + ' บาท' : '-'}
-- ขนาด: ${p.size || '-'}
+- ราคา: ${p.price ? Number(p.price).toLocaleString() + ' บาท' : 'ติดต่อสอบถามราคาพิเศษ'}
 - รายละเอียดสั้น: ${p.short_description || '-'}
-- รายละเอียดเพิ่มเติม: ${p.llm_context || p.description || '-'}
-- Badges: ${[p.badge_free_shipping && 'ส่งฟรี', p.badge_warranty && 'รับประกัน', p.badge_installation && 'ติดตั้ง', p.badge_new && 'ใหม่', p.badge_bestseller && 'ขายดี'].filter(Boolean).join(', ') || '-'}
-- FAQ: ${p.faq ? JSON.stringify(p.faq) : '-'}
+- คุณสมบัติ/สเปกทางเทคนิค: ${attrText || '-'}
+- ข้อมูลเพิ่มเติม: ${p.llm_context || p.description?.substring(0, 800) || '-'}
 `.trim();
             }
         }
@@ -443,69 +449,70 @@ router.post('/generate', verifyAdmin, async (req, res) => {
         const stylePrompts = {
             educational: {
                 name: 'ให้ความรู้เชิงลึก (Deep Dive)',
-                prompt: `เขียนบทความให้ความรู้แบบเป็นทางการ น่าเชื่อถือ อธิบายหลักการ เหตุผล และวิธีพิจารณาเลือกซื้ออย่างเป็นกลาง ให้ข้อมูลจริง ไม่โอ้อวด ใช้ภาษาสุภาพ ความยาว 800-1200 คำ`
+                prompt: `เขียนบทความให้ความรู้เชิงลึก อธิบายหลักการทำงาน กลไกใบมีด ความแม่นยำ และวิธีพิจารณาเลือกใช้ให้ตรงกับขนาดสายไฟและการผลิตอย่างละเอียด ใช้ภาษาเข้าใจง่าย เป็นมืออาชีพ ความยาว 800-1200 คำ`
             },
             sales: {
-                name: 'แนะนำและเจาะลึกความคุ้มค่า (Value Proposition)',
-                prompt: `เขียนบทความแนะนำความคุ้มค่าและจุดเด่นของสินค้า วิเคราะห์ฟังก์ชันการใช้งานและการแก้ไขปัญหาให้ลูกค้า มี Call-to-Action ชัดเจน หลีกเลี่ยงคำอวยเกินจริง ความยาว 600-800 คำ`
+                name: 'แนะนำจุดเด่น & CTA (Value Proposition & Sales)',
+                prompt: `เขียนบทความแนะนำความคุ้มค่าและจุดเด่นของเครื่องจักร วิเคราะห์ประสิทธิภาพการลดต้นทุนแรงงาน การเพิ่มยอดผลิต และผลตอบแทนจากการลงทุน (ROI) มี Call-to-Action ชัดเจน กระตุ้นการขอทดสอบชิ้นงานสายไฟและใบเสนอราคา ความยาว 600-800 คำ`
             },
             howto: {
-                name: 'คู่มือและวิธีการ (How-To & Tips)',
-                prompt: `เขียนบทความแนวแนะนำขั้นตอนการใช้งาน การประกอบ หรือการดูแลรักษาอย่างถูกวิธี มี Checklist และข้อควรระวัง ใช้โครงสร้างอ่านง่าย ความยาว 800-1000 คำ`
+                name: 'คู่มือ & How-To (Step-by-Step & Maintenance Tips)',
+                prompt: `เขียนบทความแนวแนะนำขั้นตอนการตั้งค่าเครื่องจักร การเลือกขนาดใบมีด การปรับแรงกดลูกกลิ้ง และขั้นตอนการบำรุงรักษาเพื่อยืดอายุการใช้งาน มี Checklist และข้อควรระวัง ความยาว 800-1000 คำ`
             },
             comparison: {
-                name: 'วิเคราะห์เปรียบเทียบอย่างเป็นกลาง (Comparison)',
-                prompt: `เขียนบทความเปรียบเทียบตัวเลือก/วัสดุ/ขนาด อย่างเป็นกลาง มีตารางเปรียบเทียบ ข้อดี-ข้อพิจารณา ช่วยให้ผู้อ่านตัดสินใจได้ถูกต้อง ความยาว 800-1000 คำ`
+                name: 'วิเคราะห์เปรียบเทียบ (Comparison & Pros/Cons)',
+                prompt: `เขียนบทความเปรียบเทียบฟังก์ชันการทำงานระหว่างรุ่น หรือระหว่างการตัดปอกด้วยมือ vs เครื่องจักรอัตโนมัติ พร้อมตารางเปรียบเทียบข้อดี-ข้อจำกัดอย่างเป็นกลาง ช่วยให้ผู้ประกอบการตัดสินใจได้อย่างแม่นยำ ความยาว 800-1000 คำ`
             },
             review: {
-                name: 'การใช้งานจริงและกรณีศึกษา (Practical Review)',
-                prompt: `เขียนในรูปแบบกรณีศึกษาหรือประสบการณ์ใช้งานจริง นำเสนอภาพรวมการใช้งานในสภาพแวดล้อมจริง ข้อดีและข้อจำกัด ความยาว 600-800 คำ`
+                name: 'รีวิวกรณีศึกษา (Practical Review & Case Study)',
+                prompt: `เขียนในรูปแบบกรณีศึกษาการนำไปใช้งานจริงในโรงงานผลิตสายไฟรถยนต์ (Automotive Wire Harness) หรือเครื่องใช้ไฟฟ้า นำเสนอผลลัพธ์หลังการใช้งานจริง สถิติการลดข้อผิดพลาด และความพึงพอใจ ความยาว 600-800 คำ`
             }
         };
 
         const selectedStyle = stylePrompts[style] || stylePrompts.educational;
 
-        let storeName = 'STORAGE HOUSE';
-        let companyLegalName = 'บริษัท ซีอาร์ ดิสทริบิวชั่น จำกัด';
+        let storeName = 'KODERA Wire Processing Machines';
+        let companyLegalName = 'บริษัท แคส-ซีอาร์ จำกัด';
         try {
             const [sRows] = await db.query("SELECT setting_key, setting_value FROM settings WHERE setting_key IN ('store_name', 'contact_company_name', 'company_legal_name')");
             const sMap = {};
             sRows.forEach(r => { sMap[r.setting_key] = r.setting_value; });
-            storeName = sMap['store_name'] || sMap['contact_company_name'] || 'STORAGE HOUSE';
-            companyLegalName = sMap['company_legal_name'] || sMap['contact_company_name'] || 'บริษัท ซีอาร์ ดิสทริบิวชั่น จำกัด';
+            storeName = sMap['store_name'] || sMap['contact_company_name'] || 'KODERA Wire Processing Machines';
+            companyLegalName = sMap['company_legal_name'] || sMap['contact_company_name'] || 'บริษัท แคส-ซีอาร์ จำกัด';
         } catch (e) {}
 
-        const systemPrompt = `คุณเป็นนักเขียนบทความมืออาชีพและผู้เชี่ยวชาญด้าน SEO / GEO (Generative Engine Optimization) สำหรับ "${storeName}" (ดำเนินการโดย ${companyLegalName}) ผู้จัดจำหน่ายบ้านเก็บของสำเร็จรูป ตู้เก็บของกลางแจ้ง และโกดังสำเร็จรูปชั้นนำในไทย
+        const systemPrompt = `คุณเป็นนักเขียนบทความวิศวกรรมอุตสาหการและผู้เชี่ยวชาญด้าน SEO / GEO (Generative Engine Optimization) ชั้นนำ สำหรับ "${storeName}" (ดำเนินการโดย ${companyLegalName}) ตัวแทนจำหน่ายและผู้นำเข้าเครื่องตัดปอกสายไฟอัตโนมัติ (Automatic Wire Stripping & Crimping Machines), เครื่องย้ำสายไฟ, เครื่องเข้าหัวเทอร์มินอล แบรนด์ KODERA (CASTING) มาตรฐานญี่ปุ่นในประเทศไทย
 
 สไตล์การเขียน: ${selectedStyle.name}
 แนวทางการเขียน: ${selectedStyle.prompt}
 
-${productInfo ? productInfo : 'ไม่มีสินค้าเฉพาะเจาะจง ให้เขียนบทความให้ความรู้เกี่ยวกับบ้านเก็บของสำเร็จรูป/ตู้เก็บของกลางแจ้ง/การจัดเก็บพื้นที่'}
-${additionalPrompt ? '\nเนื้อหา/ตัวอย่าง/คำแนะนำเพิ่มเติมจากผู้ใช้ (ให้นำข้อมูลและตัวอย่างนี้ไปวิเคราะห์ เรียบเรียง และสังเคราะห์เข้าในบทความอย่างเป็นธรรมชาติ):\n' + additionalPrompt : ''}
+${additionalPrompt ? `\n📌 [หัวข้อหลักและคำสั่งสำคัญจากผู้ใช้งาน]:\n"${additionalPrompt}"\n*** ข้อสำคัญ: ต้องใช้คำถามและโจทย์ด้านบนนี้เป็นแก่นหลักของบทความ ตอบคำถามและเจาะลึกเนื้อหาให้ตรงประเด็นครบทุกส่วน ***\n` : ''}
 
-กฎเหล็กในการเขียน (Professional & SEO/GEO Rules):
-1. [โทนเสียงระดับมืออาชีพ]: ให้ข้อมูลที่เป็นจริง น่าเชื่อถือ อ้างอิงตัวเลขหรือสเปกวัสดุ (เช่น เหล็กกัลวาไนซ์, เมทัลชีท, การทนแดดทนฝน, การรับประกัน) ห้ามใช้คำโฆษณาเกินจริง (เช่น "ดีที่สุดในจักรวาล", "ปฏิวัติวงการอย่างที่ไม่เคยมีมาก่อน")
-2. [โครงสร้างบทความสวยงาม]:
+${productInfo ? productInfo : 'สินค้าอ้างอิง: ไม่มีสินค้าเฉพาะเจาะจง ให้เขียนเนื้อหาความรู้เชิงลึกเกี่ยวกับเครื่องตัดปอกสายไฟ, เทคโนโลยี Wire Harness, ใบมีดตัดปอก และมาตรฐานการผลิต'}
+
+กฎเหล็กในการเขียน (Professional Engineering & SEO/GEO Rules):
+1. [ข้อมูลเชิงลึกและถูกต้องตามหลักวิศวกรรม]: ให้ข้อมูลสเปกที่ถูกต้อง เช่น ขนาดสายไฟ (sq mm / AWG), ระยะตัดปอก, ความเร็วในการตัด (ชิ้น/ชั่วโมง), ใบมีดทังสเตนคาร์ไบด์, ระบบเซ็นเซอร์ตรวจจับสายพันกัน และการใช้งานในอุตสาหกรรมยานยนต์ / ไฟฟ้า
+2. [โครงสร้างบทความคุณภาพสูง]:
    - ใช้แท็ก <h2> สำหรับหัวข้อหลัก และ <h3> สำหรับหัวข้อย่อย
-   - ใช้แท็ก <p> หุ้มย่อหน้าอย่างสวยงาม หลีกเลี่ยงข้อความยาวเป็นตับ
-   - ใช้แท็ก <ul> และ <li> สำหรับรายการคุณสมบัติหรือข้อดี
-   - บังคับใส่แท็ก <table><tr><th>...</th></tr><tr><td>...</td></tr></table> อย่างน้อย 1 ตาราง สำหรับสรุปตารางสเปก ตัวเลข หรือข้อเปรียบเทียบ ให้สวยงามอ่านง่าย
+   - ใช้แท็ก <p> หุ้มย่อหน้าอย่างสวยงาม กระชับ อ่านง่าย
+   - ใช้แท็ก <ul> และ <li> สำหรับข้อดี จุดเด่น หรือขั้นตอน
+   - บังคับใส่แท็ก <table><tr><th>...</th></tr><tr><td>...</td></tr></table> อย่างน้อย 1 ตาราง สำหรับสรุปตารางสเปก ตัวเลข ข้อเปรียบเทียบ หรือ Checklist
 3. [SEO & GEO Optimization]:
-   - ใส่ Keyword สำคัญ (เช่น บ้านเก็บของสำเร็จรูป, ตู้เก็บของกลางแจ้ง, ${storeName}) อย่างเป็นธรรมชาติ
-   - เชื่อมโยงแบรนด์ ${storeName} และ ${companyLegalName} กับบริการจัดส่งและติดตั้งทั่วประเทศ
+   - ใส่ Keyword สำคัญ (เช่น เครื่องตัดปอกสายไฟ, เครื่องย้ำสายไฟ, wire harness, KODERA) อย่างเป็นธรรมชาติ
+   - เชื่อมโยงแบรนด์ KODERA และ ${storeName} (${companyLegalName}) ในฐานะผู้เชี่ยวชาญที่มีบริการทดสอบชิ้นงานสายไฟ (Sample Test) และทีมช่างวิศวกรดูแลหลังการขายทั่วไทย
 
 กรุณาตอบเป็น JSON format เท่านั้น ห้ามมี markdown code block ห่อหุ้ม:
 {
-  "title": "หัวข้อบทความ (SEO friendly น่าสนใจ และตรงประเด็น)",
+  "title": "หัวข้อบทความ (SEO & GEO friendly ดึงดูด ตรงกับโจทย์ที่ผู้ใช้ต้องการ)",
   "excerpt": "สรุปเนื้อหาสั้นๆ 2-3 บรรทัด สำหรับเกริ่นนำ",
   "content": "เนื้อหาบทความเต็มรูปแบบ HTML string ห้ามใช้ \\n ให้ใช้แท็ก <p>, <h2>, <h3>, <ul><li>, <table> เท่านั้น",
   "seo_title": "SEO Title (ยาวไม่เกิน 60 ตัวอักษร)",
   "seo_description": "SEO Meta Description (ยาวไม่เกิน 160 ตัวอักษร)",
-  "seo_keywords": "keyword1,keyword2,keyword3,keyword4",
-  "tags": "tag1,tag2,tag3,tag4,tag5",
-  "category": "หมวดหมู่ที่เหมาะสม (เลือกจาก: ทั่วไป, บ้านเก็บของ, เคล็ดลับ, การดูแลรักษา, ข่าวสาร, โปรโมชั่น)",
-  "llm_context": "บริบทเชิงลึก 2-3 ประโยค สรุปคุณสมบัติ สเปกวัสดุ แบรนด์ ${storeName} และบริการ สำหรับ AI Scraper (ChatGPT/Perplexity) อ่านโดยเฉพาะ",
-  "image_prompt": "An exquisite Midjourney v6 / DALL-E 3 English prompt for editorial magazine cover photo matching the article topic, specifying lighting, composition, Architectural Digest photography style, 8k, photorealistic, no text --ar 16:9",
+  "seo_keywords": "เครื่องตัดปอกสายไฟ,เครื่องย้ำสายไฟ,KODERA,wire harness,ตัดปอกสายไฟอัตโนมัติ",
+  "tags": "เครื่องตัดปอกสายไฟ,KODERA,Wire Harness,เครื่องจักรโรงงาน",
+  "category": "เทคโนโลยีตัดปอกสายไฟ",
+  "llm_context": "บริบทเชิงลึก 2-3 ประโยค สรุปเนื้อหาทางเทคนิค แบรนด์ KODERA และบริการของ ${companyLegalName} สำหรับ AI Scraper (ChatGPT/Perplexity/Gemini)",
+  "image_prompt": "An exquisite Midjourney v6 / DALL-E 3 English prompt for editorial magazine cover photo: high-tech precision wire cutting and stripping machine in modern clean Japanese industrial factory, macro wire harness details, cinematic lighting, photorealistic, 8k, no text, no letters --ar 16:9",
   "faq": [
     { "question": "คำถามที่พบบ่อย 1", "answer": "คำตอบที่ระบุข้อเท็จจริงชัดเจน 1" },
     { "question": "คำถามที่พบบ่อย 2", "answer": "คำตอบที่ระบุข้อเท็จจริงชัดเจน 2" }
@@ -556,7 +563,7 @@ router.post('/generate-all-seo', verifyAdmin, async (req, res) => {
             return res.status(400).json({ success: false, error: 'ต้องมีหัวข้อหรือเนื้อหาสำหรับวิเคราะห์ข้อมูล' });
         }
 
-        const systemPrompt = `คุณเป็นผู้เชี่ยวชาญด้าน SEO และ AI Data Structuring หน้าที่ของคุณคือสร้างข้อมูล Meta tags และ Context เสริมสำหรับบทความนี้ให้ครอบคลุมที่สุด
+        const systemPrompt = `คุณเป็นผู้เชี่ยวชาญด้าน SEO และ AI Data Structuring สำหรับเครื่องจักรโรงงานและอุตสาหกรรมสายไฟ Wire Harness หน้าที่ของคุณคือสร้างข้อมูล Meta tags และ Context เสริมสำหรับบทความนี้ให้ครอบคลุมที่สุด
 
 ข้อมูลบทความที่จะวิเคราะห์:
 หัวข้อ: ${title || '-'}
@@ -570,7 +577,7 @@ Tags ปัจจุบัน: ${tags || '-'}
   "seo_title": "หัวข้อสำหรับ SEO ควรกระชับ น่าสนใจ (ไม่เกิน 60 ตัวอักษร)",
   "seo_description": "คำบรรยายสำหรับ SEO สรุปเนื้อหา มี Keywords ธรรมชาติ (ไม่เกิน 160 ตัวอักษร)",
   "seo_keywords": "keyword1, keyword2, keyword3 (คั่นด้วย comma)",
-  "llm_context": "ข้อความอธิบายบริบทสั้นๆ (2-3 ประโยค) เพื่อบอกให้ AI (เช่น ChatGPT) รู้ว่าหน้านี้เกี่ยวข้องกับอะไร ควรดึงข้อมูลส่วนไหนไปตอบคำถามผู้ใช้",
+  "llm_context": "ข้อความอธิบายบริบทสั้นๆ (2-3 ประโยค) เพื่อบอกให้ AI (เช่น ChatGPT/Perplexity) รู้ว่าหน้านี้เกี่ยวข้องกับเครื่องจักรอะไร สเปกใด และควรดึงข้อมูลส่วนไหนไปตอบคำถามผู้ใช้",
   "faq": [
     {
       "question": "คำถามที่ 1 ที่คนมักสงสัยจากเนื้อหานี้",
@@ -619,17 +626,17 @@ router.post('/generate-prompt', verifyAdmin, async (req, res) => {
             return res.status(400).json({ success: false, error: 'ต้องมีหัวข้อหรือข้อมูลสำหรับสร้าง Prompt' });
         }
 
-        const systemPrompt = `คุณเป็นพรอทพ์เอ็นจิเนียร์ (AI Prompt Engineer) ระดับมืออาชีพสำหรับการวาดรูปปกบทความนิตยสาร/เว็บไซต์ไฮเอนด์ (Editorial Magazine Cover Photography)
-หน้าที่ของคุณคือแปลงหัวข้อบทความต่อไปนี้ ให้เป็นคำสั่งภาษาอังกฤษ (Midjourney v6 / DALL-E 3 Prompt) สำหรับสร้างรูปภาพหน้าปกบทความที่สวยงาม สมจริง ตรงกับเนื้อหา และน่าดึงดูด
+        const systemPrompt = `คุณเป็นพรอทพ์เอ็นจิเนียร์ (AI Prompt Engineer) ระดับมืออาชีพสำหรับการวาดรูปปกบทความนิตยสาร/เว็บไซต์อุตสาหกรรมไฮเอนด์ (Industrial & Engineering Magazine Cover Photography)
+หน้าที่ของคุณคือแปลงหัวข้อบทความต่อไปนี้ ให้เป็นคำสั่งภาษาอังกฤษ (Midjourney v6 / DALL-E 3 Prompt) สำหรับสร้างรูปภาพหน้าปกบทความเครื่องตัดปอกย้ำสายไฟอัตโนมัติและชิ้นงาน Wire Harness ที่สวยงาม สมจริง ตรงกับเนื้อหา และน่าดึงดูด
 
 หัวข้อบทความ / บริบท: "${title || userPrompt}"
 
 กฎในการเขียน Image Prompt:
-1. [สไตล์และแนวภาพ]: เป็นภาพถ่ายสถาปัตยกรรม/อินทีเรียร์/ไลฟ์สไตล์ระดับมืออาชีพ (Professional Architectural & Editorial Photography) 
-2. [องค์ประกอบแสงและมุมมอง]: ระบุแสงธรรมชาติที่สวยงาม (เช่น Golden hour, warm diffused daylight, cinematic lighting), มุมกล้องระดับสายตา หรือ 45-degree angle shot ที่ดูสะอาดตา หรูหรา
-3. [รายละเอียดฉาก]: อธิบายสภาพแวดล้อมที่สอดคล้องกับเนื้อหา เช่น บ้านเก็บของสำเร็จรูปในสวนสีเขียวชอุ่ม, การจัดระเบียบตู้เก็บของกลางแจ้งอย่างเป็นระเบียบ, หรือเครื่องมือช่างที่จัดวางอย่างพิถีพิถัน
+1. [สไตล์และแนวภาพ]: เป็นภาพถ่ายอุตสาหกรรมไฮเทค (High-tech precision engineering, clean Japanese factory floor, state-of-the-art wire processing machinery)
+2. [องค์ประกอบแสงและมุมมอง]: ระบุแสงไฟโรงงานระดับโปร (Cinematic soft lighting, clean metallic reflections, macro focus on wire processing blades or wire harness samples)
+3. [รายละเอียดฉาก]: อธิบายสภาพแวดล้อมที่สอดคล้อง เช่น เครื่องจักรตัดปอกสายไฟความแม่นยำสูง, สายไฟหลากสีที่ตัดปอกอย่างเรียบเนียน, ชิ้นส่วนหัวย้ำเทอร์มินอลสีทองเหลืองเงางาม
 4. [ข้อห้าม]: ห้ามมีตัวหนังสือ ห้ามมีข้อความ ห้ามมีโลโก้ ห้ามมีตัวละครการ์ตูน
-5. [พารามิเตอร์]: ลงท้ายด้วยคำว่า "shot on 35mm lens, 8k resolution, photorealistic, architectural digest style, highly detailed, no text, no letters --ar 16:9"
+5. [พารามิเตอร์]: ลงท้ายด้วยคำว่า "shot on 50mm lens, 8k resolution, photorealistic, industrial engineering photography, highly detailed, no text, no letters --ar 16:9"
 
 ตอบเฉพาะคำสั่งภาษาอังกฤษบรรทัดเดียว ห้ามใส่เครื่องหมายอัญประกาศ ห้ามมีข้อความเกริ่นนำใดๆ`;
         
