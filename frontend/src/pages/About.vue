@@ -284,11 +284,7 @@ onUnmounted(() => {
                 </span>
               </div>
               
-              <h1 class="text-3xl sm:text-4xl lg:text-5xl font-black text-white leading-tight tracking-tight">
-                ประวัติความเป็นมาของ <br/>
-                <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-300 to-teal-400">
-                  {{ settingsStore.storeName || 'บริษัท ซีอาร์ ดิสทริบิวชั่น จำกัด' }}
-                </span>
+              <h1 class="text-3xl sm:text-4xl lg:text-5xl font-black text-white leading-tight tracking-tight whitespace-pre-line" v-html="s.about_hero_title || `ประวัติความเป็นมาของ <br/><span class='text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-300 to-teal-400'>${settingsStore.storeName || 'บริษัท ซีอาร์ ดิสทริบิวชั่น จำกัด'}</span>`">
               </h1>
               
               <p class="mt-4 text-slate-400 text-sm sm:text-base leading-relaxed max-w-2xl font-light">
