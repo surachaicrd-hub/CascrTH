@@ -258,14 +258,21 @@ onMounted(() => {
     <template v-else>
       
       <!-- =========================================================================
-           ARTICLE HEADER HERO (Enterprise Dark Aesthetic)
+           ARTICLE HEADER HERO (Cover Image Background + Enterprise Dark Aesthetic)
            ========================================================================= -->
-      <header class="relative overflow-hidden pt-28 pb-14 bg-[#070A0F] border-b border-white/[0.05]">
-        <!-- Mesh Background -->
-        <div class="absolute inset-0 opacity-[0.035] pointer-events-none"
-          style="background-image: radial-gradient(circle, rgba(255,255,255,0.7) 1px, transparent 1px); background-size: 28px 28px;">
+      <header class="relative overflow-hidden pt-28 pb-16 sm:pb-20 bg-[#070A0F] border-b border-white/[0.08]">
+        
+        <!-- Cover Image Backdrop -->
+        <div v-if="article.cover_image" class="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+          <img 
+            :src="getOptimizedBlogImageUrl(article.cover_image, 1600)" 
+            :alt="article.title" 
+            class="w-full h-full object-cover object-center scale-105 filter blur-[2px] opacity-25 dark:opacity-20 transform-gpu"
+          />
+          <!-- Multi-gradient overlays for maximum text legibility and aesthetic depth -->
+          <div class="absolute inset-0 bg-gradient-to-t from-[#070A0F] via-[#070A0F]/80 to-[#070A0F]/70"></div>
+          <div class="absolute inset-0 bg-gradient-to-r from-[#070A0F]/90 via-transparent to-[#070A0F]/90"></div>
         </div>
-        <div class="absolute inset-0 bg-gradient-to-b from-transparent via-[#070A0F]/60 to-[#070A0F] pointer-events-none"></div>
 
         <!-- Ambient Glows -->
         <div class="absolute -top-32 -left-32 w-96 h-96 bg-emerald-500/10 rounded-full blur-[120px] pointer-events-none"></div>
