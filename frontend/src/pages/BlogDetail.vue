@@ -378,6 +378,16 @@ onMounted(() => {
           <!-- Left Main Content Column -->
           <div class="lg:col-span-8 space-y-8">
 
+            <!-- Cover Image Container (Sharp & Featured) -->
+            <div v-if="article.cover_image" class="rounded-3xl overflow-hidden shadow-2xl border border-slate-200/80 dark:border-white/[0.06] bg-slate-900 aspect-[16/9] group">
+              <img
+                :src="getOptimizedBlogImageUrl(article.cover_image, 1200)"
+                :alt="article.title"
+                class="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-500"
+                @error="onImageError"
+              />
+            </div>
+
             <!-- Rich Text Body -->
             <article class="bg-white dark:bg-[#10141D] rounded-3xl p-6 sm:p-10 lg:p-12 border border-slate-200/80 dark:border-white/[0.06] shadow-xl shadow-slate-900/5 dark:shadow-black/20">
               <div class="prose prose-emerald dark:prose-invert max-w-none text-sm sm:text-base leading-relaxed" v-html="article.content"></div>
