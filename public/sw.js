@@ -1,4 +1,4 @@
-const CACHE_NAME = 'storage-v1';
+const CACHE_NAME = 'cascr-kodera-v2';
 const ASSETS_TO_CACHE = [
     '/',
     '/index.html',
