@@ -138,10 +138,13 @@ const lineHref = computed(() => {
 
 // Schema
 const addSchema = () => {
+  const storeName = settingsStore.storeName || 'KODERA Wire Processing Machines'
+  const baseUrl = typeof window !== 'undefined' ? window.location.origin : ''
+
   setMeta({
-    title: 'คลังบทความและสาระน่ารู้ - ' + (settingsStore.storeName || 'KODERA Wire Processing Machines'),
+    title: 'คลังบทความและสาระน่ารู้ - ' + storeName,
     description: settingsStore.storeDescription || 'รวบรวมบทความน่ารู้ คู่มือการใช้งานเครื่องตัดปอกสายไฟอัตโนมัติ เทคนิค Wire Harness และเคล็ดลับการเพิ่มผลผลิตในโรงงานอุตสาหกรรม',
-    canonicalUrl: window.location.href,
+    canonicalUrl: typeof window !== 'undefined' ? window.location.href : '',
     type: 'website'
   })
 
@@ -149,7 +152,7 @@ const addSchema = () => {
     "@context": "https://schema.org",
     "@type": "Blog",
     "name": `บทความและความรู้ - ${storeName}`,
-    "description": settingsStore.storeDescription || "บทความให้ความรู้ การดูแลรักษา และเคล็ดลับการเลือกใช้โรงเก็บของมาตรฐาน",
+    "description": settingsStore.storeDescription || "คู่มือและบทความวิชาการ เทคโนโลยีเครื่องตัดปอกย้ำสายไฟอัตโนมัติ และระบบ Wire Harness",
     "url": `${baseUrl}/blog`,
     "publisher": {
       "@type": "Organization",
