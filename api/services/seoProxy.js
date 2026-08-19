@@ -80,26 +80,42 @@ const seoProxyMiddleware = async (req, res, next) => {
         let storeKeywords = 'เครื่องตัดปอกสายไฟ, ตัดปอกสายไฟอัตโนมัติ, ใบมีดตัดสายไฟ, KODERA, CR Distribution';
         let storeOgTitle = 'CR Distribution - ผู้แทนจำหน่ายเครื่องตัดปอกสายไฟ KODERA ในประเทศไทย';
         let storeOgDescription = storeDescription;
+        let storeFavicon = '';
+        let storeLogo = '';
+        let storeOgImage = '';
 
         try {
             const [settingsRows] = await db.query(
-                "SELECT setting_key, setting_value FROM settings WHERE setting_key IN ('store_name', 'store_description', 'store_keywords', 'store_og_title', 'store_og_description', 'contact_company_name', 'company_legal_name')"
+                "SELECT setting_key, setting_value FROM settings WHERE setting_key IN ('store_name', 'store_description', 'store_keywords', 'store_og_title', 'store_og_description', 'store_og_image', 'store_logo', 'store_favicon', 'contact_company_name', 'company_legal_name')"
             );
             const sMap = {};
             settingsRows.forEach(r => { sMap[r.setting_key] = r.setting_value; });
-            storeName = sMap['store_name'] || sMap['contact_company_name'] || 'บ้านเก็บของ';
+            storeName = sMap['store_name'] || sMap['contact_company_name'] || 'CR Distribution';
             companyLegalName = sMap['company_legal_name'] || sMap['contact_company_name'] || storeName;
             if (sMap['store_description']) storeDescription = sMap['store_description'];
             if (sMap['store_keywords']) storeKeywords = sMap['store_keywords'];
             if (sMap['store_og_title']) storeOgTitle = sMap['store_og_title'];
             if (sMap['store_og_description']) storeOgDescription = sMap['store_og_description'];
+            storeFavicon = sMap['store_favicon'] || '';
+            storeLogo = sMap['store_logo'] || '';
+            storeOgImage = sMap['store_og_image'] || '';
         } catch (e) {
             // Use defaults if table doesn't exist
         }
 
+        const rawFavicon = storeFavicon || storeLogo;
+        const faviconUrl = rawFavicon 
+            ? (rawFavicon.startsWith('http') ? rawFavicon : `${siteUrl}${rawFavicon.startsWith('/') ? '' : '/'}${rawFavicon}`) 
+            : `${siteUrl}/favicon.ico`;
+
+        const rawOgImg = storeOgImage || storeLogo;
+        const resolvedOgImage = rawOgImg
+            ? (rawOgImg.startsWith('http') ? rawOgImg : `${siteUrl}${rawOgImg.startsWith('/') ? '' : '/'}${rawOgImg}`)
+            : defaultImage;
+
         let title = storeOgTitle || storeName;
         let description = storeDescription;
-        let image = defaultImage;
+        let image = resolvedOgImage;
         let keywords = storeKeywords;
         let llmContext = '';
         let jsonLdList = [];
@@ -364,6 +380,7 @@ const seoProxyMiddleware = async (req, res, next) => {
             }
         }
 
+        // Replace standard title tag with upgraded SEO tags block if matched
         if (matched) {
             const metaTags = generateMetaTags({
                 title: title.replace(/"/g, '&quot;'), 
@@ -377,13 +394,21 @@ const seoProxyMiddleware = async (req, res, next) => {
                 jsonLdHtml: jsonLdList.join('\n')
             });
 
-            // Replace standard title tag with upgraded SEO tags block
             html = html.replace(/<title>.*?<\/title>/s, metaTags);
-            
-            return res.send(html);
         }
 
-        // If not matched, just serve the default html
+        // Dynamically replace all favicon / apple-touch-icon tags for Googlebot & browsers
+        if (faviconUrl) {
+            html = html.replace(/<link[^>]+rel=["'](?:icon|shortcut icon|apple-touch-icon)["'][^>]*>/gi, '');
+            const faviconTags = `
+  <link rel="icon" href="${faviconUrl}" />
+  <link rel="shortcut icon" href="${faviconUrl}" />
+  <link rel="apple-touch-icon" sizes="180x180" href="${faviconUrl}" />
+  <link rel="icon" sizes="192x192" href="${faviconUrl}" />
+  <link rel="icon" sizes="48x48" href="${faviconUrl}" />`;
+            html = html.replace('</head>', `${faviconTags}\n</head>`);
+        }
+
         return res.send(html);
 
     } catch (error) {

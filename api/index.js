@@ -372,6 +372,45 @@ app.get('/uploads/:filename', async (req, res, next) => {
     }
 });
 
+// Dynamic Favicon Handler for Search Engine Bots & Browsers
+const { getActiveFaviconPath, syncFaviconFiles } = require('./services/faviconService');
+
+app.get([
+    '/favicon.ico',
+    '/favicon.png',
+    '/favicon.svg',
+    '/favicon-48x48.png',
+    '/favicon-192x192.png',
+    '/favicon-512x512.png',
+    '/apple-touch-icon.png',
+    '/apple-touch-icon-precomposed.png'
+], async (req, res) => {
+    try {
+        const iconPath = await getActiveFaviconPath();
+        if (iconPath && fs.existsSync(iconPath)) {
+            const ext = path.extname(iconPath).toLowerCase();
+            const mimeTypes = {
+                '.ico': 'image/x-icon',
+                '.png': 'image/png',
+                '.svg': 'image/svg+xml',
+                '.webp': 'image/webp',
+                '.jpg': 'image/jpeg',
+                '.jpeg': 'image/jpeg'
+            };
+            res.setHeader('Content-Type', mimeTypes[ext] || 'image/png');
+            res.setHeader('Cache-Control', 'public, max-age=86400');
+            return res.sendFile(iconPath);
+        }
+    } catch (e) {
+        console.error('Dynamic favicon error:', e);
+    }
+    const fallbackPath = path.join(__dirname, 'public', req.path);
+    if (fs.existsSync(fallbackPath)) {
+        return res.sendFile(fallbackPath);
+    }
+    res.status(404).end();
+});
+
 // Dual static mounts: check root public/uploads first, then api/public/uploads
 app.use('/uploads', express.static(rootUploadsDir, { maxAge: '30d' }));
 app.use('/uploads', express.static(apiUploadsDir, { maxAge: '30d' }));
@@ -427,6 +466,9 @@ app.use((err, req, res, next) => {
 if (process.env.NODE_ENV !== 'test') {
     app.listen(PORT, () => {
         console.log(`Server is running on port ${PORT}`);
+
+        // Sync favicon on startup
+        syncFaviconFiles().catch(err => console.error('Startup favicon sync error:', err));
 
         // Run background tasks & schedulers only if not disabled
         if (process.env.DISABLE_BG_TASKS !== 'true') {

@@ -413,6 +413,13 @@ router.post('/', verifyAdmin, async (req, res) => {
         // Invalidate settings cache
         await cacheService.delPattern('settings:*');
 
+        if (key === 'store_favicon' || key === 'store_logo') {
+            try {
+                const { syncFaviconFiles } = require('../services/faviconService');
+                syncFaviconFiles(value).catch(e => console.error('Favicon sync error:', e));
+            } catch (e) {}
+        }
+
         res.status(200).json({ success: true, message: 'Setting saved successfully' });
     } catch (error) {
         console.error('Save setting error:', error);
@@ -452,15 +459,26 @@ const handleBatchSave = async (req, res) => {
             ON DUPLICATE KEY UPDATE setting_value = ?
         `;
 
+        let updatedFavicon = null;
         for (const item of items) {
             if (item && item.key) {
                 const valStr = typeof item.value === 'string' ? item.value : (item.value !== undefined && item.value !== null ? String(item.value) : '');
                 await db.query(query, [item.key, valStr, valStr]);
+                if (item.key === 'store_favicon' || (item.key === 'store_logo' && !updatedFavicon)) {
+                    updatedFavicon = valStr;
+                }
             }
         }
 
         // Invalidate settings cache
         await cacheService.delPattern('settings:*');
+
+        if (updatedFavicon !== null) {
+            try {
+                const { syncFaviconFiles } = require('../services/faviconService');
+                syncFaviconFiles(updatedFavicon).catch(e => console.error('Favicon sync error:', e));
+            } catch (e) {}
+        }
 
         res.status(200).json({ success: true, message: 'Settings saved successfully' });
     } catch (error) {
