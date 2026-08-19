@@ -157,6 +157,12 @@ const sampleTitle = computed(() => {
           <stop offset="50%" stop-color="#0f172a" />
           <stop offset="100%" stop-color="#020617" />
         </linearGradient>
+
+        <!-- Twisted Diagonal Copper Strands Pattern -->
+        <pattern id="twisted-copper-pattern" width="4" height="4" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+          <line x1="0" y1="0" x2="0" y2="4" stroke="#fbbf24" stroke-width="1.2" />
+          <line x1="2" y1="0" x2="2" y2="4" stroke="#9a3412" stroke-width="1.0" />
+        </pattern>
       </defs>
 
       <!-- 1. Single Black Wire (สายเดี่ยวสีดำ ปอก 2 ด้าน) -->
@@ -174,6 +180,23 @@ const sampleTitle = computed(() => {
         <line x1="178" y1="8" x2="200" y2="8" stroke="#fbbf24" stroke-width="0.7" opacity="0.8" />
         <line x1="178" y1="10" x2="200" y2="10" stroke="#f97316" stroke-width="0.7" opacity="0.6" />
         <line x1="178" y1="12" x2="200" y2="12" stroke="#9a3412" stroke-width="0.7" opacity="0.8" />
+      </g>
+
+      <!-- 1.05 Single Wire Twisted Strands (สายเดี่ยว บิดเกลียว 2 ด้าน) -->
+      <g v-else-if="sampleType === 'single_twisted' || sampleType === 'single_twist' || sampleType === 'twisted_single' || sampleType === 'wire_twisted' || sampleType === 'twisted_strands'">
+        <!-- Left Copper (Twisted Strands) -->
+        <rect x="0" y="6.5" width="22" height="7" rx="0.5" fill="url(#copper-grad)" />
+        <rect x="0" y="6.5" width="22" height="7" rx="0.5" fill="url(#twisted-copper-pattern)" opacity="0.9" />
+        <line x1="0" y1="6.5" x2="22" y2="6.5" stroke="#fbbf24" stroke-width="0.6" opacity="0.7" />
+        <line x1="0" y1="13.5" x2="22" y2="13.5" stroke="#9a3412" stroke-width="0.6" opacity="0.8" />
+        <!-- Main Dark Slate/Grey Jacket -->
+        <rect x="22" y="4" width="156" height="12" rx="1.5" fill="url(#black-jacket-grad)" />
+        <line x1="22" y1="6.5" x2="178" y2="6.5" stroke="#64748b" stroke-width="0.8" opacity="0.6" />
+        <!-- Right Copper (Twisted Strands) -->
+        <rect x="178" y="6.5" width="22" height="7" rx="0.5" fill="url(#copper-grad)" />
+        <rect x="178" y="6.5" width="22" height="7" rx="0.5" fill="url(#twisted-copper-pattern)" opacity="0.9" />
+        <line x1="178" y1="6.5" x2="200" y2="6.5" stroke="#fbbf24" stroke-width="0.6" opacity="0.7" />
+        <line x1="178" y1="13.5" x2="200" y2="13.5" stroke="#9a3412" stroke-width="0.6" opacity="0.8" />
       </g>
 
       <!-- 1.1 Single Semi-Strip Wire (สายเดี่ยว กึ่งปอกคงปลอก 2 ด้าน / ปอกกึ่งหลุด 2 ด้าน) -->

@@ -4,6 +4,7 @@
 
 export const svgTemplateOptions = [
   { value: 'single_black', name: 'สายเดี่ยว สีดำ (ปอก 2 ด้าน)' },
+  { value: 'single_twisted', name: 'สายเดี่ยว บิดเกลียว (Single Wire Twisted Strands)' },
   { value: 'single_semi_strip', name: 'สายเดี่ยว กึ่งปอกคงปลอก 2 ด้าน (Semi-Strip)' },
   { value: 'single_blue', name: 'สายเดี่ยว สีน้ำเงิน (ปอก 2 ด้าน)' },
   { value: 'single_red', name: 'สายเดี่ยว สีแดง (ปอก 2 ด้าน)' },
@@ -40,6 +41,7 @@ export const defaultWireTypeGroups = [
     group: 'สายเดี่ยวปอกปลาย 2 ด้าน (Single Wire Stripping)',
     options: [
       { value: 'single_black', label: 'สายเดี่ยว สีดำ (ปอก 2 ด้าน)', defaultTitle: 'สายเดี่ยวสีดำ ปอก 2 ด้าน', template: 'single_black' },
+      { value: 'single_twisted', label: 'สายเดี่ยว บิดเกลียว (Single Wire Twisted)', defaultTitle: 'สายเดี่ยวบิดเกลียว ปอก 2 ด้าน', template: 'single_twisted' },
       { value: 'single_semi_strip', label: 'สายเดี่ยว กึ่งปอกคงปลอก 2 ด้าน (Semi-Strip)', defaultTitle: 'สายเดี่ยว กึ่งปอกคงปลอก 2 ด้าน', template: 'single_semi_strip' },
       { value: 'single_blue', label: 'สายเดี่ยว สีน้ำเงิน (ปอก 2 ด้าน)', defaultTitle: 'สายเดี่ยวสีน้ำเงิน ปอก 2 ด้าน', template: 'single_blue' },
       { value: 'single_red', label: 'สายเดี่ยว สีแดง (ปอก 2 ด้าน)', defaultTitle: 'สายเดี่ยวสีแดง ปอก 2 ด้าน', template: 'single_red' },
@@ -207,6 +209,7 @@ export const defaultWirePresets = [
 
 export const wireDefaultTitles = {
   single_black: 'สายเดี่ยวสีดำ ปอก 2 ด้าน',
+  single_twisted: 'สายเดี่ยวบิดเกลียว ปอก 2 ด้าน',
   single_semi_strip: 'สายเดี่ยว กึ่งปอกคงปลอก 2 ด้าน',
   single_blue: 'สายเดี่ยวสีน้ำเงิน ปอก 2 ด้าน',
   single_red: 'สายเดี่ยวสีแดง ปอก 2 ด้าน',
@@ -241,6 +244,11 @@ export const wireDefaultTitles = {
 export const wireTypeAliases = {
   black: 'single_black',
   single_strip_both: 'single_black',
+  single_twisted: 'single_twisted',
+  single_twist: 'single_twisted',
+  twisted_single: 'single_twisted',
+  wire_twisted: 'single_twisted',
+  twisted_strands: 'single_twisted',
   single_semi_strip: 'single_semi_strip',
   single_semi_strip_black: 'single_semi_strip',
   single_semi_strip_grey: 'single_semi_strip',
