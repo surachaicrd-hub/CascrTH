@@ -137,19 +137,22 @@ const generateWithAI = async (type) => {
   try {
     const res = await apiFetch('/api/ai/generate-policy', {
       method: 'POST',
-      body: JSON.stringify({ prompt: promptText })
+      body: JSON.stringify({ 
+        type, 
+        prompt: promptText 
+      })
     })
     const data = await res.json()
     
-    if (data.success) {
-      contentRef.value = data.data
+    if (data.success && data.data) {
+      contentRef.value = typeof data.data === 'string' ? data.data : (data.data.content || data.data.html || JSON.stringify(data.data))
       showToast('สร้างเนื้อหาด้วย AI สำเร็จ', 'success')
     } else {
-      showToast('เกิดข้อผิดพลาดจาก AI: ' + data.error, 'error')
+      showToast('เกิดข้อผิดพลาดจาก AI: ' + (data.error || 'ไม่สามารถสร้างเนื้อหาได้'), 'error')
     }
   } catch (error) {
     console.error('AI Generation error:', error)
-    showToast('กรุณาตรวจสอบการตั้งค่า API Key', 'error')
+    showToast('เกิดข้อผิดพลาด: ' + (error.message || 'ไม่สามารถเชื่อมต่อระบบ AI ได้'), 'error')
   } finally {
     isGeneratingAI.value = false
   }

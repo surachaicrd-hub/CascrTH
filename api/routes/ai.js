@@ -698,6 +698,84 @@ No markdown formatting (like \`\`\`json) outside the JSON block. Just pure JSON.
     }
 });
 
+router.post('/generate-policy', verifyAdmin, async (req, res) => {
+    try {
+        const { prompt: userPrompt, type, customPrompt } = req.body;
+
+        if (!userPrompt && !type && !customPrompt) {
+            return res.status(400).json({ success: false, error: 'Prompt or policy type is required' });
+        }
+
+        let storeName = 'CR Distribution';
+        let companyLegalName = 'บริษัท ซีอาร์ ดิสทริบิวชั่น จำกัด';
+        let storeEmail = 'contact@cascr.com';
+        let storePhone = '02-xxx-xxxx';
+        let storeAddress = '';
+        try {
+            const [sRows] = await db.query("SELECT setting_key, setting_value FROM settings WHERE setting_key IN ('store_name', 'contact_company_name', 'company_legal_name', 'contact_emails', 'contact_phones', 'contact_address', 'store_address')");
+            const sMap = {};
+            sRows.forEach(r => { sMap[r.setting_key] = r.setting_value; });
+            storeName = sMap['store_name'] || sMap['contact_company_name'] || 'CR Distribution';
+            companyLegalName = sMap['company_legal_name'] || sMap['contact_company_name'] || 'บริษัท ซีอาร์ ดิสทริบิวชั่น จำกัด';
+            storeAddress = sMap['store_address'] || sMap['contact_address'] || '';
+            if (sMap['contact_emails']) {
+                try {
+                    const parsed = JSON.parse(sMap['contact_emails']);
+                    if (Array.isArray(parsed) && parsed.length > 0) storeEmail = (typeof parsed[0] === 'string' ? parsed[0] : parsed[0]?.value) || storeEmail;
+                } catch(e) {}
+            }
+            if (sMap['contact_phones']) {
+                try {
+                    const parsed = JSON.parse(sMap['contact_phones']);
+                    if (Array.isArray(parsed) && parsed.length > 0) storePhone = (typeof parsed[0] === 'string' ? parsed[0] : parsed[0]?.value) || storePhone;
+                } catch(e) {}
+            }
+        } catch (e) {}
+
+        const finalPrompt = `
+You are a legal counsel, compliance officer, and corporate policy writer in Thailand with expertise in Thai Commercial Law, PDPA (Personal Data Protection Act B.E. 2562), E-commerce regulations, and industrial machinery warranty standards.
+
+Company Information:
+- Company Legal Name: ${companyLegalName}
+- Brand Name: ${storeName}
+- Products & Services: Importer and distributor of KODERA wire cutting and stripping machinery, wire harness processing equipment, spare parts, and technical on-site maintenance services in Thailand.
+- Contact Email: ${storeEmail}
+- Contact Phone: ${storePhone}
+- Address: ${storeAddress}
+
+Task / Instructions:
+${customPrompt || userPrompt || `เขียนเนื้อหาเอกสาร ${type || 'นโยบาย'} ที่ถูกต้อง สมบูรณ์ และเป็นทางการ`}
+
+Output Requirements:
+1. Write the full, professional, comprehensive legal document in THAI.
+2. Structure the output as clean, semantic HTML designed for a Rich Text Editor (CKEditor).
+3. Use HTML tags:
+   - <h2> for main section titles
+   - <h3> for subsection titles
+   - <p> for paragraphs
+   - <ul> and <li> for lists and bullet points
+   - <strong> for emphasis on key legal terms, obligations, or timelines
+   - <table>, <thead>, <tbody>, <tr>, <th>, <td> if comparative tables or timelines are helpful.
+4. Do NOT wrap the output in markdown code blocks (\`\`\`html or \`\`\`). Return ONLY the pure HTML string or text.
+5. Ensure the document is thorough, comprehensive, compliant with Thai law, and covers standard liability disclaimers, data subject rights (if PDPA), service levels, warranty terms, and contact channels.
+`;
+
+        const response = await gemini.generateContent({
+            prompt: finalPrompt,
+            label: 'AI Policy Request'
+        });
+
+        let textResponse = response.text || '';
+        textResponse = textResponse.replace(/^```html\s*/i, '').replace(/^```\s*/, '').replace(/```\s*$/, '').trim();
+
+        res.status(200).json({ success: true, data: textResponse });
+    } catch (error) {
+        console.error('AI Policy Generation error:', error);
+        const statusCode = error.statusCode || 400;
+        res.status(statusCode).json({ success: false, error: error.message || 'Failed to generate policy content' });
+    }
+});
+
 router.post('/generate', verifyAdmin, async (req, res) => {
     try {
         const { prompt, systemPrompt } = req.body;
@@ -721,9 +799,9 @@ router.post('/generate', verifyAdmin, async (req, res) => {
 
         res.status(200).json({ success: true, data: textResponse });
     } catch (error) {
-        console.error('AI Generate Policy error:', error);
+        console.error('AI Generate Content error:', error);
         const statusCode = error.statusCode || 400;
-        res.status(statusCode).json({ success: false, error: error.message || 'Failed to generate policy' });
+        res.status(statusCode).json({ success: false, error: error.message || 'Failed to generate content' });
     }
 });
 
