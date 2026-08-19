@@ -114,6 +114,29 @@ const heroBg = computed(() => {
   return settingsStore.projectsHeroBg || '/images/hero/projects-hero.jpg'
 })
 
+const heroBadge = computed(() => {
+  return settingsStore.projectsHeroBadge || 'REAL INSTALLATION PORTFOLIO'
+})
+
+const heroTitle = computed(() => {
+  return settingsStore.projectsHeroTitle || 'ผลงานการส่งมอบและติดตั้งจริง'
+})
+
+const heroSubtitle = computed(() => {
+  return settingsStore.projectsHeroSubtitle || 'โดยทีมวิศวกรผู้เชี่ยวชาญ KODERA'
+})
+
+const heroDesc = computed(() => {
+  return settingsStore.projectsHeroDesc || 'รวบรวมภาพผลงานจริงการส่งมอบ ติดตั้ง และอบรมการใช้งานเครื่องตัดปอกสายไฟ KODERA Japan จากโรงงานชั้นนำทั่วประเทศ การันตีความแม่นยำสูงและได้มาตรฐานวิศวกรรม'
+})
+
+const stat1Val = computed(() => settingsStore.projectsStat1Val || '500+')
+const stat1Label = computed(() => settingsStore.projectsStat1Label || 'เครื่องที่ส่งมอบ')
+const stat2Val = computed(() => settingsStore.projectsStat2Val || '77')
+const stat2Label = computed(() => settingsStore.projectsStat2Label || 'จังหวัดทั่วไทย')
+const stat3Val = computed(() => settingsStore.projectsStat3Val || '100%')
+const stat3Label = computed(() => settingsStore.projectsStat3Label || 'รับประกันศูนย์ไทย')
+
 /* ── Date formatting ── */
 const formatDate = (dateStr) => {
   if (!dateStr) return ''
@@ -174,37 +197,37 @@ const formatDate = (dateStr) => {
                 <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
               </svg>
               <span class="text-blue-400 text-[11px] font-bold tracking-[0.2em] uppercase">
-                REAL INSTALLATION PORTFOLIO
+                {{ heroBadge }}
               </span>
             </div>
             
             <h1 class="text-3xl sm:text-4xl lg:text-5xl font-black text-white leading-tight tracking-tight">
-              ผลงานการส่งมอบและติดตั้งจริง <br/>
-              <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-cyan-300 to-teal-400">
-                โดยทีมวิศวกรผู้เชี่ยวชาญ KODERA
+              {{ heroTitle }} <br v-if="heroSubtitle"/>
+              <span v-if="heroSubtitle" class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-cyan-300 to-teal-400">
+                {{ heroSubtitle }}
               </span>
             </h1>
             
-            <p class="mt-4 text-slate-400 text-sm sm:text-base leading-relaxed max-w-2xl font-light">
-              รวบรวมภาพผลงานจริงการส่งมอบ ติดตั้ง และอบรมการใช้งานเครื่องตัดปอกสายไฟ KODERA Japan จากโรงงานชั้นนำทั่วประเทศ การันตีความแม่นยำสูงและได้มาตรฐานวิศวกรรม
+            <p v-if="heroDesc" class="mt-4 text-slate-400 text-sm sm:text-base leading-relaxed max-w-2xl font-light whitespace-pre-line">
+              {{ heroDesc }}
             </p>
           </div>
 
           <!-- Key Stats Strip -->
           <div class="flex items-center justify-center lg:justify-end gap-6 sm:gap-8 bg-slate-900/60 border border-white/10 backdrop-blur-md px-6 py-4 rounded-2xl shrink-0">
             <div class="text-center">
-              <p class="text-2xl sm:text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-300 font-mono">500+</p>
-              <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-0.5">เครื่องที่ส่งมอบ</p>
+              <p class="text-2xl sm:text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-300 font-mono">{{ stat1Val }}</p>
+              <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-0.5">{{ stat1Label }}</p>
             </div>
             <div class="w-px h-8 bg-white/10"></div>
             <div class="text-center">
-              <p class="text-2xl sm:text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-300 font-mono">77</p>
-              <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-0.5">จังหวัดทั่วไทย</p>
+              <p class="text-2xl sm:text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-300 font-mono">{{ stat2Val }}</p>
+              <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-0.5">{{ stat2Label }}</p>
             </div>
             <div class="w-px h-8 bg-white/10"></div>
             <div class="text-center">
-              <p class="text-2xl sm:text-3xl font-black text-blue-400 font-mono">100%</p>
-              <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-0.5">รับประกันศูนย์ไทย</p>
+              <p class="text-2xl sm:text-3xl font-black text-blue-400 font-mono">{{ stat3Val }}</p>
+              <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-0.5">{{ stat3Label }}</p>
             </div>
           </div>
         </div>

@@ -181,6 +181,27 @@ const currentProject = ref({
   service_date: '' // เพิ่มฟิลด์ให้รองรับวันที่ให้บริการ
 })
 
+// Tab Navigation State
+const activeTab = ref('projects') // 'projects' | 'hero'
+
+// Projects Hero Header State
+const hero_badge = ref('REAL INSTALLATION PORTFOLIO')
+const hero_title = ref('ผลงานการส่งมอบและติดตั้งจริง')
+const hero_subtitle = ref('โดยทีมวิศวกรผู้เชี่ยวชาญ KODERA')
+const hero_desc = ref('รวบรวมภาพผลงานจริงการส่งมอบ ติดตั้ง และอบรมการใช้งานเครื่องตัดปอกสายไฟ KODERA Japan จากโรงงานชั้นนำทั่วประเทศ การันตีความแม่นยำสูงและได้มาตรฐานวิศวกรรม')
+const hero_bg = ref('')
+const stat_1_val = ref('500+')
+const stat_1_label = ref('เครื่องที่ส่งมอบ')
+const stat_2_val = ref('77')
+const stat_2_label = ref('จังหวัดทั่วไทย')
+const stat_3_val = ref('100%')
+const stat_3_label = ref('รับประกันศูนย์ไทย')
+
+const isSavingHero = ref(false)
+const uploadingHeroBg = ref(false)
+const aiHeroPrompt = ref('')
+const isAiHeroGenerating = ref(false)
+
 const fetchProjects = async () => {
     loading.value = true
     try {
@@ -200,15 +221,157 @@ const fetchProjects = async () => {
         if (prodData.success) {
             productsList.value = prodData.data
         }
-        if (setData.success && setData.data?.projects_enabled !== undefined) {
-            isProjectsEnabled.value = String(setData.data.projects_enabled) !== 'false'
-            settingsStore.isProjectsEnabled = isProjectsEnabled.value
+        if (setData.success && setData.data) {
+            if (setData.data.projects_enabled !== undefined) {
+                isProjectsEnabled.value = String(setData.data.projects_enabled) !== 'false'
+                settingsStore.isProjectsEnabled = isProjectsEnabled.value
+            }
+            if (setData.data.projects_hero_badge) hero_badge.value = setData.data.projects_hero_badge
+            if (setData.data.projects_hero_title) hero_title.value = setData.data.projects_hero_title
+            if (setData.data.projects_hero_subtitle) hero_subtitle.value = setData.data.projects_hero_subtitle
+            if (setData.data.projects_hero_desc) hero_desc.value = setData.data.projects_hero_desc
+            if (setData.data.projects_hero_bg) hero_bg.value = setData.data.projects_hero_bg
+            if (setData.data.projects_stat_1_val) stat_1_val.value = setData.data.projects_stat_1_val
+            if (setData.data.projects_stat_1_label) stat_1_label.value = setData.data.projects_stat_1_label
+            if (setData.data.projects_stat_2_val) stat_2_val.value = setData.data.projects_stat_2_val
+            if (setData.data.projects_stat_2_label) stat_2_label.value = setData.data.projects_stat_2_label
+            if (setData.data.projects_stat_3_val) stat_3_val.value = setData.data.projects_stat_3_val
+            if (setData.data.projects_stat_3_label) stat_3_label.value = setData.data.projects_stat_3_label
         }
     } catch (error) {
         console.error('Fetch data failed', error)
         showToast('โหลดข้อมูลโปรเจคหรือสินค้าไม่สำเร็จ', 'error')
     } finally {
         loading.value = false
+    }
+}
+
+const saveHeroSettings = async () => {
+    isSavingHero.value = true
+    try {
+        const payload = [
+            { key: 'projects_hero_badge', value: hero_badge.value },
+            { key: 'projects_hero_title', value: hero_title.value },
+            { key: 'projects_hero_subtitle', value: hero_subtitle.value },
+            { key: 'projects_hero_desc', value: hero_desc.value },
+            { key: 'projects_hero_bg', value: hero_bg.value },
+            { key: 'projects_stat_1_val', value: stat_1_val.value },
+            { key: 'projects_stat_1_label', value: stat_1_label.value },
+            { key: 'projects_stat_2_val', value: stat_2_val.value },
+            { key: 'projects_stat_2_label', value: stat_2_label.value },
+            { key: 'projects_stat_3_val', value: stat_3_val.value },
+            { key: 'projects_stat_3_label', value: stat_3_label.value }
+        ]
+
+        const res = await apiFetch('/api/settings/batch', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ settings: payload })
+        })
+        const json = await res.json()
+        if (json.success) {
+            settingsStore.projectsHeroBadge = hero_badge.value
+            settingsStore.projectsHeroTitle = hero_title.value
+            settingsStore.projectsHeroSubtitle = hero_subtitle.value
+            settingsStore.projectsHeroDesc = hero_desc.value
+            settingsStore.projectsHeroBg = hero_bg.value
+            settingsStore.projectsStat1Val = stat_1_val.value
+            settingsStore.projectsStat1Label = stat_1_label.value
+            settingsStore.projectsStat2Val = stat_2_val.value
+            settingsStore.projectsStat2Label = stat_2_label.value
+            settingsStore.projectsStat3Val = stat_3_val.value
+            settingsStore.projectsStat3Label = stat_3_label.value
+
+            showToast('บันทึกการตั้งค่าส่วนหัวหน้าผลงานเรียบร้อยแล้ว', 'success')
+        } else {
+            throw new Error(json.error || 'บันทึกไม่สำเร็จ')
+        }
+    } catch (e) {
+        console.error('Save hero settings error:', e)
+        showToast('เกิดข้อผิดพลาดในการบันทึก: ' + e.message, 'error')
+    } finally {
+        isSavingHero.value = false
+    }
+}
+
+const handleHeroBgUpload = async (event) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+    uploadingHeroBg.value = true
+    try {
+        const formData = new FormData()
+        formData.append('image', file)
+        const res = await apiFetch('/api/upload', {
+            method: 'POST',
+            body: formData
+        })
+        const json = await res.json()
+        if (json.success && (json.url || json.imageUrl)) {
+            hero_bg.value = json.url || json.imageUrl
+            showToast('อัปโหลดภาพพื้นหลังส่วนหัวสำเร็จ', 'success')
+        } else {
+            showToast(json.error || 'อัปโหลดภาพไม่สำเร็จ', 'error')
+        }
+    } catch (e) {
+        console.error('Hero BG upload error:', e)
+        showToast('เกิดข้อผิดพลาดในการอัปโหลดภาพ', 'error')
+    } finally {
+        uploadingHeroBg.value = false
+        if (event.target) event.target.value = ''
+    }
+}
+
+const resetHeroToDefault = async () => {
+    const isConfirmed = await showConfirm({
+        title: 'คืนค่าเริ่มต้นส่วนหัว?',
+        message: 'ข้อความส่วนหัวและตัวเลขสถิติจะถูกรีเซ็ตกลับเป็นค่ามาตรฐาน KODERA Japan',
+        confirmText: 'ใช่, คืนค่าเริ่มต้น',
+        cancelText: 'ยกเลิก',
+        type: 'warning'
+    })
+    if (!isConfirmed) return
+
+    hero_badge.value = 'REAL INSTALLATION PORTFOLIO'
+    hero_title.value = 'ผลงานการส่งมอบและติดตั้งจริง'
+    hero_subtitle.value = 'โดยทีมวิศวกรผู้เชี่ยวชาญ KODERA'
+    hero_desc.value = 'รวบรวมภาพผลงานจริงการส่งมอบ ติดตั้ง และอบรมการใช้งานเครื่องตัดปอกสายไฟ KODERA Japan จากโรงงานชั้นนำทั่วประเทศ การันตีความแม่นยำสูงและได้มาตรฐานวิศวกรรม'
+    hero_bg.value = '/images/hero/projects-hero.jpg'
+    stat_1_val.value = '500+'
+    stat_1_label.value = 'เครื่องที่ส่งมอบ'
+    stat_2_val.value = '77'
+    stat_2_label.value = 'จังหวัดทั่วไทย'
+    stat_3_val.value = '100%'
+    stat_3_label.value = 'รับประกันศูนย์ไทย'
+    showToast('คืนค่าเริ่มต้นเรียบร้อย (อย่าลืมกดบันทึกการตั้งค่า)', 'info')
+}
+
+const generateHeroWithAI = async () => {
+    if (!aiHeroPrompt.value.trim()) {
+        showToast('กรุณาระบุจุดเด่นหรือแนวทางข้อความที่ต้องการให้ AI ช่วยแต่ง', 'warning')
+        return
+    }
+    isAiHeroGenerating.value = true
+    try {
+        const res = await apiFetch('/api/ai/generate-project', {
+            method: 'POST',
+            body: JSON.stringify({ 
+                prompt: `แต่งข้อความส่วนหัว (Hero Header) สำหรับหน้าผลงาน (Projects / Installation Portfolio): ${aiHeroPrompt.value}. ขอ Title ภาษาไทยสั้นกระชับ, Subtitle ไฮไลต์, และ Description สั้น 2-3 บรรทัดน่าเชื่อถือ`, 
+                style: 'Professional' 
+            })
+        })
+        const result = await res.json()
+        if (result.success && result.data) {
+            if (result.data.title) hero_title.value = result.data.title
+            if (result.data.client_name) hero_subtitle.value = result.data.client_name
+            if (result.data.description) hero_desc.value = result.data.description
+            showToast('AI ช่วยร่างข้อความส่วนหัวเรียบร้อยแล้ว', 'success')
+        } else {
+            showToast('สร้างเนื้อหาไม่สำเร็จ', 'error')
+        }
+    } catch (e) {
+        showToast('เกิดข้อผิดพลาดในการเชื่อมต่อกับ AI', 'error')
+    } finally {
+        isAiHeroGenerating.value = false
     }
 }
 
@@ -494,21 +657,34 @@ const getProductImage = (prod) => {
 <template>
   <div class="max-w-7xl mx-auto pb-12">
     <!-- Header -->
-    <div class="flex items-center justify-between mb-8">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
       <div>
         <h1 class="text-3xl font-black text-gray-900 tracking-tight">จัดการหน้าผลงาน (Projects)</h1>
         <p class="text-gray-500 mt-2 font-medium flex items-center gap-1">เพิ่ม ลบ หรือแก้ไขข้อมูลผลงานการติดตั้งและจัดส่ง
           <InfoTooltip title="หน้าผลงานคืออะไร?" description="หน้านี้แสดงผลงานจริง (Portfolio) เพื่อสร้างความเชื่อมั่น<ul><li><strong>AI เขียนเนื้อหา:</strong> พิมพ์โน้ตสั้นๆ AI จะเรียบเรียงเป็นบทความเต็มรูปแบบ</li><li><strong>อ้างอิงสินค้า:</strong> ผูกผลงานกับสินค้าในระบบ AI ช่วยจับคู่อัตโนมัติ</li><li><strong>รูปแกลเลอรี:</strong> รูปแรกคือปก ลากสลับลำดับได้</li><li><strong>สถานะ:</strong> เผยแพร่/ซ่อน ควบคุมการแสดงบนหน้าเว็บ</li></ul>" />
         </p>
       </div>
-      <button 
-        v-if="!showForm"
-        @click="createNewProject"
-        class="flex items-center px-4 py-2.5 bg-emerald-600 text-white text-sm font-bold rounded-xl hover:bg-emerald-500 transition-colors shadow-lg shadow-emerald-500/20"
-      >
-        <svg class="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-        เพิ่มผลงานใหม่
-      </button>
+      <div v-if="!showForm" class="flex items-center gap-3">
+        <button 
+          v-if="activeTab === 'hero'"
+          @click="saveHeroSettings"
+          :disabled="isSavingHero"
+          class="flex items-center px-5 py-2.5 bg-emerald-600 text-white text-sm font-bold rounded-xl hover:bg-emerald-500 transition-colors shadow-lg shadow-emerald-500/20 cursor-pointer disabled:opacity-50"
+        >
+          <svg v-if="isSavingHero" class="w-4 h-4 mr-2 animate-spin" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+          <svg v-else class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+          {{ isSavingHero ? 'กำลังบันทึก...' : 'บันทึกส่วนหัว' }}
+        </button>
+
+        <button 
+          v-if="activeTab === 'projects'"
+          @click="createNewProject"
+          class="flex items-center px-5 py-2.5 bg-emerald-600 text-white text-sm font-bold rounded-xl hover:bg-emerald-500 transition-colors shadow-lg shadow-emerald-500/20 cursor-pointer"
+        >
+          <svg class="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+          เพิ่มผลงานใหม่
+        </button>
+      </div>
     </div>
 
     <!-- Global Visibility Switch Banner -->
@@ -572,8 +748,408 @@ const getProductImage = (prod) => {
       </div>
     </div>
 
+    <!-- Segmented Navigation Tabs (Only visible when not creating/editing single project) -->
+    <div v-if="!showForm" class="bg-white p-2 rounded-2xl border border-gray-200/80 shadow-sm flex flex-wrap items-center justify-between gap-4 mb-8">
+      <div class="flex items-center gap-2 p-1 bg-gray-100 rounded-xl w-full sm:w-auto">
+        <button 
+          type="button"
+          @click="activeTab = 'projects'" 
+          class="flex-1 sm:flex-none px-5 py-2.5 rounded-lg text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-2 cursor-pointer"
+          :class="activeTab === 'projects' ? 'bg-white text-emerald-700 shadow-sm' : 'text-gray-600 hover:text-gray-900'"
+        >
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+          รายการผลงาน ({{ projects.length }})
+        </button>
+        <button 
+          type="button"
+          @click="activeTab = 'hero'" 
+          class="flex-1 sm:flex-none px-5 py-2.5 rounded-lg text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-2 cursor-pointer"
+          :class="activeTab === 'hero' ? 'bg-white text-emerald-700 shadow-sm' : 'text-gray-600 hover:text-gray-900'"
+        >
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+          จัดการส่วนหัว & แบนเนอร์ (Hero & Banner)
+        </button>
+      </div>
+
+      <div class="flex items-center gap-2 text-xs text-gray-500 font-medium px-2">
+        <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+        <span>ระบบจัดการหน้า /projects</span>
+      </div>
+    </div>
+
+    <!-- =========================================================================
+         TAB 2: HERO HEADER & BANNER MANAGEMENT VIEW
+         ========================================================================= -->
+    <div v-if="activeTab === 'hero' && !showForm" class="space-y-8 animate-fade-in-up">
+      <!-- 1. Real-Time Live Preview -->
+      <div class="bg-white rounded-3xl border border-gray-200/80 shadow-sm overflow-hidden p-6 sm:p-8 space-y-4">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <div class="w-3 h-3 rounded-full bg-emerald-500 animate-pulse"></div>
+            <h2 class="text-base font-bold text-gray-900">ตัวอย่างจำลองส่วนหัวบนหน้าเว็บจริง (Live Preview)</h2>
+          </div>
+          <span class="text-xs font-semibold px-2.5 py-1 bg-slate-100 text-slate-600 rounded-full">แสดงผลแบบเรียลไทม์</span>
+        </div>
+
+        <!-- Realistic Mockup Header matching /projects -->
+        <div class="relative overflow-hidden rounded-2xl pt-12 pb-10 px-6 sm:px-10 bg-[#070A0F] border border-white/[0.08] shadow-2xl text-white">
+          <!-- Background image -->
+          <div 
+            class="absolute inset-0 bg-cover bg-center opacity-60 pointer-events-none transition-all duration-500"
+            :style="{ backgroundImage: `url(${getImageUrl(hero_bg) || '/images/hero/projects-hero.jpg'})` }"
+          ></div>
+          <div class="absolute inset-0 bg-gradient-to-r from-[#070A0F] via-[#070A0F]/70 to-[#070A0F]/20 pointer-events-none"></div>
+          <div class="absolute inset-0 bg-gradient-to-t from-[#070A0F] via-transparent to-[#070A0F]/40 pointer-events-none"></div>
+          <div class="absolute inset-0 opacity-[0.035] pointer-events-none" style="background-image: radial-gradient(circle, rgba(255,255,255,0.7) 1px, transparent 1px); background-size: 24px 24px;"></div>
+          <div class="absolute -top-20 -left-20 w-60 h-60 bg-blue-500/10 rounded-full blur-[80px] pointer-events-none"></div>
+          <div class="absolute top-1/2 right-0 w-60 h-60 bg-cyan-500/10 rounded-full blur-[80px] pointer-events-none"></div>
+
+          <div class="relative z-10 flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
+            <div class="max-w-xl space-y-3">
+              <!-- Eyebrow Pill -->
+              <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 backdrop-blur-md">
+                <svg class="w-3 h-3 text-blue-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                </svg>
+                <span class="text-blue-400 text-[10px] font-bold tracking-[0.2em] uppercase font-mono">
+                  {{ hero_badge || 'REAL INSTALLATION PORTFOLIO' }}
+                </span>
+              </div>
+
+              <!-- Titles -->
+              <h3 class="text-2xl sm:text-3xl font-black leading-tight tracking-tight text-white">
+                {{ hero_title || 'ผลงานการส่งมอบและติดตั้งจริง' }} <br v-if="hero_subtitle"/>
+                <span v-if="hero_subtitle" class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-cyan-300 to-teal-400">
+                  {{ hero_subtitle }}
+                </span>
+              </h3>
+
+              <p class="text-slate-400 text-xs sm:text-sm font-light leading-relaxed line-clamp-3 whitespace-pre-line">
+                {{ hero_desc || 'รวบรวมภาพผลงานจริงการส่งมอบ ติดตั้ง และอบรมการใช้งานเครื่องตัดปอกสายไฟ KODERA Japan จากโรงงานชั้นนำทั่วประเทศ การันตีความแม่นยำสูงและได้มาตรฐานวิศวกรรม' }}
+              </p>
+            </div>
+
+            <!-- Stats Box -->
+            <div class="flex items-center gap-4 sm:gap-6 bg-slate-900/70 border border-white/10 backdrop-blur-md px-5 py-3 rounded-2xl shrink-0">
+              <div class="text-center">
+                <p class="text-xl sm:text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-300 font-mono">{{ stat_1_val || '500+' }}</p>
+                <p class="text-[9px] text-slate-400 font-bold uppercase tracking-wider mt-0.5">{{ stat_1_label || 'เครื่องที่ส่งมอบ' }}</p>
+              </div>
+              <div class="w-px h-6 bg-white/10"></div>
+              <div class="text-center">
+                <p class="text-xl sm:text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-300 font-mono">{{ stat_2_val || '77' }}</p>
+                <p class="text-[9px] text-slate-400 font-bold uppercase tracking-wider mt-0.5">{{ stat_2_label || 'จังหวัดทั่วไทย' }}</p>
+              </div>
+              <div class="w-px h-6 bg-white/10"></div>
+              <div class="text-center">
+                <p class="text-xl sm:text-2xl font-black text-blue-400 font-mono">{{ stat_3_val || '100%' }}</p>
+                <p class="text-[9px] text-slate-400 font-bold uppercase tracking-wider mt-0.5">{{ stat_3_label || 'รับประกันศูนย์ไทย' }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. AI Assistant for Hero -->
+      <div class="bg-gradient-to-br from-indigo-50 via-purple-50 to-blue-50 rounded-3xl border border-indigo-100 p-6 sm:p-7 relative overflow-hidden shadow-sm">
+        <div v-if="isAiHeroGenerating" class="absolute inset-0 bg-white/80 backdrop-blur-sm z-10 flex flex-col items-center justify-center">
+          <svg class="animate-spin h-8 w-8 text-indigo-600 mb-3" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          <p class="text-indigo-900 font-bold text-sm">AI กำลังแต่งคำโฆษณาและข้อความส่วนหัว...</p>
+        </div>
+
+        <div class="flex items-center justify-between mb-2">
+          <h3 class="text-base font-black text-indigo-950 flex items-center gap-2">
+            <svg class="w-5 h-5 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+            ผู้ช่วย AI คิดคำโปรยส่วนหัวผลงาน
+          </h3>
+          <span class="text-[11px] font-bold text-indigo-700 bg-indigo-100/70 px-2.5 py-1 rounded-full">One-click AI Copywriter</span>
+        </div>
+        <p class="text-xs text-indigo-700/90 mb-4 leading-relaxed">
+          พิมพ์คำอธิบายสั้นๆ เช่น "เน้นความน่าเชื่อถือ ส่งมอบโรงงานยานยนต์ทั่วไทย เครื่องจักรมาตรฐานญี่ปุ่นแท้" แล้วกดให้ AI เรียบเรียงให้ทันที
+        </p>
+        <div class="flex flex-col sm:flex-row items-center gap-3">
+          <input 
+            v-model="aiHeroPrompt"
+            type="text" 
+            placeholder="พิมพ์โจทย์หรือสไตล์ข้อความที่ต้องการ..."
+            class="w-full bg-white border border-indigo-200 rounded-xl px-4 py-2.5 text-xs sm:text-sm text-slate-800 outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 shadow-inner"
+            @keyup.enter="generateHeroWithAI"
+          />
+          <button 
+            type="button"
+            @click="generateHeroWithAI"
+            :disabled="isAiHeroGenerating"
+            class="w-full sm:w-auto shrink-0 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs sm:text-sm font-bold rounded-xl transition-all shadow-md shadow-indigo-600/20 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+          >
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+            สร้างข้อความด้วย AI
+          </button>
+        </div>
+      </div>
+
+      <!-- 3. Form Settings Cards Grid -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        <!-- Left 2 Cols: Main Content & Copy -->
+        <div class="lg:col-span-2 space-y-6">
+          <!-- Text Content Card -->
+          <div class="bg-white rounded-3xl border border-gray-200/80 shadow-sm p-6 sm:p-7 space-y-5">
+            <div class="flex items-center gap-2 pb-3 border-b border-gray-100">
+              <div class="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+              </div>
+              <div>
+                <h3 class="text-base font-black text-gray-900">ข้อความหัวข้อและคำอธิบาย (Header Copy)</h3>
+                <p class="text-xs text-gray-500 font-medium">กำหนดข้อความหลักเพื่อดึงดูดและสร้างความเชื่อมั่นให้กับลูกค้า</p>
+              </div>
+            </div>
+
+            <!-- Eyebrow Badge -->
+            <div class="space-y-1.5">
+              <label class="block text-xs font-bold text-gray-700">
+                ป้ายกำกับเล็ก (Eyebrow Badge)
+              </label>
+              <input 
+                v-model="hero_badge"
+                type="text" 
+                placeholder="เช่น REAL INSTALLATION PORTFOLIO"
+                class="w-full bg-slate-50 border border-gray-200 rounded-xl px-4 py-2.5 text-xs sm:text-sm font-semibold text-gray-800 outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 font-mono"
+              />
+            </div>
+
+            <!-- Main Title -->
+            <div class="space-y-1.5">
+              <label class="block text-xs font-bold text-gray-700">
+                หัวข้อหลัก (Hero Title)
+              </label>
+              <input 
+                v-model="hero_title"
+                type="text" 
+                placeholder="เช่น ผลงานการส่งมอบและติดตั้งจริง"
+                class="w-full bg-slate-50 border border-gray-200 rounded-xl px-4 py-2.5 text-xs sm:text-sm font-bold text-gray-900 outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
+              />
+            </div>
+
+            <!-- Subtitle Highlight -->
+            <div class="space-y-1.5">
+              <div class="flex items-center justify-between">
+                <label class="block text-xs font-bold text-gray-700">
+                  ข้อความไฮไลต์ไล่เฉดสีฟ้า-เขียว (Subtitle Highlight)
+                </label>
+                <span class="text-[10px] text-cyan-600 font-bold">แสดงเป็นตัวอักษร Gradient</span>
+              </div>
+              <input 
+                v-model="hero_subtitle"
+                type="text" 
+                placeholder="เช่น โดยทีมวิศวกรผู้เชี่ยวชาญ KODERA"
+                class="w-full bg-slate-50 border border-gray-200 rounded-xl px-4 py-2.5 text-xs sm:text-sm font-bold text-gray-900 outline-none focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-500"
+              />
+            </div>
+
+            <!-- Description -->
+            <div class="space-y-1.5">
+              <label class="block text-xs font-bold text-gray-700">
+                คำอธิบายรายละเอียด (Description)
+              </label>
+              <textarea 
+                v-model="hero_desc"
+                rows="3"
+                placeholder="อธิบายสรุปความเชี่ยวชาญและการบริการ..."
+                class="w-full bg-slate-50 border border-gray-200 rounded-xl px-4 py-2.5 text-xs sm:text-sm text-gray-700 outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 leading-relaxed"
+              ></textarea>
+            </div>
+          </div>
+
+          <!-- 3 Stats Config Card -->
+          <div class="bg-white rounded-3xl border border-gray-200/80 shadow-sm p-6 sm:p-7 space-y-5">
+            <div class="flex items-center gap-2 pb-3 border-b border-gray-100">
+              <div class="w-8 h-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+              </div>
+              <div>
+                <h3 class="text-base font-black text-gray-900">แถบ 3 สถิติการันตีความสำเร็จ (Key Stats Strip)</h3>
+                <p class="text-xs text-gray-500 font-medium">ปรับแต่งตัวเลขและข้อความแสดงผลในกล่องสถิติฝั่งขวา</p>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <!-- Stat 1 -->
+              <div class="p-4 rounded-2xl bg-slate-50 border border-gray-200/80 space-y-3">
+                <span class="text-xs font-bold text-blue-600 flex items-center gap-1.5">
+                  <span class="w-2 h-2 rounded-full bg-blue-500"></span> สถิติที่ 1
+                </span>
+                <div class="space-y-1">
+                  <label class="block text-[10.5px] font-semibold text-gray-500">ตัวเลขสถิติ</label>
+                  <input 
+                    v-model="stat_1_val"
+                    type="text" 
+                    placeholder="เช่น 500+"
+                    class="w-full bg-white border border-gray-200 rounded-lg px-3 py-1.5 text-xs font-black text-gray-900 outline-none focus:border-blue-500 font-mono"
+                  />
+                </div>
+                <div class="space-y-1">
+                  <label class="block text-[10.5px] font-semibold text-gray-500">คำอธิบาย</label>
+                  <input 
+                    v-model="stat_1_label"
+                    type="text" 
+                    placeholder="เช่น เครื่องที่ส่งมอบ"
+                    class="w-full bg-white border border-gray-200 rounded-lg px-3 py-1.5 text-xs font-bold text-gray-700 outline-none focus:border-blue-500"
+                  />
+                </div>
+              </div>
+
+              <!-- Stat 2 -->
+              <div class="p-4 rounded-2xl bg-slate-50 border border-gray-200/80 space-y-3">
+                <span class="text-xs font-bold text-cyan-600 flex items-center gap-1.5">
+                  <span class="w-2 h-2 rounded-full bg-cyan-500"></span> สถิติที่ 2
+                </span>
+                <div class="space-y-1">
+                  <label class="block text-[10.5px] font-semibold text-gray-500">ตัวเลขสถิติ</label>
+                  <input 
+                    v-model="stat_2_val"
+                    type="text" 
+                    placeholder="เช่น 77"
+                    class="w-full bg-white border border-gray-200 rounded-lg px-3 py-1.5 text-xs font-black text-gray-900 outline-none focus:border-cyan-500 font-mono"
+                  />
+                </div>
+                <div class="space-y-1">
+                  <label class="block text-[10.5px] font-semibold text-gray-500">คำอธิบาย</label>
+                  <input 
+                    v-model="stat_2_label"
+                    type="text" 
+                    placeholder="เช่น จังหวัดทั่วไทย"
+                    class="w-full bg-white border border-gray-200 rounded-lg px-3 py-1.5 text-xs font-bold text-gray-700 outline-none focus:border-cyan-500"
+                  />
+                </div>
+              </div>
+
+              <!-- Stat 3 -->
+              <div class="p-4 rounded-2xl bg-slate-50 border border-gray-200/80 space-y-3">
+                <span class="text-xs font-bold text-teal-600 flex items-center gap-1.5">
+                  <span class="w-2 h-2 rounded-full bg-teal-500"></span> สถิติที่ 3
+                </span>
+                <div class="space-y-1">
+                  <label class="block text-[10.5px] font-semibold text-gray-500">ตัวเลขสถิติ</label>
+                  <input 
+                    v-model="stat_3_val"
+                    type="text" 
+                    placeholder="เช่น 100%"
+                    class="w-full bg-white border border-gray-200 rounded-lg px-3 py-1.5 text-xs font-black text-gray-900 outline-none focus:border-teal-500 font-mono"
+                  />
+                </div>
+                <div class="space-y-1">
+                  <label class="block text-[10.5px] font-semibold text-gray-500">คำอธิบาย</label>
+                  <input 
+                    v-model="stat_3_label"
+                    type="text" 
+                    placeholder="เช่น รับประกันศูนย์ไทย"
+                    class="w-full bg-white border border-gray-200 rounded-lg px-3 py-1.5 text-xs font-bold text-gray-700 outline-none focus:border-teal-500"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right 1 Col: Hero Background Image Upload -->
+        <div class="space-y-6">
+          <div class="bg-white rounded-3xl border border-gray-200/80 shadow-sm p-6 sm:p-7 space-y-5">
+            <div class="flex items-center gap-2 pb-3 border-b border-gray-100">
+              <div class="w-8 h-8 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center font-bold">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+              </div>
+              <div>
+                <h3 class="text-base font-black text-gray-900">รูปภาพพื้นหลังส่วนหัว (Background Image)</h3>
+                <p class="text-xs text-gray-500 font-medium">อัปโหลดภาพขนาดใหญ่</p>
+              </div>
+            </div>
+
+            <!-- Image preview box -->
+            <div class="relative group rounded-2xl overflow-hidden aspect-[16/9] bg-slate-900 border border-gray-200 flex items-center justify-center shadow-inner">
+              <img 
+                v-if="hero_bg" 
+                :src="getImageUrl(hero_bg)" 
+                alt="Hero Background Preview" 
+                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+              />
+              <div v-else class="text-center p-6 text-slate-400">
+                <svg class="w-10 h-10 mx-auto mb-2 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                <p class="text-xs font-semibold">ใช้ภาพพื้นหลังเริ่มต้นของระบบ</p>
+                <p class="text-[10px] text-slate-500 mt-0.5">/images/hero/projects-hero.jpg</p>
+              </div>
+
+              <!-- Overlay action buttons -->
+              <div v-if="hero_bg" class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
+                <button 
+                  type="button"
+                  @click="hero_bg = ''"
+                  class="px-3 py-1.5 bg-rose-600 text-white rounded-xl text-xs font-bold hover:bg-rose-700 transition shadow-lg cursor-pointer"
+                >
+                  ลบรูปภาพ
+                </button>
+              </div>
+            </div>
+
+            <!-- Upload Input Button -->
+            <div class="space-y-2">
+              <label class="relative flex flex-col items-center justify-center w-full p-4 border-2 border-dashed border-gray-300 hover:border-emerald-500 rounded-2xl cursor-pointer bg-slate-50/50 hover:bg-emerald-50/30 transition-all text-center group">
+                <div v-if="uploadingHeroBg" class="flex items-center gap-2 text-xs font-bold text-emerald-600 py-2">
+                  <svg class="w-5 h-5 animate-spin" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                  <span>กำลังอัปโหลดรูปภาพ...</span>
+                </div>
+                <div v-else class="space-y-1">
+                  <svg class="w-6 h-6 mx-auto text-gray-400 group-hover:text-emerald-600 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                  <p class="text-xs font-bold text-gray-700 group-hover:text-emerald-700">คลิกเพื่ออัปโหลดรูปภาพใหม่</p>
+                  <p class="text-[10.5px] text-gray-400">PNG, JPG, WEBP ขนาดไม่เกิน 10MB</p>
+                </div>
+                <input 
+                  type="file" 
+                  accept="image/*"
+                  class="hidden"
+                  :disabled="uploadingHeroBg"
+                  @change="handleHeroBgUpload"
+                />
+              </label>
+
+              <div class="p-3 bg-blue-50/60 rounded-xl border border-blue-100/80 text-[11px] text-blue-700 space-y-0.5">
+                <p class="font-bold flex items-center gap-1">💡 คำแนะนำขนาดรูปภาพ:</p>
+                <p class="text-blue-600/90 leading-relaxed">แนะนำสัดส่วนแบบกว้าง 21:9 หรือความละเอียด 1920x600 px เพื่อความคมชัดบนทุกหน้าจอ</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. Save Actions Bar -->
+      <div class="sticky bottom-6 z-40 bg-white/95 backdrop-blur-xl p-4 sm:p-5 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-gray-200 flex items-center justify-between gap-4 transition-all">
+        <button 
+          type="button"
+          @click="resetHeroToDefault"
+          class="px-4 py-2.5 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer"
+        >
+          กู้คืนค่าเริ่มต้นโรงงาน
+        </button>
+
+        <div class="flex items-center gap-3">
+          <button 
+            type="button"
+            @click="saveHeroSettings"
+            :disabled="isSavingHero"
+            class="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm rounded-xl shadow-md shadow-emerald-600/20 hover:shadow-lg transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50"
+          >
+            <svg v-if="isSavingHero" class="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+            <svg v-else class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+            <span>{{ isSavingHero ? 'กำลังบันทึก...' : 'บันทึกการตั้งค่าส่วนหัว' }}</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
     <!-- MAIN FORM VIEW -->
-    <div v-if="showForm" class="bg-white rounded-3xl shadow-xl shadow-gray-200/50 border border-gray-100 mb-10 transition-all">
+    <div v-else-if="showForm" class="bg-white rounded-3xl shadow-xl shadow-gray-200/50 border border-gray-100 mb-10 transition-all">
         <div class="px-8 py-6 border-b border-gray-100 bg-gray-50 rounded-t-3xl flex items-center justify-between">
             <h2 class="text-xl font-bold text-gray-900">{{ isEditing ? 'แก้ไขผลงาน' : 'สร้างผลงานใหม่' }}</h2>
             <button @click="cancelForm" class="px-4 py-2 text-sm font-bold text-gray-500 hover:text-gray-700 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors">ย้อนกลับ</button>

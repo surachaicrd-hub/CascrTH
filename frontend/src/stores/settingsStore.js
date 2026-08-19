@@ -95,6 +95,16 @@ export const useSettingsStore = defineStore('settings', () => {
     const contactHeroBg = ref('')
     const blogHeroBg = ref('')
     const projectsHeroBg = ref('')
+    const projectsHeroBadge = ref('')
+    const projectsHeroTitle = ref('')
+    const projectsHeroSubtitle = ref('')
+    const projectsHeroDesc = ref('')
+    const projectsStat1Val = ref('')
+    const projectsStat1Label = ref('')
+    const projectsStat2Val = ref('')
+    const projectsStat2Label = ref('')
+    const projectsStat3Val = ref('')
+    const projectsStat3Label = ref('')
     const quotationHeroBg = ref('')
 
     // Footer Settings
@@ -121,12 +131,24 @@ export const useSettingsStore = defineStore('settings', () => {
         if (pubSettings.products_hero_btn2_text !== undefined) productsHeroBtn2Text.value = pubSettings.products_hero_btn2_text || '';
         if (pubSettings.products_hero_btn2_url !== undefined) productsHeroBtn2Url.value = pubSettings.products_hero_btn2_url || '';
 
+        // Projects Page Hero & Stats
+        if (pubSettings.projects_hero_badge !== undefined) projectsHeroBadge.value = pubSettings.projects_hero_badge || '';
+        if (pubSettings.projects_hero_title !== undefined) projectsHeroTitle.value = pubSettings.projects_hero_title || '';
+        if (pubSettings.projects_hero_subtitle !== undefined) projectsHeroSubtitle.value = pubSettings.projects_hero_subtitle || '';
+        if (pubSettings.projects_hero_desc !== undefined) projectsHeroDesc.value = pubSettings.projects_hero_desc || '';
+        if (pubSettings.projects_hero_bg !== undefined) projectsHeroBg.value = pubSettings.projects_hero_bg || '';
+        if (pubSettings.projects_stat_1_val !== undefined) projectsStat1Val.value = pubSettings.projects_stat_1_val || '';
+        if (pubSettings.projects_stat_1_label !== undefined) projectsStat1Label.value = pubSettings.projects_stat_1_label || '';
+        if (pubSettings.projects_stat_2_val !== undefined) projectsStat2Val.value = pubSettings.projects_stat_2_val || '';
+        if (pubSettings.projects_stat_2_label !== undefined) projectsStat2Label.value = pubSettings.projects_stat_2_label || '';
+        if (pubSettings.projects_stat_3_val !== undefined) projectsStat3Val.value = pubSettings.projects_stat_3_val || '';
+        if (pubSettings.projects_stat_3_label !== undefined) projectsStat3Label.value = pubSettings.projects_stat_3_label || '';
+
         // Other Page Hero Backgrounds
         if (pubSettings.services_hero_bg !== undefined) servicesHeroBg.value = pubSettings.services_hero_bg || '';
         if (pubSettings.about_hero_bg !== undefined) aboutHeroBg.value = pubSettings.about_hero_bg || '';
         if (pubSettings.contact_hero_bg !== undefined) contactHeroBg.value = pubSettings.contact_hero_bg || '';
         if (pubSettings.blog_hero_bg !== undefined) blogHeroBg.value = pubSettings.blog_hero_bg || '';
-        if (pubSettings.projects_hero_bg !== undefined) projectsHeroBg.value = pubSettings.projects_hero_bg || '';
         if (pubSettings.quotation_hero_bg !== undefined) quotationHeroBg.value = pubSettings.quotation_hero_bg || '';
 
         if (pubSettings.online_shopping_enabled !== undefined) {
@@ -432,6 +454,16 @@ export const useSettingsStore = defineStore('settings', () => {
         contactHeroBg,
         blogHeroBg,
         projectsHeroBg,
+        projectsHeroBadge,
+        projectsHeroTitle,
+        projectsHeroSubtitle,
+        projectsHeroDesc,
+        projectsStat1Val,
+        projectsStat1Label,
+        projectsStat2Val,
+        projectsStat2Label,
+        projectsStat3Val,
+        projectsStat3Label,
         quotationHeroBg,
         footerNewsletterTitle,
         footerNewsletterSubtitle,
