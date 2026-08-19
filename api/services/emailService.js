@@ -11,13 +11,19 @@ const getTransporter = async () => {
         const s = {};
         for (const r of rows) s[r.setting_key] = r.setting_value;
 
-        const host = s.smtp_host || process.env.SMTP_HOST;
+        let host = (s.smtp_host || process.env.SMTP_HOST || '').trim();
         const port = s.smtp_port || process.env.SMTP_PORT || '587';
-        const user = s.smtp_user || process.env.SMTP_USER;
+        const user = (s.smtp_user || process.env.SMTP_USER || '').trim();
         const pass = s.smtp_password || process.env.SMTP_PASS;
         const secure = s.smtp_secure === 'true' || process.env.SMTP_SECURE === 'true' || parseInt(port) === 465;
 
         if (!host || !user || !pass) return null;
+
+        try {
+            if (host && !host.startsWith('http')) {
+                host = new URL(`http://${host}`).hostname;
+            }
+        } catch (e) {}
 
         return { 
             transport: nodemailer.createTransport({ 
@@ -25,7 +31,10 @@ const getTransporter = async () => {
                 port: parseInt(port), 
                 secure, 
                 auth: { user, pass },
-                tls: { rejectUnauthorized: false } // Bypass untrusted certificate issues
+                tls: { rejectUnauthorized: false }, // Bypass untrusted certificate issues
+                connectionTimeout: 10000,
+                greetingTimeout: 10000,
+                socketTimeout: 15000
             }),
             fromName: s.smtp_from_name || process.env.SMTP_FROM_NAME || s.store_name || 'CR Distribution',
             fromEmail: user
@@ -34,18 +43,28 @@ const getTransporter = async () => {
         if (process.env.NODE_ENV !== 'test') {
             console.warn('[Email] Failed to read SMTP from DB, falling back to .env', e.message);
         }
-        const host = process.env.SMTP_HOST;
-        const user = process.env.SMTP_USER;
+        let host = (process.env.SMTP_HOST || '').trim();
+        const user = (process.env.SMTP_USER || '').trim();
         const pass = process.env.SMTP_PASS;
         const port = process.env.SMTP_PORT || '587';
         if (!host || !user || !pass) return null;
+
+        try {
+            if (host && !host.startsWith('http')) {
+                host = new URL(`http://${host}`).hostname;
+            }
+        } catch (err) {}
+
         return {
             transport: nodemailer.createTransport({ 
                 host, 
                 port: parseInt(port), 
                 secure: parseInt(port) === 465, 
                 auth: { user, pass },
-                tls: { rejectUnauthorized: false } // Bypass untrusted certificate issues
+                tls: { rejectUnauthorized: false }, // Bypass untrusted certificate issues
+                connectionTimeout: 10000,
+                greetingTimeout: 10000,
+                socketTimeout: 15000
             }),
             fromName: process.env.SMTP_FROM_NAME || 'CR Distribution',
             fromEmail: user

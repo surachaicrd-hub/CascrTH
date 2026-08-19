@@ -587,13 +587,32 @@ router.post('/test-smtp', verifyAdmin, async (req, res) => {
         if (!host || !user || !pass) {
             return res.status(400).json({ success: false, error: 'Host, User และ Password จำเป็นต้องกรอก' });
         }
+
+        let resolvedHost = (host || '').trim();
+        try {
+            if (resolvedHost && !resolvedHost.startsWith('http')) {
+                resolvedHost = new URL(`http://${resolvedHost}`).hostname;
+            }
+        } catch (e) {}
+
+        const isSecure = secure === true || secure === 'true' || parseInt(port) === 465;
         const nodemailer = require('nodemailer');
         const transporter = nodemailer.createTransport({
-            host,
+            host: resolvedHost,
             port: parseInt(port) || 587,
-            secure: secure === true || secure === 'true',
-            auth: { user, pass }
+            secure: isSecure,
+            auth: { 
+                user: (user || '').trim(), 
+                pass: pass 
+            },
+            tls: {
+                rejectUnauthorized: false
+            },
+            connectionTimeout: 10000,
+            greetingTimeout: 10000,
+            socketTimeout: 15000
         });
+
         let storeName = 'CR Distribution';
         try {
             const [sRows] = await db.query("SELECT setting_value FROM settings WHERE setting_key = 'store_name'");
@@ -602,7 +621,7 @@ router.post('/test-smtp', verifyAdmin, async (req, res) => {
 
         const fromName = from || storeName;
         await transporter.sendMail({
-            from: `"${fromName}" <${user}>`,
+            from: `"${fromName}" <${(user || '').trim()}>`,
             to: to || user,
             subject: `✅ ทดสอบ SMTP จากระบบ ${storeName} Admin`,
             html: `
@@ -610,14 +629,22 @@ router.post('/test-smtp', verifyAdmin, async (req, res) => {
                     <h2 style="color:#059669">✅ การตั้งค่า SMTP ทำงานได้ปกติ!</h2>
                     <p>Email นี้ถูกส่งจากระบบจัดการหลังบ้าน ${storeName} เพื่อยืนยันว่าการตั้งค่า SMTP ของคุณถูกต้อง</p>
                     <hr style="border:none;border-top:1px solid #e5e7eb;margin:20px 0">
-                    <p style="color:#6b7280;font-size:12px">SMTP Host: <code>${host}:${port}</code> | Secure: ${secure}</p>
+                    <p style="color:#6b7280;font-size:12px">SMTP Host: <code>${resolvedHost}:${port}</code> | Secure: ${isSecure}</p>
                 </div>
             `
         });
         res.status(200).json({ success: true, message: `ส่ง Email ทดสอบไปที่ ${to || user} สำเร็จ` });
     } catch (error) {
         console.error('Test SMTP error:', error);
-        res.status(500).json({ success: false, error: error.message || 'SMTP connection failed' });
+        let errorMsg = error.message || 'SMTP connection failed';
+        if (errorMsg.includes('Invalid login') || errorMsg.includes('authentication failed') || errorMsg.includes('535')) {
+            errorMsg = 'รหัสผ่านหรือ Username ไม่ถูกต้อง (Authentication failed 535) กรุณาตรวจสอบ Password หรือ App Password อีกครั้ง';
+        } else if (errorMsg.includes('ETIMEDOUT') || errorMsg.includes('ESOCKETTIMEDOUT')) {
+            errorMsg = 'หมดเวลาเชื่อมต่อไปยัง SMTP Server (Timeout) กรุณาตรวจสอบ Port (465 หรือ 587) หรือ Firewall ของเซิร์ฟเวอร์';
+        } else if (errorMsg.includes('ENOTFOUND') || errorMsg.includes('getaddrinfo')) {
+            errorMsg = 'ไม่พบชื่อโฮสต์ SMTP Server (Host not found) กรุณาตรวจสอบชื่อโดเมน/โฮสต์';
+        }
+        res.status(400).json({ success: false, error: errorMsg, rawError: error.message });
     }
 });
 

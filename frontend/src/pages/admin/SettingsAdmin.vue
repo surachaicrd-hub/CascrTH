@@ -3051,10 +3051,15 @@ onMounted(() => {
                     class="px-4 py-2 text-sm font-bold rounded-xl border border-gray-200 hover:bg-blue-50 hover:border-blue-300 hover:text-blue-700 transition-all">
                     Office 365
                   </button>
+                  <button type="button" @click="smtpHost = 'thsv94.hostatom.com'; smtpPort = '465'; smtpSecure = true"
+                    class="px-4 py-2 text-sm font-bold rounded-xl border border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition-all flex items-center gap-1.5 shadow-sm">
+                    <svg class="w-4 h-4 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                    HostAtom (Port 465 SSL)
+                  </button>
                   <button type="button" @click="smtpHost = 'mail.yourdomain.com'; smtpPort = '587'; smtpSecure = false"
                     class="px-4 py-2 text-sm font-bold rounded-xl border border-gray-200 hover:bg-emerald-50 hover:border-emerald-300 hover:text-emerald-700 transition-all flex items-center gap-1.5">
                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
-                    cPanel Hosting
+                    cPanel / DirectAdmin
                   </button>
                 </div>
               </div>
