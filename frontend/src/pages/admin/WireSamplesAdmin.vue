@@ -109,15 +109,15 @@ const loadWireSettings = async () => {
 const saveAll = async () => {
   saving.value = true
   try {
-    const payload = {
-      wire_master_types: JSON.stringify(wireGroups.value),
-      wire_presets: JSON.stringify(wirePresets.value)
-    }
+    const payload = [
+      { key: 'wire_master_types', value: JSON.stringify(wireGroups.value) },
+      { key: 'wire_presets', value: JSON.stringify(wirePresets.value) }
+    ]
 
     const res = await apiFetch('/api/settings/batch', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
+      body: JSON.stringify({ settings: payload })
     })
     const json = await res.json()
     if (json.success) {

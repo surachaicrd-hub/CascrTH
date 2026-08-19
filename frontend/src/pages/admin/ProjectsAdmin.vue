@@ -220,7 +220,9 @@ const toggleProjectsVisibility = async () => {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                projects_enabled: newVal ? 'true' : 'false'
+                settings: [
+                    { key: 'projects_enabled', value: newVal ? 'true' : 'false' }
+                ]
             })
         })
         const json = await res.json()

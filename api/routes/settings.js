@@ -416,10 +416,28 @@ router.post('/', verifyAdmin, async (req, res) => {
 });
 
 // BATCH UPDATE or INSERT multiple settings
-router.post('/batch', verifyAdmin, async (req, res) => {
+const handleBatchSave = async (req, res) => {
     try {
-        const { settings } = req.body;
-        if (!settings || !Array.isArray(settings)) {
+        let items = [];
+        const body = req.body;
+
+        if (Array.isArray(body)) {
+            items = body;
+        } else if (body && Array.isArray(body.settings)) {
+            items = body.settings;
+        } else if (body && typeof body.settings === 'object' && body.settings !== null) {
+            items = Object.entries(body.settings).map(([key, value]) => ({
+                key,
+                value: typeof value === 'object' && value !== null ? JSON.stringify(value) : (value ?? '')
+            }));
+        } else if (body && typeof body === 'object' && body !== null) {
+            items = Object.entries(body).map(([key, value]) => ({
+                key,
+                value: typeof value === 'object' && value !== null ? JSON.stringify(value) : (value ?? '')
+            }));
+        }
+
+        if (!items || items.length === 0) {
             return res.status(400).json({ success: false, error: 'Settings array is required' });
         }
 
@@ -429,9 +447,10 @@ router.post('/batch', verifyAdmin, async (req, res) => {
             ON DUPLICATE KEY UPDATE setting_value = ?
         `;
 
-        for (const item of settings) {
-            if (item.key) {
-                await db.query(query, [item.key, item.value || '', item.value || '']);
+        for (const item of items) {
+            if (item && item.key) {
+                const valStr = typeof item.value === 'string' ? item.value : (item.value !== undefined && item.value !== null ? String(item.value) : '');
+                await db.query(query, [item.key, valStr, valStr]);
             }
         }
 
@@ -443,7 +462,11 @@ router.post('/batch', verifyAdmin, async (req, res) => {
         console.error('Batch save settings error:', error);
         res.status(500).json({ success: false, error: 'Failed to save settings' });
     }
-});
+};
+
+router.post('/batch', verifyAdmin, handleBatchSave);
+router.put('/batch', verifyAdmin, handleBatchSave);
+router.put('/', verifyAdmin, handleBatchSave);
 
 // POST test notification
 router.post('/test-notification', verifyAdmin, async (req, res) => {

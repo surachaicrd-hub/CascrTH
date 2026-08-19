@@ -365,8 +365,8 @@ const saveHeroSettings = async () => {
       { key: 'products_hero_btn2_url', value: heroBtn2Url.value }
     ]
 
-    const res = await apiFetch('/api/settings', {
-      method: 'PUT',
+    const res = await apiFetch('/api/settings/batch', {
+      method: 'POST',
       body: JSON.stringify({ settings: payload })
     })
     const data = await res.json()
