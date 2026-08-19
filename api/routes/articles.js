@@ -512,7 +512,7 @@ ${productInfo ? productInfo : 'สินค้าอ้างอิง: ไม�
   "tags": "เครื่องตัดปอกสายไฟ,KODERA,Wire Harness,เครื่องจักรโรงงาน",
   "category": "เทคโนโลยีตัดปอกสายไฟ",
   "llm_context": "บริบทเชิงลึก 2-3 ประโยค สรุปเนื้อหาทางเทคนิค แบรนด์ KODERA และบริการของ ${companyLegalName} สำหรับ AI Scraper (ChatGPT/Perplexity/Gemini)",
-  "image_prompt": "An exquisite Midjourney v6 / DALL-E 3 English prompt for editorial magazine cover photo: high-tech precision wire cutting and stripping machine in modern clean Japanese industrial factory, macro wire harness details, cinematic lighting, photorealistic, 8k, no text, no letters --ar 16:9",
+  "image_prompt": "A professional graphic design cover poster for the article, featuring bold modern Thai typography headline reading \"[ใส่หัวข้อภาษาไทยสั้นๆ กระชับ]\", sleek Thai subtext \"[จุดเด่นหรือสโลแกนภาษาไทย]\", high-tech precision automated wire processing machine, clean copper wire harness assembly, dark slate blue background with vibrant neon accents, minimalist geometric layout, 8k resolution, commercial advertising design --ar 16:9",
   "faq": [
     { "question": "คำถามที่พบบ่อย 1", "answer": "คำตอบที่ระบุข้อเท็จจริงชัดเจน 1" },
     { "question": "คำถามที่พบบ่อย 2", "answer": "คำตอบที่ระบุข้อเท็จจริงชัดเจน 2" }
@@ -620,25 +620,60 @@ Tags ปัจจุบัน: ${tags || '-'}
 // POST generate Cover Image Prompt with AI (Admin)
 router.post('/generate-prompt', verifyAdmin, async (req, res) => {
     try {
-        const { title, prompt: userPrompt } = req.body;
+        const { title, prompt: userPrompt, product_id, product_name, category } = req.body;
 
         if (!title && !userPrompt) {
             return res.status(400).json({ success: false, error: 'ต้องมีหัวข้อหรือข้อมูลสำหรับสร้าง Prompt' });
         }
 
-        const systemPrompt = `คุณเป็นพรอทพ์เอ็นจิเนียร์ (AI Prompt Engineer) ระดับมืออาชีพสำหรับการวาดรูปปกบทความนิตยสาร/เว็บไซต์อุตสาหกรรมไฮเอนด์ (Industrial & Engineering Magazine Cover Photography)
-หน้าที่ของคุณคือแปลงหัวข้อบทความต่อไปนี้ ให้เป็นคำสั่งภาษาอังกฤษ (Midjourney v6 / DALL-E 3 Prompt) สำหรับสร้างรูปภาพหน้าปกบทความเครื่องตัดปอกย้ำสายไฟอัตโนมัติและชิ้นงาน Wire Harness ที่สวยงาม สมจริง ตรงกับเนื้อหา และน่าดึงดูด
+        let productContext = '';
+        if (product_id) {
+            try {
+                const [prods] = await db.query('SELECT name, category, short_description, model FROM products WHERE id = ?', [product_id]);
+                if (prods.length > 0) {
+                    const p = prods[0];
+                    productContext = `สินค้าหลัก: ${p.name || ''} ${p.model ? `(รุ่น ${p.model})` : ''} ${p.category ? `หมวดหมู่: ${p.category}` : ''} ${p.short_description ? `- ${p.short_description}` : ''}`;
+                }
+            } catch (e) {
+                console.warn('Could not fetch product for prompt generation:', e.message);
+            }
+        }
+        if (!productContext && product_name) {
+            productContext = `สินค้าหลัก: ${product_name} ${category ? `(หมวดหมู่: ${category})` : ''}`;
+        }
 
-หัวข้อบทความ / บริบท: "${title || userPrompt}"
+        const systemPrompt = `คุณเป็น AI Art Director และ Graphic Designer ชั้นนำระดับโลก ผู้เชี่ยวชาญการออกแบบภาพหน้าปกบทความเชิงพาณิชย์และเทคโนโลยีอุตสาหกรรม (Commercial Tech Cover & Editorial Poster Graphic Design) และเป็นผู้เชี่ยวชาญ Prompt Engineering ขั้นสูงสำหรับ AI วาดภาพยุคใหม่ (Ideogram v2, Flux.1, Midjourney v6/v6.1, DALL-E 3)
 
-กฎในการเขียน Image Prompt:
-1. [สไตล์และแนวภาพ]: เป็นภาพถ่ายอุตสาหกรรมไฮเทค (High-tech precision engineering, clean Japanese factory floor, state-of-the-art wire processing machinery)
-2. [องค์ประกอบแสงและมุมมอง]: ระบุแสงไฟโรงงานระดับโปร (Cinematic soft lighting, clean metallic reflections, macro focus on wire processing blades or wire harness samples)
-3. [รายละเอียดฉาก]: อธิบายสภาพแวดล้อมที่สอดคล้อง เช่น เครื่องจักรตัดปอกสายไฟความแม่นยำสูง, สายไฟหลากสีที่ตัดปอกอย่างเรียบเนียน, ชิ้นส่วนหัวย้ำเทอร์มินอลสีทองเหลืองเงางาม
-4. [ข้อห้าม]: ห้ามมีตัวหนังสือ ห้ามมีข้อความ ห้ามมีโลโก้ ห้ามมีตัวละครการ์ตูน
-5. [พารามิเตอร์]: ลงท้ายด้วยคำว่า "shot on 50mm lens, 8k resolution, photorealistic, industrial engineering photography, highly detailed, no text, no letters --ar 16:9"
+หน้าที่ของคุณคือแปลงข้อมูลบทความและสินค้าต่อไปนี้ ให้เป็นคำสั่งภาษาอังกฤษ (AI Image Prompt) สำหรับสร้าง "ภาพหน้าปกสไตล์ Graphic Designer มืออาชีพ ที่มีการจัดวางเลย์เอาต์ Typography ข้อความภาษาไทย (Thai Text) ที่สวยงาม โดดเด่น คมชัด และเข้ากับสินค้าอย่างสมบูรณ์แบบ"
 
-ตอบเฉพาะคำสั่งภาษาอังกฤษบรรทัดเดียว ห้ามใส่เครื่องหมายอัญประกาศ ห้ามมีข้อความเกริ่นนำใดๆ`;
+ข้อมูลบทความและสินค้า:
+- หัวข้อบทความ: "${title || '-'}"
+- สรุปเนื้อหา/บริบท: "${userPrompt || '-'}"
+${productContext ? `- ${productContext}` : ''}
+${category ? `- หมวดหมู่บทความ: ${category}` : ''}
+
+โครงสร้างและกฎการเขียน Image Prompt (ต้องทำตามอย่างเคร่งครัด):
+1. [สไตล์กราฟฟิกดีไซน์และเลย์เอาต์ (Graphic Design & Layout)]:
+   - กำหนดให้เป็น Professional modern graphic design cover banner / magazine editorial poster
+   - เลย์เอาต์แบบมืออาชีพ: มี Visual hierarchy ชัดเจน, พื้นที่ว่าง Negative space สำหรับวางข้อความ, เส้นสายและองค์ประกอบเทคโนโลยีไฮเทค (Sleek minimalist geometric accents, modern tech UI badges, elegant subtle grid lines)
+   - โทนสีและแสง: คุมโทนอุตสาหกรรมระดับพรีเมียม (เช่น Deep slate navy blue #0f172a, titanium silver, vibrant electric orange หรือ cyber cyan neon accents), แสงสตูดิโอระดับโปรส่องกระทบตัวเครื่องจักรและชิ้นงานอย่างคมชัด (Cinematic studio lighting, high contrast)
+
+2. [ตัวสินค้าและชิ้นงาน (Hero Subject)]:
+   - เครื่องจักรตัดปอกย้ำสายไฟอัตโนมัติความแม่นยำสูง หรือชุดหัวมีดตัดปอก/หัวย้ำเทอร์มินอล และสายไฟ Wire Harness ทองแดงหลากสีที่ตัดปอกอย่างประณีต ในสไตล์ 3D hyper-realistic commercial product rendering
+
+3. [ข้อความภาษาไทยและการจัดวาง Typography (Thai Typography Text Layout)]:
+   - *** ต้องมีข้อความภาษาไทยที่คิดสรรมาอย่างเฉียบคม สั้น กระชับ ทรงพลัง ตรงกับบทความและสินค้า ***
+   - ระบุพาดหัวหลักภาษาไทย (Main Headline) ในเครื่องหมายคำพูด เช่น: Bold modern Thai typography text reading "..." placed prominently with crisp sans-serif lettering
+   - ระบุข้อความรองหรือป้ายจุดเด่น (Subtitle / Feature Badge) ในเครื่องหมายคำพูด เช่น: Sleek Thai subtext reading "..." and modern badge reading "..." (เช่น "มาตรฐานญี่ปุ่น KODERA" หรือ "แม่นยำสูง ระดับอุตสาหกรรม")
+   - กำหนดสไตล์ฟอนต์: Sharp clean modern Thai typography, perfect kerning, legible contrast against the backdrop, graphic designer art direction
+
+4. [พารามิเตอร์ต่อท้าย]:
+   - จบด้วย: 8k resolution, professional graphic design cover layout, commercial product advertising poster, cinematic studio lighting --ar 16:9
+
+5. [ข้อกำหนดสำคัญ]:
+   - ตอบเฉพาะข้อความ AI Prompt ภาษาอังกฤษ (รวมข้อความภาษาไทยในเครื่องหมายคำพูด) บรรทัดเดียวเท่านั้น
+   - ห้ามใส่เครื่องหมายคำพูดครอบทั้งประโยค
+   - ห้ามมีคำอธิบาย เกริ่นนำ หรือ markdown code block`;
         
         const aiResponse = await gemini.generateContent({
             prompt: systemPrompt,

@@ -397,14 +397,17 @@ const generateImagePrompt = async () => {
             method: 'POST',
             body: JSON.stringify({ 
                 title: form.value.title,
-                prompt: form.value.excerpt || form.value.content || aiPrompt.value
+                prompt: form.value.excerpt || form.value.content || aiPrompt.value,
+                product_id: form.value.product_id || null,
+                product_name: currentFormProduct.value?.name || '',
+                category: form.value.category || ''
             })
         })
         const data = await res.json()
         
         if (data.success && data.prompt) {
             form.value.image_prompt = data.prompt
-            showToast('สร้าง Prompt สำหรับวาดรูปปกด้วย AI สำเร็จ!', 'success')
+            showToast('สร้าง Prompt รูปภาพหน้าปกสไตล์ Graphic Design สำเร็จ!', 'success')
         } else {
             showToast(data.error || 'ไม่สามารถสร้าง Prompt ได้ ลองใหม่อีกครั้ง', 'error')
         }
@@ -1369,14 +1372,21 @@ onMounted(() => {
             </div>
 
             <!-- AI Image Prompt Textarea -->
-            <div v-if="form.image_prompt || generatingPrompt" class="bg-indigo-50/70 border border-indigo-100 rounded-2xl p-4 relative">
-              <label class="block text-xs font-bold text-indigo-900 mb-1.5 flex items-center justify-between">
-                <span>Prompt คำสั่งวาดภาพปกด้วย AI ( Midjourney / DALL-E )</span>
-                <button v-if="form.image_prompt" @click="copyPrompt" type="button" class="text-indigo-600 hover:text-indigo-800 text-[11px] font-bold flex items-center gap-1">
+            <div v-if="form.image_prompt || generatingPrompt" class="bg-indigo-50/70 border border-indigo-100 rounded-2xl p-4 relative space-y-2.5">
+              <div class="flex items-center justify-between">
+                <label class="text-xs font-bold text-indigo-900 flex items-center gap-1.5">
+                  <span class="w-2 h-2 rounded-full bg-indigo-600 animate-pulse"></span>
+                  <span>AI Cover Graphic Prompt ( Ideogram / Flux / Midjourney / DALL-E 3 )</span>
+                </label>
+                <button v-if="form.image_prompt" @click="copyPrompt" type="button" class="text-indigo-600 hover:text-indigo-800 text-[11px] font-bold flex items-center gap-1 px-3 py-1 bg-white hover:bg-indigo-50 border border-indigo-200 rounded-lg shadow-sm transition-all">
+                  <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
                   คัดลอก Prompt
                 </button>
-              </label>
-              <textarea v-model="form.image_prompt" rows="2" class="w-full text-xs text-slate-800 bg-white border border-indigo-200 rounded-xl p-3 resize-y focus:outline-none focus:ring-2 focus:ring-indigo-400 font-mono"></textarea>
+              </div>
+              <textarea v-model="form.image_prompt" rows="3" class="w-full text-xs text-slate-800 bg-white border border-indigo-200 rounded-xl p-3 resize-y focus:outline-none focus:ring-2 focus:ring-indigo-400 font-mono leading-relaxed"></textarea>
+              <div class="flex items-center gap-2 text-[11px] text-indigo-800 font-medium bg-indigo-100/60 px-3 py-2 rounded-xl">
+                <span>💡 <b>คำแนะนำ:</b> ออกแบบมาสำหรับนำไปสร้างภาพด้วย <b>Ideogram v2, Flux.1</b> หรือ <b>Midjourney v6+</b> โดยจัดวางเลย์เอาต์กราฟฟิกพร้อมข้อความภาษาไทย (Thai Typography) สวยงามเข้ากับสินค้าโดยเฉพาะ</span>
+              </div>
             </div>
 
             <!-- Gallery Draggable Grid -->
