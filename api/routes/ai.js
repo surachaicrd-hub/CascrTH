@@ -882,7 +882,8 @@ ${policySpecificInstruction}
    - ใช้ <ul> และ <li> สำหรับแจกแจงรายการเงื่อนไขและสิทธิประโยชน์
    - ใช้ <strong> สำหรับเน้นคำสำคัญทางกฎหมาย หรือระยะเวลา
    - สามารถใช้ <table>, <thead>, <tbody>, <tr>, <th>, <td> ได้หากมีตารางสรุป
-4. ห้ามครอบโค้ดด้วย markdown code block (ห้ามใส่ \`\`\`html หรือ \`\`\`) ส่งเฉพาะเนื้อหา HTML ล้วนๆ
+4. ห้ามตอบกลับเป็น JSON หรือครอบด้วย JSON เด็ดขาด (DO NOT return JSON format) ห้ามใส่ key เช่น "document_title" หรือ "content_html" ให้ส่งเฉพาะแท็ก HTML เริ่มต้นด้วย <h2> หรือ <p> โดยตรงเท่านั้น
+5. ห้ามครอบโค้ดด้วย markdown code block (ห้ามใส่ \`\`\`html หรือ \`\`\`) ส่งเฉพาะเนื้อหา HTML ล้วนๆ
 `;
 
         const response = await gemini.generateContent({
@@ -891,7 +892,37 @@ ${policySpecificInstruction}
         });
 
         let textResponse = response.text || '';
-        textResponse = textResponse.replace(/^```html\s*/i, '').replace(/^```\s*/, '').replace(/```\s*$/, '').trim();
+        textResponse = textResponse.replace(/^```(?:html|json)?\s*/i, '').replace(/```\s*$/, '').trim();
+
+        // If Gemini returned a JSON string, extract the actual HTML content
+        try {
+            const parsed = safeJsonParse(textResponse);
+            if (parsed && typeof parsed === 'object') {
+                const extractedHtml = parsed.content_html || parsed.content || parsed.html || parsed.policy_html || parsed.policy_content || parsed.body || parsed.text;
+                if (extractedHtml && typeof extractedHtml === 'string') {
+                    const title = parsed.document_title || parsed.title;
+                    if (title && !extractedHtml.includes(title)) {
+                        textResponse = `<h2>${title}</h2>\n` + extractedHtml;
+                    } else {
+                        textResponse = extractedHtml;
+                    }
+                }
+            }
+        } catch (e) {
+            // Not a full JSON object, check for partial JSON artifact wrapper
+        }
+
+        // Clean any stray JSON wrapper artifacts if model outputted literal JSON strings
+        if (textResponse.startsWith('{') && textResponse.includes('"content_html"')) {
+            textResponse = textResponse
+                .replace(/^\{[\s\S]*?"content_html"\s*:\s*"/i, '')
+                .replace(/"\s*\}\s*$/i, '')
+                .replace(/\\"/g, '"')
+                .replace(/\\n/g, '\n')
+                .replace(/\\t/g, '\t');
+        }
+
+        textResponse = textResponse.trim();
 
         res.status(200).json({ success: true, data: textResponse });
     } catch (error) {

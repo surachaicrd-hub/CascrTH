@@ -145,7 +145,33 @@ const generateWithAI = async (type) => {
     const data = await res.json()
     
     if (data.success && data.data) {
-      contentRef.value = typeof data.data === 'string' ? data.data : (data.data.content || data.data.html || JSON.stringify(data.data))
+      let cleanHtml = data.data
+      if (typeof cleanHtml === 'object' && cleanHtml !== null) {
+        cleanHtml = cleanHtml.content_html || cleanHtml.content || cleanHtml.html || cleanHtml.body || JSON.stringify(cleanHtml)
+      } else if (typeof cleanHtml === 'string') {
+        let trimmed = cleanHtml.trim()
+        if (trimmed.startsWith('{') && trimmed.endsWith('}')) {
+          try {
+            const parsed = JSON.parse(trimmed)
+            cleanHtml = parsed.content_html || parsed.content || parsed.html || parsed.body || trimmed
+          } catch (e) {
+            cleanHtml = trimmed
+              .replace(/^\{[\s\S]*?"content_html"\s*:\s*"/i, '')
+              .replace(/"\s*\}\s*$/i, '')
+              .replace(/\\"/g, '"')
+              .replace(/\\n/g, '\n')
+              .replace(/\\t/g, '\t')
+          }
+        } else if (trimmed.startsWith('{') && trimmed.includes('"content_html"')) {
+          cleanHtml = trimmed
+            .replace(/^\{[\s\S]*?"content_html"\s*:\s*"/i, '')
+            .replace(/"\s*\}\s*$/i, '')
+            .replace(/\\"/g, '"')
+            .replace(/\\n/g, '\n')
+            .replace(/\\t/g, '\t')
+        }
+      }
+      contentRef.value = cleanHtml
       showToast('สร้างเนื้อหาด้วย AI สำเร็จ', 'success')
     } else {
       showToast('เกิดข้อผิดพลาดจาก AI: ' + (data.error || 'ไม่สามารถสร้างเนื้อหาได้'), 'error')
