@@ -74,11 +74,11 @@ const seoProxyMiddleware = async (req, res, next) => {
         const url = `${siteUrl}${req.path}`;
 
         // Fetch dynamic site settings from DB
-        let storeName = 'บ้านเก็บของ';
+        let storeName = 'CR Distribution';
         let companyLegalName = 'บริษัท ซีอาร์ ดิสทริบิวชั่น จำกัด';
-        let storeDescription = 'STORAGE HOUSE จำหน่ายและติดตั้งบ้านเก็บของ โรงเรือน และโกดังสำเร็จรูปคุณภาพสูง';
-        let storeKeywords = 'บ้านเก็บของ, ตู้เก็บของกลางแจ้ง, โกดังเก็บของ, บ้านเก็บของสำเร็จรูป';
-        let storeOgTitle = 'STORAGE HOUSE - บ้านเก็บของและโรงเรือนสำเร็จรูประดับพรีเมียม';
+        let storeDescription = 'CR Distribution ศูนย์จำหน่ายเครื่องตัดปอกสายไฟอัตโนมัติ อะไหล่ และบริการหลังการขายมาตรฐานสากล';
+        let storeKeywords = 'เครื่องตัดปอกสายไฟ, ตัดปอกสายไฟอัตโนมัติ, ใบมีดตัดสายไฟ, KODERA, CR Distribution';
+        let storeOgTitle = 'CR Distribution - ผู้แทนจำหน่ายเครื่องตัดปอกสายไฟ KODERA ในประเทศไทย';
         let storeOgDescription = storeDescription;
 
         try {

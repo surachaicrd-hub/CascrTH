@@ -650,7 +650,7 @@ onUnmounted(() => {
             </transition>
           </div>
 
-          <router-link to="/projects" :class="['text-sm font-semibold tracking-wide transition-colors duration-300 relative group', isActiveRoute('/projects') ? 'text-emerald-400 font-bold' : isDarkHeader ? 'text-white/90 hover:text-emerald-400' : 'text-slate-700 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-emerald-400']">
+          <router-link v-if="settingsStore.isProjectsEnabled" to="/projects" :class="['text-sm font-semibold tracking-wide transition-colors duration-300 relative group', isActiveRoute('/projects') ? 'text-emerald-400 font-bold' : isDarkHeader ? 'text-white/90 hover:text-emerald-400' : 'text-slate-700 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-emerald-400']">
             ผลงาน
             <span :class="['absolute bottom-[-8px] left-1/2 -translate-x-1/2 h-[2px] bg-emerald-500 rounded-full transition-all duration-300', isActiveRoute('/projects') ? 'w-5' : 'w-0 group-hover:w-5']"></span>
           </router-link>
@@ -773,7 +773,7 @@ onUnmounted(() => {
             </div>
           </div>
           <router-link to="/services" :class="['py-2 text-lg font-bold tracking-wide transition-colors', isActiveRoute('/services') ? 'text-emerald-700 dark:text-emerald-400 border-l-4 border-emerald-500 pl-4' : 'text-gray-900 dark:text-white hover:text-emerald-700']">บริการ</router-link>
-          <router-link to="/projects" :class="['py-2 text-lg font-bold tracking-wide transition-colors', isActiveRoute('/projects') ? 'text-emerald-700 dark:text-emerald-400 border-l-4 border-emerald-500 pl-4' : 'text-gray-900 dark:text-white hover:text-emerald-700']">ผลงาน</router-link>
+          <router-link v-if="settingsStore.isProjectsEnabled" to="/projects" :class="['py-2 text-lg font-bold tracking-wide transition-colors', isActiveRoute('/projects') ? 'text-emerald-700 dark:text-emerald-400 border-l-4 border-emerald-500 pl-4' : 'text-gray-900 dark:text-white hover:text-emerald-700']">ผลงาน</router-link>
           <router-link to="/blog" :class="['py-2 text-lg font-bold tracking-wide transition-colors', isActiveRoute('/blog') ? 'text-emerald-700 dark:text-emerald-400 border-l-4 border-emerald-500 pl-4' : 'text-gray-900 dark:text-white hover:text-emerald-700']">บทความ</router-link>
           <router-link to="/about" :class="['py-2 text-lg font-bold tracking-wide transition-colors', isActiveRoute('/about') ? 'text-emerald-700 dark:text-emerald-400 border-l-4 border-emerald-500 pl-4' : 'text-gray-900 dark:text-white hover:text-emerald-700']">เกี่ยวกับเรา</router-link>
           <router-link to="/contact" :class="['py-2 text-lg font-bold tracking-wide transition-colors', isActiveRoute('/contact') ? 'text-emerald-700 dark:text-emerald-400 border-l-4 border-emerald-500 pl-4' : 'text-gray-900 dark:text-white hover:text-emerald-700']">ติดต่อเรา</router-link>
@@ -1053,7 +1053,7 @@ onUnmounted(() => {
               <li><router-link to="/" class="text-slate-400 hover:text-emerald-400 transition-colors flex items-center gap-1.5 group"><svg class="w-3 h-3 text-slate-600 group-hover:text-emerald-400 group-hover:translate-x-0.5 transition-all" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg> หน้าแรก</router-link></li>
               <li><router-link to="/products" class="text-slate-400 hover:text-emerald-400 transition-colors flex items-center gap-1.5 group"><svg class="w-3 h-3 text-slate-600 group-hover:text-emerald-400 group-hover:translate-x-0.5 transition-all" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg> สินค้าทั้งหมด</router-link></li>
               <li><router-link to="/services" class="text-slate-400 hover:text-emerald-400 transition-colors flex items-center gap-1.5 group"><svg class="w-3 h-3 text-slate-600 group-hover:text-emerald-400 group-hover:translate-x-0.5 transition-all" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg> บริการของเรา</router-link></li>
-              <li><router-link to="/projects" class="text-slate-400 hover:text-emerald-400 transition-colors flex items-center gap-1.5 group"><svg class="w-3 h-3 text-slate-600 group-hover:text-emerald-400 group-hover:translate-x-0.5 transition-all" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg> ผลงาน</router-link></li>
+              <li v-if="settingsStore.isProjectsEnabled"><router-link to="/projects" class="text-slate-400 hover:text-emerald-400 transition-colors flex items-center gap-1.5 group"><svg class="w-3 h-3 text-slate-600 group-hover:text-emerald-400 group-hover:translate-x-0.5 transition-all" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg> ผลงาน</router-link></li>
             </ul>
           </div>
 

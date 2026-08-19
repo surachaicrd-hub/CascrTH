@@ -73,13 +73,16 @@ router.get('/public', async (req, res) => {
             'about_cta_title', 'about_cta_desc', 'about_content_rich',
             'services_hero_title', 'services_hero_subtitle', 'services_hero_desc', 'services_hero_bg',
             'services_items', 'services_stats', 'services_cta_title', 'services_cta_desc', 'services_content_rich',
-            'products_hero_bg', 'contact_hero_bg', 'projects_hero_bg', 'quotation_hero_bg',
+            'products_hero_badge', 'products_hero_title', 'products_hero_subtitle', 'products_hero_desc',
+            'products_hero_bg', 'products_hero_btn1_text', 'products_hero_btn1_url', 'products_hero_btn2_text', 'products_hero_btn2_url',
+            'contact_hero_bg', 'projects_hero_bg', 'quotation_hero_bg',
             'blog_hero_tag', 'blog_hero_title', 'blog_hero_subtitle', 'blog_hero_desc', 'blog_hero_bg',
             'footer_newsletter_title', 'footer_newsletter_subtitle', 'footer_newsletter_privacy',
             'footer_trust_badges', 'footer_distributor_label', 'footer_distributor_url',
             'footer_sitemap_label', 'footer_sitemap_url',
             'seo_default_llm_context', 'seo_ai_crawling_enabled',
-            'wire_master_types', 'wire_presets'
+            'wire_master_types', 'wire_presets',
+            'projects_enabled'
         ];
 
         const placeholders = publicKeys.map(() => '?').join(',');
@@ -447,7 +450,7 @@ router.post('/test-notification', verifyAdmin, async (req, res) => {
     try {
         const { type, token, chatId, emails } = req.body;
 
-        let storeName = 'STORAGE HOUSE';
+        let storeName = 'CR Distribution';
         try {
             const [sRows] = await db.query("SELECT setting_value FROM settings WHERE setting_key = 'store_name'");
             if (sRows.length > 0 && sRows[0].setting_value) storeName = sRows[0].setting_value;
@@ -563,7 +566,7 @@ router.post('/test-smtp', verifyAdmin, async (req, res) => {
             secure: secure === true || secure === 'true',
             auth: { user, pass }
         });
-        let storeName = 'STORAGE HOUSE';
+        let storeName = 'CR Distribution';
         try {
             const [sRows] = await db.query("SELECT setting_value FROM settings WHERE setting_key = 'store_name'");
             if (sRows.length > 0 && sRows[0].setting_value) storeName = sRows[0].setting_value;

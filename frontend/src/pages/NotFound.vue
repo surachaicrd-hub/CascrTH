@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import ProductCard from '../components/ProductCard.vue'
 import { useSettingsStore } from '../stores/settingsStore'
 
@@ -45,6 +45,10 @@ const quickLinks = [
   { name: 'ผลงานติดตั้ง', to: '/projects', icon: 'M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z' },
   { name: 'ติดต่อเรา', to: '/contact', icon: 'M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z' },
 ]
+
+const filteredQuickLinks = computed(() => {
+  return quickLinks.filter(l => l.to !== '/projects' || settingsStore.isProjectsEnabled)
+})
 
 const services = [
   { icon: 'M5 13l4 4L19 7', title: 'จัดส่งฟรีทั่วประเทศ', desc: 'สำหรับสินค้าทุกชิ้น' },
@@ -135,7 +139,7 @@ onMounted(() => {
         <p class="text-xs font-bold tracking-[0.2em] text-emerald-600 dark:text-emerald-400 uppercase mb-6 text-center">ลิงก์ที่คุณอาจกำลังมองหา</p>
         <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
           <router-link 
-            v-for="link in quickLinks" 
+            v-for="link in filteredQuickLinks" 
             :key="link.to" 
             :to="link.to"
             class="group bg-white dark:bg-[#111827] border border-gray-100 dark:border-gray-800 rounded-2xl p-5 text-center hover:border-emerald-300 dark:hover:border-emerald-600 hover:shadow-lg hover:-translate-y-0.5 transition-all"

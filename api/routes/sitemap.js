@@ -53,10 +53,23 @@ router.get('/', async (req, res) => {
             categories = catRows;
         } catch (e) {}
 
-        // 3. Fetch all published projects
-        const [projects] = await db.query(
-            `SELECT id, title, cover_image, updated_at FROM projects WHERE is_published = 1 ORDER BY created_at DESC`
-        );
+        // Check if projects module is enabled
+        let projectsEnabled = true;
+        try {
+            const [pSetting] = await db.query(`SELECT setting_value FROM settings WHERE setting_key = 'projects_enabled'`);
+            if (pSetting.length > 0 && String(pSetting[0].setting_value) === 'false') {
+                projectsEnabled = false;
+            }
+        } catch (e) {}
+
+        // 3. Fetch all published projects (if enabled)
+        let projects = [];
+        if (projectsEnabled) {
+            const [projRows] = await db.query(
+                `SELECT id, slug, title, cover_image, updated_at FROM projects WHERE is_published = 1 ORDER BY created_at DESC`
+            );
+            projects = projRows;
+        }
 
         // 4. Fetch all published articles
         let articles = [];
@@ -74,6 +87,7 @@ router.get('/', async (req, res) => {
 
         // Static pages
         for (const page of STATIC_PAGES) {
+            if (page.path === '/projects' && !projectsEnabled) continue;
             xml += `  <url>\n`;
             xml += `    <loc>${siteUrl}${page.path}</loc>\n`;
             xml += `    <changefreq>${page.changefreq}</changefreq>\n`;
@@ -111,20 +125,23 @@ router.get('/', async (req, res) => {
         }
 
         // Project pages
-        for (const project of projects) {
-            xml += `  <url>\n`;
-            xml += `    <loc>${siteUrl}/projects/${project.id}</loc>\n`;
-            xml += `    <lastmod>${formatDate(project.updated_at)}</lastmod>\n`;
-            xml += `    <changefreq>monthly</changefreq>\n`;
-            xml += `    <priority>0.7</priority>\n`;
-            if (project.cover_image) {
-                const imgLoc = project.cover_image.startsWith('http') ? project.cover_image : `${siteUrl}${project.cover_image}`;
-                xml += `    <image:image>\n`;
-                xml += `      <image:loc>${imgLoc}</image:loc>\n`;
-                xml += `      <image:title>${project.title.replace(/[<>&'"]/g, '')}</image:title>\n`;
-                xml += `    </image:image>\n`;
+        if (projectsEnabled) {
+            for (const project of projects) {
+                const projectPath = project.slug || project.id;
+                xml += `  <url>\n`;
+                xml += `    <loc>${siteUrl}/projects/${encodeURI(projectPath)}</loc>\n`;
+                xml += `    <lastmod>${formatDate(project.updated_at)}</lastmod>\n`;
+                xml += `    <changefreq>monthly</changefreq>\n`;
+                xml += `    <priority>0.7</priority>\n`;
+                if (project.cover_image) {
+                    const imgLoc = project.cover_image.startsWith('http') ? project.cover_image : `${siteUrl}${project.cover_image}`;
+                    xml += `    <image:image>\n`;
+                    xml += `      <image:loc>${imgLoc}</image:loc>\n`;
+                    xml += `      <image:title>${project.title.replace(/[<>&'"]/g, '')}</image:title>\n`;
+                    xml += `    </image:image>\n`;
+                }
+                xml += `  </url>\n`;
             }
-            xml += `  </url>\n`;
         }
 
         // Article pages

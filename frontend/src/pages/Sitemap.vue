@@ -81,11 +81,19 @@ const siteSections = [
   }
 ]
 
+const activeSiteSections = computed(() => {
+  return siteSections.map(sec => ({
+    ...sec,
+    links: sec.links.filter(l => l.path !== '/projects' || settingsStore.isProjectsEnabled)
+  })).filter(sec => sec.links.length > 0)
+})
+
 const filteredSections = computed(() => {
   const q = searchQuery.value.trim().toLowerCase()
-  if (!q) return siteSections
+  const baseSections = activeSiteSections.value
+  if (!q) return baseSections
 
-  return siteSections.map(sec => {
+  return baseSections.map(sec => {
     const matchedLinks = sec.links.filter(l => 
       l.name.toLowerCase().includes(q) || 
       l.path.toLowerCase().includes(q) || 

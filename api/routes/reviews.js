@@ -263,6 +263,12 @@ async function updateProductRating(productId) {
             'UPDATE products SET rating = ?, review_count = ? WHERE id = ?',
             [parseFloat(avg_rating).toFixed(1), count, productId]
         );
+
+        // Invalidate product caches immediately
+        try {
+            const cacheService = require('../services/cacheService');
+            await cacheService.delPattern('products:*');
+        } catch (cErr) {}
     } catch (e) {
         console.error('[Reviews] Update product rating error:', e.message);
     }

@@ -245,7 +245,7 @@ onUnmounted(() => { window.removeEventListener('keydown', handleKeydown); docume
                 <!-- Quick Links -->
                 <div class="px-5 py-3 border-t border-gray-100 dark:border-gray-800 mt-1">
                   <div class="flex flex-wrap gap-2">
-                    <button @click="router.push('/projects'); close()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-bold bg-blue-100 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 hover:shadow-md transition-all">
+                    <button v-if="settingsStore.isProjectsEnabled" @click="router.push('/projects'); close()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-bold bg-blue-100 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 hover:shadow-md transition-all">
                       <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
                       ผลงานการติดตั้ง
                     </button>

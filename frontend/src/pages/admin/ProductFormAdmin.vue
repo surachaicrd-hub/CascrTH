@@ -2581,6 +2581,9 @@ const generateDescriptionWithAI = async () => {
                   <button type="button" @click.prevent="addWireSample('flat_ribbon_split', 'สายแพแบนแยกเส้นหลายสาย')" class="px-2 py-1 bg-white hover:bg-slate-50 text-slate-700 rounded-lg text-[11px] font-semibold border border-slate-200 transition-colors flex items-center gap-1 cursor-pointer">
                     + สายแพแยกเส้น
                   </button>
+                  <button type="button" @click.prevent="addWireSample('flat_ribbon_semi_strip', 'สายแพแบน กึ่งปอกคงปลอก 2 ด้าน')" class="px-2 py-1 bg-white hover:bg-slate-50 text-slate-700 rounded-lg text-[11px] font-semibold border border-slate-200 transition-colors flex items-center gap-1 cursor-pointer">
+                    + สายแพกึ่งปอก
+                  </button>
                   <button type="button" @click.prevent="addWireSample('flat_ribbon_grey', 'สายแพแบนสีเทา (ปอกปลาย 2 ด้าน)')" class="px-2 py-1 bg-white hover:bg-slate-50 text-slate-700 rounded-lg text-[11px] font-semibold border border-slate-200 transition-colors flex items-center gap-1 cursor-pointer">
                     + สายแพสีเทา
                   </button>

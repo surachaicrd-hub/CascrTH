@@ -227,7 +227,7 @@ router.post('/', verifyCustomerOptional, async (req, res) => {
         }
 
         // 4. Determine guest email
-        const guestEmail = (!userId && customerEmail) ? customerEmail.trim() : null;
+        const guestEmail = (!userId && (customerEmail || shippingAddress.email)) ? (customerEmail || shippingAddress.email).trim() : null;
 
         const connection = await db.getConnection();
         await connection.beginTransaction();
@@ -253,7 +253,7 @@ router.post('/', verifyCustomerOptional, async (req, res) => {
                 ]
             );
 
-            // 6. Insert Order Items and Update Stock
+            // 6. Insert Order Items and Update Stock Atomically
             for (const pItem of processedItems) {
                 await connection.query(
                     `INSERT INTO order_items 
@@ -262,14 +262,22 @@ router.post('/', verifyCustomerOptional, async (req, res) => {
                     [orderId, pItem.product_id, pItem.product_name, pItem.quantity, pItem.price_at_purchase]
                 );
 
-                // Reduce stock if it's being tracked
-                await connection.query(
+                // Reduce stock if it's being tracked with atomic check against overselling
+                const [stockUpdate] = await connection.query(
                     `UPDATE products 
                      SET stock_quantity = stock_quantity - ?,
                          is_out_of_stock = IF(stock_quantity - ? <= 0, 1, 0)
-                     WHERE id = ? AND stock_quantity IS NOT NULL`,
-                    [pItem.quantity, pItem.quantity, pItem.product_id]
+                     WHERE id = ? AND (stock_quantity IS NULL OR stock_quantity >= ?)`,
+                    [pItem.quantity, pItem.quantity, pItem.product_id, pItem.quantity]
                 );
+
+                if (stockUpdate.affectedRows === 0) {
+                    await connection.rollback();
+                    return res.status(400).json({
+                        success: false,
+                        error: `สินค้า "${pItem.product_name}" มีสต็อกไม่เพียงพอสำหรับการสั่งซื้อ`
+                    });
+                }
             }
 
             // 5. Clear the Cart if it's an authenticated user
@@ -620,9 +628,9 @@ router.get('/:id', verifyCustomerOptional, async (req, res) => {
 
         const order = orders[0];
 
-        // Ownership check for authenticated users
-        if (req.user) {
-            if (order.user_id && order.user_id !== req.user.id) {
+        // Ownership check for registered users
+        if (order.user_id) {
+            if (!req.user || order.user_id !== req.user.id) {
                 return res.status(403).json({ success: false, error: 'คุณไม่มีสิทธิ์ดูคำสั่งซื้อนี้' });
             }
         }
@@ -643,10 +651,21 @@ router.get('/:id', verifyCustomerOptional, async (req, res) => {
         try { parsedShipping = typeof order.shipping_address === 'string' ? JSON.parse(order.shipping_address) : order.shipping_address; } catch(e) {}
         try { parsedTax = typeof order.tax_invoice === 'string' ? JSON.parse(order.tax_invoice) : order.tax_invoice; } catch(e) {}
 
-        // For unauthenticated requests, strip sensitive PII fields
-        if (!req.user) {
-            const { shipping_address, tax_invoice, ...safeOrder } = order;
-            return res.json({ success: true, data: { ...safeOrder, items } });
+        // For guest orders (user_id is null) or unauthenticated requests, strip sensitive PII fields
+        if (!order.user_id || !req.user) {
+            const { shipping_address, tax_invoice, customer_email, ...safeOrder } = order;
+            return res.json({ 
+                success: true, 
+                data: { 
+                    ...safeOrder, 
+                    shipping_address: parsedShipping ? {
+                        first_name: parsedShipping.first_name,
+                        province: parsedShipping.province,
+                        postal_code: parsedShipping.postal_code
+                    } : null,
+                    items 
+                } 
+            });
         }
 
         res.json({ success: true, data: { ...order, shipping_address: parsedShipping, tax_invoice: parsedTax, items } });

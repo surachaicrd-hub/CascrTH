@@ -214,7 +214,7 @@ router.get('/stats', verifyAdmin, async (req, res) => {
 // POST - Generate AI Insights from stats
 router.post('/ai-insights', verifyAdmin, async (req, res) => {
     try {
-        let storeName = 'STORAGE HOUSE';
+        let storeName = 'CR Distribution';
         try {
             const [sRows] = await db.query("SELECT setting_value FROM settings WHERE setting_key = 'store_name'");
             if (sRows.length > 0 && sRows[0].setting_value) storeName = sRows[0].setting_value;

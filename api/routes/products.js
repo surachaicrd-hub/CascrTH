@@ -316,8 +316,10 @@ router.get('/:id', async (req, res) => {
 
         if (Array.isArray(relatedProductIds) && relatedProductIds.length > 0) {
             try {
-                // Filter out non-numbers
-                const ids = relatedProductIds.filter(id => !isNaN(parseInt(id))).map(id => parseInt(id));
+                // Filter valid IDs (supports both UUID strings and numeric IDs)
+                const ids = relatedProductIds
+                    .map(id => (id != null ? String(id).trim() : ''))
+                    .filter(id => id.length > 0);
                 if (ids.length > 0) {
                     const placeholders = ids.map(() => '?').join(',');
                     const [relatedRows] = await db.query(

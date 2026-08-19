@@ -38,7 +38,7 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
         // Verify signature if channel secret is configured
         if (channelSecret) {
             const signature = req.headers['x-line-signature'];
-            const rawBody = typeof req.body === 'string' ? req.body : JSON.stringify(req.body);
+            const rawBody = req.rawBody || (typeof req.body === 'string' ? req.body : (Buffer.isBuffer(req.body) ? req.body : JSON.stringify(req.body)));
             if (!verifySignature(channelSecret, rawBody, signature)) {
                 console.warn('[LINE Webhook] Invalid signature');
                 return res.status(403).json({ error: 'Invalid signature' });

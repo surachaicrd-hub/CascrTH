@@ -284,6 +284,11 @@ const lineHref = computed(() => {
   return l.url || (l.value ? `https://line.me/ti/p/~${l.value.replace(/^@/, '')}` : '/contact')
 })
 
+const heroBtn1Text = computed(() => settingsStore.productsHeroBtn1Text || 'ขอใบเสนอราคาด่วน')
+const heroBtn1Url = computed(() => settingsStore.productsHeroBtn1Url || '/quotation')
+const heroBtn2Text = computed(() => settingsStore.productsHeroBtn2Text || 'ปรึกษาผู้เชี่ยวชาญ')
+const heroBtn2Url = computed(() => settingsStore.productsHeroBtn2Url || lineHref.value)
+
 const heroBg = computed(() => {
   if (activeCategoryData.value?.image_url) return activeCategoryData.value.image_url
   return settingsStore.productsHeroBg || '/images/hero/products-hero.jpg'
@@ -366,16 +371,16 @@ onUnmounted(() => {
             <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 backdrop-blur-md">
               <div class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></div>
               <span class="text-emerald-400 text-[11px] font-bold tracking-wider uppercase">
-                {{ activeCategory === 'ทุกหมวดหมู่' ? 'PRODUCT CATALOG' : `หมวดหมู่สินค้า • ${activeCategoryProductCount} รายการ` }}
+                {{ activeCategory === 'ทุกหมวดหมู่' ? (settingsStore.productsHeroBadge || 'PRODUCT CATALOG') : `หมวดหมู่สินค้า • ${activeCategoryProductCount} รายการ` }}
               </span>
             </div>
             
             <!-- Main Headline -->
             <h1 class="text-3xl sm:text-4xl lg:text-5xl font-black text-white leading-tight tracking-tight">
               <template v-if="activeCategory === 'ทุกหมวดหมู่'">
-                คลังสินค้าและผลิตภัณฑ์พรีเมียม <br/>
+                {{ settingsStore.productsHeroTitle || 'คลังสินค้าและผลิตภัณฑ์พรีเมียม' }} <br/>
                 <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-300 to-teal-400">
-                  มาตรฐานความปลอดภัยระดับสากล
+                  {{ settingsStore.productsHeroSubtitle || 'มาตรฐานความปลอดภัยระดับสากล' }}
                 </span>
               </template>
               <template v-else>
@@ -388,23 +393,47 @@ onUnmounted(() => {
             
             <!-- Description -->
             <p class="text-slate-300 text-sm sm:text-base leading-relaxed max-w-2xl font-light">
-              {{ activeCategoryData?.description || 'เลือกชมและสั่งซื้อเครื่องตัดปอกสายไฟอัตโนมัติ KODERA เครื่องย้ำเทอร์มินอล เครื่องปอกสายไฟ และอุปกรณ์แปรรูปสายไฟมาตรฐานสากล พร้อมบริการ On-site Service ทั่วประเทศ' }}
+              {{ activeCategoryData?.description || settingsStore.productsHeroDesc || 'เลือกชมและสั่งซื้อเครื่องตัดปอกสายไฟอัตโนมัติ KODERA เครื่องย้ำเทอร์มินอล เครื่องปอกสายไฟ และอุปกรณ์แปรรูปสายไฟมาตรฐานสากล พร้อมบริการ On-site Service ทั่วประเทศ' }}
             </p>
 
             <!-- Quick Action Buttons -->
             <div class="flex flex-wrap items-center justify-center sm:justify-start gap-3 pt-2">
               <router-link 
-                to="/quotation" 
+                v-if="heroBtn1Url.startsWith('/')"
+                :to="heroBtn1Url" 
                 class="inline-flex items-center justify-center gap-2 h-11 px-6 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-lg shadow-emerald-600/25 transition-all duration-200 active:scale-95"
               >
                 <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                 </svg>
-                <span>ขอใบเสนอราคาด่วน</span>
+                <span>{{ heroBtn1Text }}</span>
               </router-link>
-
               <a 
-                :href="lineHref"
+                v-else
+                :href="heroBtn1Url"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="inline-flex items-center justify-center gap-2 h-11 px-6 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-lg shadow-emerald-600/25 transition-all duration-200 active:scale-95"
+              >
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                </svg>
+                <span>{{ heroBtn1Text }}</span>
+              </a>
+
+              <router-link
+                v-if="heroBtn2Url.startsWith('/')"
+                :to="heroBtn2Url"
+                class="inline-flex items-center justify-center gap-2 h-11 px-6 rounded-xl bg-white/10 hover:bg-white/15 text-white font-bold text-xs border border-white/15 backdrop-blur-sm transition-all duration-200 active:scale-95"
+              >
+                <svg class="w-4 h-4 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+                </svg>
+                <span>{{ heroBtn2Text }}</span>
+              </router-link>
+              <a 
+                v-else
+                :href="heroBtn2Url"
                 target="_blank"
                 rel="noopener noreferrer"
                 class="inline-flex items-center justify-center gap-2 h-11 px-6 rounded-xl bg-white/10 hover:bg-white/15 text-white font-bold text-xs border border-white/15 backdrop-blur-sm transition-all duration-200 active:scale-95"
@@ -412,7 +441,7 @@ onUnmounted(() => {
                 <svg class="w-4 h-4 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
                 </svg>
-                <span>ปรึกษาผู้เชี่ยวชาญ</span>
+                <span>{{ heroBtn2Text }}</span>
               </a>
             </div>
 

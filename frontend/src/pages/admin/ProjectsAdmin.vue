@@ -8,11 +8,15 @@ import { apiFetch } from '../../utils/apiFetch'
 import { useNotifications } from '../../composables/useNotifications'
 import { useToast } from '../../composables/useToast'
 import { useConfirm } from '../../composables/useConfirm'
+import { useSettingsStore } from '../../stores/settingsStore'
 import InfoTooltip from '../../components/admin/InfoTooltip.vue'
 
 const { showToast } = useToast()
 const { showConfirm } = useConfirm()
 const notifications = useNotifications()
+const settingsStore = useSettingsStore()
+const isProjectsEnabled = ref(true)
+const updatingVisibility = ref(false)
 const editor = ClassicEditor
 const editorConfig = ref({
     licenseKey: 'GPL',
@@ -180,13 +184,15 @@ const currentProject = ref({
 const fetchProjects = async () => {
     loading.value = true
     try {
-        const [projRes, prodRes] = await Promise.all([
+        const [projRes, prodRes, setRes] = await Promise.all([
             apiFetch('/api/projects'),
-            apiFetch('/api/products?is_active=1') // ดึงรายการสินค้ามาแสดงใน Dropdown
+            apiFetch('/api/products?is_active=1'), // ดึงรายการสินค้ามาแสดงใน Dropdown
+            apiFetch('/api/settings/public')
         ])
         
         const projData = await projRes.json()
         const prodData = await prodRes.json()
+        const setData = await setRes.json()
 
         if (projData.success) {
             projects.value = projData.data
@@ -194,11 +200,46 @@ const fetchProjects = async () => {
         if (prodData.success) {
             productsList.value = prodData.data
         }
+        if (setData.success && setData.data?.projects_enabled !== undefined) {
+            isProjectsEnabled.value = String(setData.data.projects_enabled) !== 'false'
+            settingsStore.isProjectsEnabled = isProjectsEnabled.value
+        }
     } catch (error) {
         console.error('Fetch data failed', error)
         showToast('โหลดข้อมูลโปรเจคหรือสินค้าไม่สำเร็จ', 'error')
     } finally {
         loading.value = false
+    }
+}
+
+const toggleProjectsVisibility = async () => {
+    updatingVisibility.value = true
+    const newVal = !isProjectsEnabled.value
+    try {
+        const res = await apiFetch('/api/settings/batch', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                projects_enabled: newVal ? 'true' : 'false'
+            })
+        })
+        const json = await res.json()
+        if (json.success) {
+            isProjectsEnabled.value = newVal
+            settingsStore.isProjectsEnabled = newVal
+            showToast(
+                newVal 
+                    ? 'เปิดการแสดงผลหน้าผลงาน (/projects) บนเว็บไซต์เรียบร้อยแล้ว' 
+                    : 'ปิดการแสดงผลหน้าผลงาน (/projects) บนเว็บไซต์เรียบร้อยแล้ว', 
+                'success'
+            )
+        } else {
+            throw new Error(json.error || 'Failed to update visibility')
+        }
+    } catch (e) {
+        showToast('เกิดข้อผิดพลาดในการเปลี่ยนสถานะ: ' + e.message, 'error')
+    } finally {
+        updatingVisibility.value = false
     }
 }
 
@@ -466,6 +507,67 @@ const getProductImage = (prod) => {
         <svg class="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
         เพิ่มผลงานใหม่
       </button>
+    </div>
+
+    <!-- Global Visibility Switch Banner -->
+    <div 
+      class="mb-8 p-5 rounded-2xl border transition-all duration-300 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+      :class="isProjectsEnabled ? 'bg-gradient-to-r from-emerald-50/90 via-teal-50/40 to-white border-emerald-200' : 'bg-gradient-to-r from-amber-50/90 via-orange-50/40 to-white border-amber-200'"
+    >
+      <div class="flex items-start sm:items-center gap-3.5">
+        <div 
+          class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 shadow-sm transition-colors"
+          :class="isProjectsEnabled ? 'bg-emerald-600 text-white shadow-emerald-200' : 'bg-amber-600 text-white shadow-amber-200'"
+        >
+          <svg v-if="isProjectsEnabled" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+          </svg>
+          <svg v-else class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+          </svg>
+        </div>
+        <div>
+          <div class="flex flex-wrap items-center gap-2">
+            <h3 class="text-sm font-bold text-gray-900">
+              สถานะการแสดงผลผลงานบนเว็บไซต์:
+            </h3>
+            <span 
+              class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-black transition-colors shadow-xs"
+              :class="isProjectsEnabled ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' : 'bg-amber-100 text-amber-900 border border-amber-300'"
+            >
+              <span class="w-1.5 h-1.5 rounded-full" :class="isProjectsEnabled ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'"></span>
+              {{ isProjectsEnabled ? 'เปิดแสดงผลสู่สาธารณะ' : 'ปิดการแสดงผลทั้งหมดชั่วคราว' }}
+            </span>
+          </div>
+          <p class="text-xs text-gray-600 mt-1 font-medium leading-relaxed">
+            {{ isProjectsEnabled 
+              ? 'เมนู "ผลงาน" แสดงบนแถบนำทาง (Navbar), ท้ายเว็บ (Footer), หน้าแรก และเปิดให้เข้าชมหน้า /projects ได้ตามปกติ' 
+              : 'ซ่อนเมนูและลิงก์ผลงานทั้งหมดบนหน้าเว็บไซต์ หากผู้ใช้งานเข้าผ่านลิงก์ /projects จะถูกนำทางกลับหน้าแรกอย่างราบรื่น (ข้อมูลในแอดมินยังคงอยู่ครบถ้วน)' }}
+          </p>
+        </div>
+      </div>
+
+      <!-- Toggle Button -->
+      <div class="flex items-center gap-3 shrink-0 self-end sm:self-center">
+        <span class="text-xs font-bold text-gray-700">
+          {{ isProjectsEnabled ? 'เปิดแสดงผล' : 'ปิดการแสดงผล' }}
+        </span>
+        <button 
+          type="button" 
+          role="switch"
+          :aria-checked="isProjectsEnabled"
+          :disabled="updatingVisibility"
+          @click="toggleProjectsVisibility"
+          class="relative inline-flex h-7 w-14 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:ring-offset-2 disabled:opacity-50"
+          :class="isProjectsEnabled ? 'bg-emerald-600' : 'bg-gray-300'"
+        >
+          <span 
+            class="pointer-events-none inline-block h-6 w-6 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out"
+            :class="isProjectsEnabled ? 'translate-x-7' : 'translate-x-0'"
+          />
+        </button>
+      </div>
     </div>
 
     <!-- MAIN FORM VIEW -->

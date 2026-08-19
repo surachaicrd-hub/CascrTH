@@ -120,10 +120,11 @@ router.post('/', async (req, res) => {
         // 2. Dynamic Math check
         let isBot = !!botHoneypot;
 
-        console.log('--- Incoming Quotation Request ---');
-        console.log('Payload:', { requestType, customerName, isBot, captchaAnswer, captchaConfig });
+        if (!customerName || !phone) {
+            return res.status(400).json({ success: false, error: 'กรุณาระบุชื่อและเบอร์โทรศัพท์สำหรับติดต่อกลับ' });
+        }
 
-        if (!isBot && (!captchaConfig || typeof captchaConfig.num1 !== 'number' || typeof captchaConfig.num2 !== 'number')) {
+        if (!isBot && (!captchaConfig || typeof captchaConfig.num1 !== 'number' || typeof captchaConfig.num2 !== 'number' || captchaConfig.num1 < 1 || captchaConfig.num1 > 20 || captchaConfig.num2 < 1 || captchaConfig.num2 > 20)) {
             isBot = true;
         } else if (!isBot) {
             const expectedAnswer = captchaConfig.num1 + captchaConfig.num2;

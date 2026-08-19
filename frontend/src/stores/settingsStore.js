@@ -24,6 +24,7 @@ export const useSettingsStore = defineStore('settings', () => {
     const isOnlineShoppingEnabled = ref(true)
     const isWishlistEnabled = ref(true)
     const isCompareEnabled = ref(true)
+    const isProjectsEnabled = ref(true)
     const showProductRating = ref(true)
     const showProductReview = ref(true)
     
@@ -78,8 +79,17 @@ export const useSettingsStore = defineStore('settings', () => {
     const contactAddress = ref('')
     const contactWorkingHours = ref('')
 
-    // Page Hero Backgrounds
+    // Page Hero Backgrounds & Content
+    const productsHeroBadge = ref('')
+    const productsHeroTitle = ref('')
+    const productsHeroSubtitle = ref('')
+    const productsHeroDesc = ref('')
     const productsHeroBg = ref('')
+    const productsHeroBtn1Text = ref('')
+    const productsHeroBtn1Url = ref('')
+    const productsHeroBtn2Text = ref('')
+    const productsHeroBtn2Url = ref('')
+
     const servicesHeroBg = ref('')
     const aboutHeroBg = ref('')
     const contactHeroBg = ref('')
@@ -100,8 +110,18 @@ export const useSettingsStore = defineStore('settings', () => {
     const initializeSettings = (pubSettings) => {
         if (!pubSettings) return
 
-        // Hero Backgrounds
+        // Products Page Hero
+        if (pubSettings.products_hero_badge !== undefined) productsHeroBadge.value = pubSettings.products_hero_badge || '';
+        if (pubSettings.products_hero_title !== undefined) productsHeroTitle.value = pubSettings.products_hero_title || '';
+        if (pubSettings.products_hero_subtitle !== undefined) productsHeroSubtitle.value = pubSettings.products_hero_subtitle || '';
+        if (pubSettings.products_hero_desc !== undefined) productsHeroDesc.value = pubSettings.products_hero_desc || '';
         if (pubSettings.products_hero_bg !== undefined) productsHeroBg.value = pubSettings.products_hero_bg || '';
+        if (pubSettings.products_hero_btn1_text !== undefined) productsHeroBtn1Text.value = pubSettings.products_hero_btn1_text || '';
+        if (pubSettings.products_hero_btn1_url !== undefined) productsHeroBtn1Url.value = pubSettings.products_hero_btn1_url || '';
+        if (pubSettings.products_hero_btn2_text !== undefined) productsHeroBtn2Text.value = pubSettings.products_hero_btn2_text || '';
+        if (pubSettings.products_hero_btn2_url !== undefined) productsHeroBtn2Url.value = pubSettings.products_hero_btn2_url || '';
+
+        // Other Page Hero Backgrounds
         if (pubSettings.services_hero_bg !== undefined) servicesHeroBg.value = pubSettings.services_hero_bg || '';
         if (pubSettings.about_hero_bg !== undefined) aboutHeroBg.value = pubSettings.about_hero_bg || '';
         if (pubSettings.contact_hero_bg !== undefined) contactHeroBg.value = pubSettings.contact_hero_bg || '';
@@ -118,6 +138,10 @@ export const useSettingsStore = defineStore('settings', () => {
 
         if (pubSettings.compare_enabled !== undefined) {
             isCompareEnabled.value = String(pubSettings.compare_enabled) === 'true'
+        }
+
+        if (pubSettings.projects_enabled !== undefined) {
+            isProjectsEnabled.value = String(pubSettings.projects_enabled) !== 'false'
         }
 
         if (pubSettings.show_product_rating !== undefined) {
@@ -366,6 +390,7 @@ export const useSettingsStore = defineStore('settings', () => {
         isOnlineShoppingEnabled,
         isWishlistEnabled,
         isCompareEnabled,
+        isProjectsEnabled,
         paymentPromptpayEnabled,
         paymentBankTransferEnabled,
         paymentIpayEnabled,
@@ -393,7 +418,15 @@ export const useSettingsStore = defineStore('settings', () => {
         contactCompanyName,
         contactAddress,
         contactWorkingHours,
+        productsHeroBadge,
+        productsHeroTitle,
+        productsHeroSubtitle,
+        productsHeroDesc,
         productsHeroBg,
+        productsHeroBtn1Text,
+        productsHeroBtn1Url,
+        productsHeroBtn2Text,
+        productsHeroBtn2Url,
         servicesHeroBg,
         aboutHeroBg,
         contactHeroBg,

@@ -45,8 +45,24 @@ router.get('/logs', verifyAdmin, (req, res) => {
       });
     }
 
-    // Read Winston combined.log
-    const logData = fs.readFileSync(combinedLogPath, 'utf8');
+    // Read Winston combined.log safely without loading massive files into memory
+    const stats = fs.statSync(combinedLogPath);
+    const maxBytesToRead = 2 * 1024 * 1024; // Read up to last 2MB
+    let logData = '';
+
+    if (stats.size <= maxBytesToRead) {
+      logData = fs.readFileSync(combinedLogPath, 'utf8');
+    } else {
+      const fd = fs.openSync(combinedLogPath, 'r');
+      const buffer = Buffer.alloc(maxBytesToRead);
+      fs.readSync(fd, buffer, 0, maxBytesToRead, stats.size - maxBytesToRead);
+      fs.closeSync(fd);
+      logData = buffer.toString('utf8');
+      const firstNewline = logData.indexOf('\n');
+      if (firstNewline !== -1) {
+        logData = logData.slice(firstNewline + 1);
+      }
+    }
     const lines = logData.trim().split('\n');
     
     const logs = [];

@@ -20,10 +20,10 @@ require('dotenv').config();
 
 // Create MySQL connection pool
 const pool = mysql.createPool({
-  host: process.env.DB_HOST || (process.env.NODE_ENV === 'production' ? 'localhost' : '127.0.0.1'),
-  user: process.env.DB_USER !== undefined ? process.env.DB_USER : (process.env.NODE_ENV === 'production' ? 'khaotom_cascr' : 'root'),
-  password: process.env.DB_PASSWORD !== undefined ? process.env.DB_PASSWORD : (process.env.NODE_ENV === 'production' ? 'Morespace15*' : ''),
-  database: process.env.DB_NAME !== undefined ? process.env.DB_NAME : (process.env.NODE_ENV === 'production' ? 'khaotom_cascr' : 'cascr_th'),
+  host: process.env.DB_HOST || '127.0.0.1',
+  user: process.env.DB_USER || 'root',
+  password: process.env.DB_PASSWORD !== undefined ? process.env.DB_PASSWORD : '',
+  database: process.env.DB_NAME || 'cascr_th',
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,

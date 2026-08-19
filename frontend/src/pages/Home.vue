@@ -1055,20 +1055,25 @@ const fetchShowcaseProducts = async () => {
 const fetchRecentContent = async () => {
   try {
     const limit = homeProjectsCta.value.show ? 5 : 6;
-    const [projRes, artRes] = await Promise.all([
-      fetch(`/api/projects/published?limit=${limit}`),
-      fetch('/api/articles?limit=9')
-    ])
-    
-    const projData = await projRes.json()
-    const artData = await artRes.json()
-    
-    if (projData.success) {
-      recentProjects.value = projData.data.slice(0, limit)
-    }
-    
-    if (artData.success) {
-      recentArticles.value = artData.data.slice(0, 9)
+    if (settingsStore.isProjectsEnabled) {
+      const [projRes, artRes] = await Promise.all([
+        fetch(`/api/projects/published?limit=${limit}`),
+        fetch('/api/articles?limit=9')
+      ])
+      const projData = await projRes.json()
+      const artData = await artRes.json()
+      if (projData.success) {
+        recentProjects.value = projData.data.slice(0, limit)
+      }
+      if (artData.success) {
+        recentArticles.value = artData.data.slice(0, 9)
+      }
+    } else {
+      const artRes = await fetch('/api/articles?limit=9')
+      const artData = await artRes.json()
+      if (artData.success) {
+        recentArticles.value = artData.data.slice(0, 9)
+      }
     }
   } catch (err) {
     console.error('Failed to fetch recent content', err)
@@ -2495,7 +2500,7 @@ onUnmounted(() => {
 
 
     <!-- Recent Projects Showcase -->
-    <section v-if="recentProjects.length > 0" class="py-20 md:py-28 bg-[#f8f9fa] dark:bg-[#0f172a]">
+    <section v-if="settingsStore.isProjectsEnabled && recentProjects.length > 0" class="py-20 md:py-28 bg-[#f8f9fa] dark:bg-[#0f172a]">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         <!-- Header -->

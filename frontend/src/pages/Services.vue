@@ -308,6 +308,7 @@ onUnmounted(() => {
               </router-link>
 
               <router-link 
+                v-if="settingsStore.isProjectsEnabled"
                 to="/projects" 
                 class="inline-flex items-center justify-center gap-2 h-12 px-6 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-sm border border-white/15 backdrop-blur-sm transition-all duration-200 active:scale-95"
               >

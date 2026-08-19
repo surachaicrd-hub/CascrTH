@@ -322,7 +322,17 @@ router.beforeEach((to, from, next) => {
     // Online Shopping Guard
     try {
         const settingsStore = useSettingsStore()
-        if (!settingsStore.isOnlineShoppingEnabled && (to.path === '/cart' || to.path === '/profile' || to.path === '/verify-email')) {
+        if (!settingsStore.isOnlineShoppingEnabled && (to.path === '/cart' || to.path === '/checkout' || to.path.startsWith('/order-success') || to.path === '/profile' || to.path === '/verify-email')) {
+            return next('/')
+        }
+    } catch (e) {
+        // Pinia might not be fully initialized on the very first route resolution
+    }
+
+    // Projects Module Guard (Redirect to home when disabled)
+    try {
+        const settingsStore = useSettingsStore()
+        if (!settingsStore.isProjectsEnabled && (to.path === '/projects' || to.path.startsWith('/projects/'))) {
             return next('/')
         }
     } catch (e) {

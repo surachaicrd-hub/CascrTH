@@ -284,6 +284,118 @@ const deleteProduct = async (product) => {
   }
 }
 
+// Hero Header Management
+const isHeroModalOpen = ref(false)
+const isUploadingHero = ref(false)
+const isSavingHero = ref(false)
+
+const heroBadge = ref('')
+const heroTitle = ref('')
+const heroSubtitle = ref('')
+const heroDesc = ref('')
+const heroBg = ref('')
+const heroBtn1Text = ref('')
+const heroBtn1Url = ref('')
+const heroBtn2Text = ref('')
+const heroBtn2Url = ref('')
+
+const openHeroModal = async () => {
+  try {
+    const res = await apiFetch('/api/settings')
+    const data = await res.json()
+    if (data.success && data.data) {
+      const s = data.data
+      heroBadge.value = s.products_hero_badge || 'PRODUCT CATALOG'
+      heroTitle.value = s.products_hero_title || 'คลังสินค้าและผลิตภัณฑ์พรีเมียม'
+      heroSubtitle.value = s.products_hero_subtitle || 'มาตรฐานความปลอดภัยระดับสากล'
+      heroDesc.value = s.products_hero_desc || 'เลือกชมและสั่งซื้อเครื่องตัดปอกสายไฟอัตโนมัติ KODERA เครื่องย้ำเทอร์มินอล เครื่องปอกสายไฟ และอุปกรณ์แปรรูปสายไฟมาตรฐานสากล พร้อมบริการ On-site Service ทั่วประเทศ'
+      heroBg.value = s.products_hero_bg || ''
+      heroBtn1Text.value = s.products_hero_btn1_text || 'ขอใบเสนอราคาด่วน'
+      heroBtn1Url.value = s.products_hero_btn1_url || '/quotation'
+      heroBtn2Text.value = s.products_hero_btn2_text || 'ปรึกษาผู้เชี่ยวชาญ'
+      heroBtn2Url.value = s.products_hero_btn2_url || ''
+    }
+  } catch (err) {
+    console.error('Failed to load hero settings:', err)
+  }
+  isHeroModalOpen.value = true
+}
+
+const handleHeroUpload = async (event) => {
+  const file = event.target.files?.[0]
+  if (!file) return
+
+  const formData = new FormData()
+  formData.append('image', file)
+
+  isUploadingHero.value = true
+  try {
+    const res = await apiFetch('/api/upload', {
+      method: 'POST',
+      body: formData
+    })
+    const data = await res.json()
+    if (data.success && data.url) {
+      heroBg.value = data.url
+      showToast('อัปโหลดรูปภาพส่วนหัวสำเร็จ', 'success')
+    } else {
+      showToast(data.error || 'อัปโหลดรูปภาพไม่สำเร็จ', 'error')
+    }
+  } catch (err) {
+    console.error('Hero upload error:', err)
+    showToast('เกิดข้อผิดพลาดในการอัปโหลดรูปภาพ', 'error')
+  } finally {
+    isUploadingHero.value = false
+    event.target.value = ''
+  }
+}
+
+const saveHeroSettings = async () => {
+  isSavingHero.value = true
+  try {
+    const payload = [
+      { key: 'products_hero_badge', value: heroBadge.value },
+      { key: 'products_hero_title', value: heroTitle.value },
+      { key: 'products_hero_subtitle', value: heroSubtitle.value },
+      { key: 'products_hero_desc', value: heroDesc.value },
+      { key: 'products_hero_bg', value: heroBg.value },
+      { key: 'products_hero_btn1_text', value: heroBtn1Text.value },
+      { key: 'products_hero_btn1_url', value: heroBtn1Url.value },
+      { key: 'products_hero_btn2_text', value: heroBtn2Text.value },
+      { key: 'products_hero_btn2_url', value: heroBtn2Url.value }
+    ]
+
+    const res = await apiFetch('/api/settings', {
+      method: 'PUT',
+      body: JSON.stringify({ settings: payload })
+    })
+    const data = await res.json()
+
+    if (data.success) {
+      // Update settingsStore locally in memory
+      settingsStore.productsHeroBadge = heroBadge.value
+      settingsStore.productsHeroTitle = heroTitle.value
+      settingsStore.productsHeroSubtitle = heroSubtitle.value
+      settingsStore.productsHeroDesc = heroDesc.value
+      settingsStore.productsHeroBg = heroBg.value
+      settingsStore.productsHeroBtn1Text = heroBtn1Text.value
+      settingsStore.productsHeroBtn1Url = heroBtn1Url.value
+      settingsStore.productsHeroBtn2Text = heroBtn2Text.value
+      settingsStore.productsHeroBtn2Url = heroBtn2Url.value
+
+      showToast('บันทึกการตั้งค่าส่วนหัวหน้าสินค้าเรียบร้อยแล้ว', 'success')
+      isHeroModalOpen.value = false
+    } else {
+      showToast(data.error || 'บันทึกการตั้งค่าไม่สำเร็จ', 'error')
+    }
+  } catch (err) {
+    console.error('Save hero settings error:', err)
+    showToast('เกิดข้อผิดพลาดในการบันทึกข้อมูล', 'error')
+  } finally {
+    isSavingHero.value = false
+  }
+}
+
 onMounted(() => {
   fetchProducts()
 })
@@ -291,17 +403,29 @@ onMounted(() => {
 
 <template>
   <div class="h-full flex flex-col">
-    <div class="flex justify-between items-center mb-8">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
       <div>
         <h1 class="text-2xl font-black text-gray-900 tracking-tight">จัดการข้อมูลสินค้า</h1>
         <p class="text-sm text-gray-500 mt-1 flex items-center gap-1">ทั้งหมด {{ products.length }} รายการบนหน้าเว็บ
           <InfoTooltip title="หน้าจัดการสินค้าคืออะไร?" description="หน้านี้แสดงรายการสินค้าทั้งหมด สามารถค้นหา, กรอง และจัดลำดับได้<ul><li><strong>ลากจัดลำดับ:</strong> ลากแถวเพื่อเปลี่ยนลำดับการแสดงบนหน้าเว็บ</li><li><strong>สถานะ (แสดงผล/ซ่อน):</strong> กดปุ่ม Toggle เพื่อซ่อนสินค้าชั่วคราวโดยไม่ต้องลบ</li><li><strong>Flash Sale:</strong> สินค้าที่มีไอคอนสายฟ้าจะแสดงราคาลดแล้ว</li><li><strong>สต๊อก:</strong> ไม่จำกัด = ไม่ต้องติดตามจำนวน, คลิกแก้ไขเพื่อตั้งค่า</li></ul>" />
         </p>
       </div>
-      <router-link to="/admin/products/new" class="inline-flex items-center px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium rounded-lg shadow-sm transition-colors">
-        <svg class="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-        เพิ่มสินค้าใหม่
-      </router-link>
+      <div class="flex items-center gap-3">
+        <button 
+          type="button" 
+          @click="openHeroModal"
+          class="inline-flex items-center px-4 py-2.5 bg-white hover:bg-slate-50 text-slate-700 text-sm font-bold rounded-xl border border-slate-200 shadow-sm transition-all hover:border-emerald-300 hover:text-emerald-700 active:scale-95"
+        >
+          <svg class="w-4 h-4 mr-2 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+          </svg>
+          ตั้งค่าส่วนหัวหน้าสินค้า
+        </button>
+        <router-link to="/admin/products/new" class="inline-flex items-center px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold rounded-xl shadow-sm shadow-emerald-600/20 transition-all active:scale-95">
+          <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+          เพิ่มสินค้าใหม่
+        </router-link>
+      </div>
     </div>
 
     <!-- Filters & Search Bar -->
@@ -592,6 +716,267 @@ onMounted(() => {
             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
           </button>
         </div>
+      </div>
+    </div>
+
+    <!-- =========================================================================
+         HERO HEADER CONFIGURATION MODAL
+         ========================================================================= -->
+    <div v-if="isHeroModalOpen" class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6">
+      <div class="bg-white rounded-3xl shadow-2xl border border-slate-200 w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+        
+        <!-- Modal Header -->
+        <div class="px-6 py-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+              <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+              </svg>
+            </div>
+            <div>
+              <h3 class="text-lg font-black text-slate-900 leading-tight">ตั้งค่าส่วนหัวของหน้าสินค้า (Products Hero Header)</h3>
+              <p class="text-xs text-slate-500 mt-0.5">ปรับแต่งข้อความ หัวข้อ และภาพพื้นหลังของหน้า <span class="font-mono text-emerald-600">/products</span></p>
+            </div>
+          </div>
+          <button 
+            type="button" 
+            @click="isHeroModalOpen = false"
+            class="p-2 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
+          >
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+          </button>
+        </div>
+
+        <!-- Modal Body (Scrollable) -->
+        <div class="p-6 overflow-y-auto space-y-6 flex-1">
+
+          <!-- LIVE PREVIEW SECTION (Enterprise Dark Theme) -->
+          <div>
+            <div class="flex items-center justify-between mb-2.5">
+              <label class="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                ตัวอย่างการแสดงผลจริงบนหน้าเว็บ (Live Preview)
+              </label>
+              <span class="text-[11px] text-slate-400 font-mono">/products</span>
+            </div>
+
+            <div class="relative rounded-2xl overflow-hidden bg-[#070A0F] border border-slate-800 p-6 sm:p-8 shadow-inner">
+              <!-- Background Image Simulation -->
+              <div 
+                class="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-50 transition-all duration-500"
+                :style="{ backgroundImage: `url(${heroBg || '/images/hero/products-hero.jpg'})` }"
+              ></div>
+              <div class="absolute inset-0 bg-gradient-to-r from-[#070A0F] via-[#070A0F]/80 to-[#070A0F]/40"></div>
+              <div class="absolute inset-0 bg-gradient-to-t from-[#070A0F] via-transparent to-[#070A0F]/50"></div>
+
+              <div class="relative z-10 space-y-3 max-w-xl">
+                <!-- Eyebrow Pill -->
+                <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-bold tracking-wider uppercase">
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                  <span>{{ heroBadge || 'PRODUCT CATALOG' }}</span>
+                </div>
+
+                <!-- Headline -->
+                <h4 class="text-xl sm:text-2xl font-black text-white leading-tight">
+                  {{ heroTitle || 'คลังสินค้าและผลิตภัณฑ์พรีเมียม' }} <br/>
+                  <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-300 to-teal-400">
+                    {{ heroSubtitle || 'มาตรฐานความปลอดภัยระดับสากล' }}
+                  </span>
+                </h4>
+
+                <!-- Description -->
+                <p class="text-slate-300 text-xs sm:text-sm font-light leading-relaxed line-clamp-2">
+                  {{ heroDesc || 'เลือกชมและสั่งซื้อเครื่องตัดปอกสายไฟอัตโนมัติ KODERA...' }}
+                </p>
+
+                <!-- Button Previews -->
+                <div class="flex items-center gap-2 pt-2">
+                  <span class="px-4 py-2 rounded-lg bg-emerald-600 text-white text-xs font-bold shadow-md shadow-emerald-600/30">
+                    {{ heroBtn1Text || 'ขอใบเสนอราคาด่วน' }}
+                  </span>
+                  <span class="px-4 py-2 rounded-lg bg-white/10 text-white text-xs font-bold border border-white/15 backdrop-blur-sm">
+                    {{ heroBtn2Text || 'ปรึกษาผู้เชี่ยวชาญ' }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- IMAGE UPLOAD & URL SECTION -->
+          <div class="bg-slate-50 rounded-2xl p-5 border border-slate-200/80 space-y-4">
+            <label class="block text-xs font-bold text-slate-800 uppercase tracking-wider">
+              รูปภาพพื้นหลังส่วนหัว (Hero Background Image)
+            </label>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 items-center">
+              <div>
+                <label class="block w-full">
+                  <input 
+                    type="file" 
+                    accept="image/*" 
+                    class="hidden" 
+                    @change="handleHeroUpload" 
+                    :disabled="isUploadingHero"
+                  />
+                  <span class="w-full inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold cursor-pointer transition-all shadow-md shadow-emerald-600/20 active:scale-98">
+                    <svg v-if="isUploadingHero" class="w-4 h-4 animate-spin text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                    <svg v-else class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                    <span>{{ isUploadingHero ? 'กำลังอัปโหลดรูปภาพ...' : 'อัปโหลดรูปภาพใหม่จากคอมพิวเตอร์' }}</span>
+                  </span>
+                </label>
+                <p class="text-[11px] text-slate-500 mt-1.5">รองรับไฟล์ JPG, PNG, WEBP แนะนำขนาด 1920x800 px (แนวนอน)</p>
+              </div>
+
+              <div class="flex items-center gap-2">
+                <input 
+                  v-model="heroBg" 
+                  type="text" 
+                  placeholder="หรือระบุ URL รูปภาพ (https://...)" 
+                  class="flex-1 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 font-mono focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-white"
+                />
+                <button 
+                  v-if="heroBg" 
+                  type="button" 
+                  @click="heroBg = ''" 
+                  class="px-3 py-2.5 rounded-xl border border-rose-200 text-rose-600 hover:bg-rose-50 text-xs font-bold shrink-0 transition-colors"
+                  title="รีเซ็ตเป็นภาพค่าเริ่มต้น"
+                >
+                  ใช้ค่าเริ่มต้น
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- TEXT CONTENT INPUTS -->
+          <div class="space-y-4">
+            <h4 class="text-xs font-bold text-slate-800 uppercase tracking-wider border-b border-slate-100 pb-2">
+              เนื้อหาข้อความส่วนหัว (Hero Typography)
+            </h4>
+
+            <!-- Tag / Eyebrow -->
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1.5">
+                ข้อความแท็กด้านบน (Badge / Eyebrow Text)
+              </label>
+              <input 
+                v-model="heroBadge" 
+                type="text" 
+                placeholder="เช่น PRODUCT CATALOG หรือ PRO-SERIES CATALOG" 
+                class="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-800 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+              />
+            </div>
+
+            <!-- Headline Line 1 & Line 2 -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1.5">
+                  หัวข้อหลัก บรรทัดที่ 1 (Main Title)
+                </label>
+                <input 
+                  v-model="heroTitle" 
+                  type="text" 
+                  placeholder="เช่น คลังสินค้าและผลิตภัณฑ์พรีเมียม" 
+                  class="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-800 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                />
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1.5">
+                  หัวข้อไฮไลต์ บรรทัดที่ 2 (Highlight Subtitle • สีเขียว)
+                </label>
+                <input 
+                  v-model="heroSubtitle" 
+                  type="text" 
+                  placeholder="เช่น มาตรฐานความปลอดภัยระดับสากล" 
+                  class="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-800 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-emerald-600 font-semibold"
+                />
+              </div>
+            </div>
+
+            <!-- Description -->
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1.5">
+                คำอธิบายรายละเอียด (Description Text)
+              </label>
+              <textarea 
+                v-model="heroDesc" 
+                rows="3" 
+                placeholder="ระบุคำบรรยายสรุปของหน้าสินค้า..."
+                class="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-800 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 leading-relaxed"
+              ></textarea>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+              <div class="p-4 bg-slate-50 rounded-xl border border-slate-200/80 space-y-2.5">
+                <p class="text-xs font-bold text-slate-800">ปุ่มดำเนินการที่ 1 (Primary Button)</p>
+                <div>
+                  <label class="block text-[11px] text-slate-500 mb-1">ข้อความบนปุ่ม</label>
+                  <input 
+                    v-model="heroBtn1Text" 
+                    type="text" 
+                    placeholder="เช่น ขอใบเสนอราคาด่วน" 
+                    class="w-full border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-800 bg-white"
+                  />
+                </div>
+                <div>
+                  <label class="block text-[11px] text-slate-500 mb-1">ลิงก์ปลายทาง (URL)</label>
+                  <input 
+                    v-model="heroBtn1Url" 
+                    type="text" 
+                    placeholder="เช่น /quotation หรือ https://..." 
+                    class="w-full border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-800 font-mono bg-white"
+                  />
+                </div>
+              </div>
+
+              <div class="p-4 bg-slate-50 rounded-xl border border-slate-200/80 space-y-2.5">
+                <p class="text-xs font-bold text-slate-800">ปุ่มดำเนินการที่ 2 (Secondary Button)</p>
+                <div>
+                  <label class="block text-[11px] text-slate-500 mb-1">ข้อความบนปุ่ม</label>
+                  <input 
+                    v-model="heroBtn2Text" 
+                    type="text" 
+                    placeholder="เช่น ปรึกษาผู้เชี่ยวชาญ" 
+                    class="w-full border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-800 bg-white"
+                  />
+                </div>
+                <div>
+                  <label class="block text-[11px] text-slate-500 mb-1">ลิงก์ปลายทาง (ว่างไว้ = ลิงก์ LINE อัตโนมัติ)</label>
+                  <input 
+                    v-model="heroBtn2Url" 
+                    type="text" 
+                    placeholder="เช่น https://line.me/... หรือว่างไว้" 
+                    class="w-full border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-800 font-mono bg-white"
+                  />
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+        <!-- Modal Footer Actions -->
+        <div class="px-6 py-4 border-t border-slate-100 bg-slate-50 flex items-center justify-end gap-3">
+          <button 
+            type="button" 
+            @click="isHeroModalOpen = false" 
+            class="px-5 py-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-100 text-slate-700 text-sm font-bold transition-all"
+          >
+            ยกเลิก
+          </button>
+          <button 
+            type="button" 
+            @click="saveHeroSettings" 
+            :disabled="isSavingHero"
+            class="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white text-sm font-bold shadow-md shadow-emerald-600/25 transition-all active:scale-95"
+          >
+            <svg v-if="isSavingHero" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+            <span>{{ isSavingHero ? 'กำลังบันทึกข้อมูล...' : 'บันทึกการตั้งค่าส่วนหัว' }}</span>
+          </button>
+        </div>
+
       </div>
     </div>
   </div>

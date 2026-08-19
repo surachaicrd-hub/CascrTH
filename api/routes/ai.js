@@ -62,13 +62,13 @@ router.post('/generate-seo', verifyAdmin, async (req, res) => {
             return res.status(400).json({ success: false, error: 'Product name is required' });
         }
 
-        let storeName = 'STORAGE HOUSE';
+        let storeName = 'CR Distribution';
         let companyLegalName = 'บริษัท ซีอาร์ ดิสทริบิวชั่น จำกัด';
         try {
             const [sRows] = await db.query("SELECT setting_key, setting_value FROM settings WHERE setting_key IN ('store_name', 'contact_company_name', 'company_legal_name')");
             const sMap = {};
             sRows.forEach(r => { sMap[r.setting_key] = r.setting_value; });
-            storeName = sMap['store_name'] || sMap['contact_company_name'] || 'STORAGE HOUSE';
+            storeName = sMap['store_name'] || sMap['contact_company_name'] || 'CR Distribution';
             companyLegalName = sMap['company_legal_name'] || sMap['contact_company_name'] || 'บริษัท ซีอาร์ ดิสทริบิวชั่น จำกัด';
         } catch (e) {}
 
@@ -117,13 +117,13 @@ router.post('/generate-full-seo-geo', verifyAdmin, async (req, res) => {
             return res.status(400).json({ success: false, error: 'Product name is required' });
         }
 
-        let storeName = 'STORAGE HOUSE';
+        let storeName = 'CR Distribution';
         let companyLegalName = 'บริษัท ซีอาร์ ดิสทริบิวชั่น จำกัด';
         try {
             const [sRows] = await db.query("SELECT setting_key, setting_value FROM settings WHERE setting_key IN ('store_name', 'contact_company_name', 'company_legal_name')");
             const sMap = {};
             sRows.forEach(r => { sMap[r.setting_key] = r.setting_value; });
-            storeName = sMap['store_name'] || sMap['contact_company_name'] || 'STORAGE HOUSE';
+            storeName = sMap['store_name'] || sMap['contact_company_name'] || 'CR Distribution';
             companyLegalName = sMap['company_legal_name'] || sMap['contact_company_name'] || 'บริษัท ซีอาร์ ดิสทริบิวชั่น จำกัด';
         } catch (e) {}
 

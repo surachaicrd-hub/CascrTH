@@ -11,18 +11,49 @@ module.exports = {
     await connection.query(`
       CREATE TABLE IF NOT EXISTS articles (
         id INT AUTO_INCREMENT PRIMARY KEY,
-        title VARCHAR(255) NOT NULL,
+        title VARCHAR(500) NOT NULL,
         slug VARCHAR(191) UNIQUE NOT NULL,
+        excerpt TEXT,
         content LONGTEXT,
+        cover_image VARCHAR(1000),
         image_url TEXT,
-        seo_title VARCHAR(255),
+        category VARCHAR(200) DEFAULT 'ทั่วไป',
+        tags TEXT,
+        seo_title VARCHAR(500),
         seo_description TEXT,
         seo_keywords TEXT,
-        is_published BOOLEAN DEFAULT TRUE,
+        faq JSON,
+        llm_context TEXT,
+        is_published TINYINT(1) DEFAULT 0,
+        is_featured TINYINT(1) DEFAULT 0,
+        view_count INT DEFAULT 0,
+        author VARCHAR(200) DEFAULT 'Admin',
+        product_id VARCHAR(36) DEFAULT NULL,
+        gallery_images TEXT,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
     `);
+
+    // Helper to ensure columns exist if articles table was previously created with fewer columns
+    const [cols] = await connection.query("SHOW COLUMNS FROM articles");
+    const existingColNames = cols.map(c => c.Field);
+    const ensureColumn = async (colName, colDef) => {
+      if (!existingColNames.includes(colName)) {
+        await connection.query(`ALTER TABLE articles ADD COLUMN ${colName} ${colDef}`);
+      }
+    };
+    await ensureColumn('excerpt', 'TEXT');
+    await ensureColumn('cover_image', 'VARCHAR(1000)');
+    await ensureColumn('category', "VARCHAR(200) DEFAULT 'ทั่วไป'");
+    await ensureColumn('tags', 'TEXT');
+    await ensureColumn('faq', 'JSON');
+    await ensureColumn('llm_context', 'TEXT');
+    await ensureColumn('is_featured', 'TINYINT(1) DEFAULT 0');
+    await ensureColumn('view_count', 'INT DEFAULT 0');
+    await ensureColumn('author', "VARCHAR(200) DEFAULT 'Admin'");
+    await ensureColumn('product_id', 'VARCHAR(36) DEFAULT NULL');
+    await ensureColumn('gallery_images', 'TEXT');
 
     // 2. Article Products Link
     await connection.query(`
@@ -156,6 +187,37 @@ module.exports = {
         status ENUM('active', 'unsubscribed') DEFAULT 'active',
         subscribed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+    `);
+
+    // 11. Page Visits Analytics
+    await connection.query(`
+      CREATE TABLE IF NOT EXISTS page_visits (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        session_id VARCHAR(100) NOT NULL,
+        page_path VARCHAR(500) NOT NULL,
+        page_title VARCHAR(500),
+        referrer VARCHAR(1000),
+        utm_source VARCHAR(200),
+        utm_medium VARCHAR(200),
+        utm_campaign VARCHAR(200),
+        device_type ENUM('desktop','tablet','mobile') DEFAULT 'desktop',
+        browser VARCHAR(100),
+        os VARCHAR(100),
+        screen_width INT,
+        screen_height INT,
+        language VARCHAR(20),
+        country VARCHAR(100),
+        time_on_page INT DEFAULT 0,
+        scroll_depth INT DEFAULT 0,
+        is_bounce BOOLEAN DEFAULT TRUE,
+        ip_address VARCHAR(100),
+        user_agent TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        INDEX idx_session (session_id),
+        INDEX idx_created (created_at),
+        INDEX idx_page (page_path(255)),
+        INDEX idx_device (device_type)
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
     `);
   }

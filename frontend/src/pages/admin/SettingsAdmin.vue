@@ -92,6 +92,7 @@ const cookiePurposeAnalytics = ref(true)
 const cookiePurposeMarketing = ref(true)
 const cookiePurposePersonalization = ref(true)
 const onlineShoppingEnabled = ref(true)
+const projectsEnabled = ref(true)
 const wishlistEnabled = ref(true)
 const compareEnabled = ref(true)
 const showProductRating = ref(true)
@@ -107,7 +108,16 @@ const holidayImage = ref('')
 const uploadingHolidayImage = ref(false)
 
 // Hero Banners State
+const productsHeroBadge = ref('')
+const productsHeroTitle = ref('')
+const productsHeroSubtitle = ref('')
+const productsHeroDesc = ref('')
 const productsHeroBg = ref('')
+const productsHeroBtn1Text = ref('')
+const productsHeroBtn1Url = ref('')
+const productsHeroBtn2Text = ref('')
+const productsHeroBtn2Url = ref('')
+
 const servicesHeroBg = ref('')
 const aboutHeroBg = ref('')
 const contactHeroBg = ref('')
@@ -453,6 +463,9 @@ const loadSettings = async () => {
       if (data.data.online_shopping_enabled !== undefined) {
         onlineShoppingEnabled.value = data.data.online_shopping_enabled === 'true'
       }
+      if (data.data.projects_enabled !== undefined) {
+        projectsEnabled.value = data.data.projects_enabled !== 'false'
+      }
       if (data.data.wishlist_enabled !== undefined) {
         wishlistEnabled.value = data.data.wishlist_enabled === 'true'
       }
@@ -494,8 +507,16 @@ const loadSettings = async () => {
       if (data.data.warehouse_lat !== undefined) warehouseLat.value = data.data.warehouse_lat
       if (data.data.warehouse_lng !== undefined) warehouseLng.value = data.data.warehouse_lng
 
-      // Load Page Hero Backgrounds
+      // Load Page Hero Backgrounds & Content
+      if (data.data.products_hero_badge !== undefined) productsHeroBadge.value = data.data.products_hero_badge
+      if (data.data.products_hero_title !== undefined) productsHeroTitle.value = data.data.products_hero_title
+      if (data.data.products_hero_subtitle !== undefined) productsHeroSubtitle.value = data.data.products_hero_subtitle
+      if (data.data.products_hero_desc !== undefined) productsHeroDesc.value = data.data.products_hero_desc
       if (data.data.products_hero_bg !== undefined) productsHeroBg.value = data.data.products_hero_bg
+      if (data.data.products_hero_btn1_text !== undefined) productsHeroBtn1Text.value = data.data.products_hero_btn1_text
+      if (data.data.products_hero_btn1_url !== undefined) productsHeroBtn1Url.value = data.data.products_hero_btn1_url
+      if (data.data.products_hero_btn2_text !== undefined) productsHeroBtn2Text.value = data.data.products_hero_btn2_text
+      if (data.data.products_hero_btn2_url !== undefined) productsHeroBtn2Url.value = data.data.products_hero_btn2_url
       if (data.data.services_hero_bg !== undefined) servicesHeroBg.value = data.data.services_hero_bg
       if (data.data.about_hero_bg !== undefined) aboutHeroBg.value = data.data.about_hero_bg
       if (data.data.contact_hero_bg !== undefined) contactHeroBg.value = data.data.contact_hero_bg
@@ -672,6 +693,7 @@ const saveSettings = async () => {
       { key: 'cookie_purpose_marketing', value: toStr(cookiePurposeMarketing.value, 'true') },
       { key: 'cookie_purpose_personalization', value: toStr(cookiePurposePersonalization.value, 'true') },
       { key: 'online_shopping_enabled', value: toStr(onlineShoppingEnabled.value, 'true') },
+      { key: 'projects_enabled', value: toStr(projectsEnabled.value, 'true') },
       { key: 'wishlist_enabled', value: toStr(wishlistEnabled.value, 'true') },
       { key: 'compare_enabled', value: toStr(compareEnabled.value, 'true') },
       { key: 'show_product_rating', value: toStr(showProductRating.value, 'true') },
@@ -705,8 +727,16 @@ const saveSettings = async () => {
       { key: 'warehouse_lat', value: warehouseLat.value || '' },
       { key: 'warehouse_lng', value: warehouseLng.value || '' },
 
-      // Page Hero Backgrounds
+      // Page Hero Backgrounds & Content
+      { key: 'products_hero_badge', value: productsHeroBadge.value || '' },
+      { key: 'products_hero_title', value: productsHeroTitle.value || '' },
+      { key: 'products_hero_subtitle', value: productsHeroSubtitle.value || '' },
+      { key: 'products_hero_desc', value: productsHeroDesc.value || '' },
       { key: 'products_hero_bg', value: productsHeroBg.value || '' },
+      { key: 'products_hero_btn1_text', value: productsHeroBtn1Text.value || '' },
+      { key: 'products_hero_btn1_url', value: productsHeroBtn1Url.value || '' },
+      { key: 'products_hero_btn2_text', value: productsHeroBtn2Text.value || '' },
+      { key: 'products_hero_btn2_url', value: productsHeroBtn2Url.value || '' },
       { key: 'services_hero_bg', value: servicesHeroBg.value || '' },
       { key: 'about_hero_bg', value: aboutHeroBg.value || '' },
       { key: 'contact_hero_bg', value: contactHeroBg.value || '' },
@@ -1797,6 +1827,23 @@ onMounted(() => {
               <label class="relative inline-flex items-center cursor-pointer flex-shrink-0 mt-2 sm:mt-0">
                 <input type="checkbox" v-model="onlineShoppingEnabled" class="sr-only peer">
                 <div class="w-14 h-7 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-indigo-600"></div>
+              </label>
+            </div>
+
+            <!-- Projects Module Toggle -->
+            <div class="flex items-center justify-between p-4 border border-gray-200 rounded-xl bg-gray-50/50 mt-4">
+              <div>
+                <h3 class="font-bold text-gray-900 flex items-center gap-2">
+                  <svg class="w-5 h-5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+                  </svg>
+                  แสดงผลโมดูลผลงานและโครงการ (/projects)
+                </h3>
+                <p class="text-sm text-gray-500 mt-1">เปิด/ปิดการแสดงผลหน้าผลงาน เมนูใน Navbar, Footer และ Section ผลงานในหน้าแรกสู่สาธารณะ</p>
+              </div>
+              <label class="relative inline-flex items-center cursor-pointer flex-shrink-0 mt-2 sm:mt-0">
+                <input type="checkbox" v-model="projectsEnabled" class="sr-only peer">
+                <div class="w-14 h-7 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-emerald-600"></div>
               </label>
             </div>
           </div>
@@ -3323,8 +3370,8 @@ onMounted(() => {
                 </div>
 
                 <!-- Preview Area -->
-                <div class="p-5">
-                  <div class="relative h-44 rounded-xl overflow-hidden bg-slate-950 border border-slate-800 flex items-center justify-center group shadow-inner">
+                <div class="p-5 space-y-4">
+                  <div class="relative min-h-[180px] rounded-xl overflow-hidden bg-slate-950 border border-slate-800 flex items-center justify-start group shadow-inner p-5">
                     <!-- Image Background with Dark Overlay Simulation -->
                     <img 
                       v-if="productsHeroBg" 
@@ -3342,10 +3389,19 @@ onMounted(() => {
                     <div class="absolute inset-0 bg-gradient-to-r from-[#070A0F]/90 via-[#070A0F]/70 to-transparent"></div>
 
                     <!-- Simulated Hero Typography -->
-                    <div class="relative z-10 text-left px-5 w-full">
-                      <span class="text-[10px] font-bold text-emerald-400 uppercase tracking-widest block mb-1">PRO-SERIES CATALOG</span>
-                      <h4 class="text-lg font-black text-white leading-tight">เครื่องตัดปอกสายไฟ KODERA</h4>
-                      <p class="text-[11px] text-slate-300 mt-1 font-light">ตัวอย่างการแสดงผลส่วนหัวหน้าสินค้า</p>
+                    <div class="relative z-10 text-left w-full space-y-1.5">
+                      <span class="text-[10px] font-bold text-emerald-400 uppercase tracking-widest block">{{ productsHeroBadge || 'PRODUCT CATALOG' }}</span>
+                      <h4 class="text-base sm:text-lg font-black text-white leading-tight">
+                        {{ productsHeroTitle || 'คลังสินค้าและผลิตภัณฑ์พรีเมียม' }} <br/>
+                        <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-300 to-teal-400 text-sm sm:text-base">
+                          {{ productsHeroSubtitle || 'มาตรฐานความปลอดภัยระดับสากล' }}
+                        </span>
+                      </h4>
+                      <p class="text-[11px] text-slate-300 font-light line-clamp-2 leading-relaxed">{{ productsHeroDesc || 'เลือกชมและสั่งซื้อเครื่องตัดปอกสายไฟอัตโนมัติ...' }}</p>
+                      <div class="flex items-center gap-1.5 pt-1">
+                        <span class="px-2.5 py-1 rounded bg-emerald-600 text-white text-[10px] font-bold">{{ productsHeroBtn1Text || 'ขอใบเสนอราคาด่วน' }}</span>
+                        <span class="px-2.5 py-1 rounded bg-white/10 text-white text-[10px] font-bold border border-white/15">{{ productsHeroBtn2Text || 'ปรึกษาผู้เชี่ยวชาญ' }}</span>
+                      </div>
                     </div>
 
                     <!-- Custom Badge Indicator -->
@@ -3355,8 +3411,9 @@ onMounted(() => {
                     </div>
                   </div>
 
-                  <!-- Upload Controls -->
-                  <div class="mt-4 space-y-2.5">
+                  <!-- Upload & URL Controls -->
+                  <div class="space-y-2.5">
+                    <label class="block text-xs font-bold text-slate-700">ภาพพื้นหลังส่วนหัว (Background Image)</label>
                     <div class="flex items-center gap-2">
                       <label class="flex-1">
                         <input 
@@ -3388,6 +3445,60 @@ onMounted(() => {
                       placeholder="หรือวาง URL รูปภาพโดยตรง (https://...)" 
                       class="w-full border border-slate-200 rounded-xl px-3 py-1.5 text-xs text-slate-700 font-mono focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                     />
+                  </div>
+
+                  <!-- Typography & Button Form Fields -->
+                  <div class="pt-3 border-t border-slate-100 space-y-3">
+                    <div>
+                      <label class="block text-[11px] font-bold text-slate-600 mb-1">ข้อความแท็กด้านบน (Badge)</label>
+                      <input 
+                        v-model="productsHeroBadge" 
+                        type="text" 
+                        placeholder="เช่น PRODUCT CATALOG" 
+                        class="w-full border border-slate-200 rounded-lg px-3 py-1.5 text-xs text-slate-800 focus:ring-2 focus:ring-emerald-500"
+                      />
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      <div>
+                        <label class="block text-[11px] font-bold text-slate-600 mb-1">หัวข้อหลัก บรรทัดที่ 1</label>
+                        <input 
+                          v-model="productsHeroTitle" 
+                          type="text" 
+                          placeholder="เช่น คลังสินค้าและผลิตภัณฑ์พรีเมียม" 
+                          class="w-full border border-slate-200 rounded-lg px-3 py-1.5 text-xs text-slate-800 focus:ring-2 focus:ring-emerald-500"
+                        />
+                      </div>
+                      <div>
+                        <label class="block text-[11px] font-bold text-slate-600 mb-1">หัวข้อไฮไลต์ บรรทัดที่ 2 (สีเขียว)</label>
+                        <input 
+                          v-model="productsHeroSubtitle" 
+                          type="text" 
+                          placeholder="เช่น มาตรฐานความปลอดภัยระดับสากล" 
+                          class="w-full border border-slate-200 rounded-lg px-3 py-1.5 text-xs text-emerald-600 font-semibold focus:ring-2 focus:ring-emerald-500"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label class="block text-[11px] font-bold text-slate-600 mb-1">คำอธิบายรายละเอียด</label>
+                      <textarea 
+                        v-model="productsHeroDesc" 
+                        rows="2" 
+                        placeholder="คำบรรยายส่วนหัวหน้าสินค้า..."
+                        class="w-full border border-slate-200 rounded-lg px-3 py-1.5 text-xs text-slate-800 focus:ring-2 focus:ring-emerald-500 resize-none"
+                      ></textarea>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+                      <div class="p-2.5 bg-slate-50 rounded-lg border border-slate-200/60 space-y-1.5">
+                        <span class="text-[10px] font-bold text-slate-700 block">ปุ่มที่ 1 (Primary)</span>
+                        <input v-model="productsHeroBtn1Text" type="text" placeholder="ข้อความบนปุ่ม 1" class="w-full border border-slate-200 rounded px-2.5 py-1 text-xs bg-white" />
+                        <input v-model="productsHeroBtn1Url" type="text" placeholder="ลิงก์ URL ปุ่ม 1 (/quotation)" class="w-full border border-slate-200 rounded px-2.5 py-1 text-[11px] font-mono bg-white" />
+                      </div>
+                      <div class="p-2.5 bg-slate-50 rounded-lg border border-slate-200/60 space-y-1.5">
+                        <span class="text-[10px] font-bold text-slate-700 block">ปุ่มที่ 2 (Secondary)</span>
+                        <input v-model="productsHeroBtn2Text" type="text" placeholder="ข้อความบนปุ่ม 2" class="w-full border border-slate-200 rounded px-2.5 py-1 text-xs bg-white" />
+                        <input v-model="productsHeroBtn2Url" type="text" placeholder="ลิงก์ URL ปุ่ม 2 (ว่าง = LINE)" class="w-full border border-slate-200 rounded px-2.5 py-1 text-[11px] font-mono bg-white" />
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>

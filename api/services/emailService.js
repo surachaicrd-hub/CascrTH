@@ -27,7 +27,7 @@ const getTransporter = async () => {
                 auth: { user, pass },
                 tls: { rejectUnauthorized: false } // Bypass untrusted certificate issues
             }),
-            fromName: s.smtp_from_name || process.env.SMTP_FROM_NAME || s.store_name || 'STORAGE HOUSE',
+            fromName: s.smtp_from_name || process.env.SMTP_FROM_NAME || s.store_name || 'CR Distribution',
             fromEmail: user
         };
     } catch (e) {
@@ -47,7 +47,7 @@ const getTransporter = async () => {
                 auth: { user, pass },
                 tls: { rejectUnauthorized: false } // Bypass untrusted certificate issues
             }),
-            fromName: process.env.SMTP_FROM_NAME || 'STORAGE HOUSE',
+            fromName: process.env.SMTP_FROM_NAME || 'CR Distribution',
             fromEmail: user
         };
     }
@@ -61,7 +61,7 @@ const getStoreSettings = async () => {
         const s = {};
         for (const r of rows) s[r.setting_key] = r.setting_value;
         return { 
-            storeName: s.store_name || 'STORAGE HOUSE', 
+            storeName: s.store_name || 'CR Distribution', 
             storeLogo: s.store_logo || '', 
             contactEmail: s.contact_email || '',
             contactEmails: s.contact_emails || '',
@@ -71,7 +71,7 @@ const getStoreSettings = async () => {
         };
     } catch (e) {
         return { 
-            storeName: 'STORAGE HOUSE', 
+            storeName: 'CR Distribution', 
             storeLogo: '', 
             contactEmail: '', 
             contactEmails: '',

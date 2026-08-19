@@ -2,9 +2,11 @@
 import { RouterView, useRouter, useRoute } from 'vue-router'
 import { ref, onMounted, watch, onBeforeUnmount } from 'vue'
 import { useNotifications } from '../../composables/useNotifications'
+import { useSettingsStore } from '../../stores/settingsStore'
 
 const router = useRouter()
 const route = useRoute()
+const settingsStore = useSettingsStore()
 const adminUser = ref(null)
 const showNotifPanel = ref(false)
 const showProfilePanel = ref(false)
@@ -191,9 +193,14 @@ function goTo(path) {
               บริการและโซลูชัน
             </router-link>
 
-            <router-link to="/admin/projects" active-class="bg-emerald-600/10 text-emerald-500 font-bold" class="flex items-center px-4 py-2.5 text-sm font-medium rounded-xl text-gray-400 hover:bg-gray-800 hover:text-white transition-colors">
-              <svg class="w-5 h-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/></svg>
-              ผลงานและโครงการ
+            <router-link to="/admin/projects" active-class="bg-emerald-600/10 text-emerald-500 font-bold" class="flex items-center justify-between px-4 py-2.5 text-sm font-medium rounded-xl text-gray-400 hover:bg-gray-800 hover:text-white transition-colors">
+              <div class="flex items-center min-w-0">
+                <svg class="w-5 h-5 mr-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/></svg>
+                <span class="truncate">ผลงานและโครงการ</span>
+              </div>
+              <span v-if="!settingsStore.isProjectsEnabled" class="text-[9px] font-black px-1.5 py-0.5 rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/30 shrink-0 ml-1.5">
+                ปิดแสดงผล
+              </span>
             </router-link>
 
             <router-link to="/admin/articles" active-class="bg-emerald-600/10 text-emerald-500 font-bold" class="flex items-center px-4 py-2.5 text-sm font-medium rounded-xl text-gray-400 hover:bg-gray-800 hover:text-white transition-colors">

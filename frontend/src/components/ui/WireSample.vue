@@ -326,59 +326,104 @@ const sampleTitle = computed(() => {
         <rect x="186" y="12.5" width="14" height="3" rx="0.5" fill="url(#copper-grad)" />
       </g>
 
-      <!-- 12. Flat Ribbon Fanned Out Split (สายแพแบนแยกเส้นหลายสาย - C371AG, C373AG) -->
-      <g v-else-if="sampleType === 'flat_ribbon_split' || sampleType === 'ribbon_split'">
-        <!-- Left 4 Strands -->
-        <rect x="0" y="0.5" width="10" height="2.5" fill="url(#copper-grad)" />
-        <path d="M10 1.8 Q32 2, 55 5.5" stroke="#475569" stroke-width="2.5" fill="none" />
+      <!-- 12. Flat Ribbon Fanned Out Split (สายแพแบนแยกเส้นหลายสาย - Slit & Strip Both Ends) -->
+      <g v-else-if="sampleType === 'flat_ribbon_split' || sampleType === 'ribbon_split' || sampleType === 'flat_ribbon_slit'">
+        <!-- Left 4 Flared Strands -->
+        <!-- Strand 1 (Top) -->
+        <line x1="1" y1="2.2" x2="16" y2="4.0" stroke="url(#copper-grad)" stroke-width="2.1" stroke-linecap="round" />
+        <line x1="16" y1="4.0" x2="36" y2="5.5" stroke="#475569" stroke-width="2.7" stroke-linecap="round" />
         
-        <rect x="0" y="5.5" width="10" height="2.5" fill="url(#copper-grad)" />
-        <path d="M10 6.8 Q32 6.5, 55 8.5" stroke="#475569" stroke-width="2.5" fill="none" />
-        
-        <rect x="0" y="12" width="10" height="2.5" fill="url(#copper-grad)" />
-        <path d="M10 13.2 Q32 13.5, 55 11.5" stroke="#475569" stroke-width="2.5" fill="none" />
-        
-        <rect x="0" y="17" width="10" height="2.5" fill="url(#copper-grad)" />
-        <path d="M10 18.2 Q32 18, 55 14.5" stroke="#475569" stroke-width="2.5" fill="none" />
+        <!-- Strand 2 (Upper-Mid) -->
+        <line x1="3" y1="6.2" x2="18" y2="7.0" stroke="url(#copper-grad)" stroke-width="2.1" stroke-linecap="round" />
+        <line x1="18" y1="7.0" x2="36" y2="8.4" stroke="#475569" stroke-width="2.7" stroke-linecap="round" />
 
-        <!-- Center Ribbon -->
-        <rect x="55" y="4.5" width="90" height="11" rx="1" fill="url(#grey-jacket-grad)" />
-        <line x1="55" y1="7.2" x2="145" y2="7.2" stroke="#1e293b" stroke-width="0.8" />
-        <line x1="55" y1="10" x2="145" y2="10" stroke="#1e293b" stroke-width="0.8" />
-        <line x1="55" y1="12.8" x2="145" y2="12.8" stroke="#1e293b" stroke-width="0.8" />
+        <!-- Strand 3 (Lower-Mid) -->
+        <line x1="3" y1="13.8" x2="18" y2="13.0" stroke="url(#copper-grad)" stroke-width="2.1" stroke-linecap="round" />
+        <line x1="18" y1="13.0" x2="36" y2="11.6" stroke="#475569" stroke-width="2.7" stroke-linecap="round" />
 
-        <!-- Right 4 Strands -->
-        <path d="M145 5.5 Q168 2, 190 1.8" stroke="#475569" stroke-width="2.5" fill="none" />
-        <rect x="190" y="0.5" width="10" height="2.5" fill="url(#copper-grad)" />
-        
-        <path d="M145 8.5 Q168 6.5, 190 6.8" stroke="#475569" stroke-width="2.5" fill="none" />
-        <rect x="190" y="5.5" width="10" height="2.5" fill="url(#copper-grad)" />
-        
-        <path d="M145 11.5 Q168 13.5, 190 13.2" stroke="#475569" stroke-width="2.5" fill="none" />
-        <rect x="190" y="12" width="10" height="2.5" fill="url(#copper-grad)" />
-        
-        <path d="M145 14.5 Q168 18, 190 18.2" stroke="#475569" stroke-width="2.5" fill="none" />
-        <rect x="190" y="17" width="10" height="2.5" fill="url(#copper-grad)" />
+        <!-- Strand 4 (Bottom) -->
+        <line x1="1" y1="17.8" x2="16" y2="16.0" stroke="url(#copper-grad)" stroke-width="2.1" stroke-linecap="round" />
+        <line x1="16" y1="16.0" x2="36" y2="14.5" stroke="#475569" stroke-width="2.7" stroke-linecap="round" />
+
+        <!-- Center Ribbon Body (4 bonded conductors) -->
+        <rect x="36" y="3.8" width="128" height="12.4" rx="0.8" fill="url(#black-jacket-grad)" />
+        <line x1="36" y1="6.9" x2="164" y2="6.9" stroke="#1e293b" stroke-width="0.7" />
+        <line x1="36" y1="10.0" x2="164" y2="10.0" stroke="#1e293b" stroke-width="0.7" />
+        <line x1="36" y1="13.1" x2="164" y2="13.1" stroke="#1e293b" stroke-width="0.7" />
+        <line x1="36" y1="4.8" x2="164" y2="4.8" stroke="#64748b" stroke-width="0.6" opacity="0.6" />
+
+        <!-- Right 4 Flared Strands (Symmetric) -->
+        <!-- Strand 1 (Top) -->
+        <line x1="164" y1="5.5" x2="184" y2="4.0" stroke="#475569" stroke-width="2.7" stroke-linecap="round" />
+        <line x1="184" y1="4.0" x2="199" y2="2.2" stroke="url(#copper-grad)" stroke-width="2.1" stroke-linecap="round" />
+
+        <!-- Strand 2 (Upper-Mid) -->
+        <line x1="164" y1="8.4" x2="182" y2="7.0" stroke="#475569" stroke-width="2.7" stroke-linecap="round" />
+        <line x1="182" y1="7.0" x2="197" y2="6.2" stroke="url(#copper-grad)" stroke-width="2.1" stroke-linecap="round" />
+
+        <!-- Strand 3 (Lower-Mid) -->
+        <line x1="164" y1="11.6" x2="182" y2="13.0" stroke="#475569" stroke-width="2.7" stroke-linecap="round" />
+        <line x1="182" y1="13.0" x2="197" y2="13.8" stroke="url(#copper-grad)" stroke-width="2.1" stroke-linecap="round" />
+
+        <!-- Strand 4 (Bottom) -->
+        <line x1="164" y1="14.5" x2="184" y2="16.0" stroke="#475569" stroke-width="2.7" stroke-linecap="round" />
+        <line x1="184" y1="16.0" x2="199" y2="17.8" stroke="url(#copper-grad)" stroke-width="2.1" stroke-linecap="round" />
       </g>
 
-      <!-- 13. Flat Ribbon Grey (สายแพแบนสีเทา ปอกปลาย 2 ด้าน - C371AG, C373AG) -->
+      <!-- 13. Flat Ribbon Semi-Strip / Slug Retention (สายแพแบน กึ่งปอกคงปลอกปลาย 2 ด้าน) -->
+      <g v-else-if="sampleType === 'flat_ribbon_semi_strip' || sampleType === 'ribbon_semi_strip' || sampleType === 'flat_ribbon_slug' || sampleType === 'flat_semi_strip' || sampleType === 'ribbon_semi'">
+        <!-- Left Slug / Cap (Insulation piece at tip) -->
+        <rect x="0" y="3.8" width="16" height="12.4" rx="0.5" fill="url(#black-jacket-grad)" />
+        <line x1="0" y1="6.9" x2="16" y2="6.9" stroke="#1e293b" stroke-width="0.7" />
+        <line x1="0" y1="10.0" x2="16" y2="10.0" stroke="#1e293b" stroke-width="0.7" />
+        <line x1="0" y1="13.1" x2="16" y2="13.1" stroke="#1e293b" stroke-width="0.7" />
+        <line x1="0" y1="4.8" x2="16" y2="4.8" stroke="#64748b" stroke-width="0.6" opacity="0.6" />
+
+        <!-- Left Exposed Copper Conductors (4 parallel cores) -->
+        <rect x="16" y="4.5" width="22" height="2.0" fill="url(#copper-grad)" />
+        <rect x="16" y="7.6" width="22" height="2.0" fill="url(#copper-grad)" />
+        <rect x="16" y="10.7" width="22" height="2.0" fill="url(#copper-grad)" />
+        <rect x="16" y="13.8" width="22" height="2.0" fill="url(#copper-grad)" />
+
+        <!-- Center Ribbon Body (Main Jacket) -->
+        <rect x="38" y="3.8" width="124" height="12.4" rx="0.5" fill="url(#black-jacket-grad)" />
+        <line x1="38" y1="6.9" x2="162" y2="6.9" stroke="#1e293b" stroke-width="0.7" />
+        <line x1="38" y1="10.0" x2="162" y2="10.0" stroke="#1e293b" stroke-width="0.7" />
+        <line x1="38" y1="13.1" x2="162" y2="13.1" stroke="#1e293b" stroke-width="0.7" />
+        <line x1="38" y1="4.8" x2="162" y2="4.8" stroke="#64748b" stroke-width="0.6" opacity="0.6" />
+
+        <!-- Right Exposed Copper Conductors (4 parallel cores) -->
+        <rect x="162" y="4.5" width="22" height="2.0" fill="url(#copper-grad)" />
+        <rect x="162" y="7.6" width="22" height="2.0" fill="url(#copper-grad)" />
+        <rect x="162" y="10.7" width="22" height="2.0" fill="url(#copper-grad)" />
+        <rect x="162" y="13.8" width="22" height="2.0" fill="url(#copper-grad)" />
+
+        <!-- Right Slug / Cap (Insulation piece at tip) -->
+        <rect x="184" y="3.8" width="16" height="12.4" rx="0.5" fill="url(#black-jacket-grad)" />
+        <line x1="184" y1="6.9" x2="200" y2="6.9" stroke="#1e293b" stroke-width="0.7" />
+        <line x1="184" y1="10.0" x2="200" y2="10.0" stroke="#1e293b" stroke-width="0.7" />
+        <line x1="184" y1="13.1" x2="200" y2="13.1" stroke="#1e293b" stroke-width="0.7" />
+        <line x1="184" y1="4.8" x2="200" y2="4.8" stroke="#64748b" stroke-width="0.6" opacity="0.6" />
+      </g>
+
+      <!-- 14. Flat Ribbon Grey (สายแพแบนสีเทา ปอกปลาย 2 ด้าน - C371AG, C373AG) -->
       <g v-else-if="sampleType === 'flat_ribbon_grey' || sampleType === 'ribbon_grey' || sampleType === 'flat_ribbon_strip'">
         <!-- Left 4 Copper Pins -->
-        <rect x="0" y="3" width="16" height="2" rx="0.5" fill="url(#copper-grad)" />
-        <rect x="0" y="6.5" width="16" height="2" rx="0.5" fill="url(#copper-grad)" />
-        <rect x="0" y="11.5" width="16" height="2" rx="0.5" fill="url(#copper-grad)" />
-        <rect x="0" y="15" width="16" height="2" rx="0.5" fill="url(#copper-grad)" />
+        <rect x="0" y="4.5" width="20" height="2.0" fill="url(#copper-grad)" />
+        <rect x="0" y="7.6" width="20" height="2.0" fill="url(#copper-grad)" />
+        <rect x="0" y="10.7" width="20" height="2.0" fill="url(#copper-grad)" />
+        <rect x="0" y="13.8" width="20" height="2.0" fill="url(#copper-grad)" />
         <!-- Main Ribbon Body -->
-        <rect x="16" y="2" width="168" height="16" rx="1" fill="url(#grey-jacket-grad)" />
-        <line x1="16" y1="5.5" x2="184" y2="5.5" stroke="#1e293b" stroke-width="0.8" />
-        <line x1="16" y1="10" x2="184" y2="10" stroke="#1e293b" stroke-width="0.8" />
-        <line x1="16" y1="14.5" x2="184" y2="14.5" stroke="#1e293b" stroke-width="0.8" />
-        <line x1="16" y1="3.5" x2="184" y2="3.5" stroke="#94a3b8" stroke-width="0.6" opacity="0.6" />
+        <rect x="20" y="3.8" width="160" height="12.4" rx="0.5" fill="url(#grey-jacket-grad)" stroke="#94a3b8" stroke-width="0.5" />
+        <line x1="20" y1="6.9" x2="180" y2="6.9" stroke="#1e293b" stroke-width="0.7" />
+        <line x1="20" y1="10.0" x2="180" y2="10.0" stroke="#1e293b" stroke-width="0.7" />
+        <line x1="20" y1="13.1" x2="180" y2="13.1" stroke="#1e293b" stroke-width="0.7" />
+        <line x1="20" y1="4.8" x2="180" y2="4.8" stroke="#ffffff" stroke-width="0.6" opacity="0.8" />
         <!-- Right 4 Copper Pins -->
-        <rect x="184" y="3" width="16" height="2" rx="0.5" fill="url(#copper-grad)" />
-        <rect x="184" y="6.5" width="16" height="2" rx="0.5" fill="url(#copper-grad)" />
-        <rect x="184" y="11.5" width="16" height="2" rx="0.5" fill="url(#copper-grad)" />
-        <rect x="184" y="15" width="16" height="2" rx="0.5" fill="url(#copper-grad)" />
+        <rect x="180" y="4.5" width="20" height="2.0" fill="url(#copper-grad)" />
+        <rect x="180" y="7.6" width="20" height="2.0" fill="url(#copper-grad)" />
+        <rect x="180" y="10.7" width="20" height="2.0" fill="url(#copper-grad)" />
+        <rect x="180" y="13.8" width="20" height="2.0" fill="url(#copper-grad)" />
       </g>
 
       <!-- 14. Flat Ribbon Rainbow (สายแพแบน สีรุ้ง ปอกปลาย 2 ด้าน) -->

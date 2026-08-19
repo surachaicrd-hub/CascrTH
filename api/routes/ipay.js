@@ -105,32 +105,71 @@ router.post('/checkout', async (req, res) => {
 
 /**
  * POST /api/payments/ipay/success
- * Bank redirects here when payment succeeds
+ * Bank redirects user's browser here when payment process finishes
  */
 router.post('/success', async (req, res) => {
     try {
-        // Bangkok Bank iPay usually sends parameters back via POST
-        const { orderRef } = req.body;
+        const { orderRef, successcode, AuthResCode, prc, secureHash, src, amt, cur, payRef } = req.body;
+        console.log('[iPay Success Callback] Received browser callback:', req.body);
 
         if (orderRef) {
             const [orders] = await db.query('SELECT payment_status FROM orders WHERE id = ?', [orderRef]);
             if (orders.length === 0) {
-                return res.redirect(`${FRONTEND_URL}/checkout-failed?error=order_not_found`);
+                return res.redirect(`${FRONTEND_URL}/order-success/not-found?error=order_not_found`);
             }
-            // Only update if current payment status is pending
-            if (orders[0].payment_status === 'pending') {
+
+            // Retrieve secure hash configuration
+            const [settingsRows] = await db.query('SELECT setting_value FROM settings WHERE setting_key = "payment_ipay_secure_secret"');
+            const secureSecret = settingsRows.length > 0 ? settingsRows[0].setting_value : null;
+
+            let isVerified = true;
+            if (secureSecret) {
+                if (!secureHash) {
+                    console.warn('[iPay Success Callback] No secureHash in browser callback. Awaiting webhook confirmation.');
+                    isVerified = false;
+                } else {
+                    const crypto = require('crypto');
+                    const rawAmount = amt || '';
+                    const currency = cur || '';
+                    const hashPayload = [
+                        src || '',
+                        prc || '',
+                        successcode || '',
+                        orderRef,
+                        payRef || '',
+                        currency,
+                        rawAmount,
+                        AuthResCode || '',
+                        secureSecret
+                    ].join('|');
+
+                    const calculatedHashSha256 = crypto.createHash('sha256').update(hashPayload).digest('hex');
+                    const calculatedHashSha1 = crypto.createHash('sha1').update(hashPayload).digest('hex');
+
+                    isVerified = (secureHash === calculatedHashSha256) || (secureHash === calculatedHashSha1);
+                    if (!isVerified) {
+                        console.warn('[iPay Success Callback] Invalid secureHash in browser callback.');
+                    }
+                }
+            }
+
+            const isSuccess = (successcode === '0' || prc === '0' || AuthResCode === '00');
+
+            // Only mark as paid if verified and confirmed success
+            if (isVerified && isSuccess && orders[0].payment_status === 'pending') {
                 await db.query(
                     "UPDATE orders SET payment_status = 'paid', order_status = 'processing', updated_at = NOW() WHERE id = ?",
                     [orderRef]
                 );
+                sendOrderStatusUpdate(orderRef, 'processing', 'paid').catch(e => console.error('[iPay Callback Email Error]:', e.message));
             }
         }
 
-        // Redirect browser to the frontend success page
+        // Redirect browser to the frontend order success page
         res.redirect(`${FRONTEND_URL}/order-success/${orderRef}`);
     } catch (err) {
         console.error('iPay Success Callback Error:', err);
-        res.redirect(`${FRONTEND_URL}/checkout-failed?error=internal_error`);
+        res.redirect(`${FRONTEND_URL}/`);
     }
 });
 

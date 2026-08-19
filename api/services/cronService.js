@@ -12,11 +12,11 @@ const runAbandonedCartRecovery = async () => {
         // Find users who have items in their cart that haven't been updated for > 24 hours
         // and haven't received an abandoned cart email yet.
         const [rows] = await db.query(`
-            SELECT c.user_id, u.email, u.first_name, c.updated_at
+            SELECT c.user_id, u.email, u.first_name, MAX(c.updated_at) as last_updated
             FROM cart_items c
             JOIN users u ON c.user_id = u.id
             WHERE c.abandoned_email_sent = 0
-            GROUP BY c.user_id, u.email, u.first_name, c.updated_at
+            GROUP BY c.user_id, u.email, u.first_name
             HAVING MAX(c.updated_at) < NOW() - INTERVAL 1 DAY
         `);
 
