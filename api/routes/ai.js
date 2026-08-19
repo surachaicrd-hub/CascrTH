@@ -706,58 +706,183 @@ router.post('/generate-policy', verifyAdmin, async (req, res) => {
             return res.status(400).json({ success: false, error: 'Prompt or policy type is required' });
         }
 
-        let storeName = 'CR Distribution';
-        let companyLegalName = 'บริษัท ซีอาร์ ดิสทริบิวชั่น จำกัด';
-        let storeEmail = 'contact@cascr.com';
-        let storePhone = '02-xxx-xxxx';
-        let storeAddress = '';
+        // 1. Fetch All Corporate Information (About Us & Contact Us) from Database
+        let sMap = {};
         try {
-            const [sRows] = await db.query("SELECT setting_key, setting_value FROM settings WHERE setting_key IN ('store_name', 'contact_company_name', 'company_legal_name', 'contact_emails', 'contact_phones', 'contact_address', 'store_address')");
-            const sMap = {};
+            const [sRows] = await db.query(`
+                SELECT setting_key, setting_value FROM settings 
+                WHERE setting_key LIKE 'about_%' 
+                   OR setting_key LIKE 'contact_%' 
+                   OR setting_key LIKE 'store_%' 
+                   OR setting_key LIKE 'company_%'
+            `);
             sRows.forEach(r => { sMap[r.setting_key] = r.setting_value; });
-            storeName = sMap['store_name'] || sMap['contact_company_name'] || 'CR Distribution';
-            companyLegalName = sMap['company_legal_name'] || sMap['contact_company_name'] || 'บริษัท ซีอาร์ ดิสทริบิวชั่น จำกัด';
-            storeAddress = sMap['store_address'] || sMap['contact_address'] || '';
-            if (sMap['contact_emails']) {
-                try {
-                    const parsed = JSON.parse(sMap['contact_emails']);
-                    if (Array.isArray(parsed) && parsed.length > 0) storeEmail = (typeof parsed[0] === 'string' ? parsed[0] : parsed[0]?.value) || storeEmail;
-                } catch(e) {}
-            }
-            if (sMap['contact_phones']) {
-                try {
-                    const parsed = JSON.parse(sMap['contact_phones']);
-                    if (Array.isArray(parsed) && parsed.length > 0) storePhone = (typeof parsed[0] === 'string' ? parsed[0] : parsed[0]?.value) || storePhone;
-                } catch(e) {}
-            }
-        } catch (e) {}
+        } catch (e) {
+            console.error('Failed to load settings for policy generation:', e);
+        }
+
+        const companyLegalName = sMap['company_legal_name'] || sMap['company_name'] || sMap['contact_company_name'] || 'บริษัท ซีอาร์ ดิสทริบิวชั่น จำกัด';
+        const storeName = sMap['store_name'] || 'CR Distribution (Thailand) - เครื่องตัดปอกสายไฟ KODERA';
+        const storeTagline = sMap['store_tagline'] || 'ตัวแทนจำหน่ายเครื่องตัดปอกสายไฟ KODERA อย่างเป็นทางการในประเทศไทย';
+        const storeDescription = sMap['store_description'] || 'ผู้นำเข้าและจำหน่ายเครื่องตัดปอกสายไฟอัตโนมัติ KODERA เครื่องย้ำคอร์เนคเตอร์ และโซลูชันระบบ Wire Harness ครบวงจร พร้อมบริการติดตั้งและหลังการขายระดับมืออาชีพ';
+        const storeUrl = sMap['store_url'] || 'https://เครื่องตัดปอกย้ำสายไฟ.com';
+        const storeAddress = sMap['contact_address'] || sMap['store_address'] || '75/110 หมู่ 11 ตำบลคลองหนึ่ง อำเภอคลองหลวง จังหวัดปทุมธานี 12120';
+        const workingHours = sMap['contact_working_hours'] || 'จันทร์ - ศุกร์ 08:00 - 17:00 น.';
+        const taxId = sMap['store_tax_id'] || '';
+
+        // Parse Contact Phones
+        let phoneList = [];
+        if (sMap['contact_phones']) {
+            try {
+                const parsed = JSON.parse(sMap['contact_phones']);
+                if (Array.isArray(parsed)) {
+                    phoneList = parsed.map(p => typeof p === 'string' ? p : `${p.name || 'โทร'}: ${p.value}`).filter(Boolean);
+                }
+            } catch(e) {}
+        }
+        if (phoneList.length === 0) {
+            if (sMap['contact_phone']) phoneList.push(`สำนักงาน: ${sMap['contact_phone']}`);
+            if (sMap['contact_phone2']) phoneList.push(`เบอร์โทร: ${sMap['contact_phone2']}`);
+            if (sMap['store_phone']) phoneList.push(`เบอร์หลัก: ${sMap['store_phone']}`);
+        }
+        const phoneString = phoneList.length > 0 ? phoneList.join(', ') : '02-9081348-9, 089-1993873, 090-8865389';
+
+        // Parse Contact Emails
+        let emailList = [];
+        if (sMap['contact_emails']) {
+            try {
+                const parsed = JSON.parse(sMap['contact_emails']);
+                if (Array.isArray(parsed)) {
+                    emailList = parsed.map(e => typeof e === 'string' ? e : `${e.name || 'อีเมล'}: ${e.value}`).filter(Boolean);
+                }
+            } catch(e) {}
+        }
+        if (emailList.length === 0) {
+            if (sMap['contact_email']) emailList.push(sMap['contact_email']);
+            if (sMap['contact_email2']) emailList.push(sMap['contact_email2']);
+        }
+        const emailString = emailList.length > 0 ? emailList.join(', ') : 'sales@crdistribution.co.th, service@crdistribution.co.th';
+
+        // Parse Contact Lines
+        let lineList = [];
+        if (sMap['contact_lines']) {
+            try {
+                const parsed = JSON.parse(sMap['contact_lines']);
+                if (Array.isArray(parsed)) {
+                    lineList = parsed.map(l => typeof l === 'string' ? l : `${l.name || 'Line'}: ${l.value || ''} (${l.url || ''})`).filter(Boolean);
+                }
+            } catch(e) {}
+        }
+        if (lineList.length === 0 && sMap['contact_line_id']) {
+            lineList.push(`Line ID: ${sMap['contact_line_id']}`);
+        }
+        const lineString = lineList.length > 0 ? lineList.join(', ') : 'Line ID: @crdistribution';
+
+        // About Us highlights
+        const aboutStory = [sMap['about_story_p1'], sMap['about_story_p2'], sMap['about_vision_desc']].filter(Boolean).join(' ') || 'ผู้นำเข้าและจำหน่ายเครื่องตัดปอกสายไฟ KODERA จากประเทศญี่ปุ่น ประสบการณ์และความเชี่ยวชาญกว่า 20 ปี พร้อมทีมวิศวกรผู้เชี่ยวชาญ On-site Service ทั่วประเทศ';
+
+        // Policy Type specific prompt instructions
+        let policySpecificInstruction = '';
+        const policyType = type || 'privacy';
+
+        if (policyType === 'privacy') {
+            policySpecificInstruction = `
+เอกสาร: "นโยบายความเป็นส่วนตัว (Privacy Policy)" ตาม พ.ร.บ. คุ้มครองข้อมูลส่วนบุคคล พ.ศ. 2562 (PDPA)
+โครงสร้างเนื้อหาที่ต้องมี:
+1. บทนำและเจตนารมณ์: ระบุชื่อผู้ควบคุมข้อมูลส่วนบุคคล (${companyLegalName}) และเว็บไซต์ (${storeUrl})
+2. ข้อมูลส่วนบุคคลที่มีการเก็บรวบรวม: ข้อมูลระบุตัวตน (ชื่อ-นามสกุล, ชื่อบริษัท/โรงงาน), ข้อมูลการติดต่อ (เบอร์โทร, อีเมล, ที่อยู่จัดส่ง/ติดตั้ง), ข้อมูลการสั่งซื้อเครื่องจักร KODERA และประวัติการขอใบเสนอราคา
+3. วัตถุประสงค์ในการประมวลผลข้อมูล: การออกใบเสนอราคา, การจัดทำสัญญาซื้อขาย, การส่งมอบและติดตั้งเครื่องจักรหน้างาน, การฝึกอบรม, การรับประกันและบริการหลังการขาย
+4. ฐานในการประมวลผลข้อมูลตามกฎหมาย (Lawful Basis)
+5. ระยะเวลาในการเก็บรักษาข้อมูลส่วนบุคคล (Data Retention Period: 5-10 ปีตามความจำเป็นทางธุรกิจและกฎหมายภาษี)
+6. การเปิดเผยหรือถ่ายโอนข้อมูล (เช่น ผู้ให้บริการขนส่งเครื่องจักร, สถาบันการเงิน)
+7. มาตรการรักษาความปลอดภัยของข้อมูลส่วนบุคคล (Technical and Organizational Measures)
+8. สิทธิของเจ้าของข้อมูลส่วนบุคคลตาม PDPA (สิทธิเข้าถึง, ขอแก้ไข, ขอลบ, ขอระงับ, ถอนความยินยอม)
+9. ช่องทางการติดต่อเจ้าหน้าที่คุ้มครองข้อมูลส่วนบุคคล (DPO / Data Controller) โดยระบุชื่อบริษัท: ${companyLegalName}, ที่อยู่: ${storeAddress}, เบอร์โทรศัพท์: ${phoneString}, อีเมล: ${emailString}, Line: ${lineString}, เวลาทำการ: ${workingHours}
+`;
+        } else if (policyType === 'terms') {
+            policySpecificInstruction = `
+เอกสาร: "เงื่อนไขและข้อตกลงการให้บริการ (Terms of Service)"
+โครงสร้างเนื้อหาที่ต้องมี:
+1. ขอบเขตการให้บริการ: การจัดจำหน่ายเครื่องตัดปอกสายไฟอัตโนมัติ KODERA, เครื่องย้ำเทอร์มินอล, อุปกรณ์ Wire Harness, ใบมีด และอะไหล่แท้จากประเทศญี่ปุ่น พร้อมบริการติดตั้งและฝึกอบรม
+2. เงื่อนไขการสั่งซื้อและเสนอราคา (Quotation & Purchase Order): ความถูกต้องของใบเสนอราคา, การยืนยันคำสั่งซื้อ, การชำระเงิน, และการออกใบกำกับภาษีถูกต้องตามกฎหมาย
+3. การส่งมอบ การติดตั้ง และการทดสอบเครื่องจักร (Delivery, On-site Installation & Testing)
+4. การรับประกันและบริการหลังการขาย (Warranty & Support): อ้างอิงเงื่อนไขการรับประกันมาตรฐาน 1 ปี
+5. ทรัพย์สินทางปัญญา (Intellectual Property): เครื่องหมายการค้า KODERA, เอกสารคู่มือ, รูปภาพ, และเนื้อหาบนเว็บไซต์เป็นลิขสิทธิ์ของบริษัทและเจ้าของสิทธิ์
+6. ข้อจำกัดความรับผิด (Limitation of Liability) และเหตุสุดวิสัย (Force Majeure)
+7. กฎหมายที่ใช้บังคับและเขตอำนาจศาล (Governing Law): กฎหมายแห่งราชอาณาจักรไทย
+8. ข้อมูลติดต่ออย่างเป็นทางการ: ${companyLegalName}, ที่อยู่: ${storeAddress}, เบอร์โทรศัพท์: ${phoneString}, อีเมล: ${emailString}, เวลาทำการ: ${workingHours}
+`;
+        } else if (policyType === 'cookie') {
+            policySpecificInstruction = `
+เอกสาร: "นโยบายการใช้คุกกี้ (Cookie Policy)"
+โครงสร้างเนื้อหาที่ต้องมี:
+1. คุกกี้คืออะไร และทำไมเว็บไซต์ ${storeUrl} ของ ${companyLegalName} จึงจำเป็นต้องใช้คุกกี้
+2. ประเภทของคุกกี้ที่ใช้งานบนเว็บไซต์:
+   - คุกกี้ที่จำเป็นอย่างยิ่ง (Strictly Necessary Cookies): สำหรับระบบความปลอดภัย, ตะกร้าสินค้า, การเข้าสู่ระบบ
+   - คุกกี้เพื่อการวิเคราะห์และวัดผล (Analytics / Performance Cookies): สำหรับสถิติผู้เข้าชมเพื่อนำไปปรับปรุงประสิทธิภาพ
+   - คุกกี้เพื่อการทำงานของเว็บไซต์ (Functional Cookies): จดจำสินค้าที่ดูล่าสุด และการเปรียบเทียบสเปกเครื่องจักร
+3. การตั้งค่าและการจัดการคุกกี้: วิธีการปฏิเสธหรือลบคุกกี้ผ่านเว็บบราวเซอร์หลัก (Google Chrome, Safari, Microsoft Edge, Firefox)
+4. การแก้ไขเปลี่ยนแปลงนโยบายคุกกี้
+5. ช่องทางการติดต่อสอบถามเรื่องคุกกี้: ${companyLegalName}, เบอร์โทรศัพท์: ${phoneString}, อีเมล: ${emailString}
+`;
+        } else if (policyType === 'warranty') {
+            policySpecificInstruction = `
+เอกสาร: "นโยบายและเงื่อนไขการรับประกันเครื่องจักร (Machine Warranty Policy)"
+โครงสร้างเนื้อหาที่ต้องมี:
+1. ขอบเขตการรับประกัน (Warranty Coverage):
+   - รับประกันตัวเครื่องตัดปอกสายไฟ KODERA และระบบควบคุมไฟฟ้า/เซอร์โวมอเตอร์ 1 ปีเต็ม นับตั้งแต่วันส่งมอบและผ่านการทดสอบหน้างาน
+   - บริการตรวจสอบ ซ่อมแซม และ On-site Service โดยทีมวิศวกรผู้เชี่ยวชาญของ ${companyLegalName}
+   - ใช้อะไหล่แท้มาตรฐานตรงรุ่นจากโรงงานผู้ผลิต KODERA ประเทศญี่ปุ่น
+2. สิทธิประโยชน์และการบริการหลังการขาย:
+   - การอบรมการใช้งานและบำรุงรักษาเบื้องต้นให้แก่ทีมช่างของผู้ซื้อ
+   - ให้คำปรึกษาทางเทคนิคตลอดอายุการใช้งาน
+3. ขั้นตอนการแจ้งซ่อมหรือขอรับบริการเคลมประกัน (Claim Procedure):
+   - แจ้งรุ่นเครื่องจักร (Model), หมายเลขเครื่อง (Serial No.), และอาการผิดปกติ
+   - ติดต่อฝ่ายวิศวกรรมและบริการ: ${phoneString}, อีเมล: ${emailString}, Line: ${lineString} (เวลาทำการ: ${workingHours})
+4. ข้อยกเว้นการรับประกัน (Warranty Exclusions):
+   - ชิ้นส่วนสิ้นเปลืองตามอายุการใช้งาน (Consumables) เช่น ใบมีดตัดปอก (Blades), ลูกกลิ้งยาง/ยูรีเทน (Feed Rollers), สายพานลำเลียง ซึ่งขึ้นอยู่กับปริมาณและประเภทสายไฟที่ใช้งาน
+   - ความเสียหายที่เกิดจากการใช้งานผิดประเภท, ใช้งานเกินกำลังสเปกเครื่อง, การตัดสายไฟที่มีโลหะแปลกปลอม
+   - การดัดแปลง แก้ไข หรือซ่อมแซมโดยบุคคลที่ไม่ได้รับอนุญาตจาก ${companyLegalName}
+   - ความเสียหายจากปัจจัยภายนอก เช่น ไฟตก ไฟกระชาก ฟ้าผ่า หรือภัยธรรมชาติ
+5. ช่องทางติดต่อฝ่ายบริการหลังการขาย: ${companyLegalName}, ที่อยู่: ${storeAddress}, เบอร์โทรศัพท์: ${phoneString}, อีเมล: ${emailString}, Line: ${lineString}
+`;
+        }
 
         const finalPrompt = `
-You are a legal counsel, compliance officer, and corporate policy writer in Thailand with expertise in Thai Commercial Law, PDPA (Personal Data Protection Act B.E. 2562), E-commerce regulations, and industrial machinery warranty standards.
+คุณคือที่ปรึกษากฎหมาย ผู้เชี่ยวชาญด้าน PDPA และนักเขียนเอกสารทางกฎหมายระดับองค์กร (Enterprise Legal Counsel & Compliance Expert) ประจำประเทศไทย
+กรุณาร่างเอกสารฉบับสมบูรณ์สำหรับเว็บไซต์และธุรกิจตามข้อมูลจริงของบริษัท ดังนี้:
 
-Company Information:
-- Company Legal Name: ${companyLegalName}
-- Brand Name: ${storeName}
-- Products & Services: Importer and distributor of KODERA wire cutting and stripping machinery, wire harness processing equipment, spare parts, and technical on-site maintenance services in Thailand.
-- Contact Email: ${storeEmail}
-- Contact Phone: ${storePhone}
-- Address: ${storeAddress}
+ข้อมูลองค์กร (Corporate Data):
+- นิติบุคคล (Legal Name): ${companyLegalName}
+- ชื่อแบรนด์/ร้านค้า: ${storeName}
+- สโลแกน/จุดเด่น: ${storeTagline}
+- ลักษณะธุรกิจ: ${storeDescription}
+- ประวัติและความเชี่ยวชาญ: ${aboutStory}
+- ที่อยู่สำนักงาน/คลังสินค้า: ${storeAddress}
+- เลขประจำตัวผู้เสียภาษี: ${taxId || 'ตามที่ระบุในใบกำกับภาษี'}
+- เบอร์โทรศัพท์ติดต่อ: ${phoneString}
+- อีเมลติดต่อ: ${emailString}
+- LINE Official: ${lineString}
+- เว็บไซต์: ${storeUrl}
+- เวลาทำการ: ${workingHours}
 
-Task / Instructions:
-${customPrompt || userPrompt || `เขียนเนื้อหาเอกสาร ${type || 'นโยบาย'} ที่ถูกต้อง สมบูรณ์ และเป็นทางการ`}
+ข้อกำหนดเฉพาะของเอกสารประเภทนี้:
+${policySpecificInstruction}
 
-Output Requirements:
-1. Write the full, professional, comprehensive legal document in THAI.
-2. Structure the output as clean, semantic HTML designed for a Rich Text Editor (CKEditor).
-3. Use HTML tags:
-   - <h2> for main section titles
-   - <h3> for subsection titles
-   - <p> for paragraphs
-   - <ul> and <li> for lists and bullet points
-   - <strong> for emphasis on key legal terms, obligations, or timelines
-   - <table>, <thead>, <tbody>, <tr>, <th>, <td> if comparative tables or timelines are helpful.
-4. Do NOT wrap the output in markdown code blocks (\`\`\`html or \`\`\`). Return ONLY the pure HTML string or text.
-5. Ensure the document is thorough, comprehensive, compliant with Thai law, and covers standard liability disclaimers, data subject rights (if PDPA), service levels, warranty terms, and contact channels.
+คำสั่งเพิ่มเติมจากผู้ใช้งาน:
+"${customPrompt || userPrompt || ''}"
+
+เกณฑ์การจัดทำเอกสาร (Strict Output Requirements):
+1. เขียนเนื้อหาภาษาไทยที่ถูกต้อง เป็นทางการ สละสลวย ชัดเจน และถูกต้องตามหลักกฎหมายไทย 100%
+2. ใช้ข้อมูลจริงของบริษัท (ชื่อบริษัท, ที่อยู่, เบอร์โทร, อีเมล, ไลน์) ที่ระบุข้างต้นเท่านั้น ห้ามเว้นว่างหรือใส่ข้อความ placeholder เช่น [ชื่อบริษัท], [ที่อยู่], [xxx]
+3. จัดโครงสร้างเป็นโค้ด HTML ที่สะอาด สำหรับใส่ลง CKEditor:
+   - ใช้ <h2> สำหรับหัวข้อหลักแต่ละมาตรา/หมวด
+   - ใช้ <h3> สำหรับหัวข้อย่อย
+   - ใช้ <p> สำหรับย่อหน้าอธิบายความ
+   - ใช้ <ul> และ <li> สำหรับแจกแจงรายการเงื่อนไขและสิทธิประโยชน์
+   - ใช้ <strong> สำหรับเน้นคำสำคัญทางกฎหมาย หรือระยะเวลา
+   - สามารถใช้ <table>, <thead>, <tbody>, <tr>, <th>, <td> ได้หากมีตารางสรุป
+4. ห้ามครอบโค้ดด้วย markdown code block (ห้ามใส่ \`\`\`html หรือ \`\`\`) ส่งเฉพาะเนื้อหา HTML ล้วนๆ
 `;
 
         const response = await gemini.generateContent({
