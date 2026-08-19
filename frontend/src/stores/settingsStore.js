@@ -8,6 +8,7 @@ export const useSettingsStore = defineStore('settings', () => {
     const storeKeywords = ref('')
     const storeOgTitle = ref('')
     const storeOgDescription = ref('')
+    const storeOgImage = ref('')
     const storeDefaultLlmContext = ref('')
     const storeAiCrawlingEnabled = ref(true)
     const companyLegalName = ref('')
@@ -204,6 +205,7 @@ export const useSettingsStore = defineStore('settings', () => {
         if (pubSettings.store_keywords !== undefined) storeKeywords.value = pubSettings.store_keywords || '';
         if (pubSettings.store_og_title !== undefined) storeOgTitle.value = pubSettings.store_og_title || '';
         if (pubSettings.store_og_description !== undefined) storeOgDescription.value = pubSettings.store_og_description || '';
+        if (pubSettings.store_og_image !== undefined) storeOgImage.value = pubSettings.store_og_image || '';
         if (pubSettings.seo_default_llm_context !== undefined) storeDefaultLlmContext.value = pubSettings.seo_default_llm_context || '';
         if (pubSettings.seo_ai_crawling_enabled !== undefined) storeAiCrawlingEnabled.value = String(pubSettings.seo_ai_crawling_enabled) !== 'false';
         if (pubSettings.company_legal_name !== undefined) companyLegalName.value = pubSettings.company_legal_name || '';
@@ -420,6 +422,30 @@ export const useSettingsStore = defineStore('settings', () => {
         paymentPromptpayNumber,
         shippingRestrictedProvinces,
         freeInstallProvinces,
+        showProductRating,
+        showProductReview,
+        maintenanceModeEnabled,
+        maintenanceMessage,
+        holidayModeEnabled,
+        holidayMessage,
+        holidayName,
+        storeOgTitle,
+        storeOgDescription,
+        storeOgImage,
+        storeDefaultLlmContext,
+        storeAiCrawlingEnabled,
+        companyLegalName,
+        storeLogo,
+        storeFavicon,
+        storeAddress,
+        storeTaxId,
+        storePhone,
+        warehouseLat,
+        warehouseLng,
+        isOnlineShoppingEnabled,
+        isWishlistEnabled,
+        isCompareEnabled,
+        isProjectsEnabled,
         showProductRating,
         showProductReview,
         maintenanceModeEnabled,

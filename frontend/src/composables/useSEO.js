@@ -53,7 +53,10 @@ export function useSEO() {
     const storeName = settingsStore.storeName || '';
     const storeDesc = descVal || settingsStore.storeDescription || '';
     const pageTitle = titleVal ? (storeName ? `${titleVal} | ${storeName}` : titleVal) : (settingsStore.storeOgTitle || storeName || '');
-    const finalImage = imageVal ? (imageVal.startsWith('http') ? imageVal : `${window.location.origin}${imageVal}`) : `${window.location.origin}/og-image.jpg`;
+    const defaultSiteOgImage = settingsStore.storeOgImage || settingsStore.storeLogo || '/uploads/image-1786956107440-520358157.webp' || '/logo.webp';
+    const finalImage = imageVal 
+      ? (imageVal.startsWith('http') ? imageVal : `${window.location.origin}${imageVal}`) 
+      : (defaultSiteOgImage.startsWith('http') ? defaultSiteOgImage : `${window.location.origin}${defaultSiteOgImage}`);
 
     // 1. Document Title
     if (pageTitle) {
@@ -89,7 +92,7 @@ export function useSEO() {
 
   // Reactively re-apply meta when settings load from API
   const stopWatch = watch(
-    [() => settingsStore.storeName, () => settingsStore.storeDescription, () => settingsStore.storeOgTitle, () => settingsStore.storeKeywords],
+    [() => settingsStore.storeName, () => settingsStore.storeDescription, () => settingsStore.storeOgTitle, () => settingsStore.storeOgImage, () => settingsStore.storeKeywords],
     () => {
       if (lastMetaOptions) {
         setMeta(lastMetaOptions);

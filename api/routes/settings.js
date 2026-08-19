@@ -35,7 +35,7 @@ router.get('/public', async (req, res) => {
             'payment_bank_accounts', 'payment_promptpay_number',
             'shipping_restricted_provinces',
             'free_install_provinces',
-            'store_name', 'store_description', 'store_keywords', 'store_og_title', 'store_og_description', 'company_legal_name', 'store_logo', 'store_favicon', 
+            'store_name', 'store_description', 'store_keywords', 'store_og_title', 'store_og_description', 'store_og_image', 'company_legal_name', 'store_logo', 'store_favicon', 
             'store_address', 'store_tax_id', 'store_phone', 
             'warehouse_lat', 'warehouse_lng',
             'home_category_showcase', 'show_product_rating', 'show_product_review',
@@ -154,7 +154,8 @@ router.get('/seo-preview', async (req, res) => {
         let description = defaultDesc;
         let keywords = defaultKeywords;
         let llmContext = defaultLlmContext;
-        let image = `${siteUrl}/og-image.jpg`;
+        const defaultOgImage = sMap['store_og_image'] || sMap['store_logo'] || '/uploads/image-1786956107440-520358157.webp' || '/logo.webp';
+        let image = defaultOgImage.startsWith('http') ? defaultOgImage : `${siteUrl}${defaultOgImage}`;
         let canonicalUrl = siteUrl;
         let rating = 4.9;
         let reviewCount = 128;

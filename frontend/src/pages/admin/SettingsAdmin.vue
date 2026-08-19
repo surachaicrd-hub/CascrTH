@@ -224,6 +224,7 @@ const companyLegalName = ref('')
 const storeUrl = ref('')
 const storeLogo = ref('')
 const storeFavicon = ref('')
+const storeOgImage = ref('')
 const storeAddress = ref('')
 const storeTaxId = ref('')
 const storePhone = ref('')
@@ -231,6 +232,7 @@ const warehouseLat = ref('')
 const warehouseLng = ref('')
 const uploadingLogo = ref(false)
 const uploadingFavicon = ref(false)
+const uploadingOgImage = ref(false)
 const paymentIbankingEnabled = ref(false)
 const paymentPromptpayEnabled = ref(false)
 const paymentBankTransferEnabled = ref(false)
@@ -501,6 +503,7 @@ const loadSettings = async () => {
       if (data.data.store_url !== undefined) storeUrl.value = data.data.store_url
       if (data.data.store_logo !== undefined) storeLogo.value = data.data.store_logo
       if (data.data.store_favicon !== undefined) storeFavicon.value = data.data.store_favicon
+      if (data.data.store_og_image !== undefined) storeOgImage.value = data.data.store_og_image
       if (data.data.store_address !== undefined) storeAddress.value = data.data.store_address
       if (data.data.store_tax_id !== undefined) storeTaxId.value = data.data.store_tax_id
       if (data.data.store_phone !== undefined) storePhone.value = data.data.store_phone
@@ -721,6 +724,7 @@ const saveSettings = async () => {
       { key: 'store_url', value: storeUrl.value || '' },
       { key: 'store_logo', value: storeLogo.value || '' },
       { key: 'store_favicon', value: storeFavicon.value || '' },
+      { key: 'store_og_image', value: storeOgImage.value || '' },
       { key: 'store_address', value: storeAddress.value || '' },
       { key: 'store_tax_id', value: storeTaxId.value || '' },
       { key: 'store_phone', value: storePhone.value || '' },
@@ -861,6 +865,41 @@ const handleFaviconUpload = async (event) => {
     uploadingFavicon.value = false
     event.target.value = '' // reset input
   }
+}
+
+const handleOgImageUpload = async (event) => {
+  const file = event.target.files[0]
+  if (!file) return
+
+  const formData = new FormData()
+  formData.append('image', file)
+
+  uploadingOgImage.value = true
+  try {
+    const res = await apiFetch('/api/upload', {
+      method: 'POST',
+      body: formData
+    })
+    const data = await res.json()
+    if (data.success) {
+      storeOgImage.value = data.url
+      showToast('อัปโหลดรูป Social Share (OG Image) สำเร็จ', 'success')
+      await fetchSeoPreview()
+    } else {
+      showToast(data.error || 'ไม่สามารถอัปโหลดรูปภาพได้', 'error')
+    }
+  } catch (err) {
+    showToast('เกิดข้อผิดพลาดในการเชื่อมต่อ', 'error')
+  } finally {
+    uploadingOgImage.value = false
+    event.target.value = ''
+  }
+}
+
+const removeOgImage = async () => {
+  storeOgImage.value = ''
+  showToast('ลบรูปภาพ Social Share แล้ว (กรุณากดบันทึกการตั้งค่า)', 'info')
+  await fetchSeoPreview()
 }
 
 const handleHolidayImageUpload = async (event) => {
@@ -1349,6 +1388,26 @@ onMounted(() => {
                       <input type="file" class="hidden" accept="image/png,image/x-icon,image/jpeg" @change="handleFaviconUpload" :disabled="uploadingFavicon">
                     </label>
                     <p class="text-[10px] text-gray-500 mt-1.5">ขนาดจัตุรัส 64x64px (.PNG / .ICO) ปรากฏบนแท็บเบราว์เซอร์</p>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-sm font-bold text-gray-700 mb-2">ภาพแชร์โซเชียล (Social Share / OG Image)</label>
+                <div class="flex items-center gap-4">
+                  <div class="w-24 h-16 bg-gray-50 border border-gray-200 rounded-lg flex items-center justify-center shrink-0 overflow-hidden relative">
+                    <img v-if="storeOgImage" :src="storeOgImage" class="w-full h-full object-cover" />
+                    <svg v-else class="w-6 h-6 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                  </div>
+                  <div class="flex-1">
+                    <div class="flex items-center gap-2">
+                      <label class="px-3 py-1.5 bg-white text-gray-700 font-bold text-xs rounded-lg border border-gray-300 hover:bg-gray-50 cursor-pointer transition-colors" :class="{ 'opacity-50': uploadingOgImage }">
+                        {{ uploadingOgImage ? 'กำลังอัปโหลด...' : (storeOgImage ? 'เปลี่ยนรูป' : 'อัปโหลดรูป') }}
+                        <input type="file" class="hidden" accept="image/png,image/jpeg,image/webp" @change="handleOgImageUpload" :disabled="uploadingOgImage">
+                      </label>
+                      <button v-if="storeOgImage" type="button" @click="removeOgImage" class="text-xs text-rose-500 hover:text-rose-700 font-medium">ลบ</button>
+                    </div>
+                    <p class="text-[10px] text-gray-500 mt-1.5">ขนาดแนะนำ 1200x630px สำหรับ Facebook, LINE, X</p>
                   </div>
                 </div>
               </div>
@@ -3142,6 +3201,40 @@ onMounted(() => {
               </div>
             </div>
 
+            <!-- Open Graph / Social Share Image Uploader -->
+            <div class="pt-4 border-t border-gray-100">
+              <label class="block text-xs font-bold text-gray-700 mb-1">
+                รูปภาพตัวอย่างสำหรับแชร์ลงโซเชียลมีเดีย (Social Share / Open Graph Image)
+              </label>
+              <p class="text-xs text-gray-500 mb-3">รูปภาพนี้จะแสดงเป็นภาพปกการ์ดพรีวิวเมื่อแชร์ลิงก์หน้าเว็บลงบน Facebook, LINE, Twitter (X) และปรากฏในเครื่องมือจำลอง Social Card ด้านล่าง (แนะนำขนาด 1200 x 630 px)</p>
+              
+              <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4 p-4 border border-gray-200 rounded-2xl bg-gray-50/50">
+                <div class="w-48 h-28 bg-gray-100 rounded-xl overflow-hidden border border-gray-200 shrink-0 relative flex items-center justify-center">
+                  <img v-if="storeOgImage" :src="storeOgImage" class="w-full h-full object-cover" />
+                  <div v-else class="flex flex-col items-center justify-center text-gray-400 p-2 text-center">
+                    <svg class="w-8 h-8 mb-1 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                    <span class="text-[10px]">ยังไม่ได้ตั้งค่ารูปภาพ</span>
+                  </div>
+                </div>
+
+                <div class="space-y-2 flex-1">
+                  <div class="flex items-center gap-2">
+                    <label class="px-4 py-2 bg-white text-gray-800 font-bold text-xs rounded-xl border border-gray-300 hover:bg-gray-50 cursor-pointer transition-colors shadow-sm inline-flex items-center gap-1.5" :class="{ 'opacity-50 pointer-events-none': uploadingOgImage }">
+                      <svg v-if="uploadingOgImage" class="w-4 h-4 animate-spin text-gray-600" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                      <svg v-else class="w-4 h-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                      {{ uploadingOgImage ? 'กำลังอัปโหลด...' : (storeOgImage ? 'เปลี่ยนรูปภาพ' : 'อัปโหลดรูปภาพ Open Graph') }}
+                      <input type="file" class="hidden" accept="image/png,image/jpeg,image/webp" @change="handleOgImageUpload" :disabled="uploadingOgImage">
+                    </label>
+
+                    <button v-if="storeOgImage" type="button" @click="removeOgImage" class="px-3 py-2 text-xs font-bold text-rose-600 hover:bg-rose-50 rounded-xl transition-colors border border-rose-200">
+                      ลบรูปภาพ
+                    </button>
+                  </div>
+                  <p class="text-[11px] text-gray-500">รองรับไฟล์ PNG, JPG, WebP ขนาดไม่เกิน 5MB (สัดส่วน 1.91:1 แนะนำ 1200x630px)</p>
+                </div>
+              </div>
+            </div>
+
             <div class="pt-4 border-t border-gray-100 flex items-center justify-between">
               <div>
                 <h4 class="text-sm font-bold text-gray-900">อนุญาตให้ AI Search Bots เข้าถึงข้อมูล (GEO Crawling)</h4>
@@ -3250,7 +3343,7 @@ onMounted(() => {
               <!-- SubTab: Social -->
               <div v-if="previewSubTab === 'social'" class="max-w-md bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-md">
                 <div class="h-48 bg-slate-100 overflow-hidden relative">
-                  <img :src="previewData.data.socialCard.image" class="w-full h-full object-cover" @error="previewData.data.socialCard.image = '/og-image.jpg'">
+                  <img :src="previewData.data.socialCard.image || storeOgImage || storeLogo || '/logo.webp'" class="w-full h-full object-cover" @error="previewData.data.socialCard.image = storeOgImage || storeLogo || '/logo.webp'">
                   <div class="absolute bottom-2 left-2 px-2 py-1 bg-black/60 text-white text-[10px] rounded font-mono uppercase">Open Graph Preview</div>
                 </div>
                 <div class="p-4 space-y-1.5 bg-slate-50">
