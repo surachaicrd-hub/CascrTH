@@ -176,6 +176,33 @@ const sampleTitle = computed(() => {
         <line x1="178" y1="12" x2="200" y2="12" stroke="#9a3412" stroke-width="0.7" opacity="0.8" />
       </g>
 
+      <!-- 1.1 Single Semi-Strip Wire (สายเดี่ยว กึ่งปอกคงปลอก 2 ด้าน / ปอกกึ่งหลุด 2 ด้าน) -->
+      <g v-else-if="sampleType === 'single_semi_strip' || sampleType === 'semi_strip_both' || sampleType === 'single_semi_strip_grey' || sampleType === 'single_semi_strip_black' || sampleType === 'single_slug_both' || sampleType === 'slug_both' || sampleType === 'single_semi' || sampleType === 'semi_strip'">
+        <!-- Left Slug / Cap (Pulled Jacket Piece) -->
+        <rect x="0" y="4" width="16" height="12" rx="1" fill="url(#black-jacket-grad)" />
+        <line x1="0" y1="6.5" x2="16" y2="6.5" stroke="#64748b" stroke-width="0.8" opacity="0.6" />
+
+        <!-- Left Exposed Copper Strands -->
+        <rect x="16" y="6.5" width="14" height="7" rx="0.5" fill="url(#copper-grad)" />
+        <line x1="16" y1="8" x2="30" y2="8" stroke="#fbbf24" stroke-width="0.7" opacity="0.8" />
+        <line x1="16" y1="10" x2="30" y2="10" stroke="#f97316" stroke-width="0.7" opacity="0.6" />
+        <line x1="16" y1="12" x2="30" y2="12" stroke="#9a3412" stroke-width="0.7" opacity="0.8" />
+
+        <!-- Main Middle Dark Slate/Black Jacket Body -->
+        <rect x="30" y="4" width="140" height="12" rx="1.5" fill="url(#black-jacket-grad)" />
+        <line x1="30" y1="6.5" x2="170" y2="6.5" stroke="#64748b" stroke-width="0.8" opacity="0.6" />
+
+        <!-- Right Exposed Copper Strands -->
+        <rect x="170" y="6.5" width="14" height="7" rx="0.5" fill="url(#copper-grad)" />
+        <line x1="170" y1="8" x2="184" y2="8" stroke="#fbbf24" stroke-width="0.7" opacity="0.8" />
+        <line x1="170" y1="10" x2="184" y2="10" stroke="#f97316" stroke-width="0.7" opacity="0.6" />
+        <line x1="170" y1="12" x2="184" y2="12" stroke="#9a3412" stroke-width="0.7" opacity="0.8" />
+
+        <!-- Right Slug / Cap (Pulled Jacket Piece) -->
+        <rect x="184" y="4" width="16" height="12" rx="1" fill="url(#black-jacket-grad)" />
+        <line x1="184" y1="6.5" x2="200" y2="6.5" stroke="#64748b" stroke-width="0.8" opacity="0.6" />
+      </g>
+
       <!-- 2. Single Grey Wire (สายเดี่ยวสีเทา ปอก 2 ด้าน - สว่าง ชัดเจน ไม่มืด) -->
       <g v-else-if="sampleType === 'single_grey' || sampleType === 'grey' || sampleType === 'single_strip_grey'">
         <!-- Left Copper -->

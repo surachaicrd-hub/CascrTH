@@ -2554,9 +2554,12 @@ const generateDescriptionWithAI = async () => {
                 </div>
 
                 <div class="flex flex-wrap items-center gap-1.5">
-                  <!-- สายเดี่ยว & ปอกกลาง -->
+                  <!-- สายเดี่ยว & ปอกกลาง & กึ่งปอก -->
                   <button type="button" @click.prevent="addWireSample('single_black', 'สายเดี่ยวสีดำ ปอก 2 ด้าน')" class="px-2 py-1 bg-white hover:bg-slate-50 text-slate-700 rounded-lg text-[11px] font-semibold border border-slate-200 transition-colors flex items-center gap-1 cursor-pointer">
                     <span class="w-2 h-2 rounded-full bg-slate-800"></span> + สายเดี่ยว (ดำ)
+                  </button>
+                  <button type="button" @click.prevent="addWireSample('single_semi_strip', 'สายเดี่ยว กึ่งปอกคงปลอก 2 ด้าน')" class="px-2 py-1 bg-white hover:bg-slate-50 text-slate-700 rounded-lg text-[11px] font-semibold border border-slate-200 transition-colors flex items-center gap-1 cursor-pointer" title="สายเดี่ยว กึ่งปอกคงปลอก 2 ด้าน (Semi-Strip / Slug Retention)">
+                    <span class="w-2.5 h-1.5 rounded-xs bg-slate-700 border border-slate-400"></span> + กึ่งปอก 2 ด้าน (Semi-Strip)
                   </button>
                   <button type="button" @click.prevent="addWireSample('single_blue', 'สายเดี่ยวสีน้ำเงิน ปอก 2 ด้าน')" class="px-2 py-1 bg-white hover:bg-blue-50 text-blue-700 rounded-lg text-[11px] font-semibold border border-blue-200 transition-colors flex items-center gap-1 cursor-pointer">
                     <span class="w-2 h-2 rounded-full bg-blue-600"></span> + สายเดี่ยว (น้ำเงิน)
