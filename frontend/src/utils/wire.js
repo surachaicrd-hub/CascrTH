@@ -300,17 +300,42 @@ export const wireTypeAliases = {
 }
 
 /**
- * Parse wire groups from JSON or Array with fallback to defaultWireTypeGroups
+ * Parse wire groups from JSON or Array with fallback & auto-merging missing default options
  */
 export function parseWireTypeGroups(raw) {
-  if (!raw) return JSON.parse(JSON.stringify(defaultWireTypeGroups))
+  const defaultGroups = JSON.parse(JSON.stringify(defaultWireTypeGroups))
+  if (!raw) return defaultGroups
   try {
     const data = typeof raw === 'string' ? JSON.parse(raw) : raw
     if (Array.isArray(data) && data.length > 0) {
+      // Find all existing option values in loaded data
+      const existingValues = new Set()
+      data.forEach(g => {
+        (g.options || []).forEach(o => {
+          if (o && o.value) existingValues.add(o.value)
+        })
+      })
+
+      // Auto-merge any missing built-in default options
+      defaultGroups.forEach(defGroup => {
+        let targetGroup = data.find(g => g.group === defGroup.group)
+        defGroup.options.forEach(defOpt => {
+          if (!existingValues.has(defOpt.value)) {
+            if (!targetGroup) {
+              targetGroup = { group: defGroup.group, options: [] }
+              data.push(targetGroup)
+            }
+            if (!targetGroup.options) targetGroup.options = []
+            targetGroup.options.push(defOpt)
+            existingValues.add(defOpt.value)
+          }
+        })
+      })
+
       return data
     }
   } catch (e) {}
-  return JSON.parse(JSON.stringify(defaultWireTypeGroups))
+  return defaultGroups
 }
 
 /**
