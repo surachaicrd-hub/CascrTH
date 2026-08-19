@@ -1,10 +1,27 @@
 User-agent: *
 Allow: /
+Allow: /sitemap.xml
 Allow: /api/sitemap.xml
 Allow: /llms.txt
 Allow: /llms-full.txt
 Disallow: /admin/
 Disallow: /api/
 
-Sitemap: /sitemap.xml
-LLMs-txt: /llms.txt
+# AI Search & LLM Crawlers Directives
+User-agent: GPTBot
+Allow: /
+User-agent: ChatGPT-User
+Allow: /
+User-agent: PerplexityBot
+Allow: /
+User-agent: ClaudeBot
+Allow: /
+User-agent: Google-Extended
+Allow: /
+User-agent: ByteDance
+Allow: /
+User-agent: CCBot
+Allow: /
+
+Sitemap: https://เครื่องตัดปอกย้ำสายไฟ.com/sitemap.xml
+LLMs-txt: https://เครื่องตัดปอกย้ำสายไฟ.com/llms.txt

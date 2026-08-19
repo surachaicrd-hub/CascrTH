@@ -223,6 +223,7 @@ app.get(['/robots.txt', '/api/robots.txt'], (req, res) => {
     res.type('text/plain; charset=utf-8');
     res.send(`User-agent: *
 Allow: /
+Allow: /sitemap.xml
 Allow: /api/sitemap.xml
 Allow: /llms.txt
 Allow: /llms-full.txt
@@ -255,7 +256,9 @@ app.use(['/llms-full.txt', '/api/llms-full.txt'], (req, res, next) => {
     req.url = '/full';
     require('./routes/llms')(req, res, next);
 });
-app.use(['/sitemap.xml', '/api/sitemap.xml', '/api/sitemap'], require('./routes/sitemap'));
+const { router: sitemapRouter, handleSitemapRequest, generateSitemapXml } = require('./routes/sitemap');
+app.get(['/sitemap.xml', '/api/sitemap.xml', '/sitemap.ashx', '/sitemap_index.xml'], handleSitemapRequest);
+app.use(['/api/sitemap'], sitemapRouter);
 app.use('/api/articles', require('./routes/articles'));
 app.use('/api/users', require('./routes/users'));
 app.use('/api/orders', require('./routes/orders'));
@@ -467,8 +470,9 @@ if (process.env.NODE_ENV !== 'test') {
     app.listen(PORT, () => {
         console.log(`Server is running on port ${PORT}`);
 
-        // Sync favicon on startup
+        // Sync favicon and sitemap on startup
         syncFaviconFiles().catch(err => console.error('Startup favicon sync error:', err));
+        generateSitemapXml().catch(err => console.error('Startup sitemap generation error:', err));
 
         // Run background tasks & schedulers only if not disabled
         if (process.env.DISABLE_BG_TASKS !== 'true') {
