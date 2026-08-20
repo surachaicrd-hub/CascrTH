@@ -1153,8 +1153,8 @@ onMounted(() => {
                           <span class="text-[11px] font-bold text-gray-400 uppercase tracking-wider block">ตัวอย่างการแสดงผลบนหน้าแรก</span>
                           
                           <div class="rounded-2xl overflow-hidden border border-gray-200 bg-white shadow-sm flex flex-col">
-                            <!-- Image part -->
-                            <div class="relative aspect-[16/10] w-full bg-slate-900 overflow-hidden flex items-center justify-center">
+                            <!-- Image part (16:9 Aspect Ratio) -->
+                            <div class="relative aspect-video w-full bg-slate-900 overflow-hidden flex items-center justify-center border-b border-gray-100">
                               <img 
                                 v-if="company.banner" 
                                 :src="company.banner" 
@@ -1167,13 +1167,15 @@ onMounted(() => {
                                 </svg>
                                 <span class="text-[10px]">ยังไม่มีรูปแบนเนอร์</span>
                               </div>
-                              <span class="absolute bottom-2 left-2 px-2 py-0.5 text-[9px] font-bold text-white bg-emerald-600/90 rounded uppercase">
-                                {{ company.tag || 'บริษัทในเครือ' }}
-                              </span>
                             </div>
 
                             <!-- Content part -->
                             <div class="p-3.5 space-y-2">
+                              <div v-if="company.tag" class="mb-1">
+                                <span class="inline-flex items-center px-2 py-0.5 text-[10px] font-bold text-emerald-800 bg-emerald-50 border border-emerald-200/60 rounded uppercase tracking-wider">
+                                  {{ company.tag }}
+                                </span>
+                              </div>
                               <h4 class="font-bold text-sm text-gray-900 line-clamp-1">
                                 {{ company.name || 'ชื่อบริษัท' }}
                               </h4>

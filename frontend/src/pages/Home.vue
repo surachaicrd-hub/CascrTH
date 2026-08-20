@@ -3362,8 +3362,8 @@ onUnmounted(() => {
             rel="noopener noreferrer"
             class="group flex flex-col h-full w-[290px] sm:w-[320px] md:w-auto shrink-0 snap-center rounded-3xl overflow-hidden bg-white dark:bg-[#121622] shadow-[0_8px_30px_rgb(0,0,0,0.02)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] hover:shadow-[0_20px_40px_rgba(16,185,129,0.06)] dark:hover:shadow-[0_20px_40px_rgba(16,185,129,0.12)] border border-gray-100 dark:border-white/[0.06] hover:border-emerald-500/20 dark:hover:border-emerald-500/30 transition-all duration-500 hover:-translate-y-2"
           >
-            <!-- Banner Image Section -->
-            <div class="relative aspect-[16/10] w-full overflow-hidden bg-[#1a2333] flex items-center justify-center">
+            <!-- Banner Image Section (16:9 Aspect Ratio) -->
+            <div class="relative aspect-video w-full overflow-hidden bg-[#1a2333] flex items-center justify-center border-b border-gray-100 dark:border-white/[0.04]">
               <img 
                 v-if="company.banner || company.image"
                 :src="getOptimizedImageUrl(company.banner || company.image, 800)" 
@@ -3381,27 +3381,24 @@ onUnmounted(() => {
                 <span class="text-xs font-bold text-slate-300 line-clamp-1 font-['IBM_Plex_Sans_Thai']">{{ company.name }}</span>
               </div>
 
-              <!-- Gradient Overlay -->
-              <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60 pointer-events-none"></div>
-              
               <!-- Subtle top-right external link badge -->
-              <div v-if="company.url" class="absolute top-4 right-4 bg-white/95 dark:bg-[#0c0e14]/80 backdrop-blur-md rounded-full w-8 h-8 flex items-center justify-center text-gray-700 dark:text-white shadow-md opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-1 group-hover:translate-y-0">
+              <div v-if="company.url" class="absolute top-3 right-3 bg-white/95 dark:bg-[#0c0e14]/80 backdrop-blur-md rounded-full w-8 h-8 flex items-center justify-center text-gray-700 dark:text-white shadow-md opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-1 group-hover:translate-y-0">
                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                 </svg>
-              </div>
-
-              <!-- Floating Category Tag -->
-              <div class="absolute bottom-4 left-4">
-                <span class="px-2.5 py-1 text-[10px] md:text-xs font-bold text-white bg-emerald-600/85 backdrop-blur-md rounded-lg uppercase tracking-wide">
-                  {{ company.tag || getBusinessTag(company.name) }}
-                </span>
               </div>
             </div>
 
             <!-- Content Area -->
             <div class="p-6 flex-1 flex flex-col justify-between">
               <div>
+                <!-- Category Tag Badge above Title -->
+                <div v-if="company.tag || getBusinessTag(company.name)" class="mb-2">
+                  <span class="inline-flex items-center px-2.5 py-0.5 text-[11px] font-bold text-emerald-800 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/60 dark:border-emerald-800/40 rounded-md uppercase tracking-wider">
+                    {{ company.tag || getBusinessTag(company.name) }}
+                  </span>
+                </div>
+
                 <h4 class="text-lg md:text-xl font-bold text-gray-900 dark:text-white group-hover:text-emerald-700 dark:group-hover:text-emerald-400 transition-colors font-['IBM_Plex_Sans_Thai']">
                   {{ company.name }}
                 </h4>
