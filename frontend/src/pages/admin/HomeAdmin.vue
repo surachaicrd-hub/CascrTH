@@ -18,7 +18,8 @@ const tabs = [
   { key: 'slider', label: '1. แบนเนอร์สไลด์หลัก (Hero Slider)', icon: 'M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z' },
   { key: 'featured', label: '2. แบนเนอร์โปรโมชั่น & สินค้าแนะนำ', icon: 'M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z' },
   { key: 'categories', label: '3. หมวดหมู่สินค้าแสดงหน้าแรก', icon: 'M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10' },
-  { key: 'visibility', label: '4. จัดการเปิด/ปิด Section หน้าแรก', icon: 'M15 12a3 3 0 11-6 0 3 3 0 016 0z M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z' }
+  { key: 'affiliates', label: '4. เครือข่ายธุรกิจ & บริษัทในเครือ', icon: 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4' },
+  { key: 'visibility', label: '5. จัดการเปิด/ปิด Section หน้าแรก', icon: 'M15 12a3 3 0 11-6 0 3 3 0 016 0z M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z' }
 ]
 
 // Default Hero Slides
@@ -137,7 +138,35 @@ const allCategories = ref([])
 const allProducts = ref([])
 const categoryShowcase = ref([]) // Array of { categoryId, productIds }
 
-// TAB 4: Section Visibility Toggles
+// TAB 4: Affiliated Companies & Business Network
+const affiliatesTitle = ref('บริษัทในเครือ')
+const affiliatesHeading = ref('เครือข่ายธุรกิจของเรา')
+const affiliatesDesc = ref('เครือข่ายธุรกิจที่มั่นคง ร่วมมือสร้างสรรค์นวัตกรรมและบริการคุณภาพระดับมาตรฐานสากล')
+const rawSectionTitles = ref({})
+
+const defaultAffiliates = [
+  {
+    id: 1,
+    name: 'KODERA MFG. CO., LTD.',
+    tag: 'บริษัทในเครือ',
+    description: 'ผู้ผลิตเครื่องตัดปอกสายไฟอัตโนมัติชั้นนำจากประเทศญี่ปุ่น มาตรฐานระดับโลก',
+    banner: '',
+    url: 'https://www.kodera.co.jp/',
+    buttonText: 'เข้าชมเว็บไซต์'
+  },
+  {
+    id: 2,
+    name: 'CR Distribution (Thailand)',
+    tag: 'บริษัทในเครือ',
+    description: 'ตัวแทนจำหน่ายและศูนย์บริการเครื่องจักร KODERA อย่างเป็นทางการในประเทศไทย',
+    banner: '',
+    url: 'https://crdistribution.co.th',
+    buttonText: 'เข้าชมเว็บไซต์'
+  }
+]
+const affiliates = ref([...defaultAffiliates])
+
+// TAB 5: Section Visibility Toggles
 const homeShowTestimonials = ref(true)
 const homeShowPartners = ref(true)
 const homeShowAffiliates = ref(true)
@@ -275,6 +304,44 @@ const toggleShowcaseProduct = (showcase, prodId) => {
   }
 }
 
+// Affiliated Companies Helpers
+const addAffiliate = () => {
+  affiliates.value.push({
+    id: Date.now(),
+    name: '',
+    tag: 'บริษัทในเครือ',
+    description: '',
+    banner: '',
+    url: '',
+    buttonText: 'เข้าชมเว็บไซต์'
+  })
+}
+
+const removeAffiliate = async (index) => {
+  const confirmed = await showConfirm({
+    title: 'ยืนยันการลบ',
+    message: `คุณต้องการลบบริษัท/เครือข่ายธุรกิจ "${affiliates.value[index]?.name || 'รายการนี้'}" ใช่หรือไม่?`,
+    confirmText: 'ลบรายการ',
+    cancelText: 'ยกเลิก',
+    type: 'danger'
+  })
+  if (confirmed) {
+    affiliates.value.splice(index, 1)
+    showToast('ลบรายการเรียบร้อยแล้ว', 'success')
+  }
+}
+
+const duplicateAffiliate = (index) => {
+  const item = affiliates.value[index]
+  if (!item) return
+  affiliates.value.splice(index + 1, 0, {
+    ...item,
+    id: Date.now(),
+    name: item.name ? `${item.name} (สำเนา)` : ''
+  })
+  showToast('คัดลอกรายการเรียบร้อย', 'success')
+}
+
 // Fetch Initial Data
 const fetchData = async () => {
   loading.value = true
@@ -345,6 +412,33 @@ const fetchData = async () => {
         if (Array.isArray(parsedShowcase)) categoryShowcase.value = parsedShowcase
       } catch (e) {}
 
+      // Section Titles
+      try {
+        const parsedTitles = s.home_section_titles ? JSON.parse(s.home_section_titles) : null
+        if (parsedTitles && typeof parsedTitles === 'object') {
+          rawSectionTitles.value = { ...parsedTitles }
+          if (parsedTitles.affiliatesTitle) affiliatesTitle.value = parsedTitles.affiliatesTitle
+          if (parsedTitles.affiliatesHeading) affiliatesHeading.value = parsedTitles.affiliatesHeading
+          if (parsedTitles.affiliatesDesc) affiliatesDesc.value = parsedTitles.affiliatesDesc
+        }
+      } catch (e) {}
+
+      // Affiliated Companies
+      try {
+        const parsedAffiliates = s.home_affiliates ? JSON.parse(s.home_affiliates) : []
+        if (Array.isArray(parsedAffiliates) && parsedAffiliates.length > 0) {
+          affiliates.value = parsedAffiliates.map((a, idx) => ({
+            id: a.id || (Date.now() + idx),
+            name: a.name || '',
+            tag: a.tag || 'บริษัทในเครือ',
+            description: a.description || '',
+            banner: a.banner || a.image || '',
+            url: a.url || '',
+            buttonText: a.buttonText || 'เข้าชมเว็บไซต์'
+          }))
+        }
+      } catch (e) {}
+
       // Visibility Toggles
       homeShowTestimonials.value = s.home_show_testimonials !== 'false'
       homeShowPartners.value = s.home_show_partners !== 'false'
@@ -365,6 +459,13 @@ const fetchData = async () => {
 const saveSettings = async () => {
   saving.value = true
   try {
+    const updatedSectionTitles = {
+      ...rawSectionTitles.value,
+      affiliatesTitle: affiliatesTitle.value,
+      affiliatesHeading: affiliatesHeading.value,
+      affiliatesDesc: affiliatesDesc.value
+    }
+
     const payload = {
       settings: [
         { key: 'home_slides', value: JSON.stringify(slides.value) },
@@ -385,6 +486,8 @@ const saveSettings = async () => {
         { key: 'home_why_choose_us_title', value: whyChooseUsTitle.value },
         { key: 'home_why_choose_us_bullets', value: JSON.stringify(whyChooseUsBullets.value) },
         { key: 'home_category_showcase', value: JSON.stringify(categoryShowcase.value) },
+        { key: 'home_affiliates', value: JSON.stringify(affiliates.value) },
+        { key: 'home_section_titles', value: JSON.stringify(updatedSectionTitles) },
         { key: 'home_show_testimonials', value: String(homeShowTestimonials.value) },
         { key: 'home_show_partners', value: String(homeShowPartners.value) },
         { key: 'home_show_affiliates', value: String(homeShowAffiliates.value) },
@@ -887,7 +990,218 @@ onMounted(() => {
 
           </div>
 
-          <!-- ==================== TAB 4: จัดการเปิด/ปิด Section ==================== -->
+          <!-- ==================== TAB 4: เครือข่ายธุรกิจ & บริษัทในเครือ ==================== -->
+          <div v-show="activeTab === 'affiliates'" class="space-y-6">
+            
+            <!-- Section Header & Visibility Controls -->
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+              <div class="p-6 border-b border-gray-100 bg-gray-50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                  <h2 class="text-lg font-bold text-gray-900 flex items-center gap-2">
+                    <svg class="w-5 h-5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                    </svg>
+                    <span>ตั้งค่าหัวข้อบล็อก "บริษัทในเครือ" (Section Header Settings)</span>
+                  </h2>
+                  <p class="text-xs text-gray-500 mt-0.5">กำหนดข้อความหัวข้อ ป้ายกำกับ และคำอธิบายสำหรับส่วนเครือข่ายธุรกิจบนหน้าแรก</p>
+                </div>
+                
+                <!-- Quick Status Toggle -->
+                <div class="flex items-center gap-3 bg-white px-4 py-2 rounded-xl border border-gray-200 shadow-xs shrink-0">
+                  <div class="flex flex-col text-right">
+                    <span class="text-xs font-bold text-gray-800">แสดง Section นี้</span>
+                    <span :class="['text-[10px] font-semibold', homeShowAffiliates ? 'text-emerald-600' : 'text-gray-400']">
+                      {{ homeShowAffiliates ? '● เปิดใช้งานบนหน้าแรก' : '○ ปิดการแสดงผล' }}
+                    </span>
+                  </div>
+                  <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" v-model="homeShowAffiliates" class="sr-only peer">
+                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+                  </label>
+                </div>
+              </div>
+
+              <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div>
+                  <label class="block text-xs font-bold text-gray-700 mb-1">ป้ายกำกับด้านบน (Section Badge / Tag)</label>
+                  <input type="text" v-model="affiliatesTitle" placeholder="เช่น บริษัทในเครือ" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 font-semibold">
+                </div>
+
+                <div>
+                  <label class="block text-xs font-bold text-gray-700 mb-1">หัวข้อหลักของบล็อก (Section Heading)</label>
+                  <input type="text" v-model="affiliatesHeading" placeholder="เช่น เครือข่ายธุรกิจของเรา" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 font-bold">
+                </div>
+
+                <div class="md:col-span-2">
+                  <label class="block text-xs font-bold text-gray-700 mb-1">คำอธิบายรายละเอียด (Section Subtitle / Description)</label>
+                  <textarea v-model="affiliatesDesc" rows="2" placeholder="เช่น เครือข่ายธุรกิจที่มั่นคง ร่วมมือสร้างสรรค์นวัตกรรมและบริการคุณภาพระดับมาตรฐานสากล" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500"></textarea>
+                </div>
+              </div>
+            </div>
+
+            <!-- Affiliated Companies List Container -->
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+              <div class="p-6 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
+                <div>
+                  <h2 class="text-lg font-bold text-gray-900 flex items-center gap-2">
+                    <svg class="w-5 h-5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
+                    <span>รายการการ์ดบริษัทในเครือ (Affiliated Companies Cards)</span>
+                  </h2>
+                  <p class="text-xs text-gray-500 mt-0.5">ลากเพื่อสลับลำดับการแสดงผลการ์ดบนหน้าแรก (แนะนำ 2-6 บริษัท)</p>
+                </div>
+                <button type="button" @click="addAffiliate" class="bg-emerald-600 text-white px-4 py-2 rounded-xl text-sm font-bold hover:bg-emerald-700 transition flex items-center gap-2 shadow-sm">
+                  <span>+ เพิ่มบริษัทใหม่</span>
+                </button>
+              </div>
+
+              <div class="p-6 space-y-6">
+                <div v-if="affiliates.length === 0" class="text-center py-12 text-gray-400 border-2 border-dashed border-gray-200 rounded-xl">
+                  ยังไม่มีข้อมูลบริษัทในเครือ กดปุ่ม "+ เพิ่มบริษัทใหม่" เพื่อเริ่มต้น
+                </div>
+
+                <draggable v-model="affiliates" item-key="id" handle=".affiliate-drag-handle" class="space-y-6">
+                  <template #item="{ element: company, index }">
+                    <div class="bg-gray-50 p-6 rounded-2xl border border-gray-200 relative space-y-5">
+                      
+                      <!-- Card Header Bar -->
+                      <div class="flex items-center justify-between border-b border-gray-200 pb-3">
+                        <div class="flex items-center gap-3">
+                          <span class="affiliate-drag-handle cursor-grab active:cursor-grabbing p-1.5 bg-white rounded-lg border border-gray-200 text-gray-400 hover:text-gray-600 shadow-xs" title="ลากเพื่อจัดลำดับ">
+                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16"></path></svg>
+                          </span>
+                          <span class="font-bold text-gray-800 text-sm flex items-center gap-2">
+                            <span>บริษัทที่ {{ index + 1 }}</span>
+                            <span v-if="company.name" class="font-bold text-emerald-700">
+                              - {{ company.name }}
+                            </span>
+                            <span v-if="company.tag" class="text-xs px-2 py-0.5 bg-emerald-100 text-emerald-700 font-bold rounded-md">
+                              {{ company.tag }}
+                            </span>
+                          </span>
+                        </div>
+
+                        <div class="flex items-center gap-2">
+                          <button type="button" @click="duplicateAffiliate(index)" class="text-gray-600 hover:text-gray-900 text-xs font-semibold px-2.5 py-1.5 bg-white rounded-lg hover:bg-gray-100 transition border border-gray-200">
+                            คัดลอก
+                          </button>
+                          <button type="button" @click="removeAffiliate(index)" class="text-red-500 hover:text-red-700 text-xs font-bold px-3 py-1.5 bg-red-50 rounded-lg hover:bg-red-100 transition border border-red-100">
+                            ลบรายการนี้
+                          </button>
+                        </div>
+                      </div>
+
+                      <!-- Form Inputs & Live Preview -->
+                      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                        
+                        <!-- Left Form Fields (8 cols) -->
+                        <div class="lg:col-span-8 grid grid-cols-1 md:grid-cols-2 gap-4">
+                          
+                          <!-- Company Name -->
+                          <div class="md:col-span-2">
+                            <label class="block text-xs font-bold text-gray-700 mb-1">ชื่อบริษัท / องค์กร (Company Name) <span class="text-red-500">*</span></label>
+                            <input type="text" v-model="company.name" placeholder="เช่น KODERA MFG. CO., LTD." class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 font-bold">
+                          </div>
+
+                          <!-- Tag / Badge Text -->
+                          <div>
+                            <label class="block text-xs font-bold text-gray-700 mb-1">ป้ายกำกับประเภท (Card Tag / Badge)</label>
+                            <input type="text" v-model="company.tag" placeholder="เช่น บริษัทในเครือ หรือ สำนักงานใหญ่ญี่ปุ่น" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500">
+                          </div>
+
+                          <!-- Button Text -->
+                          <div>
+                            <label class="block text-xs font-bold text-gray-700 mb-1">ข้อความบนปุ่มกด (Button Text)</label>
+                            <input type="text" v-model="company.buttonText" placeholder="เช่น เข้าชมเว็บไซต์" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500">
+                          </div>
+
+                          <!-- Website Link -->
+                          <div class="md:col-span-2">
+                            <label class="block text-xs font-bold text-gray-700 mb-1">ลิงก์เว็บไซต์ (Website URL)</label>
+                            <div class="relative">
+                              <input type="url" v-model="company.url" placeholder="https://www.kodera.co.jp/" class="w-full border border-gray-300 rounded-lg pl-8 pr-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 font-mono text-xs">
+                              <svg class="w-4 h-4 text-gray-400 absolute left-2.5 top-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                              </svg>
+                            </div>
+                          </div>
+
+                          <!-- Description -->
+                          <div class="md:col-span-2">
+                            <label class="block text-xs font-bold text-gray-700 mb-1">คำอธิบายรายละเอียด (Description)</label>
+                            <textarea v-model="company.description" rows="2" placeholder="เช่น ผู้ผลิตเครื่องตัดปอกสายไฟอัตโนมัติชั้นนำจากประเทศญี่ปุ่น มาตรฐานระดับโลก" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500"></textarea>
+                          </div>
+
+                          <!-- Banner Image Upload & Input -->
+                          <div class="md:col-span-2">
+                            <label class="block text-xs font-bold text-gray-700 mb-1">รูปภาพแบนเนอร์ / โลโก้บริษัท (Banner Image)</label>
+                            <div class="flex items-center gap-2">
+                              <input type="text" v-model="company.banner" placeholder="/images/affiliates/kodera.webp หรือ https://..." class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500">
+                              <label class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-3 py-2 rounded-lg text-xs font-bold cursor-pointer border border-gray-300 shrink-0">
+                                อัพโหลดรูป...
+                                <input type="file" accept="image/*" class="hidden" @change="(e) => handleImageUpload(e, (url) => company.banner = url)">
+                              </label>
+                            </div>
+                            <p class="text-[11px] text-gray-400 mt-1">แนะนำขนาดสัดส่วน 16:10 หรือ 800x500px (JPG, PNG, WebP)</p>
+                          </div>
+
+                        </div>
+
+                        <!-- Right Preview Card (4 cols) -->
+                        <div class="lg:col-span-4 bg-white p-4 rounded-2xl border border-gray-200 shadow-xs flex flex-col gap-3">
+                          <span class="text-[11px] font-bold text-gray-400 uppercase tracking-wider block">ตัวอย่างการแสดงผลบนหน้าแรก</span>
+                          
+                          <div class="rounded-2xl overflow-hidden border border-gray-200 bg-white shadow-sm flex flex-col">
+                            <!-- Image part -->
+                            <div class="relative aspect-[16/10] w-full bg-slate-900 overflow-hidden flex items-center justify-center">
+                              <img 
+                                v-if="company.banner" 
+                                :src="company.banner" 
+                                :alt="company.name" 
+                                class="w-full h-full object-cover"
+                              />
+                              <div v-else class="flex flex-col items-center justify-center p-3 text-slate-500 text-center">
+                                <svg class="w-8 h-8 opacity-40 text-emerald-400 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                </svg>
+                                <span class="text-[10px]">ยังไม่มีรูปแบนเนอร์</span>
+                              </div>
+                              <span class="absolute bottom-2 left-2 px-2 py-0.5 text-[9px] font-bold text-white bg-emerald-600/90 rounded uppercase">
+                                {{ company.tag || 'บริษัทในเครือ' }}
+                              </span>
+                            </div>
+
+                            <!-- Content part -->
+                            <div class="p-3.5 space-y-2">
+                              <h4 class="font-bold text-sm text-gray-900 line-clamp-1">
+                                {{ company.name || 'ชื่อบริษัท' }}
+                              </h4>
+                              <p class="text-xs text-gray-500 line-clamp-2 leading-relaxed">
+                                {{ company.description || 'คำอธิบายรายละเอียดบริษัท...' }}
+                              </p>
+                              <div class="pt-2 border-t border-gray-100 flex items-center justify-between text-emerald-700 text-xs font-bold">
+                                <span>{{ company.buttonText || 'เข้าชมเว็บไซต์' }}</span>
+                                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                                </svg>
+                              </div>
+                            </div>
+                          </div>
+
+                        </div>
+
+                      </div>
+
+                    </div>
+                  </template>
+                </draggable>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- ==================== TAB 5: จัดการเปิด/ปิด Section ==================== -->
           <div v-show="activeTab === 'visibility'" class="space-y-6">
             
             <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
@@ -901,7 +1215,6 @@ onMounted(() => {
 
               <div class="p-6 divide-y divide-gray-100">
                 
-
 
                 <div class="py-4 flex items-center justify-between">
                   <div>
@@ -933,6 +1246,17 @@ onMounted(() => {
                   <label class="relative inline-flex items-center cursor-pointer">
                     <input type="checkbox" v-model="homeShowPartners" class="sr-only peer">
                     <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-500"></div>
+                  </label>
+                </div>
+
+                <div class="py-4 flex items-center justify-between">
+                  <div>
+                    <h3 class="text-sm font-bold text-gray-800">Section บริษัทในเครือ & เครือข่ายธุรกิจ (Affiliated Companies)</h3>
+                    <p class="text-xs text-gray-500">แสดงการ์ดข้อมูลบริษัทและเครือข่ายธุรกิจพันธมิตร</p>
+                  </div>
+                  <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" v-model="homeShowAffiliates" class="sr-only peer">
+                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
                   </label>
                 </div>
 

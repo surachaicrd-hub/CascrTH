@@ -43,6 +43,7 @@ router.get('/public', async (req, res) => {
             'home_section_titles', 'home_how_it_works', 'home_faq', 'home_projects_cta',
             'home_slides', 'home_hero_feature_badges', 'home_stats', 'home_features_items',
             'home_testimonials', 'home_partners', 'home_corporate_reviews', 'home_affiliates',
+            'home_show_testimonials', 'home_show_partners', 'home_show_affiliates', 'home_show_faq', 'home_show_features', 'home_show_stats',
             'maintenance_mode_enabled', 'maintenance_message',
             'holiday_mode_enabled', 'holiday_message', 'holiday_name',
             'holiday_start_date', 'holiday_end_date', 'holiday_image',

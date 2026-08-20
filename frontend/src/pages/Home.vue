@@ -849,6 +849,7 @@ const sectionTitles = ref({
   faqDesc: 'รวบรวมคำตอบสำหรับคำถามที่ลูกค้าสอบถามบ่อยที่สุด',
   affiliatesTitle: 'บริษัทในเครือ',
   affiliatesHeading: 'เครือข่ายธุรกิจของเรา',
+  affiliatesDesc: 'เครือข่ายธุรกิจที่มั่นคง ร่วมมือสร้างสรรค์นวัตกรรมและบริการคุณภาพระดับมาตรฐานสากล',
 })
 
 const highlightCatIndex = ref(0)
@@ -3341,13 +3342,13 @@ onUnmounted(() => {
         <!-- Header -->
         <div class="text-center mb-12 md:mb-16">
           <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 dark:bg-emerald-500/5 border border-emerald-500/25 dark:border-emerald-500/15 text-emerald-700 dark:text-emerald-400 font-bold text-xs mb-3 uppercase tracking-[0.2em]">
-            <span>{{ sectionTitles.affiliatesTitle }}</span>
+            <span>{{ sectionTitles.affiliatesTitle || 'บริษัทในเครือ' }}</span>
           </div>
           <h3 class="text-2xl md:text-4.5xl font-black tracking-tight text-gray-900 dark:text-white font-['IBM_Plex_Sans_Thai']">
-            {{ sectionTitles.affiliatesHeading }}
+            {{ sectionTitles.affiliatesHeading || 'เครือข่ายธุรกิจของเรา' }}
           </h3>
           <p class="mt-3 text-gray-500 dark:text-gray-400 max-w-xl mx-auto text-sm md:text-base font-light">
-            เครือข่ายธุรกิจที่มั่นคง ร่วมมือสร้างสรรค์นวัตกรรมและบริการคุณภาพระดับมาตรฐานสากล
+            {{ sectionTitles.affiliatesDesc || 'เครือข่ายธุรกิจที่มั่นคง ร่วมมือสร้างสรรค์นวัตกรรมและบริการคุณภาพระดับมาตรฐานสากล' }}
           </p>
         </div>
 
@@ -3356,24 +3357,35 @@ onUnmounted(() => {
           <a 
             v-for="(company, idx) in affiliatedCompanies" 
             :key="idx"
-            :href="company.url" 
-            target="_blank" 
+            :href="company.url || '#'" 
+            :target="company.url ? '_blank' : '_self'" 
             rel="noopener noreferrer"
             class="group flex flex-col h-full w-[290px] sm:w-[320px] md:w-auto shrink-0 snap-center rounded-3xl overflow-hidden bg-white dark:bg-[#121622] shadow-[0_8px_30px_rgb(0,0,0,0.02)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] hover:shadow-[0_20px_40px_rgba(16,185,129,0.06)] dark:hover:shadow-[0_20px_40px_rgba(16,185,129,0.12)] border border-gray-100 dark:border-white/[0.06] hover:border-emerald-500/20 dark:hover:border-emerald-500/30 transition-all duration-500 hover:-translate-y-2"
           >
             <!-- Banner Image Section -->
-            <div class="relative aspect-[16/10] w-full overflow-hidden bg-[#1a2333]">
+            <div class="relative aspect-[16/10] w-full overflow-hidden bg-[#1a2333] flex items-center justify-center">
               <img 
-                :src="getOptimizedImageUrl(company.banner, 800)" 
+                v-if="company.banner || company.image"
+                :src="getOptimizedImageUrl(company.banner || company.image, 800)" 
                 :alt="company.name" 
                 class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700 select-none pointer-events-none"
                 @error="onImageError"
               >
+              <!-- Elegant Fallback Placeholder when no image URL is provided -->
+              <div v-else class="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-[#131b2e] via-[#101726] to-[#0a0f1d] p-6 text-center select-none">
+                <div class="w-14 h-14 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 mb-2 shadow-inner">
+                  <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                  </svg>
+                </div>
+                <span class="text-xs font-bold text-slate-300 line-clamp-1 font-['IBM_Plex_Sans_Thai']">{{ company.name }}</span>
+              </div>
+
               <!-- Gradient Overlay -->
-              <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-60"></div>
+              <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60 pointer-events-none"></div>
               
               <!-- Subtle top-right external link badge -->
-              <div class="absolute top-4 right-4 bg-white/95 dark:bg-[#0c0e14]/80 backdrop-blur-md rounded-full w-8 h-8 flex items-center justify-center text-gray-700 dark:text-white shadow-md opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-1 group-hover:translate-y-0">
+              <div v-if="company.url" class="absolute top-4 right-4 bg-white/95 dark:bg-[#0c0e14]/80 backdrop-blur-md rounded-full w-8 h-8 flex items-center justify-center text-gray-700 dark:text-white shadow-md opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-1 group-hover:translate-y-0">
                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                 </svg>
@@ -3381,8 +3393,8 @@ onUnmounted(() => {
 
               <!-- Floating Category Tag -->
               <div class="absolute bottom-4 left-4">
-                <span class="px-2.5 py-1 text-[10px] md:text-xs font-bold text-white bg-emerald-600/80 backdrop-blur-md rounded-lg uppercase tracking-wide">
-                  {{ getBusinessTag(company.name) }}
+                <span class="px-2.5 py-1 text-[10px] md:text-xs font-bold text-white bg-emerald-600/85 backdrop-blur-md rounded-lg uppercase tracking-wide">
+                  {{ company.tag || getBusinessTag(company.name) }}
                 </span>
               </div>
             </div>
@@ -3395,14 +3407,14 @@ onUnmounted(() => {
                 </h4>
                 
                 <!-- Line-clamped Description to keep heights uniform -->
-                <p v-if="company.description" class="text-gray-600 dark:text-gray-400 text-sm font-light leading-relaxed mt-2.5 line-clamp-3 sm:line-clamp-4 h-[72px] sm:h-[80px] overflow-hidden">
+                <p v-if="company.description" class="text-gray-600 dark:text-gray-400 text-sm font-light leading-relaxed mt-2.5 line-clamp-3 sm:line-clamp-4 min-h-[48px] overflow-hidden">
                   {{ company.description }}
                 </p>
               </div>
 
               <!-- Action Link Footer -->
               <div class="pt-4 mt-4 border-t border-gray-100 dark:border-white/[0.04] flex items-center justify-between text-emerald-800 dark:text-emerald-400 text-sm font-bold">
-                <span class="font-['IBM_Plex_Sans_Thai']">เข้าชมเว็บไซต์</span>
+                <span class="font-['IBM_Plex_Sans_Thai']">{{ company.buttonText || 'เข้าชมเว็บไซต์' }}</span>
                 <div class="w-7 h-7 rounded-full bg-emerald-50 dark:bg-emerald-950/20 group-hover:bg-emerald-700 group-hover:text-white flex items-center justify-center transition-all duration-300">
                   <svg class="w-4 h-4 transform group-hover:translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
